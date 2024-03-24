@@ -44,15 +44,15 @@
 * [`fluence module pack [PATH]`](#fluence-module-pack-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider cc-activate`](#fluence-provider-cc-activate)
+* [`fluence provider cc-collateral-withdraw`](#fluence-provider-cc-collateral-withdraw)
 * [`fluence provider cc-create`](#fluence-provider-cc-create)
 * [`fluence provider cc-info`](#fluence-provider-cc-info)
 * [`fluence provider cc-remove`](#fluence-provider-cc-remove)
-* [`fluence provider cc-withdraw-collateral`](#fluence-provider-cc-withdraw-collateral)
-* [`fluence provider cc-withdraw-rewards`](#fluence-provider-cc-withdraw-rewards)
-* [`fluence provider deal-exit [DEAL-IDS]`](#fluence-provider-deal-exit-deal-ids)
+* [`fluence provider cc-rewards-withdraw`](#fluence-provider-cc-rewards-withdraw)
+* [`fluence provider deal-exit`](#fluence-provider-deal-exit)
 * [`fluence provider deal-list`](#fluence-provider-deal-list)
-* [`fluence provider deal-reward-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-deal-reward-info-deal-address-unit-id)
-* [`fluence provider deal-withdraw [DEAL-IDS]`](#fluence-provider-deal-withdraw-deal-ids)
+* [`fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-deal-rewards-info-deal-address-unit-id)
+* [`fluence provider deal-rewards-withdraw`](#fluence-provider-deal-rewards-withdraw)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider offer-create`](#fluence-provider-offer-create)
@@ -386,8 +386,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -413,8 +412,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -446,8 +444,7 @@ FLAGS
                                                    specified, will use the default key for the project. If there is no
                                                    fluence project or there is no default key, will use user's default
                                                    key
-      --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                                   with DEPLOYMENT-NAMES arg
+      --deal-ids=<id-1,id-2>                       Comma-separated deal ids
       --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
                                                    peer
       --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -481,8 +478,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -510,8 +506,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -537,8 +532,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -823,7 +817,7 @@ Deploy according to 'deployments' property in fluence.yaml
 USAGE
   $ fluence deploy [DEPLOYMENT-NAMES] [--no-input] [--off-aqua-logs] [--env <value>] [--priv-key <value>]
     [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>]
-    [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match] [-u]
+    [--no-build] [--tracing] [--marine-build-args <value>] [-u]
 
 ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
@@ -834,7 +828,6 @@ FLAGS
                                                    fluence project or there is no default key, will use user's default
                                                    key
   -u, --update                                     Update your previous deployment
-      --[no-]auto-match                            Toggle automatic matching. Auto-matching is turned on by default
       --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
                                                    peer
       --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1242,11 +1235,12 @@ Add FLT collateral to capacity commitment to activate it
 
 ```
 USAGE
-  $ fluence provider cc-activate [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
+  $ fluence provider cc-activate [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids
+  <value>]
 
 FLAGS
+  --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                                Comma separated capacity commitment IDs
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
@@ -1263,6 +1257,35 @@ ALIASES
 ```
 
 _See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/cc-activate.ts)_
+
+## `fluence provider cc-collateral-withdraw`
+
+Withdraw FLT collateral from capacity commitments
+
+```
+USAGE
+  $ fluence provider cc-collateral-withdraw [--no-input] [--nox-names <value> | --cc-ids <value>] [--env <value>]
+  [--priv-key <value>]
+
+FLAGS
+  --cc-ids=<value>                             Comma separated capacity commitment IDs
+  --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  Withdraw FLT collateral from capacity commitments
+
+ALIASES
+  $ fluence provider ccw
+```
+
+_See code: [src/commands/provider/cc-collateral-withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/cc-collateral-withdraw.ts)_
 
 ## `fluence provider cc-create`
 
@@ -1297,11 +1320,11 @@ Get info about capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
+  $ fluence provider cc-info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids <value>]
 
 FLAGS
+  --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                                Comma separated capacity commitment IDs
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
@@ -1325,11 +1348,12 @@ Remove Capacity commitment. You can remove it only BEFORE you activated it by de
 
 ```
 USAGE
-  $ fluence provider cc-remove [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
+  $ fluence provider cc-remove [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids
+  <value>]
 
 FLAGS
+  --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                                Comma separated capacity commitment IDs
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
@@ -1347,42 +1371,13 @@ ALIASES
 
 _See code: [src/commands/provider/cc-remove.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/cc-remove.ts)_
 
-## `fluence provider cc-withdraw-collateral`
-
-Withdraw FLT collateral from capacity commitments
-
-```
-USAGE
-  $ fluence provider cc-withdraw-collateral [--no-input] [--nox-names <value> | --ids <value>] [--env <value>]
-  [--priv-key <value>]
-
-FLAGS
-  --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                                Comma separated capacity commitment IDs
-  --no-input                                   Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
-                                               noxes: --nox-names all
-  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
-
-DESCRIPTION
-  Withdraw FLT collateral from capacity commitments
-
-ALIASES
-  $ fluence provider cwc
-```
-
-_See code: [src/commands/provider/cc-withdraw-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/cc-withdraw-collateral.ts)_
-
-## `fluence provider cc-withdraw-rewards`
+## `fluence provider cc-rewards-withdraw`
 
 Withdraw FLT rewards from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-withdraw-rewards [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider cc-rewards-withdraw [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1398,23 +1393,21 @@ DESCRIPTION
   Withdraw FLT rewards from capacity commitments
 
 ALIASES
-  $ fluence provider cwr
+  $ fluence provider crw
 ```
 
-_See code: [src/commands/provider/cc-withdraw-rewards.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/cc-withdraw-rewards.ts)_
+_See code: [src/commands/provider/cc-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/cc-rewards-withdraw.ts)_
 
-## `fluence provider deal-exit [DEAL-IDS]`
+## `fluence provider deal-exit`
 
 Exit from deal
 
 ```
 USAGE
-  $ fluence provider deal-exit [DEAL-IDS] [--no-input] [--env <value>] [--priv-key <value>]
-
-ARGUMENTS
-  DEAL-IDS  Comma-separated deal ids
+  $ fluence provider deal-exit [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
 
 FLAGS
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -1458,13 +1451,13 @@ ALIASES
 
 _See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/deal-list.ts)_
 
-## `fluence provider deal-reward-info [DEAL-ADDRESS] [UNIT-ID]`
+## `fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID]`
 
-Deal reward info
+Deal rewards info
 
 ```
 USAGE
-  $ fluence provider deal-reward-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -1479,26 +1472,24 @@ FLAGS
                                                will be used by default
 
 DESCRIPTION
-  Deal reward info
+  Deal rewards info
 
 ALIASES
   $ fluence provider dri
 ```
 
-_See code: [src/commands/provider/deal-reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/deal-reward-info.ts)_
+_See code: [src/commands/provider/deal-rewards-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/deal-rewards-info.ts)_
 
-## `fluence provider deal-withdraw [DEAL-IDS]`
+## `fluence provider deal-rewards-withdraw`
 
 Withdraw USDC rewards from deals
 
 ```
 USAGE
-  $ fluence provider deal-withdraw [DEAL-IDS] [--no-input] [--env <value>] [--priv-key <value>]
-
-ARGUMENTS
-  DEAL-IDS  Deal ids
+  $ fluence provider deal-rewards-withdraw [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
 
 FLAGS
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -1510,10 +1501,10 @@ DESCRIPTION
   Withdraw USDC rewards from deals
 
 ALIASES
-  $ fluence provider dw
+  $ fluence provider drw
 ```
 
-_See code: [src/commands/provider/deal-withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/deal-withdraw.ts)_
+_See code: [src/commands/provider/deal-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/deal-rewards-withdraw.ts)_
 
 ## `fluence provider gen`
 
@@ -1574,8 +1565,8 @@ USAGE
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with --ids.
-                                               To use all of your offers: --offers all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offers all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1596,15 +1587,16 @@ Get info about offers
 
 ```
 USAGE
-  $ fluence provider offer-info [--no-input] [--offers <value> | --ids <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider offer-info [--no-input] [--offers <value> | --offer-ids <value>] [--env <value>] [--priv-key
+  <value>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<id-1,id-2>                            Comma-separated list of offer ids. Can't be used together with --offers
-                                               flag
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with --ids.
-                                               To use all of your offers: --offers all
+  --offer-ids=<id-1,id-2>                      Comma-separated list of offer ids. Can't be used together with --offers
+                                               flag
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offers all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1630,8 +1622,8 @@ USAGE
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with --ids.
-                                               To use all of your offers: --offers all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offers all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key

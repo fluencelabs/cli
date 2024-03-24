@@ -59,8 +59,5 @@ export async function cidStringToCIDV1Struct(
 export async function cidHexStringToBase32(cidHex: string): Promise<string> {
   // eslint-disable-next-line import/extensions
   const { base32 } = await import("multiformats/bases/base32");
-
-  return base32.encode(
-    new Uint8Array(Buffer.from(cidHex.slice(2).split("0x").join(""), "hex")),
-  );
+  return base32.encode(new Uint8Array(Buffer.from(cidHex, "hex")));
 }

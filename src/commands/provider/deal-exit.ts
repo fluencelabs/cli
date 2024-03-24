@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { Args } from "@oclif/core";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
+import {
+  CHAIN_FLAGS,
+  DEAL_IDS_FLAG,
+  DEAL_IDS_FLAG_NAME,
+} from "../../lib/const.js";
 import { getDealClient, signBatch } from "../../lib/dealClient.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -29,23 +31,18 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-  };
-
-  static override args = {
-    "DEAL-IDS": Args.string({
-      description: "Comma-separated deal ids",
-    }),
+    ...DEAL_IDS_FLAG,
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(DealExit));
+    const { flags } = await initCli(this, await this.parse(DealExit));
     const { dealClient } = await getDealClient();
     const market = dealClient.getMarket();
 
     const computeUnits = (
       await Promise.all(
         commaSepStrToArr(
-          args["DEAL-IDS"] ??
+          flags[DEAL_IDS_FLAG_NAME] ??
             (await input({
               message: "Enter comma-separated deal ids",
             })),

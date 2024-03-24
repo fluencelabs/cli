@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { type ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
+import isUndefined from "lodash-es/isUndefined.js";
+import omitBy from "lodash-es/omitBy.js";
 import parse from "parse-duration";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -31,6 +34,7 @@ import {
   getEventValues,
   signBatch,
   sign,
+  getReadonlyDealClient,
 } from "../dealClient.js";
 import {
   splitErrorsAndResults,
@@ -43,6 +47,8 @@ import {
   peerIdHexStringToBase58String,
   peerIdToUint8Array,
 } from "./conversions.js";
+
+const HUNDRED_PERCENT = 100;
 
 export type ComputePeersWithCC = Awaited<
   ReturnType<typeof getComputePeersWithCC>
@@ -223,7 +229,8 @@ export async function createCommitments(flags: {
           }
 
           const ccRewardDelegationRate = Math.floor(
-            (capacityCommitment.rewardDelegationRate / 100) * Number(precision),
+            (capacityCommitment.rewardDelegationRate / HUNDRED_PERCENT) *
+              Number(precision),
           );
 
           return {
@@ -309,12 +316,20 @@ export async function createCommitments(flags: {
   }
 
   commandObj.logToStderr(
-    color.green(
-      `Commitments ${stringCommitmentIds.join(", ")} were registered`,
-    ),
+    `Capacity Commitments were registered with ids:\n${color.yellow(
+      stringCommitmentIds.join("\n"),
+    )}`,
   );
 
-  return stringCommitmentIds;
+  const commitmentInfo = await getCommitmentsInfo({
+    "nox-names": computePeers
+      .map(({ name }) => {
+        return name;
+      })
+      .join(", "),
+  });
+
+  printCommitmentsInfo(commitmentInfo);
 }
 
 export async function removeCommitments(flags: CCFlags) {
@@ -440,13 +455,95 @@ export function ccStatusToString(status: bigint | undefined) {
   return (
     (
       [
+        "Inactive",
         "Active",
         "WaitDelegation",
         "WaitStart",
-        "Inactive",
         "Failed",
         "Removed",
       ] as const
     )[Number(status)] ?? "Unknown"
   );
+}
+
+export async function getCommitmentsInfo(flags: CCFlags) {
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const capacity = readonlyDealClient.getCapacity();
+  const commitments = await getCommitments(flags);
+  const { ethers } = await import("ethers");
+
+  return Promise.all(
+    commitments.map(async (c) => {
+      let commitment: Partial<ICapacity.CommitmentViewStructOutput> =
+        "commitmentCreatedEvent" in c
+          ? {
+              peerId: c.commitmentCreatedEvent.args.peerId,
+              rewardDelegatorRate:
+                c.commitmentCreatedEvent.args.rewardDelegationRate,
+              collateralPerUnit:
+                c.commitmentCreatedEvent.args.fltCollateralPerUnit,
+              delegator: c.commitmentCreatedEvent.args.delegator,
+            }
+          : {};
+
+      try {
+        commitment = await capacity.getCommitment(c.commitmentId);
+      } catch {}
+
+      return {
+        ...("providerConfigComputePeer" in c
+          ? {
+              Nox: c.providerConfigComputePeer.name,
+              PeerId: c.providerConfigComputePeer.peerId,
+            }
+          : {}),
+        "PeerId Hex": commitment.peerId,
+        "Capacity commitment ID": c.commitmentId,
+        Status: ccStatusToString(commitment.status),
+        "Start epoch": commitment.startEpoch?.toString(),
+        "End epoch": commitment.endEpoch?.toString(),
+        "Reward delegator rate": await rewardDelegationRateToString(
+          commitment.rewardDelegatorRate,
+        ),
+        Delegator:
+          commitment.delegator === ethers.ZeroAddress.toString()
+            ? "Anyone can activate capacity commitment"
+            : commitment.delegator,
+        "Total CU": commitment.unitCount?.toString(),
+        "Failed epoch": commitment.failedEpoch?.toString(),
+        "Total CU Fail Count": commitment.totalFailCount?.toString(),
+        "Collateral per unit": commitment.collateralPerUnit?.toString(),
+        "Exited unit count": commitment.exitedUnitCount?.toString(),
+      };
+    }),
+  );
+}
+
+async function rewardDelegationRateToString(
+  rewardDelegatorRate: bigint | undefined,
+) {
+  if (rewardDelegatorRate === undefined) {
+    return undefined;
+  }
+
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const core = readonlyDealClient.getCore();
+  const precision = await core.precision();
+  return `${
+    (Number(rewardDelegatorRate) * HUNDRED_PERCENT) / Number(precision)
+  }%`;
+}
+
+export function printCommitmentsInfo(
+  infos: Awaited<ReturnType<typeof getCommitmentsInfo>>,
+) {
+  for (const { Nox, ...restInfo } of infos) {
+    if (Nox !== undefined) {
+      commandObj.logToStderr(color.yellow(`Nox: ${Nox}`));
+    }
+
+    commandObj.logToStderr(
+      yamlDiffPatch("", {}, omitBy(restInfo, isUndefined)),
+    );
+  }
 }

@@ -25,9 +25,11 @@ import { getReadonlyDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
-export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
+export default class DealRewardsInfo extends BaseCommand<
+  typeof DealRewardsInfo
+> {
   static override aliases = ["provider:dri"];
-  static override description = "Deal reward info";
+  static override description = "Deal rewards info";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
@@ -43,7 +45,7 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(RewardInfo));
+    const { args } = await initCli(this, await this.parse(DealRewardsInfo));
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));

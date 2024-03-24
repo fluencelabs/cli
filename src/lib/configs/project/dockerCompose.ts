@@ -29,6 +29,7 @@ import {
   DOCKER_COMPOSE_FILE_NAME,
   GRAPH_NODE_CONTAINER_NAME,
   GRAPH_NODE_PORT,
+  HTTP_PORT_START,
   IPFS_CONTAINER_NAME,
   IPFS_PORT,
   POSTGRES_CONTAINER_NAME,
@@ -78,6 +79,7 @@ type GenNoxImageArgs = {
   name: string;
   tcpPort: number;
   webSocketPort: number;
+  httpPort: number;
   bootstrapName: string;
   bootstrapTcpPort?: number;
 };
@@ -86,6 +88,7 @@ function genNox({
   name,
   tcpPort,
   webSocketPort,
+  httpPort,
   bootstrapName,
   bootstrapTcpPort,
 }: GenNoxImageArgs): [name: string, service: Service] {
@@ -127,7 +130,7 @@ function genNox({
       ],
       secrets: [name],
       healthcheck: {
-        test: "curl -f http://localhost:18080/health",
+        test: `curl -f http://localhost:${httpPort}/health`,
         interval: "5s",
         timeout: "2s",
         retries: 10,
@@ -147,6 +150,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
         ...(await genSecretKeyOrReturnExisting(name)),
         webSocketPort: overriddenNoxConfig.websocketPort,
         tcpPort: overriddenNoxConfig.tcpPort,
+        httpPort: overriddenNoxConfig.httpPort,
         relativeConfigFilePath: relative(
           fluenceDir,
           join(configsDir, getConfigTomlName(name)),
@@ -166,6 +170,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
     name: bootstrapName,
     webSocketPort: bootstrapWebSocketPort = WEB_SOCKET_PORT_START,
     tcpPort: bootstrapTcpPort = TCP_PORT_START,
+    httpPort: bootstrapHttpPort = HTTP_PORT_START,
   } = bootstrap;
 
   return {
@@ -280,15 +285,17 @@ async function genDockerCompose(): Promise<LatestConfig> {
           name: bootstrapName,
           tcpPort: bootstrapTcpPort,
           webSocketPort: bootstrapWebSocketPort,
+          httpPort: bootstrapHttpPort,
           bootstrapName: bootstrapName,
         }),
       ]),
       ...Object.fromEntries(
-        restNoxes.map(({ name, tcpPort, webSocketPort }, index) => {
+        restNoxes.map(({ name, tcpPort, webSocketPort, httpPort }, index) => {
           return genNox({
             name,
             tcpPort: tcpPort ?? TCP_PORT_START + index + 1,
             webSocketPort: webSocketPort ?? WEB_SOCKET_PORT_START + index + 1,
+            httpPort: httpPort ?? HTTP_PORT_START + index + 1,
             bootstrapName: bootstrapName,
             bootstrapTcpPort,
           });
