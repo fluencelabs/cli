@@ -37,26 +37,14 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   commandObj.log(`\n${color.yellow(dealName)} info:`);
   const status = await deal.getStatus();
   const env = await ensureChainEnv();
+  const { DealStatus } = await import("@fluencelabs/deal-ts-clients");
 
   if (env !== "local") {
     commandObj.log(`Deal: ${blockScoutUrls[env]}${dealId}`);
   }
 
   commandObj.log(`DealID: "${dealId}"`);
-
-  //TODO: change to enum
-  switch (status) {
-    case 0n:
-      commandObj.log(`Status: Inactive`);
-      break;
-    case 1n:
-      commandObj.log(`Status: Active`);
-      break;
-    case 2n:
-      commandObj.log(`Status: Ended`);
-      break;
-  }
-
+  commandObj.log(`Status: ${DealStatus[Number(status)]}`);
   const { ethers } = await import("ethers");
 
   commandObj.log(
