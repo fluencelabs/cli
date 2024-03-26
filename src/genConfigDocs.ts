@@ -112,7 +112,7 @@ const commandsContent = await readFile(DOCS_COMMANDS_PATH, FS_OPTIONS);
 
 await writeFile(
   DOCS_COMMANDS_PATH,
-  commandsContent.replace(
+  commandsContent.replaceAll(
     `/blob/v${CLIPackageJSON.version}/src/`,
     `/blob/fluence-cli-v${CLIPackageJSON.version}/src/`,
   ),
