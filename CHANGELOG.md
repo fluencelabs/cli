@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.16.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.28...fluence-cli-v0.16.0) (2024-03-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* store unmatched deals, rename commands and flags ([#868](https://github.com/fluencelabs/cli/issues/868))
+
+### Features
+
+* store unmatched deals, rename commands and flags ([#868](https://github.com/fluencelabs/cli/issues/868)) ([1ec9414](https://github.com/fluencelabs/cli/commit/1ec94145904a0c7327e8da3d97e214e375f8ccf8))
+* use cli client, improve cc-info, add deal-list command ([#875](https://github.com/fluencelabs/cli/issues/875)) ([4f6c358](https://github.com/fluencelabs/cli/commit/4f6c3581486ccfac5aac00664276f3489a2725de))
+
+
+### Bug Fixes
+
+* fix repl facade module being first instead of being last ([#873](https://github.com/fluencelabs/cli/issues/873)) ([fe37bb0](https://github.com/fluencelabs/cli/commit/fe37bb02a1a8f2da9c11e8387be1d5777b061d6e))
+* **offer-create:** offer-update suggestion typo ([#876](https://github.com/fluencelabs/cli/issues/876)) ([bdf3f2b](https://github.com/fluencelabs/cli/commit/bdf3f2ba66ea2d5f63a8021fea84085f1c114209))
+
 ## [0.15.28](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.27...fluence-cli-v0.15.28) (2024-03-20)
 
 
