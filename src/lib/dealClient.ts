@@ -22,8 +22,8 @@ import { URL } from "node:url";
 import type {
   DealClient,
   DealMatcherClient,
-  DealExplorerClient,
 } from "@fluencelabs/deal-ts-clients";
+import type { DealCliClient } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/dealCliClient.js";
 import { color } from "@oclif/color";
 import type { ethers, LogDescription } from "ethers";
 import chunk from "lodash-es/chunk.js";
@@ -112,38 +112,17 @@ export async function getDealMatcherClient() {
   return dealMatcherClient;
 }
 
-let dealExplorerClient: DealExplorerClient | undefined = undefined;
+let dealCliClient: DealCliClient | undefined = undefined;
 
-export async function getDealExplorerClient() {
-  if (dealExplorerClient === undefined) {
-    const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
+export async function getDealCliClient() {
+  if (dealCliClient === undefined) {
+    const { DealCliClient } = await import("@fluencelabs/deal-ts-clients");
     const env = await ensureChainEnv();
-
-    dealExplorerClient = new DealExplorerClient(
-      env,
-      undefined,
-      signerOrWallet ?? (await getDealClient()).signerOrWallet,
-    );
+    dealCliClient = new DealCliClient(env);
   }
 
-  return dealExplorerClient;
+  return dealCliClient;
 }
-
-// No need for that for now cause dealExplorerClient returns everything that is currently needed
-// let dealCliClient: DealCliClient | undefined = undefined;
-
-// export async function getDealCliClient() {
-//   if (dealCliClient === undefined) {
-//     const { DealCliClient } = await import(
-//       "@fluencelabs/deal-ts-clients/dist/dealCliClient/index.js"
-//     );
-
-//     const env = await ensureChainEnv();
-//     dealCliClient = new DealCliClient(env);
-//   }
-
-//   return dealCliClient;
-// }
 
 async function createDealClient(
   signerOrProvider: ethers.Provider | ethers.Signer,

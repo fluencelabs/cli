@@ -15,21 +15,30 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { getProviderDeals } from "../../lib/chain/deals.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CHAIN_FLAGS, NOX_NAMES_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class DealsList extends BaseCommand<typeof DealsList> {
   static override aliases = ["provider:dl"];
-  static override description = "List deals";
+  static override description = "List all deals";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-    ...NOX_NAMES_FLAG,
   };
 
   async run(): Promise<void> {
     await initCli(this, await this.parse(DealsList));
-    commandObj.error(`Not implemented yet`);
+
+    const deals = await getProviderDeals();
+
+    commandObj.log(
+      deals
+        .map(({ id }) => {
+          return id;
+        })
+        .join("\n"),
+    );
   }
 }

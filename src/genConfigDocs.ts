@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
@@ -48,8 +48,10 @@ import {
 } from "./lib/const.js";
 import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/utils.js";
+import CLIPackageJSON from "./versions/cli.package.json";
 
 const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
+const DOCS_COMMANDS_PATH = join("docs", "commands", "README.md");
 
 const configsInfo = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
@@ -104,4 +106,14 @@ ${configsInfo
     )}`;
   })
   .join("\n\n")}`,
+);
+
+const commandsContent = await readFile(DOCS_COMMANDS_PATH, FS_OPTIONS);
+
+await writeFile(
+  DOCS_COMMANDS_PATH,
+  commandsContent.replaceAll(
+    `/blob/v${CLIPackageJSON.version}/src/`,
+    `/blob/fluence-cli-v${CLIPackageJSON.version}/src/`,
+  ),
 );

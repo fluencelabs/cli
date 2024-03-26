@@ -39,7 +39,7 @@ import {
 } from "../const.js";
 import {
   getDealClient,
-  getDealExplorerClient,
+  getDealCliClient,
   sign,
   getEventValue,
   signBatch,
@@ -246,29 +246,29 @@ export async function offersInfoToString([
 async function resolveOfferInfo({
   offerId,
   offerInfo,
-  offerExplorerInfo,
+  offerIndexerInfo,
 }: Awaited<ReturnType<typeof getOfferInfo>>) {
-  if (offerExplorerInfo !== undefined) {
+  if (offerIndexerInfo !== undefined) {
     return {
-      "Provider ID": offerExplorerInfo.providerId,
-      "Offer ID": offerExplorerInfo.id,
-      "Created At": new Date(offerExplorerInfo.createdAt * 1000).toISOString(),
+      "Provider ID": offerIndexerInfo.providerId,
+      "Offer ID": offerIndexerInfo.id,
+      "Created At": new Date(offerIndexerInfo.createdAt * 1000).toISOString(),
       "Last Updated At": new Date(
-        offerExplorerInfo.updatedAt * 1000,
+        offerIndexerInfo.updatedAt * 1000,
       ).toISOString(),
       "Price Per Epoch":
         offerInfo === undefined
-          ? `${offerExplorerInfo.pricePerEpoch} ${PT_SYMBOL}`
+          ? `${offerIndexerInfo.pricePerEpoch} ${PT_SYMBOL}`
           : await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
       Effectors: await Promise.all(
-        offerExplorerInfo.effectors.map(({ cid }) => {
+        offerIndexerInfo.effectors.map(({ cid }) => {
           return cidHexStringToBase32(cid);
         }),
       ),
-      "Total compute units": offerExplorerInfo.totalComputeUnits,
-      "Free compute units": offerExplorerInfo.freeComputeUnits,
+      "Total compute units": offerIndexerInfo.totalComputeUnits,
+      "Free compute units": offerIndexerInfo.freeComputeUnits,
       Peers: await Promise.all(
-        offerExplorerInfo.peers.map(async ({ id, computeUnits }) => {
+        offerIndexerInfo.peers.map(async ({ id, computeUnits }) => {
           return {
             "Hex ID": id,
             "Peer ID": await peerIdHexStringToBase58String(id),
@@ -331,9 +331,9 @@ export async function updateOffers(flags: OffersArgs) {
     offerId,
     effectors,
     offerName,
-    offerInfo: { offerInfo, offerExplorerInfo } = {
+    offerInfo: { offerInfo, offerIndexerInfo } = {
       offerInfo: undefined,
-      offerExplorerInfo: undefined,
+      offerIndexerInfo: undefined,
     },
   } of offersToUpdate) {
     if (offerInfo === undefined) {
@@ -346,7 +346,7 @@ export async function updateOffers(flags: OffersArgs) {
       continue;
     }
 
-    if (offerExplorerInfo === undefined) {
+    if (offerIndexerInfo === undefined) {
       commandObj.warn(
         `Can't find offer ${color.yellow(
           offerName,
@@ -374,7 +374,7 @@ export async function updateOffers(flags: OffersArgs) {
     }
 
     const offerClientInfoEffectors = await Promise.all(
-      offerExplorerInfo.effectors.map(({ cid }) => {
+      offerIndexerInfo.effectors.map(({ cid }) => {
         return cidHexStringToBase32(cid);
       }),
     );
@@ -702,7 +702,7 @@ export async function getOfferInfo(
 ) {
   const { readonlyDealClient } = await getReadonlyDealClient();
   const market = readonlyDealClient.getMarket();
-  const dealExplorerClient = await getDealExplorerClient();
+  const dealCliClient = await getDealCliClient();
 
   let offerInfo = undefined;
 
@@ -714,14 +714,13 @@ export async function getOfferInfo(
     }
   }
 
-  let offerExplorerInfo = undefined;
+  let offerIndexerInfo = undefined;
 
   try {
-    offerExplorerInfo =
-      (await dealExplorerClient.getOffer(offerId)) ?? undefined;
+    offerIndexerInfo = (await dealCliClient.getOffer(offerId)) ?? undefined;
   } catch {}
 
-  return { offerName, offerId, offerInfo, offerExplorerInfo };
+  return { offerName, offerId, offerInfo, offerIndexerInfo };
 }
 
 export async function getOffersInfo(offers: OfferFromProviderArtifacts[]) {

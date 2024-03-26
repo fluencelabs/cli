@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { Flags } from "@oclif/core";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { getProviderDeals } from "../../lib/chain/deals.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
@@ -32,6 +35,11 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     ...baseFlags,
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
+    all: Flags.boolean({
+      default: false,
+      description:
+        "To use all deal ids that indexer is aware of for your provider address",
+    }),
   };
 
   async run(): Promise<void> {
@@ -39,14 +47,20 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     const { dealClient } = await getDealClient();
     const market = dealClient.getMarket();
 
-    const computeUnits = (
-      await Promise.all(
-        commaSepStrToArr(
+    const dealIds = flags.all
+      ? (await getProviderDeals()).map(({ id }) => {
+          return id;
+        })
+      : commaSepStrToArr(
           flags[DEAL_IDS_FLAG_NAME] ??
             (await input({
               message: "Enter comma-separated deal ids",
             })),
-        ).map(async (id) => {
+        );
+
+    const computeUnits = (
+      await Promise.all(
+        dealIds.map(async (id) => {
           const deal = dealClient.getDeal(id);
           return deal.getComputeUnits();
         }),

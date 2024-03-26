@@ -47,6 +47,7 @@ import {
   peerIdHexStringToBase58String,
   peerIdToUint8Array,
 } from "./conversions.js";
+import { fltFormatWithSymbol } from "./currencies.js";
 
 const HUNDRED_PERCENT = 100;
 
@@ -369,17 +370,19 @@ export async function removeCommitments(flags: CCFlags) {
     );
   }
 
+  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
+
   const commitmentsWithInvalidStatus = commitmentInfo.filter(({ info }) => {
-    return ccStatusToString(info.status) !== "WaitDelegation";
+    return Number(info.status) !== Number(CommitmentStatus.WaitDelegation);
   });
 
   if (commitmentsWithInvalidStatus.length > 0) {
     commandObj.error(
       `You can remove commitments only if they have WaitDelegation status. Got:\n\n${commitmentsWithInvalidStatus
         .map(({ commitment, info }) => {
-          return `${stringifyBasicCommitmentInfo(
-            commitment,
-          )}Status: ${ccStatusToString(info.status)}`;
+          return `${stringifyBasicCommitmentInfo(commitment)}Status: ${
+            CommitmentStatus[Number(info.status)]
+          }`;
         })
         .join("\n\n")}`,
     );
@@ -451,26 +454,12 @@ function stringifyBasicCommitmentInfo(
   return color.yellow(`CommitmentId: ${commitment.commitmentId}`);
 }
 
-export function ccStatusToString(status: bigint | undefined) {
-  return (
-    (
-      [
-        "Inactive",
-        "Active",
-        "WaitDelegation",
-        "WaitStart",
-        "Failed",
-        "Removed",
-      ] as const
-    )[Number(status)] ?? "Unknown"
-  );
-}
-
 export async function getCommitmentsInfo(flags: CCFlags) {
   const { readonlyDealClient } = await getReadonlyDealClient();
   const capacity = readonlyDealClient.getCapacity();
   const commitments = await getCommitments(flags);
   const { ethers } = await import("ethers");
+  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
   return Promise.all(
     commitments.map(async (c) => {
@@ -499,7 +488,10 @@ export async function getCommitmentsInfo(flags: CCFlags) {
           : {}),
         "PeerId Hex": commitment.peerId,
         "Capacity commitment ID": c.commitmentId,
-        Status: ccStatusToString(commitment.status),
+        Status:
+          commitment.status === undefined
+            ? undefined
+            : CommitmentStatus[Number(commitment.status)],
         "Start epoch": commitment.startEpoch?.toString(),
         "End epoch": commitment.endEpoch?.toString(),
         "Reward delegator rate": await rewardDelegationRateToString(
@@ -512,7 +504,10 @@ export async function getCommitmentsInfo(flags: CCFlags) {
         "Total CU": commitment.unitCount?.toString(),
         "Failed epoch": commitment.failedEpoch?.toString(),
         "Total CU Fail Count": commitment.totalFailCount?.toString(),
-        "Collateral per unit": commitment.collateralPerUnit?.toString(),
+        "Collateral per unit":
+          commitment.collateralPerUnit === undefined
+            ? undefined
+            : await fltFormatWithSymbol(commitment.collateralPerUnit),
         "Exited unit count": commitment.exitedUnitCount?.toString(),
       };
     }),
