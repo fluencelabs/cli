@@ -93,7 +93,7 @@ ALIASES
   $ fluence air b
 ```
 
-_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/air/beautify.ts)_
+_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.15.28/src/commands/air/beautify.ts)_
 
 ## `fluence aqua`
 
