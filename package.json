@@ -50,7 +50,7 @@
     "test": "node --loader ts-node/esm --no-warnings ./test/setupTests.ts && yarn jest",
     "check": "yarn before-build && yarn build && yarn lint-fix && yarn prettier && yarn circular",
     "circular": "madge --circular ./dist",
-    "on-each-commit": "yarn check && yarn gen-config-docs && cd docs/commands && oclif readme --no-aliases",
+    "on-each-commit": "yarn check && cd docs/commands && oclif readme --no-aliases && yarn gen-config-docs",
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && tsx ./src/genConfigDocs.ts",
     "unused-exports": "ts-unused-exports tsconfig.json",
     "up-deps": "npm-check-updates -u",
