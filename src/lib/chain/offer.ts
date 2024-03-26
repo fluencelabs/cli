@@ -90,7 +90,7 @@ export async function createOffers(flags: OffersArgs) {
         })
         .join(
           ", ",
-        )}. You can update them if you want using '${CLI_NAME} provider update-offer' command`,
+        )}. You can update them if you want using '${CLI_NAME} provider offer-update' command`,
     );
   }
 
