@@ -1715,7 +1715,7 @@ function camelCaseKeysToKebabCase(val: unknown): unknown {
 
 const EXTERNAL_API_MULTIADDRS: Record<ChainENV, string> = {
   kras: "/dns4/ipfs.kras.fluence.dev/tcp/5020",
-  dar: "/dns4/dar-ipfs.fluence.dev/tcp/5020",
+  dar: "/dns4/ipfs.dar.fluence.dev/tcp/5020",
   stage: "/dns4/stage-ipfs.fluence.dev/tcp/5020",
   local: LOCAL_IPFS_ADDRESS,
 };
