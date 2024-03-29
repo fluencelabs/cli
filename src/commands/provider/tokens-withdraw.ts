@@ -17,26 +17,31 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { distributeToNox } from "../../lib/chain/distributeToNox.js";
-import { CHAIN_FLAGS, FLT_SYMBOL, NOX_NAMES_FLAG } from "../../lib/const.js";
+import { withdrawFromNox } from "../../lib/chain/distributeToNox.js";
+import {
+  CHAIN_FLAGS,
+  FLT_SYMBOL,
+  MAX_TOKEN_AMOUNT_KEYWORD,
+  NOX_NAMES_FLAG,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class TokensDistribute extends BaseCommand<
-  typeof TokensDistribute
-> {
-  static override aliases = ["provider:td"];
-  static override description = `Distribute ${FLT_SYMBOL} tokens to noxes`;
+const AMOUNT_FLAG_NAME = "amount";
+
+export default class TokensWithdraw extends BaseCommand<typeof TokensWithdraw> {
+  static override aliases = ["provider:tw"];
+  static override description = `Withdraw ${FLT_SYMBOL} tokens from noxes`;
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
-    amount: Flags.string({
-      description: `Amount of ${FLT_SYMBOL} tokens to distribute to noxes`,
+    [AMOUNT_FLAG_NAME]: Flags.string({
+      description: `Amount of ${FLT_SYMBOL} tokens to withdraw from noxes. Use --${AMOUNT_FLAG_NAME} ${MAX_TOKEN_AMOUNT_KEYWORD} to withdraw maximum possible amount`,
     }),
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(TokensDistribute));
-    await distributeToNox(flags);
+    const { flags } = await initCli(this, await this.parse(TokensWithdraw));
+    await withdrawFromNox(flags);
   }
 }
