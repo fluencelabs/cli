@@ -27,7 +27,7 @@ import { ptFormatWithSymbol } from "./currencies.js";
 
 const blockScoutUrls: Record<Exclude<ChainENV, "local">, string> = {
   kras: "https://blockscout.kras.fluence.dev/address/",
-  dar: "https://blockscout-dar.fluence.dev/address/",
+  dar: "https://blockscout.dar.fluence.dev/address/",
   stage: "https://blockscout-stage.fluence.dev/address/",
 };
 
