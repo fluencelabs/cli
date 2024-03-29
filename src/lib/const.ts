@@ -139,7 +139,7 @@ export const DEFAULT_AQUAVM_POOL_SIZE = 2;
 
 const CHAIN_URLS_WITHOUT_LOCAL: Record<Exclude<ChainENV, "local">, string> = {
   kras: "https://ipc.kras.fluence.dev",
-  dar: "https://ipc-dar.fluence.dev",
+  dar: "https://ipc.dar.fluence.dev",
   stage: "https://ipc-stage.fluence.dev",
 };
 
@@ -155,7 +155,7 @@ export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
 
 export const WS_CHAIN_URLS: Record<ChainENV, string> = {
   kras: "wss://ipc.kras.fluence.dev",
-  dar: "wss://ipc-dar.fluence.dev",
+  dar: "wss://ipc.dar.fluence.dev",
   stage: "wss://ipc-stage.fluence.dev",
   local: `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
 };
