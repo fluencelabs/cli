@@ -39,6 +39,8 @@ export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
 export const FLT_SYMBOL = "FLT";
 export const PT_SYMBOL = "USDC";
 
+export const MAX_TOKEN_AMOUNT_KEYWORD = "max";
+
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
