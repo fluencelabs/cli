@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { join } from "node:path";
+
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 import type {
@@ -34,23 +36,25 @@ export const CLI_NAME_FULL = "Fluence CLI";
 const GITHUB_REPO_NAME = "https://github.com/fluencelabs/cli";
 export const NODE_JS_MAJOR_VERSION = 18;
 export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
+export const FLT_SYMBOL = "FLT";
+export const PT_SYMBOL = "USDC";
+
+export const MAX_TOKEN_AMOUNT_KEYWORD = "max";
 
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
-export const numberProperties = ["minPricePerWorkerEpoch"] as const;
+export const currencyProperties = ["minPricePerWorkerEpoch"] as const;
+export type CurrencyProperty = (typeof currencyProperties)[number];
 
-export type NumberProperty = (typeof numberProperties)[number];
-
-const CURRENCY_MULTIPLIER_POWER = 18;
-export const CURRENCY_MULTIPLIER = 10 ** CURRENCY_MULTIPLIER_POWER;
 export const COLLATERAL_DEFAULT = 1;
-export const PRICE_PER_EPOCH_DEFAULT = 0.00001;
-export const DEFAULT_INITIAL_BALANCE = 0.001;
+export const DEFAULT_PRICE_PER_EPOCH_PROVIDER = "0.00001";
+export const DEFAULT_PRICE_PER_EPOCH_DEVELOPER = "0.0001";
+export const DEFAULT_INITIAL_BALANCE = "1";
 
-export const defaultNumberProperties: Record<NumberProperty, number> = {
-  minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
+export const defaultNumberProperties: Record<CurrencyProperty, string> = {
+  minPricePerWorkerEpoch: DEFAULT_PRICE_PER_EPOCH_PROVIDER,
 };
 
 export const MIN_MEMORY_PER_MODULE_STR = "2 MiB";
@@ -60,6 +64,9 @@ export const MIN_MEMORY_PER_MODULE = xbytes.parseSize(
 
 export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
+
+export const DEFAULT_CURL_EFFECTOR_CID =
+  "bafkreids22lgia5bqs63uigw4mqwhsoxvtnkpfqxqy5uwyyerrldsr32ce";
 
 const byteUnits = [
   "kB",
@@ -89,18 +96,18 @@ export const U32_MAX = 4_294_967_295;
 
 export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
 
-export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
+export const DEFAULT_PUBLIC_FLUENCE_ENV = "dar";
+export const PUBLIC_FLUENCE_ENV = [
+  DEFAULT_PUBLIC_FLUENCE_ENV,
+  "kras",
+  "stage",
+] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
 
 export const CHAIN_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
 export type ChainENV = (typeof CHAIN_ENV)[number];
 export const isChainEnv = getIsStringUnion(CHAIN_ENV);
-
-export type ChainConfig = {
-  url: string;
-  id: number;
-};
 
 export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
 export const WC_PROJECT_ID = "70c1c5ed2a23e7383313de1044ddce7e";
@@ -114,39 +121,6 @@ export const WC_METADATA = {
 export const FLUENCE_ENVS = [...CHAIN_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
-
-export const DEAL_CONFIG: Record<ChainENV, ChainConfig> = {
-  kras: {
-    url: "https://polygon-mumbai.g.alchemy.com/v2/lSTLbdQejAUJ854kpjvyFXrmKocI2N-z",
-    id: 80001,
-  },
-  testnet: {
-    url: "https://polygon-mumbai.g.alchemy.com/v2/_Tc--Ia76JVzBPdr8IbBWDTCPf-DVQpS",
-    id: 80001,
-  },
-  stage: {
-    url: "https://polygon-mumbai.g.alchemy.com/v2/_nxv_qsNy3ZWBipXy41imOXj4j6aNfCc",
-    id: 80001,
-  },
-  local: {
-    url: "http://127.0.0.1:8545",
-    id: 31_337,
-  },
-};
-
-export const DEAL_RPC_CONFIG = Object.fromEntries(
-  Object.values(DEAL_CONFIG).map(({ id, url }) => {
-    return [id, url];
-  }),
-);
-
-// @ts-expect-error we know that keys are ContractsEnv, not just string
-export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ChainENV, number> =
-  Object.fromEntries(
-    Object.entries(DEAL_CONFIG).map(([name, { id }]) => {
-      return [name, id];
-    }),
-  );
 
 export const IPFS_CONTAINER_NAME = "ipfs";
 export const IPFS_PORT = 5001;
@@ -167,6 +141,29 @@ export const WEB_SOCKET_PORT_START = 9991;
 export const HTTP_PORT_START = 18080;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
 
+const CHAIN_URLS_WITHOUT_LOCAL: Record<Exclude<ChainENV, "local">, string> = {
+  kras: "https://ipc.kras.fluence.dev",
+  dar: "https://ipc.dar.fluence.dev",
+  stage: "https://ipc-stage.fluence.dev",
+};
+
+export const CHAIN_URLS: Record<ChainENV, string> = {
+  ...CHAIN_URLS_WITHOUT_LOCAL,
+  local: `http://127.0.0.1:${IPC_ETH_PORT}`,
+};
+
+export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
+  ...CHAIN_URLS_WITHOUT_LOCAL,
+  local: `http://${IPC_ETH_CONTAINER_NAME}:${IPC_ETH_PORT}`,
+};
+
+export const WS_CHAIN_URLS: Record<ChainENV, string> = {
+  kras: "wss://ipc.kras.fluence.dev",
+  dar: "wss://ipc.dar.fluence.dev",
+  stage: "wss://ipc-stage.fluence.dev",
+  local: `wss://${IPC_ETH_CONTAINER_NAME}:${IPC_ETH_PORT}`,
+};
+
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
 export const JS_EXT = "js";
@@ -178,6 +175,9 @@ export const TOML_EXT = "toml";
 
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
 export const AQUA_DEPENDENCIES_DIR_NAME = "aqua-dependencies";
+export const SERVICE_CONFIGS_DIR_NAME = "service-configs";
+export const MODULE_VOLUMES_DIR_NAME = "volumes";
+export const MODULE_VOLUMES_SERVICES_DIR_NAME = "services";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const FRONTEND_DIR_NAME = "frontend";
@@ -196,6 +196,7 @@ export const BIN_DIR_NAME = "bin";
 export const COUNTLY_DIR_NAME = "countly";
 export const SECRETS_DIR_NAME = "secrets";
 export const CONFIGS_DIR_NAME = "configs";
+export const CCP_CONFIGS_DIR_NAME = "ccp-configs";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
 export const PROVIDER_CONFIG_FILE_NAME = `provider`;
@@ -246,7 +247,7 @@ export const INDEX_HTML_FILE_NAME = `index.html`;
 export const SERVER_TS_FILE_NAME = `server.${TS_EXT}`;
 export const SERVER_JS_FILE_NAME = `server.${JS_EXT}`;
 
-export const CONFIG_TOML = `Config.${TOML_EXT}`;
+export const SERVICE_CONFIG_TOML_POSTFIX = `_Config.${TOML_EXT}`;
 export const CARGO_TOML = `Cargo.${TOML_EXT}`;
 
 export const README_MD_FILE_NAME = `README.md`;
@@ -258,7 +259,7 @@ export const FS_OPTIONS = {
 export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 
 export const AUTO_GENERATED = "auto-generated";
-export const DEFAULT_DEAL_NAME = "dealName";
+export const DEFAULT_DEPLOYMENT_NAME = "myDeployment";
 export const DEFAULT_WORKER_NAME = "workerName";
 
 export const NO_INPUT_FLAG_NAME = "no-input";
@@ -331,9 +332,12 @@ export const TRACING_FLAG = {
   }),
 };
 
+export const ALL_FLAG_VALUE = "all";
+
 export const NOX_NAMES_FLAG_NAME = "nox-names";
 export const NOX_NAMES_FLAG_CONFIG = {
-  description: `Comma-separated names of noxes from ${PROVIDER_CONFIG_FULL_FILE_NAME}. Default: all noxes from 'computePeers' property of ${PROVIDER_CONFIG_FULL_FILE_NAME}`,
+  description: `Comma-separated names of noxes from ${PROVIDER_CONFIG_FULL_FILE_NAME}. To use all of your noxes: --${NOX_NAMES_FLAG_NAME} ${ALL_FLAG_VALUE}`,
+  helpValue: "<nox-1,nox-2>",
 };
 export const NOX_NAMES_FLAG = {
   [NOX_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
@@ -389,7 +393,7 @@ export const COMMON_AQUA_COMPILATION_FLAGS = {
   }),
   ...TRACING_FLAG,
   "no-empty-response": Flags.boolean({
-    default: false,
+    default: true,
     description:
       "Do not generate response call if there are no returned values",
   }),
@@ -405,36 +409,58 @@ export const NOXES_FLAG = {
   }),
 };
 
-export const OFFERS_FLAG_NAME = "offers";
-export const OFFERS_FLAG_OBJECT = {
-  description: `Comma-separated list of offer names. If not provider all offers will be used`,
+export const OFFER_FLAG_NAME = "offers";
+export const OFFER_IDS_FLAG_NAME = "offer-ids";
+
+const OFFER_FLAG_OBJECT = {
+  description: `Comma-separated list of offer names. Can't be used together with --${OFFER_IDS_FLAG_NAME}. To use all of your offers: --${OFFER_FLAG_NAME} ${ALL_FLAG_VALUE}`,
   helpValue: "<offer-1,offer-2>",
 };
 
-export const OFFERS_FLAG = {
-  [OFFERS_FLAG_NAME]: Flags.string(OFFERS_FLAG_OBJECT),
+export const OFFER_FLAG = {
+  [OFFER_FLAG_NAME]: Flags.string(OFFER_FLAG_OBJECT),
+};
+
+export const OFFER_FLAGS = {
+  [OFFER_FLAG_NAME]: Flags.string({
+    ...OFFER_FLAG_OBJECT,
+    exclusive: [OFFER_IDS_FLAG_NAME],
+  }),
+  [OFFER_IDS_FLAG_NAME]: Flags.string({
+    description: `Comma-separated list of offer ids. Can't be used together with --${OFFER_FLAG_NAME} flag`,
+    helpValue: "<id-1,id-2>",
+    exclusive: [OFFER_FLAG_NAME],
+  }),
 };
 
 export const PRIV_KEY_FLAG_NAME = "priv-key";
 
-export const CHAIN_FLAGS = {
-  ...ENV_FLAG,
+export const PRIV_KEY_FLAG = {
   [PRIV_KEY_FLAG_NAME]: Flags.string({
     description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local network ${LOCAL_NET_DEFAULT_WALLET_KEY} key will be used by default`,
     helpValue: "<private-key>",
   }),
 };
 
-export const DEAL_FLAGS = {
-  deal: Flags.string({
-    description: `Comma-separated deal names of the deployed deals for the current environment. Default: all deployed deals`,
-    helpValue: "<name>",
-    exclusive: ["deal-id"],
+export const CHAIN_FLAGS = {
+  ...ENV_FLAG,
+  ...PRIV_KEY_FLAG,
+};
+
+export const DEAL_IDS_FLAG_NAME = "deal-ids";
+export const DEPLOYMENT_NAMES_ARG_NAME = "DEPLOYMENT-NAMES";
+
+export const DEAL_IDS_FLAG = {
+  [DEAL_IDS_FLAG_NAME]: Flags.string({
+    description: `Comma-separated deal ids`,
+    helpValue: "<id-1,id-2>",
   }),
-  "deal-id": Flags.string({
-    description: `Comma-separated deal ids of the deployed deal`,
-    helpValue: "<name>",
-    exclusive: ["deal"],
+};
+
+export const DEPLOYMENT_NAMES_ARG = {
+  [DEPLOYMENT_NAMES_ARG_NAME]: Args.string({
+    description: `Comma separated names of deployments. Can't be used together with --${DEAL_IDS_FLAG_NAME} flag`,
+    helpValue: "<name-1,name-2>",
   }),
 };
 
@@ -445,6 +471,13 @@ export const IPFS_ADDR_PROPERTY = "ipfsAddr";
 export const MARINE_BUILD_ARGS_FLAG = {
   [MARINE_BUILD_ARGS_FLAG_NAME]: Flags.string({
     description: `Space separated \`cargo build\` flags and args to pass to marine build. Overrides '${MARINE_BUILD_ARGS_PROPERTY}' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}. Default: ${DEFAULT_MARINE_BUILD_ARGS}`,
+    helpValue: "<--flag arg>",
+  }),
+};
+
+export const DOCKER_COMPOSE_FLAGS = {
+  flags: Flags.string({
+    description: "Space separated flags to pass to `docker compose`",
     helpValue: "<--flag arg>",
   }),
 };
@@ -466,12 +499,12 @@ export const FLUENCE_CLIENT_FLAGS = {
   [TTL_FLAG_NAME]: Flags.integer({
     description:
       "Particle Time To Live since 'now'. After that, particle is expired and not processed.",
-    default: 120_000,
+    default: 15_000,
     helpValue: "<milliseconds>",
   }),
   [DIAL_TIMEOUT_FLAG_NAME]: Flags.integer({
     description: "Timeout for Fluence js-client to connect to relay peer",
-    default: 60000,
+    default: 15_000,
     helpValue: "<milliseconds>",
   }),
   "particle-id": Flags.boolean({
@@ -480,6 +513,19 @@ export const FLUENCE_CLIENT_FLAGS = {
   }),
   ...ENV_FLAG,
 } as const;
+
+const CC_IDS_FLAG_NAME = "cc-ids";
+
+export const CC_FLAGS = {
+  [NOX_NAMES_FLAG_NAME]: Flags.string({
+    ...NOX_NAMES_FLAG_CONFIG,
+    exclusive: [CC_IDS_FLAG_NAME],
+  }),
+  [CC_IDS_FLAG_NAME]: Flags.string({
+    description: "Comma separated capacity commitment IDs",
+    exclusive: [NOX_NAMES_FLAG_NAME],
+  }),
+};
 
 export type FluenceClientFlags = FromFlagsDef<typeof FLUENCE_CLIENT_FLAGS>;
 
@@ -498,11 +544,6 @@ export const MODULE_TYPE_COMPILED = "compiled";
 export const MODULE_TYPES = [MODULE_TYPE_RUST, MODULE_TYPE_COMPILED] as const;
 export type ModuleType = (typeof MODULE_TYPES)[number];
 
-export const TOKENS = ["FakeUSD", "FLT"] as const;
-export const TOKENS_STRING = TOKENS.join(", ");
-export type Token = (typeof TOKENS)[number];
-export const isToken = getIsStringUnion(TOKENS);
-
 export const TEMPLATES = ["quickstart", "minimal", "ts", "js"] as const;
 export type Template = (typeof TEMPLATES)[number];
 export const isTemplate = getIsStringUnion(TEMPLATES);
@@ -516,6 +557,7 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${SERVICE_CONFIGS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${AQUA_DEPENDENCIES_DIR_NAME}/${PACKAGE_JSON_FILE_NAME}
 ${SRC_DIR_NAME}/${FRONTEND_DIR_NAME}/${SRC_DIR_NAME}/${COMPILED_AQUA_DIR_NAME}/
 **/node_modules
@@ -550,8 +592,8 @@ export const RUN_DEPLOYED_SERVICES_FUNCTION_NAME = "runDeployedServices";
 export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNCTION_NAME}()`;
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
--- example of running services deployed using \`${CLI_NAME} deal deploy\`
--- with worker '${DEFAULT_DEAL_NAME}' which has service 'MyService' with method 'greeting'
+-- example of running services deployed using \`${CLI_NAME} deploy\`
+-- with worker '${DEFAULT_DEPLOYMENT_NAME}' which has service 'MyService' with method 'greeting'
 
 export runDeployedServices, showSubnet
 
@@ -561,7 +603,7 @@ data Answer:
 
 func ${RUN_DEPLOYED_SERVICES_FUNCTION_NAME}() -> []Answer:
     deals <- Deals.get()
-    dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
+    dealId = deals.${DEFAULT_DEPLOYMENT_NAME}!.dealIdOriginal
     answers: *Answer
     on HOST_PEER_ID:
         subnet <- Subnet.resolve(dealId)
@@ -586,7 +628,7 @@ data WorkerServices:
 
 func showSubnet() -> []WorkerServices:
     deals <- Deals.get()
-    dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
+    dealId = deals.${DEFAULT_DEPLOYMENT_NAME}!.dealIdOriginal
     on HOST_PEER_ID:
         subnet <- Subnet.resolve(dealId)
     if subnet.success == false:
@@ -689,13 +731,33 @@ func spell():
 `;
 }
 
+// TODO: use relative(pathToFluenceProject, pathToAquaFolder). Won't work rn, need to refactor things.
+const TEMPLATE_CONTENT_BASE = `- Default Marine service - \`${join(
+  SRC_DIR_NAME,
+  SERVICES_DIR_NAME,
+)}\`.
+- Basic aqua functions - \`${join(SRC_DIR_NAME, AQUA_DIR_NAME)}\`.
+- Fluence HTTP Gateway for proxying Aqua execution - \`${join(
+  SRC_DIR_NAME,
+  GATEWAY_DIR_NAME,
+)}\`.`;
+
+const TEMPLATE_CONTENT_FRONTEND = `- Fluence frontend template - \`${join(
+  SRC_DIR_NAME,
+  FRONTEND_DIR_NAME,
+)}\`.`;
+
 const QUICKSTART_README = `# Fluence Quickstart Template
+
+## Content
+
+${TEMPLATE_CONTENT_BASE}
 
 ## Usage
 
 \`\`\`sh
 # You can deploy right away with an example worker that contains an example service
-fluence deal deploy
+fluence deploy
 
 # Run the deployed code
 fluence run -f 'runDeployedServices()'
@@ -711,7 +773,7 @@ const MINIMAL_README = `# Fluence Minimal Template
 fluence service new myService
 
 # Deploy the default worker
-fluence deal deploy
+fluence deploy
 
 # Uncomment \`runDeployedServices\` aqua function in \`src/aqua/main.aqua\` and run it
 fluence run -f 'runDeployedServices()'
@@ -721,6 +783,12 @@ fluence run -f 'runDeployedServices()'
 function getTsOrJsReadme(isJS: boolean) {
   const jsOrTsString = isJS ? "JavaScript" : "TypeScript";
   return `# Fluence ${jsOrTsString} Template
+
+## Content
+
+${TEMPLATE_CONTENT_BASE}
+${TEMPLATE_CONTENT_FRONTEND}
+
 ## Usage
 
 \`\`\`sh
@@ -736,7 +804,7 @@ npm run dev
 # You can also deploy deal and run the deployed code
 
 # Deploy the default worker
-fluence deal deploy
+fluence deploy
 
 # Compile aqua to ${jsOrTsString} so it contains info about deployed services
 fluence aqua
@@ -755,10 +823,10 @@ export const READMEs: Record<Template, string> = {
   js: getTsOrJsReadme(true),
 };
 
-export const DEFAULT_OFFER_NAME = "offer";
+export const DEFAULT_OFFER_NAME = "defaultOffer";
 
 export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
-export const DEFAULT_CC_DURATION = "100 minutes";
+export const DEFAULT_CC_DURATION = "100 days";
 export const DURATION_EXAMPLE =
   "in human-readable format. Example: 1 months 1 days";
 

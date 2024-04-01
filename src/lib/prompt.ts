@@ -59,24 +59,35 @@ const validateArrayOfStringsPrompt = ajv.compile(arrayOfStringsSchema);
 type PromptOptions<T, U extends Answers> = DistinctQuestion<U> & {
   validateType: ValidateFunction<{ NAME: T }>;
   flagName?: string | undefined;
+  argName?: string | undefined;
 };
 
 const prompt = async <T, U extends Answers>({
   validateType,
   flagName,
+  argName,
   ...question
 }: PromptOptions<T, U>): Promise<T> => {
   const promptMessageWarning =
     typeof question.message === "string"
-      ? `\nPrompt message is: ${color.yellow(question.message)}`
+      ? `\nPrompt message is: ${question.message}`
       : "";
 
-  const flagAdvice =
+  const flagNameAndArgName = [
+    argName === undefined
+      ? null
+      : `Try using ${color.yellow(argName)} argument`,
     flagName === undefined
+      ? null
+      : `Try using ${color.yellow(`--${flagName}`)} flag`,
+  ].filter(Boolean);
+
+  const flagOrArgAdvice =
+    flagNameAndArgName.length === 0
       ? ""
-      : `\nTry using ${color.yellow(
-          `--${flagName}`,
-        )} flag and make sure you use it correctly.`;
+      : `\n${flagNameAndArgName.join(
+          " or\n",
+        )} and make sure you are using it correctly.`;
 
   if (!isInteractive) {
     if (question.default !== undefined) {
@@ -96,7 +107,7 @@ const prompt = async <T, U extends Answers>({
     return commandObj.error(
       `Can't prompt when in non-interactive mode or when ${color.yellow(
         `--${NO_INPUT_FLAG_NAME}`,
-      )} is set.${promptMessageWarning}${flagAdvice}`,
+      )} is set.${promptMessageWarning}${flagOrArgAdvice}`,
     );
   }
 
@@ -113,12 +124,10 @@ const prompt = async <T, U extends Answers>({
 type ConfirmArg = DistinctQuestion & {
   message: string;
   flagName?: string | undefined;
+  argName?: string | undefined;
 };
 
-export const confirm = ({
-  flagName,
-  ...question
-}: ConfirmArg): Promise<boolean> => {
+export function confirm(question: ConfirmArg): Promise<boolean> {
   // inquirer broke it's types so we have to cast it. "confirm" always returns boolean
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
@@ -126,9 +135,8 @@ export const confirm = ({
     message: `${question.message}:`,
     type: "confirm",
     validateType: validateBooleanPrompt,
-    flagName,
   }) as Promise<boolean>;
-};
+}
 
 export type InputArg = DistinctQuestion & {
   message: string;
@@ -211,6 +219,10 @@ type ListOptions<T, U> = DistinctQuestion & {
    * Flag name to use if user can't be prompted because he uses cli in non-interactive mode
    */
   flagName?: string | undefined;
+  /**
+   * Arg name to use if user can't be prompted because he uses cli in non-interactive mode
+   */
+  argName?: string | undefined;
   default?: T;
 };
 
@@ -224,7 +236,9 @@ const handleList = async <T, U>(
   result?: T;
   noChoicesResult?: U;
 }> => {
-  const { options, oneChoiceMessage, onNoChoices, flagName } = listOptions;
+  const { options, oneChoiceMessage, onNoChoices, flagName, argName } =
+    listOptions;
+
   const inquirer = (await import("inquirer")).default;
 
   function nameWithDefault(name: string) {
@@ -268,6 +282,7 @@ const handleList = async <T, U>(
     const doConfirm = await confirm({
       message: oneChoiceMessage(firstChoice.name),
       flagName,
+      argName,
     });
 
     if (doConfirm) {
@@ -346,6 +361,7 @@ export const checkboxes = async <T, U>(
     oneChoiceMessage, // used for confirm in case the list contains only one item
     onNoChoices, // do something if list is empty
     flagName,
+    argName,
     ...question
   } = listOptions;
 
@@ -354,6 +370,7 @@ export const checkboxes = async <T, U>(
     oneChoiceMessage,
     onNoChoices,
     flagName,
+    argName,
   });
 
   if (result !== undefined) {
@@ -374,6 +391,7 @@ export const checkboxes = async <T, U>(
       return choice instanceof inquirer.Separator ? choice : choice.name;
     }),
     flagName,
+    argName,
   });
 
   const results: T[] = [];

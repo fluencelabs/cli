@@ -18,6 +18,8 @@ import { cp } from "fs/promises";
 import { access } from "node:fs/promises";
 import { join } from "path";
 
+import core from "@actions/core";
+
 import {
   DOT_FLUENCE_DIR_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
@@ -116,35 +118,20 @@ const initFirstTime = async (template: Template) => {
 
 async function setupLocalEnvironment() {
   if (fluenceEnv === "local") {
-    if (process.env.CI !== "true") {
-      try {
-        const localPsResult = await fluence({
-          cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-          args: ["local", "ps"],
-        });
-
-        if (localPsResult.includes("fluence")) {
-          await fluence({
-            cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-            args: ["local", "down"],
-          });
-        }
-      } catch {}
-    }
-
     await fluence({
       args: ["local", "up"],
+      flags: { r: true },
       cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
       timeout: 1000 * 60 * 8, // 8 minutes
     });
   }
 }
 
-console.log("\nSetting up tests...");
+core.startGroup("create templates and run 'fluence local up' command");
 
 await setupCli();
 await setupSecretKeys();
 await setupTemplates();
 await setupLocalEnvironment();
 
-console.log("\nTests are ready to run!");
+core.endGroup();

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { getDealClient, sign } from "../dealClient.js";
+import { delimiter } from "node:path";
 
-export async function withdrawReward(commitmentIds: string[]) {
-  const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
+export const findEntryInPATH = (entry: string): boolean => {
+  return process.env.PATH.split(delimiter).includes(entry);
+};
 
-  for (const commitmentId of commitmentIds) {
-    await sign(capacity.withdrawReward, commitmentId);
-  }
-}
+export const prependEntryToPATH = (entry: string) => {
+  process.env.PATH = `${entry}${delimiter}${process.env.PATH}`;
+};

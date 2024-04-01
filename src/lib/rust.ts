@@ -31,6 +31,7 @@ import {
   type MarineOrMrepl,
 } from "./const.js";
 import { addCountlyLog } from "./countly.js";
+import { findEntryInPATH, prependEntryToPATH } from "./env.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
@@ -125,9 +126,9 @@ async function isRustInstalled(): Promise<boolean> {
 
   const cargoPath = join(homedir(), ".cargo", "bin");
 
-  if (!process.env.PATH.split(":").includes(cargoPath)) {
+  if (!findEntryInPATH(cargoPath)) {
     // try updating PATH to include cargo
-    process.env.PATH = `${cargoPath}:${process.env.PATH}`;
+    prependEntryToPATH(cargoPath);
     return isRustInstalledCheck();
   }
 
@@ -185,9 +186,9 @@ const hasRequiredRustTarget = async (): Promise<boolean> => {
   return (
     await execPromise({
       command: RUSTUP,
-      args: ["target", "list"],
+      args: ["target", "list", "--installed"],
     })
-  ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
+  ).includes(RUST_WASM32_WASI_TARGET);
 };
 
 async function getLatestVersionOfCargoDependency(
@@ -225,6 +226,8 @@ async function installCargoDependency({
   dependencyDirPath,
   dependencyTmpDirPath,
 }: InstallCargoDependencyArg) {
+  await ensureRust();
+
   await execPromise({
     command: CARGO,
     args: [

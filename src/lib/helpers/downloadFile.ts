@@ -36,7 +36,7 @@ import {
   projectRootDir,
 } from "../paths.js";
 
-const getHashOfString = (str: string): Promise<string> => {
+function getHashOfString(str: string): Promise<string> {
   const md5Hash = crypto.createHash("md5");
   return new Promise((resolve): void => {
     md5Hash.on("readable", (): void => {
@@ -50,12 +50,12 @@ const getHashOfString = (str: string): Promise<string> => {
     md5Hash.write(str);
     md5Hash.end();
   });
-};
+}
 
-export const downloadFile = async (
+export async function downloadFile(
   outputPath: string,
   url: string,
-): Promise<string> => {
+): Promise<string> {
   const res = await fetch(url);
 
   if (!res.ok) {
@@ -66,32 +66,32 @@ export const downloadFile = async (
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, new Uint8Array(arrayBuffer));
   return outputPath;
-};
+}
 
 export const AQUA_NAME_REQUIREMENTS =
   "must start with a lowercase letter and contain only letters, numbers, and underscores";
 
-export const validateAquaName = (text: string): true | string => {
+export function validateAquaName(text: string): true | string {
   return (
     /^[a-z]\w*$/.test(text) || `${color.yellow(text)} ${AQUA_NAME_REQUIREMENTS}`
   );
-};
+}
 
-export const validateAquaTypeName = (text: string): true | string => {
+export function validateAquaTypeName(text: string): true | string {
   return (
     /^[A-Z]\w*$/.test(text) ||
     `${color.yellow(
       text,
     )} must start with an uppercase letter and contain only letters, numbers, and underscores`
   );
-};
+}
 
 const ARCHIVE_FILE = "archive.tar.gz";
 
-const getDownloadDirPath = async (
+async function getDownloadDirPath(
   get: string,
   pathStart: string,
-): Promise<string> => {
+): Promise<string> {
   const hash = await getHashOfString(get);
   const cleanPrefix = get.replace(".tar.gz?raw=true", "");
   const withoutTrailingSlash = cleanPrefix.replace(/\/$/, "");
@@ -107,12 +107,12 @@ const getDownloadDirPath = async (
     lastPortionOfPath === "" ? "" : `${filenamify(lastPortionOfPath)}_`;
 
   return join(pathStart, `${prefix}${hash}`);
-};
+}
 
-const downloadAndDecompress = async (
+async function downloadAndDecompress(
   get: string,
   pathStart: string,
-): Promise<string> => {
+): Promise<string> {
   const dirPath = await getDownloadDirPath(get, pathStart);
 
   try {
@@ -122,52 +122,58 @@ const downloadAndDecompress = async (
 
   const archivePath = join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);
-  const decompress = (await import("decompress")).default;
-  await decompress(archivePath, dirPath);
+
+  const tar = (await import("tar")).default;
+
+  await tar.x({
+    cwd: dirPath,
+    file: archivePath,
+  });
+
   await rm(archivePath, { force: true });
   return dirPath;
-};
+}
 
-export const downloadModule = async (get: string): Promise<string> => {
+export async function downloadModule(get: string): Promise<string> {
   return downloadAndDecompress(get, await ensureFluenceModulesDir());
-};
+}
 
-const downloadService = async (get: string): Promise<string> => {
+async function downloadService(get: string): Promise<string> {
   return downloadAndDecompress(get, await ensureFluenceServicesDir());
-};
+}
 
-const downloadSpell = async (get: string): Promise<string> => {
+async function downloadSpell(get: string): Promise<string> {
   return downloadAndDecompress(get, await ensureFluenceSpellsDir());
-};
+}
 
-const getModulePathFromUrl = async (get: string): Promise<string> => {
+async function getModulePathFromUrl(get: string): Promise<string> {
   return getDownloadDirPath(get, await ensureFluenceModulesDir());
-};
+}
 
-const getServicePathFromUrl = async (get: string): Promise<string> => {
+async function getServicePathFromUrl(get: string): Promise<string> {
   return getDownloadDirPath(get, await ensureFluenceServicesDir());
-};
+}
 
-export const isUrl = (unknown: string): boolean => {
+export function isUrl(unknown: string): boolean {
   return unknown.startsWith("http://") || unknown.startsWith("https://");
-};
+}
 
-export const getModuleWasmPath = (moduleConfig: {
+export function getModuleWasmPath(moduleConfig: {
   type?: string;
   name: string;
   $getDirPath: () => string;
-}): string => {
+}): string {
   const fileName = `${moduleConfig.name}.${WASM_EXT}`;
   const configDirName = moduleConfig.$getDirPath();
   return moduleConfig.type === MODULE_TYPE_RUST
     ? resolve(projectRootDir, "target", "wasm32-wasi", "release", fileName)
     : resolve(configDirName, fileName);
-};
+}
 
-export const getUrlOrAbsolutePath = (
+export function getUrlOrAbsolutePath(
   pathOrUrl: string,
   absolutePath: string,
-): string => {
+): string {
   if (isUrl(pathOrUrl)) {
     return pathOrUrl;
   }
@@ -177,12 +183,12 @@ export const getUrlOrAbsolutePath = (
   }
 
   return resolve(absolutePath, pathOrUrl);
-};
+}
 
-const ensureOrGetConfigAbsolutePath = (
+function ensureOrGetConfigAbsolutePath(
   downloadOrGetFunction: (get: string) => Promise<string>,
   configName: string,
-) => {
+) {
   return async (
     pathOrUrl: string,
     absolutePath: string | undefined,
@@ -209,7 +215,7 @@ const ensureOrGetConfigAbsolutePath = (
 
     return getConfigPath(dirOrConfigAbsolutePath, configName).configPath;
   };
-};
+}
 
 export const ensureModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
   downloadModule,

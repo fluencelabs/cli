@@ -24,7 +24,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initNewReadonlySpellConfig } from "../../lib/configs/project/spell.js";
 import {
-  DEFAULT_DEAL_NAME,
+  DEFAULT_DEPLOYMENT_NAME,
   FS_OPTIONS,
   getSpellAquaFileContent,
   SPELL_AQUA_FILE_NAME,
@@ -86,32 +86,35 @@ export default class New extends BaseCommand<typeof New> {
     if (
       !(
         isInteractive &&
-        fluenceConfig.deals !== undefined &&
-        DEFAULT_DEAL_NAME in fluenceConfig.deals &&
-        !(fluenceConfig.deals[DEFAULT_DEAL_NAME].spells ?? []).includes(
-          spellName,
-        ) &&
+        fluenceConfig.deployments !== undefined &&
+        DEFAULT_DEPLOYMENT_NAME in fluenceConfig.deployments &&
+        !(
+          fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].spells ?? []
+        ).includes(spellName) &&
         (await confirm({
           message: `Do you want to add spell ${color.yellow(
             spellName,
-          )} to a default deal ${color.yellow(DEFAULT_DEAL_NAME)}`,
+          )} to a default deployment ${color.yellow(DEFAULT_DEPLOYMENT_NAME)}`,
         }))
       )
     ) {
       return;
     }
 
-    const defaultDeal = fluenceConfig.deals[DEFAULT_DEAL_NAME];
+    const defaultDeployment =
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME];
 
-    fluenceConfig.deals[DEFAULT_DEAL_NAME] = {
-      ...defaultDeal,
-      spells: [...(defaultDeal.spells ?? []), spellName],
+    fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] = {
+      ...defaultDeployment,
+      spells: [...(defaultDeployment.spells ?? []), spellName],
     };
 
     await fluenceConfig.$commit();
 
     commandObj.log(
-      `Added ${color.yellow(spellName)} to ${color.yellow(DEFAULT_DEAL_NAME)}`,
+      `Added ${color.yellow(spellName)} to ${color.yellow(
+        DEFAULT_DEPLOYMENT_NAME,
+      )}`,
     );
   }
 }

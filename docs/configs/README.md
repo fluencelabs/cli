@@ -14,7 +14,7 @@ Defines secrets config used for provider set up
 
 ## [module.yaml](./module.md)
 
-Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use `fluence module new` command to generate a template for new module
+Defines Marine Module. You can use `fluence module new` command to generate a template for new module
 
 ## [service.yaml](./service.md)
 
@@ -38,7 +38,7 @@ Defines user project preferences
 
 ## [docker-compose.yaml](./docker-compose.md)
 
-Defines a multi-containers based application.
+The Compose file is a YAML file defining a multi-containers based application.
 
 ## [provider-artifacts.yaml](./provider-artifacts.md)
 

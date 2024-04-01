@@ -14,37 +14,28 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
-import { sign, getDealClient } from "../../lib/dealClient.js";
+import { withdrawCollateralRewards } from "../../lib/chain/commitment.js";
+import { CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
-export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
-  static override description = "Remove unit from the deal";
+export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
+  static override aliases = ["delegator:rw"];
+  static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitment`;
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
   };
-
   static override args = {
-    "UNIT-ID": Args.string({
-      description: "Compute unitId",
+    IDS: Args.string({
+      description: "Comma separated capacity commitment IDs",
     }),
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(RemoveUnit));
-
-    const unitId =
-      args["UNIT-ID"] ?? (await input({ message: "Enter compute unit CID" }));
-
-    const { dealClient } = await getDealClient();
-    const market = await dealClient.getMarket();
-    await sign(market.returnComputeUnitFromDeal, unitId);
-    color.green(`Unit ${unitId} was removed from the deal`);
+    const { args } = await initCli(this, await this.parse(WithdrawReward));
+    await withdrawCollateralRewards({ ids: args.IDS });
   }
 }

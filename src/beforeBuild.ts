@@ -144,26 +144,60 @@ const BIN_FILE_PATH = join(
   "bin.js",
 );
 
-try {
-  const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
+const WIN_BIN_FILE_PATH = join(
+  NODE_MODULES_DIR_NAME,
+  "oclif",
+  "lib",
+  "commands",
+  "pack",
+  "win.js",
+);
 
-  const search = `#!/usr/bin/env bash`;
-  const insert = `export NODE_NO_WARNINGS=1`;
-  const hasSearch = binFileContent.includes(search);
-  const hasInsert = binFileContent.includes(insert);
+async function patchOclif(fileName: string, search: string, insert: string) {
+  try {
+    const binFileContent = await readFile(fileName, FS_OPTIONS);
 
-  if (hasSearch && !hasInsert) {
-    const newBinFileContent = binFileContent.replace(
-      search,
-      `${search}\n${insert}`,
-    );
+    const hasSearch = binFileContent.includes(search);
+    const hasInsert = binFileContent.includes(insert);
 
-    await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
-  } else if (!hasSearch) {
-    throw new Error(`Wasn't able to find '${search}' in ${BIN_FILE_PATH}`);
+    if (hasSearch && !hasInsert) {
+      const newBinFileContent = binFileContent.replace(search, insert);
+
+      await writeFile(fileName, newBinFileContent, FS_OPTIONS);
+    } else if (!hasSearch && !hasInsert) {
+      throw new Error(`Wasn't able to find '${search}' in ${fileName}`);
+    }
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(`Error while modifying ${fileName}`);
+    throw err;
   }
-} catch (err) {
-  // eslint-disable-next-line no-console
-  console.error(`Error while modifying ${BIN_FILE_PATH}`);
-  throw err;
 }
+
+// Unix replacement
+await patchOclif(
+  BIN_FILE_PATH,
+  "#!/usr/bin/env bash",
+  "#!/usr/bin/env bash\nexport NODE_NO_WARNINGS=1",
+);
+
+// Windows replacement
+await patchOclif(
+  WIN_BIN_FILE_PATH,
+  "setlocal enableextensions",
+  "setlocal enableextensions\nset NODE_NO_WARNINGS=1",
+);
+
+// Pack tar.gz for Windows. We need it to perform update
+await patchOclif(
+  WIN_BIN_FILE_PATH,
+  "await Tarballs.build(buildConfig, { pack: false, parallel: true, platform: 'win32', tarball: flags.tarball });",
+  "await Tarballs.build(buildConfig, { pack: true, parallel: true, platform: 'win32', tarball: flags.tarball });",
+);
+
+// Set correct redirection command on Windows
+await patchOclif(
+  WIN_BIN_FILE_PATH,
+  '"%~dp0\\\\..\\\\client\\\\bin\\\\node.exe" "%~dp0\\\\..\\\\client\\\\${additionalCLI ? `${additionalCLI}\\\\bin\\\\run` : \'bin\\\\run\'}" %*',
+  '"%~dp0\\\\..\\\\client\\\\bin\\\\fluence.cmd" %*',
+);

@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-import { commandObj } from "../commandObj.js";
-import { CLI_NAME } from "../const.js";
-import { getDealClient } from "../dealClient.js";
+import { ensureChainEnv } from "../ensureChainNetwork.js";
 
-export async function assertProviderIsRegistered() {
-  const { dealClient, signerOrWallet } = await getDealClient();
-  const market = await dealClient.getMarket();
-
-  const initialProviderInfo = await market.getProviderInfo(
-    signerOrWallet.address,
-  );
-
-  if (initialProviderInfo.name.length === 0) {
-    commandObj.error(
-      `You have to register as a provider first. Use '${CLI_NAME} provider register' command for that`,
-    );
-  }
+export async function getChainId(): Promise<number> {
+  const chainEnv = await ensureChainEnv();
+  const { DealClient } = await import("@fluencelabs/deal-ts-clients");
+  const { chainId } = DealClient.getContractAddresses(chainEnv);
+  return chainId;
 }

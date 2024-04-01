@@ -14,78 +14,92 @@
  * limitations under the License.
  */
 
-import { resolveComputePeersByNames } from "../configs/project/provider.js";
-import { NOX_NAMES_FLAG_NAME } from "../const.js";
+import { color } from "@oclif/color";
+
+import { commandObj } from "../commandObj.js";
 import { getDealClient, sign } from "../dealClient.js";
 
-import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
+import { getCommitments, type CCFlags } from "./commitment.js";
+import { fltFormatWithSymbol } from "./currencies.js";
 
-export async function depositCollateralByNoxNames(flags: {
-  [NOX_NAMES_FLAG_NAME]: string | undefined;
-}) {
+export async function depositCollateral(flags: CCFlags) {
+  const commitments = await getCommitments(flags);
+  const [firstCommitment] = commitments;
+
+  const isProvider =
+    firstCommitment !== undefined &&
+    "providerConfigComputePeer" in firstCommitment;
+
   const { dealClient } = await getDealClient();
-  const computePeers = await resolveComputePeersByNames(flags);
-  const capacity = await dealClient.getCapacity();
-  const { ethers } = await import("ethers");
+  const capacity = dealClient.getCapacity();
 
-  const PeerIdHexes = await Promise.all(
-    computePeers.map(async ({ peerId }) => {
-      return ethers.hexlify(await peerIdToUint8Array(peerId));
+  const commitmentsWithCollateral = await Promise.all(
+    commitments.map(async (commitment) => {
+      return {
+        ...commitment,
+        collateral: await getCollateral(commitment.commitmentId),
+      };
     }),
   );
 
-  const commitmentIds = (
-    await capacity.queryFilter(capacity.filters.CommitmentCreated)
-  )
-    .filter((e) => {
-      return PeerIdHexes.find((peerIdHex) => {
-        return e.args.peerId === peerIdHex;
-      });
-    })
-    .map((e) => {
-      return e.args.commitmentId;
-    });
+  const collateralToApproveCommitment = commitmentsWithCollateral.reduce(
+    (acc, c) => {
+      return acc + c.collateral;
+    },
+    0n,
+  );
 
-  await depositCollateral(commitmentIds);
+  await sign(
+    capacity.depositCollateral,
+    commitments.map(({ commitmentId }) => {
+      return commitmentId;
+    }),
+    {
+      value: collateralToApproveCommitment,
+    },
+  );
+
+  commandObj.logToStderr(
+    `${color.yellow(
+      commitments.length,
+    )} capacity commitments have been successfully activated by adding collateral!
+${
+  isProvider
+    ? "ATTENTION: Capacity proofs are expected to be sent in next epochs!"
+    : ""
 }
+Deposited ${color.yellow(
+      await fltFormatWithSymbol(collateralToApproveCommitment),
+    )} collateral in total
 
-export async function depositCollateral(commitmentIds: string[]) {
-  const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
-
-  // let collateralToApproveCommitments = 0n;
-
-  // for (const commitmentId of commitmentIds) {
-  //   const collateralToApproveCommitment = await getCollateral(commitmentId);
-
-  //   collateralToApproveCommitments =
-  //     collateralToApproveCommitments + collateralToApproveCommitment;
-  // }
-
-  // await sign(
-  //   flt.approve,
-  //   await capacity.getAddress(),
-  //   collateralToApproveCommitments,
-  // )
-
-  const collateralToApproveCommitment = (
-    await Promise.all(
-      commitmentIds.map((commitmentId) => {
-        return getCollateral(commitmentId);
-      }),
-    )
-  ).reduce((acc, v) => {
-    return acc + v;
-  }, 0n);
-
-  await sign(capacity.depositCollateral, commitmentIds, {
-    value: collateralToApproveCommitment,
-  });
+${(
+  await Promise.all(
+    commitmentsWithCollateral.map(async (c) => {
+      return `Capacity commitment${
+        "providerConfigComputePeer" in c
+          ? ` for ${color.yellow(c.providerConfigComputePeer.name)}`
+          : ""
+      } successfully activated!
+Commitment ID: ${color.yellow(c.commitmentId)}
+Collateral: ${color.yellow(await fltFormatWithSymbol(c.collateral))}
+${
+  "providerConfigComputePeer" in c
+    ? `Peer ID: ${color.yellow(c.providerConfigComputePeer.peerId)}
+Number of compute units: ${color.yellow(
+        c.providerConfigComputePeer.computeUnits,
+      )}
+`
+    : ""
+}`;
+    }),
+  )
+).join("\n\n")}`,
+  );
 }
 
 async function getCollateral(commitmentId: string) {
   const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
+  const capacity = dealClient.getCapacity();
   const commitment = await capacity.getCommitment(commitmentId);
   return commitment.collateralPerUnit * commitment.unitCount;
 }

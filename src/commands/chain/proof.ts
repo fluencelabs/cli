@@ -17,7 +17,7 @@
 import { randomBytes } from "node:crypto";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { peerIdToUint8Array } from "../../lib/chain/peerIdToUint8Array.js";
+import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
 import { setChainFlags, chainFlags } from "../../lib/chainFlags.js";
 import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
 import { CHAIN_FLAGS, PRIV_KEY_FLAG_NAME } from "../../lib/const.js";
@@ -34,15 +34,7 @@ export default class Proof extends BaseCommand<typeof Proof> {
 
   async run(): Promise<void> {
     await initCli(this, await this.parse(Proof));
-
-    const computeUnitIds = (await resolveComputePeersByNames()).map(
-      ({ peerId, walletKey }) => {
-        return {
-          peerId,
-          walletKey,
-        };
-      },
-    );
+    const computeUnitIds = await resolveComputePeersByNames();
 
     for (const { peerId, walletKey } of computeUnitIds) {
       setChainFlags({
@@ -51,9 +43,10 @@ export default class Proof extends BaseCommand<typeof Proof> {
       });
 
       const { dealClient } = await getDealClient();
-      const capacity = await dealClient.getCapacity();
-      const difficulty = await capacity.difficulty();
-      const market = await dealClient.getMarket();
+      const core = dealClient.getCore();
+      const capacity = dealClient.getCapacity();
+      const difficulty = await core.difficulty();
+      const market = dealClient.getMarket();
 
       const unitIds = await market.getComputeUnitIds(
         await peerIdToUint8Array(peerId),

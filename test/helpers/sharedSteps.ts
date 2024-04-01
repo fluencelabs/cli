@@ -19,10 +19,10 @@ import { cp, rm, writeFile } from "node:fs/promises";
 import { relative } from "node:path";
 
 import {
-  krasnodar,
   type Node,
   stage,
   testNet,
+  kras,
 } from "@fluencelabs/fluence-network-environment";
 import sortBy from "lodash-es/sortBy.js";
 
@@ -32,7 +32,7 @@ import {
 } from "../../src/lib/configs/project/fluence.js";
 import { initServiceConfig } from "../../src/lib/configs/project/service.js";
 import {
-  DEFAULT_DEAL_NAME,
+  DEFAULT_DEPLOYMENT_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
@@ -46,7 +46,7 @@ import {
   setTryTimeout,
   stringifyUnknown,
 } from "../../src/lib/helpers/utils.js";
-import { addrsToNodes } from "../../src/lib/multiaddres.js";
+import { addrsToNodes } from "../../src/lib/multiaddresWithoutLocal.js";
 import { getAquaMainPath } from "../../src/lib/paths.js";
 import { validateDeployedServicesAnswerSchema } from "../validators/deployedServicesAnswerValidator.js";
 import { validateSpellLogs } from "../validators/spellLogsValidator.js";
@@ -90,9 +90,9 @@ export async function getMultiaddrs(cwd: string): Promise<Node[]> {
 
   multiaddrs = sortBy(
     {
-      kras: krasnodar,
-      stage: stage,
-      testnet: testNet,
+      kras,
+      stage,
+      dar: testNet,
       local,
     }[fluenceEnv],
     ["peerId"],
@@ -153,13 +153,17 @@ export async function updateFluenceConfigForTest(cwd: string) {
   const fluenceConfig = await getFluenceConfig(cwd);
 
   assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    fluenceConfig.deployments !== undefined &&
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
+    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
   );
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].targetWorkers = 3;
+
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services = [
+    MY_SERVICE_NAME,
+  ];
+
   await fluenceConfig.$commit();
   return fluenceConfig;
 }
@@ -235,21 +239,20 @@ export async function callRunDeployedServices(cwd: string) {
   return runDeployedServicesResult;
 }
 
-export async function deployDealAndWaitUntilDeployed(cwd: string) {
+export async function deployDealAndWaitUntilDeployed(
+  cwd: string,
+  update = false,
+) {
   const res = await fluence({
-    args: ["deal", "deploy"],
+    args: ["deploy", DEFAULT_DEPLOYMENT_NAME],
+    flags: { update },
     cwd,
   });
 
-  const dealId = res.split('deal: "')[1]?.split('"')[0];
+  const dealId = res.split('DealID: "')[1]?.split('"')[0];
 
   assert(dealId, "dealId is expected to be defined");
-  console.log("dealId:", dealId);
-
-  await fluence({
-    args: ["deal", "deposit", "10"],
-    cwd,
-  });
+  console.log("DealID:", dealId);
 
   await setTryTimeout(
     "run deployed services",
@@ -276,9 +279,9 @@ export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
   const fluenceConfig = await getFluenceConfig(cwd);
 
   assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    fluenceConfig.deployments !== undefined &&
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
+    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
   );
 
   fluenceConfig.spells = {
@@ -287,7 +290,7 @@ export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
     },
   };
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = [spellName];
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].spells = [spellName];
   await fluenceConfig.$commit();
 }
 
@@ -321,14 +324,15 @@ export async function createServiceAndAddToDeal(
   };
 
   assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    fluenceConfig.deployments !== undefined &&
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
+    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
   );
 
-  const currentServices = fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? [];
+  const currentServices =
+    fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services ?? [];
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services = [
     ...currentServices,
     serviceName,
   ];
@@ -537,9 +541,9 @@ export function assertLogsAreValid(logs: string) {
   }
 }
 
-export async function stopAllDeals(cwd: string) {
+export async function stopDefaultDeal(cwd: string) {
   await fluence({
-    args: ["deal", "stop"],
+    args: ["deal", "stop", DEFAULT_DEPLOYMENT_NAME],
     cwd,
   });
 }

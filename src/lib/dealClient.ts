@@ -22,22 +22,21 @@ import { URL } from "node:url";
 import type {
   DealClient,
   DealMatcherClient,
-  DealExplorerClient,
 } from "@fluencelabs/deal-ts-clients";
+import type { DealCliClient } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/dealCliClient.js";
 import { color } from "@oclif/color";
 import type { ethers, LogDescription } from "ethers";
 import chunk from "lodash-es/chunk.js";
 
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
+import { getChainId } from "./chain/chainId.js";
 import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
 import {
-  DEAL_CONFIG,
+  CHAIN_URLS,
   CLI_CONNECTOR_URL,
-  DEAL_RPC_CONFIG,
   WC_PROJECT_ID,
   WC_METADATA,
-  CONTRACTS_ENV_TO_CHAIN_ID,
   CLI_NAME_FULL,
   PRIV_KEY_FLAG_NAME,
 } from "./const.js";
@@ -61,7 +60,10 @@ export async function getReadonlyDealClient() {
     readonlyDealClient = await createDealClient(provider);
   }
 
-  return { readonlyDealClient, provider };
+  return {
+    readonlyDealClient,
+    provider,
+  };
 }
 
 let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
@@ -70,7 +72,7 @@ let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
 let dealClient: DealClient | undefined = undefined;
 
 // only needed for 'proof' command so it's possible to use multiple wallets during one command execution
-// normally each command will use only one wallet
+// normally, each command will use only one wallet
 let dealClientPrivKey: string | undefined = undefined;
 
 export async function getDealClient() {
@@ -88,10 +90,9 @@ export async function getDealClient() {
   ) {
     dealClientPrivKey = privKey;
 
-    signerOrWallet =
-      privKey === undefined
-        ? await getWalletConnectProvider()
-        : await getWallet(privKey);
+    signerOrWallet = await (privKey === undefined
+      ? getWalletConnectProvider()
+      : getWallet(privKey));
 
     dealClient = await createDealClient(signerOrWallet);
   }
@@ -102,27 +103,25 @@ export async function getDealClient() {
 let dealMatcherClient: DealMatcherClient | undefined = undefined;
 
 export async function getDealMatcherClient() {
-  const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
-  const chainEnv = await ensureChainEnv();
-
   if (dealMatcherClient === undefined) {
-    dealMatcherClient = new DealMatcherClient(chainEnv);
+    const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
+    const env = await ensureChainEnv();
+    dealMatcherClient = new DealMatcherClient(env);
   }
 
   return dealMatcherClient;
 }
 
-let dealExplorerClient: DealExplorerClient | undefined = undefined;
+let dealCliClient: DealCliClient | undefined = undefined;
 
-export async function getDealExplorerClient() {
-  const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
-  const chainEnv = await ensureChainEnv();
-
-  if (dealExplorerClient === undefined) {
-    dealExplorerClient = new DealExplorerClient(chainEnv);
+export async function getDealCliClient() {
+  if (dealCliClient === undefined) {
+    const { DealCliClient } = await import("@fluencelabs/deal-ts-clients");
+    const env = await ensureChainEnv();
+    dealCliClient = new DealCliClient(env);
   }
 
-  return dealExplorerClient;
+  return dealCliClient;
 }
 
 async function createDealClient(
@@ -135,9 +134,9 @@ async function createDealClient(
   await setTryTimeout(
     "check if blockchain client is connected",
     async () => {
-      const core = await client.getCore();
+      const core = client.getCore();
       // By calling this method we ensure that the blockchain client is connected
-      await core.minDealDepositedEpoches();
+      await core.minDealDepositedEpochs();
     },
     (err) => {
       throw new Error(stringifyUnknown(err));
@@ -149,11 +148,10 @@ async function createDealClient(
 }
 
 export async function ensureProvider(): Promise<ethers.Provider> {
-  const { ethers } = await import("ethers");
-  const chainEnv = await ensureChainEnv();
-
   if (provider === undefined) {
-    provider = new ethers.JsonRpcProvider(DEAL_CONFIG[chainEnv].url);
+    const { ethers } = await import("ethers");
+    const chainEnv = await ensureChainEnv();
+    provider = new ethers.JsonRpcProvider(CHAIN_URLS[chainEnv]);
   }
 
   return provider;
@@ -184,11 +182,12 @@ async function getWalletConnectProvider() {
     url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
 
     commandObj.logToStderr(
-      `To approve transactions to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`,
+      `To continue, please connect your wallet using metamask by opening the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`,
     );
   });
 
   const chainEnv = await ensureChainEnv();
+  const chainId = await getChainId();
 
   const session = await provider.connect({
     namespaces: {
@@ -200,9 +199,9 @@ async function getWalletConnectProvider() {
           "personal_sign",
           "eth_signTypedData",
         ],
-        chains: [`eip155:${CONTRACTS_ENV_TO_CHAIN_ID[chainEnv]}`],
+        chains: [`eip155:${chainId}`],
         events: ["chainChanged", "accountsChanged"],
-        rpcMap: DEAL_RPC_CONFIG,
+        rpcMap: { [chainId]: CHAIN_URLS[chainEnv] },
       },
     },
   });
@@ -245,9 +244,6 @@ export async function sign<T extends unknown[]>(
     dbg(debugInfo);
   }
 
-  // const tx = await method(...args);
-  // const res = await tx.wait();
-
   const { tx, res } = await setTryTimeout(
     `execute ${color.yellow(method.name)} blockchain method`,
     async function executingContractMethod() {
@@ -259,6 +255,11 @@ export async function sign<T extends unknown[]>(
       throw err;
     },
     1000 * 60 * 3,
+    1000,
+    (err: unknown) => {
+      // only retry data=null errors
+      return !(err instanceof Error && err.message.includes("data=null"));
+    },
   );
 
   assert(res !== null, `'${method.name}' transaction hash is not defined`);
@@ -267,7 +268,7 @@ export async function sign<T extends unknown[]>(
   commandObj.logToStderr(
     `${color.yellow(method.name)} transaction ${color.yellow(
       tx.hash,
-    )} was mined successfuly`,
+    )} was mined successfully`,
   );
 
   return res;

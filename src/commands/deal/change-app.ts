@@ -23,6 +23,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
+  hidden = true;
   static override description = "Change app id in the deal";
   static override flags = {
     ...baseFlags,

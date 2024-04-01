@@ -1,18 +1,19 @@
 {
-  "nox": "docker.fluence.dev/distro:compute-unit-matched_578_3",
+  "protocolVersion": 1,
+  "nox": "fluencelabs/nox:0.23.6",
   "ipc": "docker.fluence.dev/ipc:NET-720-fadea54-1552-1",
   "ipc-deploy-script": "docker.fluence.dev/ipc-deploy-script:NET-720-fadea54-1552-1",
   "cometbft": "docker.fluence.dev/cometbft:NET-720-fadea54-1552-1",
-  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script-image:main-d95d05b-219-1",
+  "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.13.6",
   "rust-toolchain": "nightly-2023-08-27-x86_64",
   "npm": {
     "@fluencelabs/aqua-lib": "0.9.1",
-    "@fluencelabs/spell": "0.6.9"
+    "@fluencelabs/spell": "0.7.6"
   },
   "cargo": {
-    "marine": "0.19.0",
-    "mrepl": "0.26.0",
-    "marine-rs-sdk": "0.10.1",
-    "marine-rs-sdk-test": "0.12.0"
+    "marine": "0.19.7",
+    "mrepl": "0.30.1",
+    "marine-rs-sdk": "0.14.0",
+    "marine-rs-sdk-test": "0.16.1"
   }
 }

@@ -23,7 +23,8 @@ import {
   AQUA_DIR_NAME,
   AQUA_SERVICES_FILE_NAME,
   CARGO_DIR_NAME,
-  CONFIG_TOML,
+  MODULE_VOLUMES_DIR_NAME,
+  MODULE_VOLUMES_SERVICES_DIR_NAME,
   CARGO_TOML,
   COUNTLY_DIR_NAME,
   MAIN_AQUA_FILE_NAME,
@@ -56,6 +57,8 @@ import {
   SERVER_JS_FILE_NAME,
   SERVER_TS_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  CCP_CONFIGS_DIR_NAME,
+  SERVICE_CONFIGS_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -138,9 +141,9 @@ export function getProviderConfigPath(): string {
   return join(projectRootDir, PROVIDER_CONFIG_FULL_FILE_NAME);
 }
 
-const getAquaDir = (cwd?: string): string => {
+export function getAquaDir(cwd?: string): string {
   return join(getSrcPath(cwd), AQUA_DIR_NAME);
-};
+}
 
 export async function ensureAquaDir(): Promise<string> {
   return ensureDir(getAquaDir());
@@ -257,6 +260,10 @@ export async function ensureFluenceConfigsDir(): Promise<string> {
   return ensureDir(join(getFluenceDir(), CONFIGS_DIR_NAME));
 }
 
+export async function ensureFluenceCCPConfigsDir(): Promise<string> {
+  return ensureDir(join(getFluenceDir(), CCP_CONFIGS_DIR_NAME));
+}
+
 export async function getSecretsPathForReading(isUser: boolean) {
   return isUser ? await ensureUserFluenceSecretsDir() : getFluenceSecretsDir();
 }
@@ -355,12 +362,57 @@ export const ensureFluenceSpellsDir = async (): Promise<string> => {
   return ensureDir(join(await ensureFluenceDir(), SPELLS_DIR_NAME));
 };
 
-const ensureFluenceTmpDir = async (): Promise<string> => {
+export const ensureFluenceTmpDir = async (): Promise<string> => {
   return ensureDir(join(await ensureFluenceDir(), TMP_DIR_NAME));
 };
 
-export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> => {
-  return join(await ensureFluenceTmpDir(), CONFIG_TOML);
+export const ensureFluenceTmpVolumesParticlesDir =
+  async (): Promise<string> => {
+    return ensureDir(
+      join(await ensureFluenceTmpDir(), MODULE_VOLUMES_DIR_NAME, "particles"),
+    );
+  };
+
+export const ensureFluenceTmpVolumesServiceDir = async (
+  serviceName: string,
+  mappedDirPath: string,
+): Promise<string> => {
+  return ensureDir(
+    join(
+      await ensureFluenceTmpDir(),
+      MODULE_VOLUMES_DIR_NAME,
+      MODULE_VOLUMES_SERVICES_DIR_NAME,
+      serviceName,
+      "service",
+      mappedDirPath,
+    ),
+  );
+};
+
+export const ensureFluenceTmpVolumesModuleDir = async (
+  serviceName: string,
+  moduleName: string,
+  mappedDirPath: string,
+): Promise<string> => {
+  return ensureDir(
+    join(
+      await ensureFluenceTmpDir(),
+      MODULE_VOLUMES_DIR_NAME,
+      MODULE_VOLUMES_SERVICES_DIR_NAME,
+      serviceName,
+      "modules",
+      moduleName,
+      mappedDirPath,
+    ),
+  );
+};
+
+export const ensureFluenceServiceConfigsDir = async (): Promise<string> => {
+  return ensureDir(join(await ensureFluenceDir(), SERVICE_CONFIGS_DIR_NAME));
+};
+
+export const ensureFluenceTmpModulePath = async (): Promise<string> => {
+  return ensureDir(join(await ensureFluenceTmpDir(), "module"));
 };
 
 export async function ensureFluenceAquaDependenciesPath(): Promise<string> {

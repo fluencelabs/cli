@@ -14,32 +14,24 @@
  * limitations under the License.
  */
 
-import { Args } from "@oclif/core";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
-import { match } from "../../lib/deal.js";
+import { createCommitments } from "../../lib/chain/commitment.js";
+import { NOX_NAMES_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
-export default class Match extends BaseCommand<typeof Match> {
-  static override description = "Match deal with resource owners";
+export default class CreateCommitment extends BaseCommand<
+  typeof CreateCommitment
+> {
+  static override aliases = ["provider:cc"];
+  static override description = "Create Capacity commitment";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-  };
-
-  static override args = {
-    "DEAL-ADDRESS": Args.string({
-      description: "Deal address",
-    }),
+    ...NOX_NAMES_FLAG,
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(Match));
-
-    await match(
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" })),
-    );
+    const { flags } = await initCli(this, await this.parse(CreateCommitment));
+    await createCommitments(flags);
   }
 }

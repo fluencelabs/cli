@@ -27,7 +27,7 @@ import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
 } from "./configs/project/service.js";
-import { DEFAULT_DEAL_NAME } from "./const.js";
+import { DEFAULT_DEPLOYMENT_NAME } from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   getModuleWasmPath,
@@ -161,20 +161,21 @@ export async function addService({
   }
 
   if (
-    hasDefaultDeal(fluenceConfig) &&
+    hasDefaultDeployment(fluenceConfig) &&
     (!interactive ||
       (isInteractive &&
         (await confirm({
           message: `Do you want to add service ${color.yellow(
             serviceName,
-          )} to a default deal ${color.yellow(DEFAULT_DEAL_NAME)}`,
+          )} to a default deployment ${color.yellow(DEFAULT_DEPLOYMENT_NAME)}`,
         }))))
   ) {
-    const defaultDeal = fluenceConfig.deals[DEFAULT_DEAL_NAME];
+    const defaultDeployemnt =
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME];
 
-    fluenceConfig.deals[DEFAULT_DEAL_NAME] = {
-      ...defaultDeal,
-      services: [...(defaultDeal.services ?? []), serviceName],
+    fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] = {
+      ...defaultDeployemnt,
+      services: [...(defaultDeployemnt.services ?? []), serviceName],
     };
 
     await fluenceConfig.$commit();
@@ -182,18 +183,19 @@ export async function addService({
     if (interactive) {
       commandObj.log(
         `Added ${color.yellow(serviceName)} to ${color.yellow(
-          DEFAULT_DEAL_NAME,
+          DEFAULT_DEPLOYMENT_NAME,
         )}`,
       );
     }
   }
 
-  await resolveSingleServiceModuleConfigsAndBuild(
+  await resolveSingleServiceModuleConfigsAndBuild({
+    serviceName,
     serviceConfig,
     fluenceConfig,
     marineCli,
     marineBuildArgs,
-  );
+  });
 
   await updateAquaServiceInterfaceFile(
     {
@@ -206,13 +208,17 @@ export async function addService({
   return serviceName;
 }
 
-function hasDefaultDeal(
+function hasDefaultDeployment(
   fluenceConfig: FluenceConfig,
 ): fluenceConfig is FluenceConfig & {
-  deals: { [DEFAULT_DEAL_NAME]: NonNullable<FluenceConfig["deals"]>[string] };
+  deployments: {
+    [DEFAULT_DEPLOYMENT_NAME]: NonNullable<
+      FluenceConfig["deployments"]
+    >[string];
+  };
 } {
   return (
-    fluenceConfig.deals !== undefined &&
-    DEFAULT_DEAL_NAME in fluenceConfig.deals
+    fluenceConfig.deployments !== undefined &&
+    DEFAULT_DEPLOYMENT_NAME in fluenceConfig.deployments
   );
 }

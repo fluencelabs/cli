@@ -73,7 +73,7 @@ const configSchemaV0Obj = {
         "Whether to include commented-out documented config examples in the configs generated with the CLI",
       nullable: true,
     },
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
   },
   required: ["version", "countlyConsent"],
 } as const;
@@ -92,7 +92,7 @@ const configSchemaV1Obj = {
   description: `Defines global config for ${CLI_NAME_FULL}`,
   properties: {
     ...configSchemaV0Obj.properties,
-    version: { type: "number", const: 1 },
+    version: { type: "integer", const: 1 },
     defaultSecretKeyName: {
       type: "string",
       description:

@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import { Flags } from "@oclif/core";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { initReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
-import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
+import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import {
+  DOCKER_COMPOSE_FULL_FILE_NAME,
+  DOCKER_COMPOSE_FLAGS,
+} from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -26,21 +30,25 @@ export default class Down extends BaseCommand<typeof Down> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
+    volumes: Flags.boolean({
+      char: "v",
+      description:
+        'Remove named volumes declared in the "volumes" section of the Compose file and anonymous volumes attached to containers',
+      default: false,
+    }),
+    ...DOCKER_COMPOSE_FLAGS,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Down));
-    const dockerComposeConfig = await initReadonlyDockerComposeConfig();
-
-    if (dockerComposeConfig === null) {
-      commandObj.error(
-        `Cannot find ${DOCKER_COMPOSE_FULL_FILE_NAME}. Aborting.`,
-      );
-    }
+    const { flags } = await initCli(this, await this.parse(Down));
+    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
 
     await dockerCompose({
-      args: ["down"],
+      args: [
+        "down",
+        ...(flags.flags === undefined ? [] : flags.flags.split(" ")),
+      ],
       flags: {
-        v: true,
+        v: flags.volumes,
       },
       printOutput: true,
       options: {

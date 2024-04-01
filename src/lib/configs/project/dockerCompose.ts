@@ -23,37 +23,37 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 import { versions } from "../../../versions.js";
 import {
   IPC_DEPLOY_SCRIPT_NAME,
-  GRAPH_NODE_PORT,
-  POSTGRES_CONTAINER_NAME,
-  DOCKER_COMPOSE_FILE_NAME,
-  DOCKER_COMPOSE_FULL_FILE_NAME,
-  TOP_LEVEL_SCHEMA_ID,
-  IPFS_PORT,
-  IPFS_CONTAINER_NAME,
   IPC_PORT,
   IPC_CONTAINER_NAME,
-  TCP_PORT_START,
-  WEB_SOCKET_PORT_START,
-  PROVIDER_CONFIG_FULL_FILE_NAME,
-  CONFIGS_DIR_NAME,
-  GRAPH_NODE_CONTAINER_NAME,
-  SUBGRAPH_DEPLOY_SCRIPT_NAME,
   COMETBFT_CONTAINER_NAME,
   COMETBFT_PORT,
   IPC_ETH_CONTAINER_NAME,
   IPC_ETH_PORT,
+  CONFIGS_DIR_NAME,
+  DOCKER_COMPOSE_FILE_NAME,
+  GRAPH_NODE_CONTAINER_NAME,
+  GRAPH_NODE_PORT,
+  HTTP_PORT_START,
+  IPFS_CONTAINER_NAME,
+  IPFS_PORT,
+  POSTGRES_CONTAINER_NAME,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+  SUBGRAPH_DEPLOY_SCRIPT_NAME,
+  TCP_PORT_START,
+  WEB_SOCKET_PORT_START,
 } from "../../const.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureFluenceConfigsDir, getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
-  getReadonlyConfigInitFunction,
   type GetDefaultConfig,
+  getReadonlyConfigInitFunction,
   type InitializedConfig,
   type InitializedReadonlyConfig,
   type Migrations,
 } from "../initConfig.js";
 
+import schema from "./compose.schema.json" assert { type: "json" };
 import { ensureComputerPeerConfigs, getConfigTomlName } from "./provider.js";
 
 type Service = {
@@ -63,83 +63,9 @@ type Service = {
   environment?: Record<string, string | number>;
   volumes?: string[];
   command?: string[] | string;
-  depends_on?: string[] | Record<string, { condition: string }>;
+  depends_on?: string[] | Record<string, Record<string, string>>;
   secrets?: string[];
   healthcheck?: Record<string, string | number>;
-};
-
-const serviceSchema: JSONSchemaType<Service> = {
-  type: "object",
-  properties: {
-    image: { type: "string", nullable: true },
-    ports: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-    pull_policy: { type: "string", nullable: true },
-    environment: {
-      type: "object",
-      additionalProperties: { type: ["string", "number"] },
-      required: [],
-      nullable: true,
-    },
-    volumes: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-    command: {
-      type: ["array", "string"],
-      nullable: true,
-      oneOf: [
-        {
-          type: "array",
-          items: { type: "string" },
-          nullable: true,
-        },
-        {
-          type: "string",
-          nullable: true,
-        },
-      ],
-    },
-    depends_on: {
-      type: ["array", "object"],
-      oneOf: [
-        {
-          type: "array",
-          items: { type: "string" },
-          nullable: true,
-        },
-        {
-          type: "object",
-          additionalProperties: {
-            type: "object",
-            properties: {
-              condition: { type: "string" },
-            },
-            required: ["condition"],
-          },
-          nullable: true,
-          required: [],
-        },
-      ],
-      nullable: true,
-    },
-    secrets: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-    healthcheck: {
-      type: "object",
-      additionalProperties: { type: ["string", "number"] },
-      nullable: true,
-      required: [],
-    },
-  },
-  required: [],
 };
 
 type ConfigV0 = {
@@ -150,55 +76,14 @@ type ConfigV0 = {
   secrets?: Record<string, { file?: string }>;
 };
 
-const configSchemaV0: JSONSchemaType<ConfigV0> = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${DOCKER_COMPOSE_FULL_FILE_NAME}`,
-  title: DOCKER_COMPOSE_FULL_FILE_NAME,
-  type: "object",
-  description: "Defines a multi-containers based application.",
-  properties: {
-    version: { type: "string", const: "3" },
-    volumes: {
-      type: "object",
-      nullable: true,
-      additionalProperties: {
-        type: "null",
-        nullable: true,
-      },
-      required: [],
-    },
-    services: {
-      type: "object",
-      additionalProperties: serviceSchema,
-      properties: {
-        service: serviceSchema,
-      },
-      required: [],
-    },
-    include: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-    secrets: {
-      type: "object",
-      nullable: true,
-      additionalProperties: {
-        type: "object",
-        properties: {
-          file: { type: "string", nullable: true },
-        },
-        required: [],
-      },
-      required: [],
-    },
-  },
-  required: ["version", "services"],
-};
+// @ts-expect-error - this schema is from official github and it's valid
+const configSchemaV0: JSONSchemaType<ConfigV0> = schema;
 
 type GenNoxImageArgs = {
   name: string;
   tcpPort: number;
   webSocketPort: number;
+  httpPort: number;
   bootstrapName: string;
   bootstrapTcpPort?: number;
 };
@@ -207,6 +92,7 @@ function genNox({
   name,
   tcpPort,
   webSocketPort,
+  httpPort,
   bootstrapName,
   bootstrapTcpPort,
 }: GenNoxImageArgs): [name: string, service: Service] {
@@ -218,14 +104,15 @@ function genNox({
       image: versions.nox,
       ports: [`${tcpPort}:${tcpPort}`, `${webSocketPort}:${webSocketPort}`],
       environment: {
-        WASM_LOG: "info",
+        WASM_LOG: "debug",
         FLUENCE_MAX_SPELL_PARTICLE_TTL: "9s",
         FLUENCE_ROOT_KEY_PAIR__PATH: `/run/secrets/${name}`,
         RUST_LOG:
-          "run-console=trace,aquamarine::log=debug,network=trace,worker_inactive=trace",
+          "chain_connector=debug,run-console=trace,aquamarine::log=debug,network=trace,worker_inactive=trace",
       },
       command: [
         `--config=${configLocation}`,
+        "--dev-mode",
         "--external-maddrs",
         `/dns4/${name}/tcp/${tcpPort}`,
         `/dns4/${name}/tcp/${webSocketPort}/ws`,
@@ -234,16 +121,24 @@ function genNox({
           ? "--local"
           : `--bootstraps=/dns/${bootstrapName}/tcp/${bootstrapTcpPort}`,
       ],
-      depends_on: [
-        IPFS_CONTAINER_NAME,
-        IPC_ETH_CONTAINER_NAME,
-        IPC_DEPLOY_SCRIPT_NAME,
-      ],
+      depends_on: {
+        [IPFS_CONTAINER_NAME]: { condition: "service_healthy" },
+        [IPC_ETH_CONTAINER_NAME]: { condition: "service_healthy" },
+        [IPC_DEPLOY_SCRIPT_NAME]: {
+          condition: "service_completed_successfully",
+        },
+      },
       volumes: [
         `./${CONFIGS_DIR_NAME}/${configTomlName}:${configLocation}`,
         `${name}:/.fluence`,
       ],
       secrets: [name],
+      healthcheck: {
+        test: `curl -f http://localhost:${httpPort}/health`,
+        interval: "5s",
+        timeout: "2s",
+        retries: 10,
+      },
     },
   ];
 }
@@ -259,6 +154,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
         ...(await genSecretKeyOrReturnExisting(name)),
         webSocketPort: overriddenNoxConfig.websocketPort,
         tcpPort: overriddenNoxConfig.tcpPort,
+        httpPort: overriddenNoxConfig.httpPort,
         relativeConfigFilePath: relative(
           fluenceDir,
           join(configsDir, getConfigTomlName(name)),
@@ -278,11 +174,13 @@ async function genDockerCompose(): Promise<LatestConfig> {
     name: bootstrapName,
     webSocketPort: bootstrapWebSocketPort = WEB_SOCKET_PORT_START,
     tcpPort: bootstrapTcpPort = TCP_PORT_START,
+    httpPort: bootstrapHttpPort = HTTP_PORT_START,
   } = bootstrap;
 
   return {
     version: "3",
     volumes: {
+      "chain-rpc": null,
       [IPFS_CONTAINER_NAME]: null,
       [POSTGRES_CONTAINER_NAME]: null,
       ...Object.fromEntries(
@@ -306,6 +204,12 @@ async function genDockerCompose(): Promise<LatestConfig> {
           IPFS_PROFILE: "server",
         },
         volumes: [`${IPFS_CONTAINER_NAME}:/data/ipfs`],
+        healthcheck: {
+          test: "ipfs id || exit 1",
+          interval: "8s",
+          timeout: "10s",
+          retries: 20,
+        },
       },
       [POSTGRES_CONTAINER_NAME]: {
         image: "postgres:14",
@@ -350,18 +254,27 @@ async function genDockerCompose(): Promise<LatestConfig> {
           TENDERMINT_WS_URL: `ws://${COMETBFT_CONTAINER_NAME}:${COMETBFT_PORT}/websocket`,
         },
         command: "eth run",
+        volumes: [`${IPC_ETH_CONTAINER_NAME}:/data`],
         ports: [`${IPC_ETH_PORT}:${IPC_ETH_PORT}`],
         depends_on: {
           [COMETBFT_CONTAINER_NAME]: { condition: "service_healthy" },
+        },
+        healthcheck: {
+          test: `curl -s -X POST 'http://localhost:${IPC_ETH_PORT}' -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0", "method":"eth_chainId", "params":[], "id":1}' | jq -e '.result != null'`,
+          interval: "8s",
+          timeout: "10s",
+          retries: 20,
         },
       },
       [IPC_DEPLOY_SCRIPT_NAME]: {
         image: versions[IPC_DEPLOY_SCRIPT_NAME],
         command: ["deploy-to-ipc"],
-        depends_on: [IPC_ETH_CONTAINER_NAME],
+        depends_on: {
+          [IPC_ETH_CONTAINER_NAME]: { condition: "service_healthy" },
+        },
       },
       [GRAPH_NODE_CONTAINER_NAME]: {
-        image: "graphprotocol/graph-node:v0.33.0",
+        image: "fluencelabs/graph-node:v0.34.1",
         ports: [
           "8000:8000",
           "8001:8001",
@@ -369,11 +282,13 @@ async function genDockerCompose(): Promise<LatestConfig> {
           "8030:8030",
           "8040:8040",
         ],
-        depends_on: [
-          IPFS_CONTAINER_NAME,
-          POSTGRES_CONTAINER_NAME,
-          IPC_ETH_CONTAINER_NAME,
-        ],
+        depends_on: {
+          [IPFS_CONTAINER_NAME]: { condition: "service_healthy" },
+          [IPC_ETH_CONTAINER_NAME]: { condition: "service_healthy" },
+          [IPC_DEPLOY_SCRIPT_NAME]: {
+            condition: "service_completed_successfully",
+          },
+        },
         environment: {
           postgres_host: "postgres",
           postgres_user: "graph-node",
@@ -399,15 +314,17 @@ async function genDockerCompose(): Promise<LatestConfig> {
           name: bootstrapName,
           tcpPort: bootstrapTcpPort,
           webSocketPort: bootstrapWebSocketPort,
+          httpPort: bootstrapHttpPort,
           bootstrapName: bootstrapName,
         }),
       ]),
       ...Object.fromEntries(
-        restNoxes.map(({ name, tcpPort, webSocketPort }, index) => {
+        restNoxes.map(({ name, tcpPort, webSocketPort, httpPort }, index) => {
           return genNox({
             name,
             tcpPort: tcpPort ?? TCP_PORT_START + index + 1,
             webSocketPort: webSocketPort ?? WEB_SOCKET_PORT_START + index + 1,
+            httpPort: httpPort ?? HTTP_PORT_START + index + 1,
             bootstrapName: bootstrapName,
             bootstrapTcpPort,
           });
@@ -433,12 +350,16 @@ export type DockerComposeConfig = InitializedConfig<LatestConfig>;
 export type DockerComposeConfigReadonly =
   InitializedReadonlyConfig<LatestConfig>;
 
+export function dockerComposeDirPath() {
+  return getFluenceDir();
+}
+
 const initConfigOptions = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
   name: DOCKER_COMPOSE_FILE_NAME,
-  getConfigOrConfigDirPath: getFluenceDir,
+  getConfigOrConfigDirPath: dockerComposeDirPath,
 };
 
 export async function initNewDockerComposeConfig() {

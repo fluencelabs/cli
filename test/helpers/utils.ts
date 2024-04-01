@@ -16,6 +16,7 @@
 
 import { access, readFile, writeFile } from "node:fs/promises";
 
+import core from "@actions/core";
 import lockfile from "proper-lockfile";
 
 export const sleepSeconds = (s: number) => {
@@ -67,4 +68,21 @@ export async function lockAndProcessFile(
   } finally {
     await release?.();
   }
+}
+
+export function wrappedTest(
+  ...[name, fn, ...rest]: Parameters<(typeof test)["concurrent"]>
+) {
+  test(
+    name,
+    // @ts-expect-error fix later
+    async (...args) => {
+      core.startGroup(name);
+      // @ts-expect-error fix later
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      await fn(...args);
+      core.endGroup();
+    },
+    ...rest,
+  );
 }

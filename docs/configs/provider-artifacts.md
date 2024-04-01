@@ -7,7 +7,7 @@ Defines artifacts created by the provider
 | Property  | Type              | Required | Description    |
 |-----------|-------------------|----------|----------------|
 | `offers`  | [object](#offers) | **Yes**  | Created offers |
-| `version` | number            | **Yes**  | Config version |
+| `version` | integer           | **Yes**  | Config version |
 
 ## offers
 

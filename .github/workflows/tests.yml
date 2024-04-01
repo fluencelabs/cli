@@ -71,7 +71,7 @@ on:
 env:
   CI: true
   FORCE_COLOR: true
-  DEBUG: "fcli:debug"
+  DEBUG: "fcli:*,deal-ts-clients:*"
 
 jobs:
   tests:
@@ -252,6 +252,14 @@ jobs:
       - name: Dump container logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
+
+      - name: Dump anvil state
+        if: always()
+        run: |
+          curl http://localhost:8545 \
+            -X POST \
+            -H "Content-Type: application/json" \
+            --data '{"id":0,"jsonrpc":"2.0","method":"anvil_dumpState","params":[]}'
 
       - name: Stop containers
         if: always()

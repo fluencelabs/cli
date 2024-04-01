@@ -27,10 +27,11 @@ import {
   CLI_NAME,
   type ChainENV,
   CHAIN_ENV,
-  DEFAULT_DEAL_NAME,
+  DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_WORKER_NAME,
   type FluenceEnv,
   FLUENCE_ENVS,
+  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "../../const.js";
 import { getFluenceDir } from "../../paths.js";
 import { fluenceEnvPrompt } from "../../resolveFluenceEnv.js";
@@ -69,8 +70,9 @@ const workerInfoSchema = {
 export type Deal = WorkerInfo & {
   dealId: string;
   dealIdOriginal: string;
-  chainNetwork: ChainENV;
   chainNetworkId: number;
+  chainNetwork?: ChainENV;
+  matched?: boolean;
 };
 
 export type Host = WorkerInfo & {
@@ -159,18 +161,23 @@ const dealSchema: JSONSchemaType<Deal> = {
       type: "string",
       enum: CHAIN_ENV,
       description:
-        "Blockchain network name that was used when deploying workers",
+        "DEPRECATED. Blockchain network name that was used when deploying workers",
+      nullable: true,
     },
     chainNetworkId: {
-      type: "number",
+      type: "integer",
       description: "Blockchain network id that was used when deploying workers",
+    },
+    matched: {
+      type: "boolean",
+      description: "Is deal matched",
+      nullable: true,
     },
   },
   required: [
     ...workerInfoSchema.required,
     "dealId",
     "dealIdOriginal",
-    "chainNetwork",
     "chainNetworkId",
   ],
 } as const;
@@ -201,7 +208,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   additionalProperties: false,
   properties: {
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
     deals: mapOfDealsSchema,
     hosts: mapOfHostsSchema,
   },
@@ -225,7 +232,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
   additionalProperties: false,
   required: ["version"],
   properties: {
-    version: { type: "number", const: 1, description: "Config version" },
+    version: { type: "integer", const: 1, description: "Config version" },
     deals: {
       type: "object",
       description:
@@ -235,7 +242,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       required: [],
       properties: {
         custom: mapOfDealsSchema,
-        testnet: mapOfDealsSchema,
+        dar: mapOfDealsSchema,
         kras: mapOfDealsSchema,
         local: mapOfDealsSchema,
         stage: mapOfDealsSchema,
@@ -250,7 +257,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       required: [],
       properties: {
         custom: mapOfHostsSchema,
-        testnet: mapOfHostsSchema,
+        dar: mapOfHostsSchema,
         kras: mapOfHostsSchema,
         local: mapOfHostsSchema,
         stage: mapOfHostsSchema,
@@ -285,7 +292,7 @@ const migrations: Migrations<Config> = [
 
       if (dealsForEnv === undefined) {
         dealsForEnv = {};
-        deals[deal.chainNetwork] = dealsForEnv;
+        deals[deal.chainNetwork ?? DEFAULT_PUBLIC_FLUENCE_ENV] = dealsForEnv;
       }
 
       dealsForEnv[workerName] = deal;
@@ -339,8 +346,8 @@ version: 0
 
 # deals:
 # # A map of created deals
-#   ${FLUENCE_ENVS[0]}:
-#     ${DEFAULT_DEAL_NAME}:
+#   ${DEFAULT_PUBLIC_FLUENCE_ENV}:
+#     ${DEFAULT_DEPLOYMENT_NAME}:
 #       # worker CID
 #       definition: bafkreigvy3k4racm6i6vvavtr5mdkllmfi2lfkmdk72gnzwk7zdnhajw4y
 #       # ISO timestamp of the time when the worker was deployed
@@ -349,8 +356,6 @@ version: 0
 #       dealId: 799c4beb18ae084d57a90582c2cb8bb19098139e
 #       # original deal ID that you get after signing the contract
 #       dealIdOriginal: "0x799C4BEB18Ae084D57a90582c2Cb8Bb19098139E"
-#       # network name that was used when deploying worker
-#       chainNetwork: testnet
 #       # network ID that was used when deploying worker
 #       chainNetworkId: 1313161555
 

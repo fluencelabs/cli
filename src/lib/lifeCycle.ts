@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { access } from "fs/promises";
+
 import { color } from "@oclif/color";
 import type {
   ArgOutput,
@@ -47,11 +49,11 @@ import "./setupEnvironment.js";
 import { dbg } from "./dbg.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
-import { updateRelaysJSON } from "./multiaddres.js";
 import {
   projectRootDir,
   recursivelyFindProjectRootDir,
   setProjectRootDir,
+  getProviderConfigPath,
 } from "./paths.js";
 import { confirm } from "./prompt.js";
 
@@ -148,32 +150,34 @@ export async function initCli<
 
   await ensureUserConfig();
 
-  const res = requiresFluenceProject
-    ? { fluenceConfig: await ensureFluenceProject() }
-    : { maybeFluenceConfig: await initFluenceConfig() };
-
-  const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
-
-  await initCountly({ maybeFluenceConfig });
-  ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
-
   if (requiresFluenceProject) {
     setEnvConfig(await initNewEnvConfig());
   } else {
-    const envConfig = await initEnvConfig();
+    try {
+      // ensure env config also when provider.yaml exists
+      await access(getProviderConfigPath());
+      setEnvConfig(await initNewEnvConfig());
+    } catch {
+      const envConfig = await initEnvConfig();
 
-    if (envConfig !== null) {
-      setEnvConfig(envConfig);
+      if (envConfig !== null) {
+        setEnvConfig(envConfig);
+      }
     }
   }
-
-  await updateRelaysJSON();
 
   setChainFlags({
     env: flags.env,
     [PRIV_KEY_FLAG_NAME]: flags[PRIV_KEY_FLAG_NAME],
   });
 
+  const res = requiresFluenceProject
+    ? { fluenceConfig: await ensureFluenceProject() }
+    : { maybeFluenceConfig: await initFluenceConfig() };
+
+  const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
+  await initCountly({ maybeFluenceConfig });
+  ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
   return { args, flags, ...res };
 }
 

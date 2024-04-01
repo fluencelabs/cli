@@ -20,6 +20,7 @@ import { CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Update extends BaseCommand<typeof Update> {
+  static override aliases = ["provider:u"];
   static override description = "Update provider info";
   static override flags = {
     ...baseFlags,

@@ -59,7 +59,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   additionalProperties: false,
   properties: {
-    version: { type: "number", const: 0, description: "Config version" },
+    version: { type: "integer", const: 0, description: "Config version" },
     offers: {
       type: "object",
       description: "Created offers",

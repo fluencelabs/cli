@@ -65,7 +65,7 @@ type ConfigV0 = {
 } & SpellProperties;
 
 const spellProperties = {
-  version: { type: "number", const: 0 },
+  version: { type: "integer", const: 0 },
   aquaFilePath: {
     type: "string",
     description:
@@ -88,7 +88,7 @@ const spellProperties = {
     description: `Trigger the spell execution periodically. If you want to disable this property by overriding it in ${FLUENCE_CONFIG_FULL_FILE_NAME} - pass empty config for it like this: \`clock: {}\``,
     properties: {
       periodSec: {
-        type: "number",
+        type: "integer",
         description:
           "How often the spell will be executed. If set to 0, the spell will be executed only once. If this value not provided at all - the spell will never be executed",
         minimum: 0,
@@ -108,7 +108,7 @@ const spellProperties = {
         nullable: true,
       },
       startDelaySec: {
-        type: "number",
+        type: "integer",
         description:
           "How long to wait before the first execution in seconds. If this property or `startTimestamp` not specified, periodic execution will start immediately. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. This property conflicts with `startTimestamp`. You can specify only one of them",
         nullable: true,
@@ -116,7 +116,7 @@ const spellProperties = {
         maximum: U32_MAX,
       },
       endDelaySec: {
-        type: "number",
+        type: "integer",
         description:
           "How long to wait before the last execution in seconds. If this property or `endTimestamp` not specified, periodic execution will never end. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. If it is in the past at the moment of spell creation - the spell will never be executed. This property conflicts with `endTimestamp`. You can specify only one of them",
         nullable: true,

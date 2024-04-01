@@ -15,11 +15,8 @@
  */
 
 import assert from "node:assert";
-import { access, readFile, writeFile } from "node:fs/promises";
-import { relative } from "node:path";
 
 import { color } from "@oclif/color";
-import type { JSONSchemaType } from "ajv";
 
 import type {
   FluenceConfigReadonly,
@@ -36,11 +33,8 @@ import {
   type ServiceConfigReadonly,
 } from "../lib/configs/project/service.js";
 import {
-  FS_OPTIONS,
   MODULE_CONFIG_FULL_FILE_NAME,
-  MODULE_TYPE_RUST,
   SERVICE_CONFIG_FULL_FILE_NAME,
-  DEFAULT_MARINE_BUILD_ARGS,
 } from "../lib/const.js";
 import {
   getUrlOrAbsolutePath,
@@ -49,11 +43,13 @@ import {
 } from "../lib/helpers/downloadFile.js";
 import type { MarineCLI } from "../lib/marineCli.js";
 
-import { ajv, validationErrorToString } from "./ajvInstance.js";
+import { buildModules } from "./buildModules.js";
 import { commandObj } from "./commandObj.js";
+import { overrideModule } from "./deployWorkers.js";
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
+import { genServiceConfigToml } from "./helpers/serviceConfigToml.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { getCargoTomlPath, projectRootDir } from "./paths.js";
+import { projectRootDir } from "./paths.js";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
@@ -86,32 +82,40 @@ const resolveServiceInfos = async ({
     serviceConfig: ServiceConfigReadonly;
   }>;
 
-  startSpinner("Making sure all services are downloaded");
+  const services = Object.entries(fluenceConfig.services ?? []);
+
+  const hasSomeServiceURL = services.some(([, { get }]) => {
+    return isUrl(get);
+  });
+
+  if (hasSomeServiceURL) {
+    startSpinner("Making sure all services are downloaded");
+  }
 
   const serviceConfigs = await Promise.all(
-    Object.entries(fluenceConfig.services ?? []).map(
-      async ([serviceName, { get }]): ServiceConfigPromises => {
-        return {
-          serviceName,
-          serviceConfig:
-            (await initReadonlyServiceConfig(get, projectRootDir)) ??
-            commandObj.error(
-              `Service ${color.yellow(serviceName)} must have ${color.yellow(
-                SERVICE_CONFIG_FULL_FILE_NAME,
-              )}. ${
-                isUrl(get)
-                  ? `Not able to find it after downloading and decompressing ${color.yellow(
-                      get,
-                    )}`
-                  : `Not able to find it at ${color.yellow(get)}`
-              }`,
-            ),
-        };
-      },
-    ),
+    services.map(async ([serviceName, { get }]): ServiceConfigPromises => {
+      return {
+        serviceName,
+        serviceConfig:
+          (await initReadonlyServiceConfig(get, projectRootDir)) ??
+          commandObj.error(
+            `Service ${color.yellow(serviceName)} must have ${color.yellow(
+              SERVICE_CONFIG_FULL_FILE_NAME,
+            )}. ${
+              isUrl(get)
+                ? `Not able to find it after downloading and decompressing ${color.yellow(
+                    get,
+                  )}`
+                : `Not able to find it at ${color.yellow(get)}`
+            }`,
+          ),
+      };
+    }),
   );
 
-  stopSpinner();
+  if (hasSomeServiceURL) {
+    stopSpinner();
+  }
 
   return Promise.all(
     serviceConfigs.map(({ serviceName, serviceConfig }) => {
@@ -130,11 +134,11 @@ type BuildArg = ResolveServiceInfosArg & {
   marineBuildArgs: string | undefined;
 };
 
-export const build = async ({
+export async function build({
   marineCli,
   marineBuildArgs,
   ...resolveDeployInfosArg
-}: BuildArg): Promise<Array<ServiceInfo>> => {
+}: BuildArg): Promise<Array<ServiceInfo>> {
   const serviceInfos = await resolveServiceInfos(resolveDeployInfosArg);
 
   const setOfAllModuleUrlsOrAbsolutePaths = new Set(
@@ -242,200 +246,106 @@ export const build = async ({
   );
 
   return serviceInfoWithModuleConfigs;
-};
+}
 
-type CargoWorkspaceToml = {
-  workspace?: {
-    members?: string[];
-  };
-};
-
-const cargoWorkspaceTomlSchema: JSONSchemaType<CargoWorkspaceToml> = {
-  type: "object",
-  properties: {
-    workspace: {
-      type: "object",
-      properties: {
-        members: {
-          type: "array",
-          items: {
-            type: "string",
-          },
-          nullable: true,
-        },
-      },
-      required: [],
-      nullable: true,
-    },
-  },
-  required: [],
-};
-
-const validateCargoWorkspaceToml = ajv.compile(cargoWorkspaceTomlSchema);
-
-const updateWorkspaceCargoToml = async (
-  moduleAbsolutePaths: string[],
-): Promise<void> => {
-  const cargoTomlPath = getCargoTomlPath();
-  let cargoTomlFileContent: string;
-
-  try {
-    cargoTomlFileContent = await readFile(cargoTomlPath, FS_OPTIONS);
-  } catch {
-    cargoTomlFileContent = `[workspace]
-members = []
-`;
-  }
-
-  const { parse } = await import("@iarna/toml");
-  const parsedConfig: unknown = parse(cargoTomlFileContent);
-
-  if (!validateCargoWorkspaceToml(parsedConfig)) {
-    return commandObj.error(
-      `Cargo.toml at ${cargoTomlPath} is not valid. Please fix it manually. ${await validationErrorToString(
-        validateCargoWorkspaceToml.errors,
-      )}`,
-    );
-  }
-
-  const oldCargoWorkspaceMembers = parsedConfig.workspace?.members ?? [];
-
-  const cargoWorkspaceMembersExistance = await Promise.allSettled(
-    oldCargoWorkspaceMembers.map((member) => {
-      return access(member);
-    }),
-  );
-
-  const existingCargoWorkspaceMembers = oldCargoWorkspaceMembers.filter(
-    (_, i) => {
-      return cargoWorkspaceMembersExistance[i]?.status === "fulfilled";
-    },
-  );
-
-  const newConfig = {
-    ...parsedConfig,
-    workspace: {
-      ...(parsedConfig.workspace ?? {}),
-      members: [
-        ...new Set([
-          ...existingCargoWorkspaceMembers,
-          ...moduleAbsolutePaths.map((moduleAbsolutePath) => {
-            return relative(projectRootDir, moduleAbsolutePath);
-          }),
-        ]),
-      ],
-    },
-  };
-
-  const stringifyToTOML = (await import("@iarna/toml/stringify.js")).default;
-  await writeFile(cargoTomlPath, stringifyToTOML(newConfig), FS_OPTIONS);
-};
-
-const resolveSingleServiceModuleConfigs = (
+async function resolveSingleServiceModuleConfigs(
   serviceConfig: ServiceConfigReadonly,
   overridesFromFluenceYAMLMap: OverrideModules | undefined,
-) => {
-  const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
+) {
+  const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
     serviceConfig.modules;
 
-  const modulesWithNames = [
-    ...Object.entries(otherModules),
-    [FACADE_MODULE_NAME, facadeModule] as const,
-  ];
+  const serviceConfigDirPath = serviceConfig.$getDirPath();
 
-  return Promise.all(
-    modulesWithNames.map(
-      async ([name, { get, ...overridesFromServiceYAML }]) => {
-        const overridesFromFluenceYAML = overridesFromFluenceYAMLMap?.[name];
-
-        const maybeModuleConfig = await initReadonlyModuleConfig(
-          get,
-          serviceConfig.$getDirPath(),
-        );
-
-        if (maybeModuleConfig === null) {
-          stopSpinner(color.red("error"));
-          return commandObj.error(
-            `Cant find module config at ${color.yellow(get)}`,
-          );
-        }
-
-        return {
-          ...maybeModuleConfig,
-          ...overridesFromServiceYAML,
-          ...overridesFromFluenceYAML,
-        };
-      },
+  const allModuleConfigs = await Promise.all([
+    overrideModuleConfig(
+      FACADE_MODULE_NAME,
+      facadeModule,
+      overridesFromFluenceYAMLMap,
+      serviceConfigDirPath,
     ),
-  );
-};
-
-export const resolveSingleServiceModuleConfigsAndBuild = async (
-  serviceConfig: ServiceConfigReadonly,
-  maybeFluenceConfig: FluenceConfigReadonly | undefined | null,
-  marineCli: MarineCLI,
-  marineBuildArgs: string | undefined,
-) => {
-  const maybeOverridesFromFluenceCOnfig =
-    maybeFluenceConfig?.services?.[serviceConfig.name]?.overrideModules;
-
-  const moduleConfigs = await resolveSingleServiceModuleConfigs(
-    serviceConfig,
-    maybeOverridesFromFluenceCOnfig,
-  );
-
-  await buildModules(
-    moduleConfigs,
-    marineCli,
-    marineBuildArgs,
-    maybeFluenceConfig,
-  );
-
-  const facadeModuleConfig = moduleConfigs.at(-1);
-
-  assert(
-    facadeModuleConfig !== undefined,
-    "Unreachable. Each service must have at least one module, which is a facade",
-  );
-
-  return { moduleConfigs, facadeModuleConfig };
-};
-
-export const buildModules = async (
-  modulesConfigs: ModuleConfigReadonly[],
-  marineCli: MarineCLI,
-  marineBuildArgs: string | undefined,
-  maybeFluenceConfig: FluenceConfigReadonly | undefined | null,
-): Promise<void> => {
-  const rustModuleConfigs = modulesConfigs.filter(({ type }) => {
-    return type === MODULE_TYPE_RUST;
-  });
-
-  await updateWorkspaceCargoToml(
-    rustModuleConfigs.map((moduleConfig) => {
-      return moduleConfig.$getDirPath();
+    ...Object.entries(restModules).map(async ([name, moduleConfig]) => {
+      return overrideModuleConfig(
+        name,
+        moduleConfig,
+        overridesFromFluenceYAMLMap,
+        serviceConfigDirPath,
+      );
     }),
+  ]);
+
+  const [facadeModuleConfig, ...restModuleConfigs] = allModuleConfigs;
+
+  return {
+    facadeModuleConfig,
+    allModuleConfigs: [...restModuleConfigs, facadeModuleConfig],
+  };
+}
+
+async function overrideModuleConfig(
+  name: string,
+  { get, ...overridesFromServiceYAML }: ServiceModuleV0,
+  overridesFromFluenceYAMLMap: OverrideModules | undefined,
+  serviceConfigDirPath: string,
+) {
+  const overridesFromFluenceYAML = overridesFromFluenceYAMLMap?.[name];
+
+  const moduleConfig = await initReadonlyModuleConfig(
+    get,
+    serviceConfigDirPath,
   );
 
-  if (rustModuleConfigs.length === 0) {
-    return;
+  if (moduleConfig === null) {
+    return commandObj.error(`Cant find module config at ${color.yellow(get)}`);
   }
 
-  const pFlagsForEachModule = rustModuleConfigs.flatMap(({ name }) => {
-    return ["-p", name];
-  });
+  return overrideModule(
+    moduleConfig,
+    overridesFromServiceYAML,
+    overridesFromFluenceYAML,
+  );
+}
 
-  const marineBuildArgsToUse = (
-    marineBuildArgs ??
-    maybeFluenceConfig?.marineBuildArgs ??
-    DEFAULT_MARINE_BUILD_ARGS
-  ).split(" ");
-
-  await marineCli({
-    args: ["build", ...pFlagsForEachModule, ...marineBuildArgsToUse],
-    cwd: projectRootDir,
-  });
+type ResolveSingleServiceModuleConfigsAndBuildArgs = {
+  serviceName: string;
+  serviceConfig: ServiceConfigReadonly;
+  fluenceConfig: FluenceConfigReadonly | undefined | null;
+  marineCli: MarineCLI;
+  marineBuildArgs: string | undefined;
 };
+
+export async function resolveSingleServiceModuleConfigsAndBuild({
+  serviceName,
+  serviceConfig,
+  fluenceConfig,
+  marineCli,
+  marineBuildArgs,
+}: ResolveSingleServiceModuleConfigsAndBuildArgs) {
+  const maybeOverridesFromFluenceCOnfig =
+    fluenceConfig?.services?.[serviceConfig.name]?.overrideModules;
+
+  const { facadeModuleConfig, allModuleConfigs } =
+    await resolveSingleServiceModuleConfigs(
+      serviceConfig,
+      maybeOverridesFromFluenceCOnfig,
+    );
+
+  await buildModules(
+    allModuleConfigs,
+    marineCli,
+    marineBuildArgs,
+    fluenceConfig,
+  );
+
+  const fluenceServiceConfigTomlPath = await genServiceConfigToml(
+    serviceName,
+    serviceConfig,
+    fluenceConfig?.services?.[serviceName],
+    allModuleConfigs,
+  );
+
+  return { facadeModuleConfig, fluenceServiceConfigTomlPath };
+}
 
 type GetModuleNamesAndConfigsDefinedInServicesArg = {
   facade: ServiceModuleV0;

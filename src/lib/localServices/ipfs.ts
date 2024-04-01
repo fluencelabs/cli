@@ -28,7 +28,7 @@ import { stringifyUnknown } from "../helpers/utils.js";
 
 /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
 
-const createIPFSClient = async (multiaddrString: string) => {
+export async function createIPFSClient(multiaddrString: string) {
   const [{ multiaddr, protocols }, { create }] = await Promise.all([
     import("@multiformats/multiaddr"),
     import("ipfs-http-client"),
@@ -39,7 +39,7 @@ const createIPFSClient = async (multiaddrString: string) => {
       .decapsulateCode(protocols("p2p").code)
       .toOptions(),
   );
-};
+}
 
 const upload = async (
   multiaddr: string,
@@ -66,7 +66,7 @@ const upload = async (
         if (r.type === "recursive") {
           log(`file ${cidString} pinned to ${multiaddr}`);
         } else {
-          log(`pin result type is not recursive. ${r}`);
+          log(`pin result type is not recursive. ${stringifyUnknown(r)}`);
         }
       }
     } catch (error) {
@@ -109,7 +109,7 @@ const dagUpload = async (
         if (r.type === "recursive") {
           log(`file ${cidString} pinned to ${multiaddr}`);
         } else {
-          log(`pin result type is not recursive. ${r}`);
+          log(`pin result type is not recursive. ${stringifyUnknown(r)}`);
         }
       }
     } catch (error) {
@@ -211,14 +211,14 @@ export const doRegisterIpfsClient = async (
         const rm = ipfsClient.block.rm(CID.parse(cid), { force: true });
 
         for await (const r of rm) {
-          if (r.error !== null) {
-            log(`block rm failed. ${r.error}`);
+          if (r.error !== undefined) {
+            log(`block rm failed. ${stringifyUnknown(r.error)}`);
           }
         }
 
         return "Success";
       } catch (err) {
-        log(`remove failed. ${err}`);
+        log(`remove failed. ${stringifyUnknown(err)}`);
         return "Error: remove failed";
       }
     },

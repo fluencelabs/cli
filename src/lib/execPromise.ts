@@ -20,7 +20,6 @@ import { join } from "path";
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
-import { isInteractive } from "./commandObj.js";
 import { CLI_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { dbg } from "./dbg.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
@@ -51,9 +50,8 @@ export const execPromise = async ({
   options,
   spinnerMessage,
   timeout,
-  printOutput: printOutputArg = false,
+  printOutput = false,
 }: ExecPromiseArg): Promise<string> => {
-  const printOutput = isInteractive ? printOutputArg : false;
   const allArgs = [...args, ...flagsToArgs(flags)];
   const fullCommand = [command, ...allArgs].join(" ");
 

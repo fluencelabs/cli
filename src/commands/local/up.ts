@@ -14,26 +14,45 @@
  * limitations under the License.
  */
 
+import { rm } from "node:fs/promises";
+import { join } from "node:path";
+
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { createCommitments } from "../../lib/chain/createCommitment.js";
+import { createCommitments } from "../../lib/chain/commitment.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
-import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
 import {
-  DEFAULT_OFFER_NAME,
+  initNewReadonlyDockerComposeConfig,
+  dockerComposeDirPath,
+} from "../../lib/configs/project/dockerCompose.js";
+import { initNewEnvConfig } from "../../lib/configs/project/env.js";
+import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
+import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
+import {
+  DOCKER_COMPOSE_FLAGS,
+  PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+} from "../../lib/const.js";
+import {
+  ALL_FLAG_VALUE,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   NOXES_FLAG,
-  CHAIN_FLAGS,
+  NOX_NAMES_FLAG_NAME,
+  PRIV_KEY_FLAG,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+  type FluenceEnv,
 } from "../../lib/const.js";
+import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Up extends BaseCommand<typeof Up> {
-  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
+  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using the first offer from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} file.`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -43,55 +62,118 @@ export default class Up extends BaseCommand<typeof Up> {
         "Timeout in seconds for attempting to register local network on local peers",
       default: 120,
     }),
-    ...CHAIN_FLAGS,
+    ...PRIV_KEY_FLAG,
+    "quiet-pull": Flags.boolean({
+      description: "Pull without printing progress information",
+      default: true,
+    }),
+    detach: Flags.boolean({
+      char: "d",
+      description: "Detached mode: Run containers in the background",
+      default: true,
+    }),
+    build: Flags.boolean({
+      description: "Build images before starting containers",
+      default: true,
+    }),
+    ...DOCKER_COMPOSE_FLAGS,
+    reset: Flags.boolean({
+      description:
+        "Resets docker-compose.yaml to default, removes volumes and previous local deployments",
+      allowNo: true,
+      default: true,
+      char: "r",
+    }),
   };
+
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Up));
+    const env: FluenceEnv = "local";
+    const envConfig = await initNewEnvConfig(env);
+    envConfig.fluenceEnv = env;
+    await envConfig.$commit();
+    setEnvConfig(envConfig);
+
+    const { flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Up),
+    );
+
+    const providerConfig = await initNewReadonlyProviderConfig();
+
+    if (flags.reset) {
+      const dirPath = dockerComposeDirPath();
+      await initNewReadonlyDockerComposeConfig();
+
+      try {
+        await dockerCompose({
+          args: ["down"],
+          flags: {
+            v: true,
+          },
+          printOutput: true,
+          options: {
+            cwd: dirPath,
+          },
+        });
+      } catch {}
+
+      try {
+        await rm(join(dirPath, DOCKER_COMPOSE_FULL_FILE_NAME));
+      } catch {}
+
+      try {
+        await rm(join(dirPath, PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME));
+      } catch {}
+
+      const workersConfig = await initNewWorkersConfig();
+
+      if (workersConfig.deals !== undefined) {
+        delete workersConfig.deals.local;
+        await workersConfig.$commit();
+
+        if (maybeFluenceConfig !== null) {
+          const fluenceEnv = await ensureFluenceEnv();
+
+          await ensureAquaFileWithWorkerInfo(
+            workersConfig,
+            maybeFluenceConfig,
+            fluenceEnv,
+          );
+        }
+      }
+    }
 
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
 
-    try {
-      const res = await dockerCompose({
-        args: ["down"],
-        flags: {
-          v: true,
-        },
-        printOutput: true,
-        options: {
-          cwd: dockerComposeConfig.$getDirPath(),
-        },
-      });
+    await dockerCompose({
+      args: [
+        "up",
+        ...(flags.flags === undefined ? [] : flags.flags.split(" ")),
+      ],
+      flags: {
+        "quiet-pull": flags["quiet-pull"],
+        d: flags.detach,
+        build: flags.build,
+      },
+      printOutput: true,
+      options: {
+        cwd: dockerComposeConfig.$getDirPath(),
+      },
+    });
 
-      if (res.trim() === "") {
-        throw new Error("docker-compose down failed");
-      }
-    } catch {
-      await dockerCompose({
-        args: ["up"],
-        flags: {
-          "quiet-pull": true,
-          d: true,
-          build: true,
-        },
-        printOutput: true,
-        options: {
-          cwd: dockerComposeConfig.$getDirPath(),
-        },
-      });
-    }
+    const allNoxNames = {
+      [NOX_NAMES_FLAG_NAME]: ALL_FLAG_VALUE,
+    };
 
-    flags.env = "local";
-
-    await distributeToNox({ ...flags, amount: "100" });
-
+    await distributeToNox({ ...flags, ...allNoxNames, amount: "10" });
     await registerProvider();
 
     await createOffers({
       force: true,
-      offers: DEFAULT_OFFER_NAME,
+      offers: Object.keys(providerConfig.offers)[0],
     });
 
-    const ccIds = await createCommitments(flags);
-    await depositCollateral(ccIds);
+    await createCommitments({ ...flags, ...allNoxNames, env });
+    await depositCollateral(allNoxNames);
   }
 }

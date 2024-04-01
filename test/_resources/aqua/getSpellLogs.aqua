@@ -19,7 +19,7 @@ func getSpellLogs(name: string) -> []SpellLogs, []string:
     results: *SpellLogs
 
     deals <- Deals.get()
-    dealId = deals.dealName!.dealIdOriginal
+    dealId = deals.myDeployment!.dealIdOriginal
     on HOST_PEER_ID:
         subnet <- Subnet.resolve(dealId)
     if subnet.success == false:

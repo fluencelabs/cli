@@ -15,8 +15,8 @@
  */
 
 import { BaseCommand } from "../baseCommand.js";
+import { DEPLOYMENT_NAMES_ARG } from "../lib/const.js";
 import {
-  DEPLOY_ARGS,
   DEPLOY_DESCRIPTION,
   DEPLOY_EXAMPLES,
   DEPLOY_FLAGS,
@@ -27,7 +27,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = DEPLOY_DESCRIPTION;
   static override examples = DEPLOY_EXAMPLES;
   static override flags = DEPLOY_FLAGS;
-  static override args = DEPLOY_ARGS;
+  static override args = DEPLOYMENT_NAMES_ARG;
   async run(): Promise<void> {
     await deployImpl.bind(this)(Deploy);
   }

@@ -14,26 +14,31 @@
  * limitations under the License.
  */
 
-import { Flags } from "@oclif/core";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { distributeToNox } from "../../lib/chain/distributeToNox.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
+import { NOX_NAMES_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class Deposit extends BaseCommand<typeof Deposit> {
-  static override aliases = ["provider:d"];
-  static override description = "Distribute tokens to noxes";
+export default class SigningWallets extends BaseCommand<typeof SigningWallets> {
+  static override aliases = ["provider:sw"];
+  static override description = "Print nox signing wallets";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-    amount: Flags.string({
-      description: "Amount of tokens to distribute to noxes",
-    }),
+    ...NOX_NAMES_FLAG,
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Deposit));
-    await distributeToNox(flags);
+    const { flags } = await initCli(this, await this.parse(SigningWallets));
+    const computePeers = await resolveComputePeersByNames(flags);
+
+    commandObj.log(
+      computePeers
+        .map(({ walletAddress, name }) => {
+          return `${name}: ${walletAddress}`;
+        })
+        .join("\n"),
+    );
   }
 }

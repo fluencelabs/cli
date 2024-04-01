@@ -15,39 +15,25 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
-import { getDealClient } from "../../lib/dealClient.js";
-import { jsonStringify } from "../../lib/helpers/utils.js";
+import {
+  getCommitmentsInfo,
+  printCommitmentsInfo,
+} from "../../lib/chain/commitment.js";
+import { CHAIN_FLAGS, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveAddrsAndPeerIds } from "../../lib/multiaddres.js";
 
 export default class CCInfo extends BaseCommand<typeof CCInfo> {
+  static override aliases = ["provider:ci"];
   static override description = "Get info about capacity commitments";
   static override flags = {
     ...baseFlags,
-    // ...NOX_NAMES_FLAG,
-    // ids: Flags.string({
-    //   description: "Comma-separated list of capacity commitment ids",
-    //   exclusive: [OFFERS_FLAG_NAME],
-    // }),
     ...CHAIN_FLAGS,
+    ...CC_FLAGS,
   };
 
   async run(): Promise<void> {
-    await initCli(this, await this.parse(CCInfo));
-    const { dealClient } = await getDealClient();
-    const market = await dealClient.getMarket();
-    const capacity = await dealClient.getCapacity();
-
-    const cc = await Promise.all(
-      (await resolveAddrsAndPeerIds()).map(async ({ peerId }) => {
-        const peer = await market.getComputePeer(peerId);
-        return capacity.getCommitment(peer.commitmentId);
-      }),
-    );
-
-    // TODO: complete this command implementation
-    commandObj.logToStderr(jsonStringify(cc));
+    const { flags } = await initCli(this, await this.parse(CCInfo));
+    const infos = await getCommitmentsInfo(flags);
+    printCommitmentsInfo(infos);
   }
 }

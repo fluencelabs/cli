@@ -14,38 +14,31 @@
  * limitations under the License.
  */
 
-import { Args } from "@oclif/core";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { withdrawReward } from "../../lib/chain/withdrawReward.js";
+import { getProviderDeals } from "../../lib/chain/deals.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
-import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
-export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
-  static override description = "Withdraw reward from capacity commitment";
-  static override aliases = ["delegator:wr"];
+export default class DealsList extends BaseCommand<typeof DealsList> {
+  static override aliases = ["provider:dl"];
+  static override description = "List all deals";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
   };
-  static override args = {
-    IDS: Args.string({
-      description: "Comma separated capacity commitment IDs",
-    }),
-  };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(WithdrawReward));
+    await initCli(this, await this.parse(DealsList));
 
-    await withdrawReward(
-      commaSepStrToArr(
-        args.IDS ??
-          (await input({
-            message: "Enter comma-separated capacity commitment IDs",
-          })),
-      ),
+    const deals = await getProviderDeals();
+
+    commandObj.log(
+      deals
+        .map(({ id }) => {
+          return id;
+        })
+        .join("\n"),
     );
   }
 }

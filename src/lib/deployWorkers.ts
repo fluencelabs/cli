@@ -19,14 +19,17 @@ import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { color } from "@oclif/color";
+import cloneDeep from "lodash-es/cloneDeep.js";
+import merge from "lodash-es/merge.js";
 import sum from "lodash-es/sum.js";
 import xbytes from "xbytes";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { buildModules } from "./build.js";
+import { importAquaCompiler } from "./aqua.js";
+import { buildModules } from "./buildModules.js";
 import { commandObj, isInteractive } from "./commandObj.js";
+import { compileAquaFromFluenceConfigWithDefaults } from "./compileAquaAndWatch.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
-import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
 import {
   type FluenceConfig,
   type FluenceConfigReadonly,
@@ -34,8 +37,9 @@ import {
   type OverrideModules,
 } from "./configs/project/fluence.js";
 import {
-  type ConfigV0,
   initReadonlyModuleConfig,
+  type OverridableModuleProperties,
+  type ModuleConfigReadonly,
 } from "./configs/project/module.js";
 import {
   FACADE_MODULE_NAME,
@@ -54,6 +58,7 @@ import type {
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
 import {
+  MODULE_TYPE_RUST,
   FS_OPTIONS,
   HOSTS_FILE_NAME,
   DEALS_FILE_NAME,
@@ -62,6 +67,9 @@ import {
   COMPUTE_UNIT_MEMORY,
   MIN_MEMORY_PER_MODULE,
   MIN_MEMORY_PER_MODULE_STR,
+  DEPLOYMENT_NAMES_ARG_NAME,
+  MODULE_CONFIG_FULL_FILE_NAME,
+  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import {
@@ -76,7 +84,7 @@ import {
   makeOptional,
   type CustomTypes,
 } from "./helpers/jsToAqua.js";
-import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
+import { genServiceConfigToml } from "./helpers/serviceConfigToml.js";
 import { commaSepStrToArr, splitErrorsAndResults } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
@@ -113,7 +121,7 @@ const handlePreviouslyDeployedWorkers = async (
 
   const confirmedWorkersNamesToDeploy = isInteractive
     ? await checkboxes({
-        message: `There are workers that were deployed previously. Please select the ones you want to redeploy.`,
+        message: `There are workers that were deployed previously. Please select the ones you want to update.`,
         options: previouslyDeployedWorkersNamesToBeDeployed,
         oneChoiceMessage(workerName) {
           return `Do you want to redeploy worker ${color.yellow(workerName)}`;
@@ -158,7 +166,7 @@ type PrepareForDeployArg = {
    * and so no error happens if some worker doesn't have any services or spells
    */
   isBuildCheck?: boolean;
-  workerNames?: string | undefined;
+  deploymentNamesString?: string | undefined;
   initPeerId?: string;
   workersConfig?: WorkersConfigReadonly;
 };
@@ -172,138 +180,74 @@ export async function prepareForDeploy({
   },
   fluenceEnv,
   isBuildCheck = false,
-  workerNames: workerNamesString,
+  deploymentNamesString,
   initPeerId,
   workersConfig: maybeWorkersConfig,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> {
   const isDealDeploy = initPeerId === undefined;
-  const hostsOrDealsString = isDealDeploy ? "deals" : "hosts";
+  const deploymentsOrHostsString = isDealDeploy ? "deployments" : "hosts";
+  const dealsOrHostsString = isDealDeploy ? "deals" : "hosts";
 
   const hostsOrDeals = Object.entries(
-    fluenceConfig[hostsOrDealsString] ??
-      commandObj.error(
-        `You must have a ${color.yellow(
-          hostsOrDealsString,
-        )} property in ${color.yellow(
-          fluenceConfig.$getPath(),
-        )} that contains a record with at least one worker name as a key`,
-      ),
+    fluenceConfig[deploymentsOrHostsString] ?? {},
   );
 
   assertIsArrayWithHostsOrDeals(hostsOrDeals);
 
   const maybeDeployedHostsOrDeals = (maybeWorkersConfig ?? {})[
-    hostsOrDealsString
+    dealsOrHostsString
   ];
 
-  const workerNamesSet = hostsOrDeals.map(([workerName]) => {
-    return workerName;
-  });
-
-  const workersToDeploy =
-    workerNamesString === undefined
-      ? workerNamesSet
-      : commaSepStrToArr(workerNamesString);
-
-  if (workersToDeploy.length === 0) {
-    return commandObj.error(
-      `${color.yellow(
-        hostsOrDealsString,
-      )} property in ${fluenceConfig.$getPath()} must contain at least one worker name as a key`,
-    );
-  }
-
-  const { services: servicesFromFluenceConfig = {} } = fluenceConfig;
-  const dealsOrHosts = isDealDeploy ? "deals" : "hosts";
-  const { [dealsOrHosts]: workersFromFluenceConfig = {} } = fluenceConfig;
-
-  const workersToDeployConfirmed = await handlePreviouslyDeployedWorkers(
-    maybeDeployedHostsOrDeals,
-    workersToDeploy,
+  const deploymentsToDeploy = await getDeploymentNames(
+    deploymentNamesString,
+    fluenceConfig,
   );
 
-  const workerConfigs = workersToDeployConfirmed.map((workerName) => {
-    const workerConfig = workersFromFluenceConfig[workerName];
+  const { services: servicesFromFluenceConfig = {} } = fluenceConfig;
 
-    assert(
-      workerConfig !== undefined,
-      `Unreachable. workerNamesNotFoundInWorkersConfig was empty but error still happened. Looking for ${workerName} in ${JSON.stringify(
-        workersFromFluenceConfig,
-      )}`,
-    );
+  const { [deploymentsOrHostsString]: deploymentsFromFluenceConfig = {} } =
+    fluenceConfig;
 
-    if (
-      !isBuildCheck &&
-      (workerConfig.services ?? []).length === 0 &&
-      (workerConfig.spells ?? []).length === 0
-    ) {
-      return commandObj.error(
-        `All workers must have at least one service or spell. Worker ${color.yellow(
-          workerName,
-        )} listed in ${fluenceConfig.$getPath()} ${color.yellow(
-          dealsOrHosts,
-        )} property does not have any spells or services`,
+  const deploymentsToDeployConfirmed = await handlePreviouslyDeployedWorkers(
+    maybeDeployedHostsOrDeals,
+    deploymentsToDeploy,
+  );
+
+  const deploymentConfigs = deploymentsToDeployConfirmed.map(
+    (deploymentName) => {
+      const deploymentConfig = deploymentsFromFluenceConfig[deploymentName];
+
+      assert(
+        deploymentConfig !== undefined,
+        `Unreachable. deployment names are validated in getDeploymentNames. Looking for ${deploymentName} in ${JSON.stringify(
+          deploymentsFromFluenceConfig,
+        )}`,
       );
-    }
 
-    return {
-      workerName,
-      workerConfig,
-    };
-  });
+      if (
+        !isBuildCheck &&
+        (deploymentConfig.services ?? []).length === 0 &&
+        (deploymentConfig.spells ?? []).length === 0
+      ) {
+        return commandObj.error(
+          `All deployments must have at least one service or spell. Deployment ${color.yellow(
+            deploymentName,
+          )} listed in ${fluenceConfig.$getPath()} ${color.yellow(
+            dealsOrHostsString,
+          )} property does not have any spells or services`,
+        );
+      }
 
-  const spellsToCompile = isBuildCheck
-    ? Object.keys(fluenceConfig.spells ?? {})
-    : [
-        ...new Set(
-          workerConfigs.flatMap(({ workerConfig }) => {
-            return workerConfig.spells ?? [];
-          }),
-        ),
-      ];
-
-  const spellConfigs = (
-    await compileSpells(fluenceConfig, aquaImportsFromFlags, spellsToCompile)
-  ).map(({ functions, name, spellConfig, spellAquaFilePath }) => {
-    const { script } = functions[spellConfig.function] ?? {};
-
-    if (script === undefined) {
-      commandObj.error(
-        `Failed to find spell function ${color.yellow(
-          spellConfig.function,
-        )} in aqua file at ${color.yellow(spellAquaFilePath)}`,
-      );
-    }
-
-    return {
-      name,
-      config: {
-        blockchain: { end_block: 0, start_block: 0 },
-        connections: { connect: false, disconnect: false },
-        clock:
-          spellConfig.clock?.periodSec === undefined
-            ? {
-                start_sec: 0,
-                end_sec: 0,
-                period_sec: 0,
-              }
-            : {
-                start_sec: resolveStartSec(spellConfig),
-                end_sec: resolveEndSec(spellConfig),
-                period_sec: spellConfig.clock.periodSec,
-              },
-      },
-      script,
-      init_args: spellConfig.initArgs ?? {},
-    };
-  });
+      return { deploymentName, deploymentConfig };
+    },
+  );
 
   const serviceNames = isBuildCheck
     ? Object.keys(fluenceConfig.services ?? {})
     : [
         ...new Set(
-          workerConfigs.flatMap(({ workerConfig }) => {
-            return workerConfig.services ?? [];
+          deploymentConfigs.flatMap(({ deploymentConfig }) => {
+            return deploymentConfig.services ?? [];
           }),
         ),
       ];
@@ -314,7 +258,7 @@ export async function prepareForDeploy({
 
       assert(
         service !== undefined,
-        `Unreachable. can't find service ${serviceName} from workers property in ${fluenceConfig.$getPath()} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
+        `Unreachable. can't find service ${serviceName} from 'services' property in ${fluenceConfig.$getPath()}. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
           servicesFromFluenceConfig,
         )}`,
       );
@@ -387,12 +331,12 @@ export async function prepareForDeploy({
 
   const moduleAbsolutePathOrURLToModuleConfigsMap = new Map<
     string,
-    InitializedReadonlyConfig<ConfigV0>
+    ModuleConfigReadonly
   >(
     await Promise.all(
       [...downloadedModulesMap.entries(), ...localModuleAbsolutePaths].map(
         async ([originalGetValue, moduleAbsolutePath]): Promise<
-          [string, InitializedReadonlyConfig<ConfigV0>]
+          [string, ModuleConfigReadonly]
         > => {
           const moduleConfig =
             await initReadonlyModuleConfig(moduleAbsolutePath);
@@ -455,17 +399,63 @@ export async function prepareForDeploy({
     );
   }
 
+  const spellsToCompile = isBuildCheck
+    ? Object.keys(fluenceConfig.spells ?? {})
+    : [
+        ...new Set(
+          deploymentConfigs.flatMap(({ deploymentConfig }) => {
+            return deploymentConfig.spells ?? [];
+          }),
+        ),
+      ];
+
+  const spellConfigs = (
+    await compileSpells(fluenceConfig, aquaImportsFromFlags, spellsToCompile)
+  ).map(({ functions, name, spellConfig, spellAquaFilePath }) => {
+    const { script } = functions[spellConfig.function] ?? {};
+
+    if (script === undefined) {
+      commandObj.error(
+        `Failed to find spell function ${color.yellow(
+          spellConfig.function,
+        )} in aqua file at ${color.yellow(spellAquaFilePath)}`,
+      );
+    }
+
+    return {
+      name,
+      config: {
+        blockchain: { end_block: 0, start_block: 0 },
+        connections: { connect: false, disconnect: false },
+        clock:
+          spellConfig.clock?.periodSec === undefined
+            ? {
+                start_sec: 0,
+                end_sec: 0,
+                period_sec: 0,
+              }
+            : {
+                start_sec: resolveStartSec(spellConfig),
+                end_sec: resolveEndSec(spellConfig),
+                period_sec: spellConfig.clock.periodSec,
+              },
+      },
+      script,
+      init_args: spellConfig.initArgs ?? {},
+    };
+  });
+
   const workers: Upload_deployArgConfig["workers"] = await Promise.all(
     hostsOrDeals
-      .filter(([workerName]) => {
-        return workersToDeployConfirmed.includes(workerName);
+      .filter(([deploymentName]) => {
+        return deploymentsToDeployConfirmed.includes(deploymentName);
       })
-      .map(([workerName, hostsOrDeals]) => {
-        return resolveWorker({
-          workerName,
+      .map(([deploymentName, hostsOrDeals]) => {
+        return resolveDeployment({
+          deploymentName,
           hostsOrDeals,
           fluenceConfig,
-          workersFromFluenceConfig,
+          deploymentsFromFluenceConfig,
           serviceConfigsWithOverrides,
           moduleAbsolutePathOrURLToModuleConfigsMap,
           spellConfigs,
@@ -475,10 +465,6 @@ export async function prepareForDeploy({
         });
       }),
   );
-
-  if (workers.length === 0) {
-    commandObj.error(`You must select at least one worker to deploy`);
-  }
 
   await validateWasmExist(workers);
 
@@ -520,16 +506,20 @@ const validateWasmExist = async (
             };
           });
         })
-        .map(async ({ wasm, service, worker }) => {
+        .map(async ({ wasm, name, service, worker }) => {
           try {
             await access(wasm);
             return true;
           } catch (e) {
-            return `wasm at ${color.yellow(wasm)} for service ${color.yellow(
-              service,
-            )} in worker ${color.yellow(
+            return `wasm file not found at ${color.yellow(
+              wasm,
+            )}\nfor deployment: ${color.yellow(
               worker,
-            )} does not exist. Make sure you have built it`;
+            )}\nservice: ${color.yellow(service)}\nmodule ${color.yellow(
+              name,
+            )}\nIf you expect CLI to compile the code of this module, please add ${color.yellow(
+              `type: ${MODULE_TYPE_RUST}`,
+            )} to the ${MODULE_CONFIG_FULL_FILE_NAME}`;
           }
         }),
     )
@@ -542,9 +532,65 @@ const validateWasmExist = async (
   }
 };
 
+async function getDeploymentNames(
+  deploymentNames: string | undefined,
+  fluenceConfig: FluenceConfigReadonly,
+): Promise<string[]> {
+  if (deploymentNames !== undefined) {
+    const names =
+      deploymentNames === "" ? [] : commaSepStrToArr(deploymentNames);
+
+    const [invalidNames, validDeploymentNames] = splitErrorsAndResults(
+      names,
+      (deploymentName) => {
+        const deployment = fluenceConfig.deployments?.[deploymentName];
+
+        if (deployment === undefined) {
+          return { error: deploymentName };
+        }
+
+        return { result: deploymentName };
+      },
+    );
+
+    if (invalidNames.length > 0) {
+      commandObj.error(
+        `Couldn't find deployments in ${fluenceConfig.$getPath()} deployments property: ${color.yellow(
+          invalidNames.join(", "),
+        )}`,
+      );
+    }
+
+    return validDeploymentNames;
+  }
+
+  return checkboxes<string, never>({
+    message: `Select one or more deployments from ${fluenceConfig.$getPath()}`,
+    options: Object.keys(fluenceConfig.deployments ?? {}),
+    validate: (choices: string[]) => {
+      if (choices.length === 0) {
+        return "Please select at least one deployment";
+      }
+
+      return true;
+    },
+    oneChoiceMessage(choice) {
+      return `One deployment found at ${fluenceConfig.$getPath()}: ${color.yellow(
+        choice,
+      )}. Do you want to select it`;
+    },
+    onNoChoices() {
+      commandObj.error(
+        `You must have at least one deployment in 'deployments' property at ${fluenceConfig.$getPath()}`,
+      );
+    },
+    argName: DEPLOYMENT_NAMES_ARG_NAME,
+  });
+}
+
 const emptyDeal: Deal = {
   dealId: "",
-  chainNetwork: "testnet",
+  chainNetwork: DEFAULT_PUBLIC_FLUENCE_ENV,
   chainNetworkId: 0,
   dealIdOriginal: "",
   definition: "",
@@ -565,14 +611,14 @@ const emptyHosts: Host = {
   dummyDealId: "",
 };
 
-export const ensureAquaFileWithWorkerInfo = async (
+export async function ensureAquaFileWithWorkerInfo(
   workersConfig: WorkersConfigReadonly,
   fluenceConfig: FluenceConfigReadonly,
   fluenceEnv: FluenceEnv,
-) => {
+) {
   const dealWorkers = Object.fromEntries(
     Object.entries({
-      ...fluenceConfig.deals,
+      ...fluenceConfig.deployments,
       ...(workersConfig.deals?.[fluenceEnv] ?? {}),
     }).map(([workerName, info]) => {
       const key = workerName;
@@ -624,26 +670,25 @@ export const ensureAquaFileWithWorkerInfo = async (
     }),
     FS_OPTIONS,
   );
-};
 
-type ResolveWorkerArgs = {
+  await compileAquaFromFluenceConfigWithDefaults(fluenceConfig);
+}
+
+type ResolveDeploymentArgs = {
   fluenceConfig: FluenceConfig;
   hostsOrDeals: NonNullable<
-    FluenceConfig["deals"] | FluenceConfig["hosts"]
+    FluenceConfig["deployments"] | FluenceConfig["hosts"]
   >[string];
-  workerName: string;
-  workersFromFluenceConfig: NonNullable<
-    FluenceConfig["deals"] | FluenceConfig["hosts"]
+  deploymentName: string;
+  deploymentsFromFluenceConfig: NonNullable<
+    FluenceConfig["deployments"] | FluenceConfig["hosts"]
   >;
   serviceConfigsWithOverrides: ({
     serviceName: string;
     overrideModules: OverrideModules | undefined;
     serviceConfig: ServiceConfigReadonly;
   } & OverridableServiceProperties)[];
-  moduleAbsolutePathOrURLToModuleConfigsMap: Map<
-    string,
-    InitializedReadonlyConfig<ConfigV0>
-  >;
+  moduleAbsolutePathOrURLToModuleConfigsMap: Map<string, ModuleConfigReadonly>;
   spellConfigs: UploadDeploySpellConfig[];
   maybeWorkersConfig: WorkersConfigReadonly | undefined;
   initPeerId: string | undefined;
@@ -712,7 +757,7 @@ export async function compileSpells(
         spellConfig.aquaFilePath,
       );
 
-      const { compileFromPath } = await import("@fluencelabs/aqua-api");
+      const { compileFromPath } = await importAquaCompiler();
 
       // TODO: consider how to compile spells with aqua compilation args
       const { errors, functions } = await compileFromPath({
@@ -752,44 +797,48 @@ export async function compileSpells(
   return compiledSpells;
 }
 
-async function resolveWorker({
+async function resolveDeployment({
   hostsOrDeals,
-  workerName,
-  workersFromFluenceConfig,
+  deploymentName,
+  deploymentsFromFluenceConfig,
   serviceConfigsWithOverrides,
   moduleAbsolutePathOrURLToModuleConfigsMap,
   spellConfigs,
   maybeWorkersConfig,
   initPeerId,
   fluenceEnv,
-}: ResolveWorkerArgs) {
+}: ResolveDeploymentArgs) {
   let dummyDealId = "deal_deploy_does_not_need_dummy_deal_id";
   const isDealDeploy = initPeerId === undefined;
 
   if (!isDealDeploy) {
     dummyDealId =
-      maybeWorkersConfig?.hosts?.[fluenceEnv]?.[workerName]?.dummyDealId ??
-      `${workerName}_${initPeerId}_${Math.random().toString().slice(2)}`;
+      maybeWorkersConfig?.hosts?.[fluenceEnv]?.[deploymentName]?.dummyDealId ??
+      `${deploymentName}_${initPeerId}_${Math.random().toString().slice(2)}`;
   }
 
   const peerIdsOrNamedNodes =
     "peerIds" in hostsOrDeals ? hostsOrDeals.peerIds : [];
 
-  const workerConfig = workersFromFluenceConfig[workerName];
+  const deploymentConfig = deploymentsFromFluenceConfig[deploymentName];
 
   assert(
-    workerConfig !== undefined,
-    `Unreachable. workerNamesNotFoundInWorkersConfig was empty but error still happened. Looking for ${workerName} in ${JSON.stringify(
-      workersFromFluenceConfig,
+    deploymentConfig !== undefined,
+    `Unreachable. Wasn't able to find deployment. Looking for '${deploymentName}' in ${JSON.stringify(
+      deploymentsFromFluenceConfig,
     )}`,
   );
 
-  const servicesWithUnresolvedMemoryLimit = (workerConfig.services ?? []).map(
-    (
+  const servicesWithUnresolvedMemoryLimitPromises = (
+    deploymentConfig.services ?? []
+  ).map(
+    async (
       serviceName,
-    ): Omit<UploadDeployServiceConfig, "total_memory_limit"> & {
-      total_memory_limit: number | undefined;
-    } => {
+    ): Promise<
+      Omit<UploadDeployServiceConfig, "total_memory_limit"> & {
+        total_memory_limit: number | undefined;
+      }
+    > => {
       const serviceConfigWithOverrides = serviceConfigsWithOverrides.find(
         (c) => {
           return c.serviceName === serviceName;
@@ -803,8 +852,13 @@ async function resolveWorker({
         )}`,
       );
 
-      const { overrideModules, serviceConfig, totalMemoryLimit } =
-        serviceConfigWithOverrides;
+      const {
+        overrideModules,
+        serviceConfig,
+        ...serviceOverridesFromFluenceYaml
+      } = serviceConfigWithOverrides;
+
+      const { totalMemoryLimit } = serviceOverridesFromFluenceYaml;
 
       const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
         serviceConfig.modules;
@@ -831,34 +885,48 @@ async function resolveWorker({
           )}`,
         );
 
-        const overridesFromProject = overrideModules?.[name];
+        const overridesFromFluenceYaml = overrideModules?.[name];
 
-        const overriddenModuleConfig = {
-          ...moduleConfig,
-          ...overridesFromService,
-          ...overridesFromProject,
-        };
+        const overriddenModuleConfig = overrideModule(
+          moduleConfig,
+          overridesFromService,
+          overridesFromFluenceYaml,
+        );
 
         return {
           wasm: getModuleWasmPath(overriddenModuleConfig),
-          config: JSON.stringify(
-            moduleToJSONModuleConfig(overriddenModuleConfig),
-          ),
+          name: overriddenModuleConfig.name,
+          overriddenModuleConfig,
         };
       });
 
       const totalMemoryLimitString =
         totalMemoryLimit ?? serviceConfig.totalMemoryLimit;
 
+      await genServiceConfigToml(
+        serviceName,
+        serviceConfig,
+        serviceOverridesFromFluenceYaml,
+        modules.map(({ overriddenModuleConfig }) => {
+          return overriddenModuleConfig;
+        }),
+      );
+
       return {
         name: serviceName,
-        modules,
+        modules: modules.map(({ name, wasm }) => {
+          return { name, wasm };
+        }),
         total_memory_limit:
           totalMemoryLimitString === undefined
             ? undefined
             : xbytes.parseSize(totalMemoryLimitString),
       };
     },
+  );
+
+  const servicesWithUnresolvedMemoryLimit = await Promise.all(
+    servicesWithUnresolvedMemoryLimitPromises,
   );
 
   const [
@@ -877,12 +945,12 @@ async function resolveWorker({
   );
 
   const workerMemory =
-    ("computeUnits" in workerConfig ? workerConfig.computeUnits : 1) *
+    ("computeUnits" in deploymentConfig ? deploymentConfig.computeUnits : 1) *
     COMPUTE_UNIT_MEMORY;
 
   if (specifiedServicesMemoryLimit > workerMemory) {
     throwMemoryExceedsError(
-      workerName,
+      deploymentName,
       specifiedServicesMemoryLimit,
       servicesWithSpecifiedMemoryLimit,
       workerMemory,
@@ -921,7 +989,7 @@ async function resolveWorker({
 
   if (servicesWithNotEnoughMemory.length > 0) {
     throwNotEnoughMemoryError(
-      workerName,
+      deploymentName,
       servicesWithNotEnoughMemory,
       services,
     );
@@ -930,12 +998,12 @@ async function resolveWorker({
   if (services.length > 0) {
     commandObj.logToStderr(
       `Service memory limits for worker ${color.yellow(
-        workerName,
+        deploymentName,
       )}:\n${formatServiceMemoryLimits(services)}`,
     );
   }
 
-  const spells = (workerConfig.spells ?? []).map((spellName) => {
+  const spells = (deploymentConfig.spells ?? []).map((spellName) => {
     const spellConfig = spellConfigs.find((c) => {
       return c.name === spellName;
     });
@@ -951,7 +1019,7 @@ async function resolveWorker({
   });
 
   return {
-    name: workerName,
+    name: deploymentName,
     hosts: await Promise.all(
       peerIdsOrNamedNodes.map((peerIdOrNamedNode) => {
         return resolvePeerId(peerIdOrNamedNode);
@@ -965,8 +1033,20 @@ async function resolveWorker({
   };
 }
 
+export function overrideModule(
+  moduleConfig: ModuleConfigReadonly,
+  moduleConfigOverridesFromServiceYaml: OverridableModuleProperties | undefined,
+  moduleConfigOverridesFromFluenceYaml: OverridableModuleProperties | undefined,
+): ModuleConfigReadonly {
+  return merge(
+    cloneDeep(moduleConfig),
+    moduleConfigOverridesFromServiceYaml ?? {},
+    moduleConfigOverridesFromFluenceYaml ?? {},
+  );
+}
+
 function throwNotEnoughMemoryError(
-  workerName: string,
+  deploymentName: string,
   servicesWithNotEnoughMemory: {
     service: UploadDeployServiceConfig;
     minMemoryForService: number;
@@ -991,8 +1071,8 @@ function throwNotEnoughMemoryError(
       : "";
 
   commandObj.error(
-    `The following services of the worker ${color.yellow(
-      workerName,
+    `The following services of the deployment ${color.yellow(
+      deploymentName,
     )} don't have a big enough totalMemoryLimit:\n${formattedServiceMemoryLimits.join(
       "\n",
     )}\n\nEach service must have at least ${color.yellow(
@@ -1002,7 +1082,7 @@ function throwNotEnoughMemoryError(
 }
 
 function throwMemoryExceedsError(
-  workerName: string,
+  deploymentName: string,
   specifiedServicesMemoryLimit: number,
   servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
   workerMemory: number,
@@ -1012,8 +1092,8 @@ function throwMemoryExceedsError(
   );
 
   commandObj.error(
-    `Total memory limit for services in worker ${color.yellow(
-      workerName,
+    `Total memory limit for services in deployment ${color.yellow(
+      deploymentName,
     )} is ${formattedServiceMemoryLimit}, which exceeds per-worker memory limit: ${color.yellow(
       xbytes(workerMemory),
     )}. Decrease ${color.yellow(

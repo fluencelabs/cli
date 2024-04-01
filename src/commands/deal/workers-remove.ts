@@ -19,46 +19,45 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
-import { getDealClient, sign } from "../../lib/dealClient.js";
+import { CHAIN_FLAGS, CLI_NAME } from "../../lib/const.js";
+import { sign, getDealClient } from "../../lib/dealClient.js";
+import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
-export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
-  static override description = "Withdraw reward";
+export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
+  static override aliases = ["deal:wr"];
+  static override description = "Remove unit from the deal";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
   };
 
   static override args = {
-    "DEAL-ADDRESS": Args.string({
-      description: "Deal address",
-    }),
-    "UNIT-ID": Args.string({
-      description: "Compute unit CID",
+    "UNIT-IDS": Args.string({
+      description: `Comma-separated compute unit ids. You can get them using '${CLI_NAME} deal info' command`,
     }),
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(WithdrawReward));
+    const { args } = await initCli(this, await this.parse(RemoveUnit));
 
-    const dealAddress =
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
-
-    const unitId =
-      args["UNIT-ID"] ?? (await input({ message: "Enter unit CID" }));
+    const unitIds = commaSepStrToArr(
+      args["UNIT-IDS"] ??
+        (await input({
+          message: "Enter comma-separated compute unit ids",
+          validate: (v: string) => {
+            return commaSepStrToArr(v).length > 0;
+          },
+        })),
+    );
 
     const { dealClient } = await getDealClient();
-    const deal = dealClient.getDeal(dealAddress);
-    const rewardAmount = await deal.getRewardAmount(unitId);
-    await sign(deal.withdrawRewards, unitId);
-    const { ethers } = await import("ethers");
+    const market = dealClient.getMarket();
 
-    commandObj.logToStderr(
-      `Reward ${color.yellow(
-        ethers.formatEther(rewardAmount),
-      )} was withdrawn from the deal ${dealAddress}`,
-    );
+    for (const unitId of unitIds) {
+      await sign(market.returnComputeUnitFromDeal, unitId);
+      commandObj.log(`Unit ${color.yellow(unitId)} was removed from the deal`);
+    }
   }
 }

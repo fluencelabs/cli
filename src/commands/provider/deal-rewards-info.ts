@@ -18,14 +18,18 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
 import { getReadonlyDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
-export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
-  static override description = "Reward info";
+export default class DealRewardsInfo extends BaseCommand<
+  typeof DealRewardsInfo
+> {
+  static override aliases = ["provider:dri"];
+  static override description = "Deal rewards info";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
@@ -41,7 +45,7 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(RewardInfo));
+    const { args } = await initCli(this, await this.parse(DealRewardsInfo));
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
@@ -51,12 +55,12 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
 
     const { readonlyDealClient } = await getReadonlyDealClient();
     const deal = readonlyDealClient.getDeal(dealAddress);
-
     const rewardAmount = await deal.getRewardAmount(unitId);
-    const { ethers } = await import("ethers");
 
     commandObj.log(
-      color.green(`Reward amount: ${ethers.formatEther(rewardAmount)}`),
+      `Deal reward amount: ${color.yellow(
+        await ptFormatWithSymbol(rewardAmount),
+      )}`,
     );
   }
 }

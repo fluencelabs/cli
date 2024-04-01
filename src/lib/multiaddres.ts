@@ -16,17 +16,9 @@
 
 import { writeFile, mkdir } from "fs/promises";
 import assert from "node:assert";
-import { join } from "node:path";
-import { isAbsolute, resolve } from "path/posix";
+import { isAbsolute, join, resolve } from "node:path";
 
-import {
-  krasnodar,
-  stage,
-  testNet,
-  type Node as AddrAndPeerId,
-} from "@fluencelabs/fluence-network-environment";
-// TODO: replace with dynamic import
-import { multiaddr } from "@multiformats/multiaddr";
+import { type Node as AddrAndPeerId } from "@fluencelabs/fluence-network-environment";
 import { color } from "@oclif/color";
 import sample from "lodash-es/sample.js";
 
@@ -34,29 +26,14 @@ import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";
 import { initFluenceConfig } from "./configs/project/fluence.js";
 import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
+import { FLUENCE_ENVS, type FluenceEnv } from "./const.js";
+import { jsonStringify, splitErrorsAndResults } from "./helpers/utils.js";
 import {
-  FLUENCE_ENVS,
-  type FluenceEnv,
-  type PublicFluenceEnv,
-  CHAIN_ENV,
-} from "./const.js";
-import {
-  commaSepStrToArr,
-  jsonStringify,
-  splitErrorsAndResults,
-} from "./helpers/utils.js";
+  getPeerId,
+  resolveAddrsAndPeerIdsWithoutLocal,
+} from "./multiaddresWithoutLocal.js";
 import { projectRootDir } from "./paths.js";
-import { input, list } from "./prompt.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
-
-export function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
-  return multiaddrs.map((multiaddr) => {
-    return {
-      peerId: getPeerId(multiaddr),
-      multiaddr,
-    };
-  });
-}
 
 async function ensureLocalAddrsAndPeerIds() {
   return (await ensureComputerPeerConfigs()).map(
@@ -69,86 +46,14 @@ async function ensureLocalAddrsAndPeerIds() {
   );
 }
 
-const ADDR_MAP: Record<PublicFluenceEnv, Array<AddrAndPeerId>> = {
-  kras: krasnodar,
-  stage,
-  testnet: testNet,
-};
-
-export async function ensureCustomAddrsAndPeerIds() {
-  const fluenceConfig = await initFluenceConfig();
-
-  if (fluenceConfig === null) {
-    commandObj.error(
-      `You must init fluence project if you want to use ${color.yellow(
-        "custom",
-      )} fluence env`,
-    );
-  }
-
-  if (fluenceConfig.customFluenceEnv?.relays !== undefined) {
-    let res;
-
-    try {
-      res = addrsToNodes(fluenceConfig.customFluenceEnv.relays);
-    } catch (e) {
-      commandObj.error(
-        `${fluenceConfig.$getPath()} at ${color.yellow(
-          "customFluenceEnv.relays",
-        )}: ${e instanceof Error ? e.message : String(e)}`,
-      );
-    }
-
-    return res;
-  }
-
-  const contractsEnv = await list({
-    message: "Select contracts environment for your custom network",
-    options: [...CHAIN_ENV],
-    oneChoiceMessage: (): never => {
-      throw new Error("Unreachable: only one contracts env");
-    },
-    onNoChoices: (): never => {
-      throw new Error("Unreachable: no contracts envs");
-    },
-  });
-
-  const fluenceEnvOrCustomRelays = commaSepStrToArr(
-    await input({
-      message: "Enter comma-separated list of relays",
-      validate: (input: string) => {
-        const relays = commaSepStrToArr(input);
-
-        if (relays.length === 0) {
-          return "You must specify at least one relay";
-        }
-
-        return true;
-      },
-    }),
-  );
-
-  fluenceConfig.customFluenceEnv = {
-    contractsEnv,
-    relays: fluenceEnvOrCustomRelays,
-  };
-
-  await fluenceConfig.$commit();
-  return addrsToNodes(fluenceEnvOrCustomRelays);
-}
-
 export async function resolveAddrsAndPeerIds(): Promise<AddrAndPeerId[]> {
   const fluenceEnv = await ensureFluenceEnv();
-
-  if (fluenceEnv === "custom") {
-    return ensureCustomAddrsAndPeerIds();
-  }
 
   if (fluenceEnv === "local") {
     return ensureLocalAddrsAndPeerIds();
   }
 
-  return ADDR_MAP[fluenceEnv];
+  return resolveAddrsAndPeerIdsWithoutLocal(fluenceEnv);
 }
 
 export async function resolveRelays(): Promise<Array<string>> {
@@ -273,18 +178,6 @@ export async function resolvePeerId(peerIdOrNamedNode: string) {
 
 export async function getRandomPeerId(): Promise<string> {
   return getPeerId(await getRandomRelayAddr());
-}
-
-export function getPeerId(addr: string): string {
-  const id = multiaddr(addr).getPeerId();
-
-  if (id === null) {
-    return commandObj.error(
-      `Can't extract peer id from multiaddr ${color.yellow(addr)}`,
-    );
-  }
-
-  return id;
 }
 
 export async function updateRelaysJSON() {

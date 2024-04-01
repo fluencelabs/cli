@@ -15,23 +15,27 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { createCommitments } from "../../lib/chain/createCommitment.js";
-import { NOX_NAMES_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
+import { withdrawCollateral } from "../../lib/chain/commitment.js";
+import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class CreateCommitment extends BaseCommand<
-  typeof CreateCommitment
+export default class CCCollateralWithdraw extends BaseCommand<
+  typeof CCCollateralWithdraw
 > {
-  static override aliases = ["provider:cc"];
-  static override description = "Create Capacity commitment";
+  static override aliases = ["provider:ccw"];
+  static override description = `Withdraw ${FLT_SYMBOL} collateral from capacity commitments`;
   static override flags = {
     ...baseFlags,
+    ...CC_FLAGS,
     ...CHAIN_FLAGS,
-    ...NOX_NAMES_FLAG,
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(CreateCommitment));
-    await createCommitments(flags);
+    const { flags } = await initCli(
+      this,
+      await this.parse(CCCollateralWithdraw),
+    );
+
+    await withdrawCollateral(flags);
   }
 }
