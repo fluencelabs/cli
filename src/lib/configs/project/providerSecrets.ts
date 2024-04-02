@@ -30,6 +30,7 @@ import {
   type InitializedConfig,
   type InitializedReadonlyConfig,
   type Migrations,
+  type InitConfigOptions,
 } from "../initConfig.js";
 
 import type { ProviderConfigReadonly } from "./provider.js";
@@ -91,7 +92,7 @@ export type ProviderSecretesConfig = InitializedConfig<LatestConfig>;
 export type ProviderSecretesConfigReadonly =
   InitializedReadonlyConfig<LatestConfig>;
 
-function getInitConfigOptions() {
+function getInitConfigOptions(): InitConfigOptions<Config, LatestConfig> {
   return {
     allSchemas: [configSchemaV0],
     latestSchema: configSchemaV0,

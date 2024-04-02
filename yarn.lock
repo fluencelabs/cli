@@ -791,7 +791,7 @@ __metadata:
     "@fluencelabs/aqua-api": 0.14.5
     "@fluencelabs/aqua-to-js": 0.3.5
     "@fluencelabs/deal-ts-clients": 0.13.6
-    "@fluencelabs/fluence-network-environment": 1.1.2
+    "@fluencelabs/fluence-network-environment": 1.2.0
     "@fluencelabs/js-client": 0.9.0
     "@fluencelabs/npm-aqua-compiler": 0.0.3
     "@iarna/toml": 2.2.5
@@ -882,10 +882,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/fluence-network-environment@npm:1.1.2":
-  version: 1.1.2
-  resolution: "@fluencelabs/fluence-network-environment@npm:1.1.2"
-  checksum: 63598f862186c0b191b4c70ecc352a8dd11e7e7571be2b321617f34c3e1f4114c86d17bc6039136d27b8aeeb550f1c4bf5a506de69b2e5f015cc639398a5de04
+"@fluencelabs/fluence-network-environment@npm:1.2.0":
+  version: 1.2.0
+  resolution: "@fluencelabs/fluence-network-environment@npm:1.2.0"
+  checksum: fb971ce728a9d170e169fa29dff58896ccb3d2470be476fa1562fc7fd6218acc9a6f1986cd24b4b03cc0d6547efef5d687c7489f5c9f04754da5393111ac78ba
   languageName: node
   linkType: hard
 
