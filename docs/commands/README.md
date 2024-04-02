@@ -1071,7 +1071,7 @@ _See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/fl
 
 ## `fluence local up`
 
-Run docker-compose.yaml using docker compose and set up provider using the first offer from the 'offers' section in provider.yaml file.
+Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in provider.yaml config
 
 ```
 USAGE
@@ -1093,8 +1093,8 @@ FLAGS
                                 peers
 
 DESCRIPTION
-  Run docker-compose.yaml using docker compose and set up provider using the first offer from the 'offers' section in
-  provider.yaml file.
+  Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in
+  provider.yaml config
 
 EXAMPLES
   $ fluence local up
@@ -1294,13 +1294,16 @@ Create Capacity commitment
 
 ```
 USAGE
-  $ fluence provider cc-create [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
+  $ fluence provider cc-create [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>] [--offers
+  <value>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offers all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
