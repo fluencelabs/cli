@@ -104,13 +104,15 @@ Deposited ${color.yellow(
       await fltFormatWithSymbol(collateralToApproveCommitment),
     )} collateral in total
 
-${commitmentsWithCollateral
-  .map((c) => {
-    return `Capacity commitment successfully activated!\n${stringifyBasicCommitmentInfo(
-      c,
-    )}`;
-  })
-  .join("\n\n")}`,
+${(
+  await Promise.all(
+    commitmentsWithCollateral.map(async (c) => {
+      return `Capacity commitment successfully activated!\n${stringifyBasicCommitmentInfo(
+        c,
+      )}\nCollateral: ${color.yellow(await fltFormatWithSymbol(c.collateral))}`;
+    }),
+  )
+).join("\n\n")}`,
   );
 }
 
