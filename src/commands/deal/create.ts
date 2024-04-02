@@ -19,7 +19,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { DEFAULT_INITIAL_BALANCE, CHAIN_FLAGS } from "../../lib/const.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -86,10 +86,7 @@ export default class Create extends BaseCommand<typeof Create> {
       pricePerWorkerEpoch: flags["price-per-worker-epoch"],
       effectors:
         flags.effectors === undefined ? [] : commaSepStrToArr(flags.effectors),
-      initialBalance:
-        flags["initial-balance"] === undefined
-          ? DEFAULT_INITIAL_BALANCE
-          : flags["initial-balance"],
+      initialBalance: flags["initial-balance"],
       whitelist:
         flags.whitelist === undefined
           ? undefined

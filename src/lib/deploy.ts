@@ -43,7 +43,6 @@ import {
   MARINE_BUILD_ARGS_FLAG,
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
-  DEFAULT_INITIAL_BALANCE,
   DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
   CHAIN_FLAGS,
   DEPLOYMENT_NAMES_ARG_NAME,
@@ -225,8 +224,6 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
         `\nCreating ${color.yellow(deploymentName)} deal\n`,
       );
 
-      const initialBalance = deal.initialBalance ?? DEFAULT_INITIAL_BALANCE;
-
       const dealIdOriginal = await dealCreate({
         appCID,
         minWorkers,
@@ -235,7 +232,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
         pricePerWorkerEpoch,
         effectors,
         deploymentName,
-        initialBalance,
+        initialBalance: deal.initialBalance,
         whitelist: deal.whitelist,
         blacklist: deal.blacklist,
         protocolVersion: deal.protocolVersion,
