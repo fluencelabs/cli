@@ -26,7 +26,11 @@ import { cidStringToCIDV1Struct } from "./chain/conversions.js";
 import { ptFormatWithSymbol, ptParse } from "./chain/currencies.js";
 import { commandObj } from "./commandObj.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
-import { DEAL_IDS_FLAG_NAME, DEPLOYMENT_NAMES_ARG_NAME } from "./const.js";
+import {
+  DEAL_IDS_FLAG_NAME,
+  DEFAULT_DEAL_ACTIVE_DURATION_FOR_LOCAL_ENV,
+  DEPLOYMENT_NAMES_ARG_NAME,
+} from "./const.js";
 import { dbg } from "./dbg.js";
 import {
   sign,
@@ -35,6 +39,7 @@ import {
   getEventValue,
   getEventValues,
 } from "./dealClient.js";
+import { ensureChainEnv } from "./ensureChainNetwork.js";
 import {
   commaSepStrToArr,
   setTryTimeout,
@@ -51,7 +56,7 @@ type DealCreateArg = {
   maxWorkersPerProvider: number;
   pricePerWorkerEpoch: string;
   effectors: string[];
-  initialBalance: string;
+  initialBalance: string | undefined;
   whitelist: string[] | undefined;
   blacklist: string[] | undefined;
   protocolVersion: number | undefined;
@@ -76,11 +81,20 @@ export async function dealCreate({
   const usdc = dealClient.getUSDC();
 
   const pricePerWorkerEpochBigInt = await ptParse(pricePerWorkerEpoch);
-  const initialBalanceBigInt = await ptParse(initialBalance);
   const minDealDepositedEpochs = await core.minDealDepositedEpochs();
+  const targetWorkersBigInt = BigInt(targetWorkers);
 
   const minInitialBalanceBigInt =
-    BigInt(targetWorkers) * pricePerWorkerEpochBigInt * minDealDepositedEpochs;
+    targetWorkersBigInt * pricePerWorkerEpochBigInt * minDealDepositedEpochs;
+
+  const initialBalanceBigInt =
+    typeof initialBalance === "string"
+      ? await ptParse(initialBalance)
+      : await getDefaultInitialBalance(
+          minInitialBalanceBigInt,
+          pricePerWorkerEpochBigInt,
+          targetWorkersBigInt,
+        );
 
   if (initialBalanceBigInt < minInitialBalanceBigInt) {
     commandObj.error(
@@ -134,6 +148,29 @@ export async function dealCreate({
 
   assert(typeof dealId === "string", "dealId is not a string");
   return dealId;
+}
+
+async function getDefaultInitialBalance(
+  minInitialBalanceBigInt: bigint,
+  pricePerWorkerEpochBigInt: bigint,
+  targetWorkersBigInt: bigint,
+) {
+  if ((await ensureChainEnv()) === "local") {
+    const { dealClient } = await getDealClient();
+    const core = dealClient.getCore();
+
+    const balance =
+      (DEFAULT_DEAL_ACTIVE_DURATION_FOR_LOCAL_ENV /
+        (await core.epochDuration())) *
+      targetWorkersBigInt *
+      pricePerWorkerEpochBigInt;
+
+    return balance < minInitialBalanceBigInt
+      ? minInitialBalanceBigInt
+      : balance;
+  }
+
+  return minInitialBalanceBigInt;
 }
 
 type DealUpdateArg = {

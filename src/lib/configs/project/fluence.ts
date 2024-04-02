@@ -53,7 +53,6 @@ import {
   MARINE_BUILD_ARGS_PROPERTY,
   DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
   TOP_LEVEL_SCHEMA_ID,
-  DEFAULT_INITIAL_BALANCE,
   aquaLogLevelsString,
   AQUA_LOG_LEVELS,
   type AquaLogLevel,
@@ -314,8 +313,7 @@ const dealSchemaObj = {
     },
     initialBalance: {
       type: "string",
-      description: `Initial balance after deploy in ${PT_SYMBOL}`,
-      default: DEFAULT_INITIAL_BALANCE,
+      description: `Initial balance after deploy in ${PT_SYMBOL}. Default: targetWorkers * pricePerWorkerEpoch * minDealDepositedEpochs. For local environment: enough for deal to be active for 1 day`,
       nullable: true,
     },
     effectors: {
@@ -947,9 +945,9 @@ deployments:
   ${DEFAULT_DEPLOYMENT_NAME}:
     targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
     pricePerWorkerEpoch: "${DEFAULT_PRICE_PER_EPOCH_DEVELOPER}" # price per worker epoch in ${PT_SYMBOL}
-    initialBalance: "${DEFAULT_INITIAL_BALANCE}" # initial balance  after deploy in ${PT_SYMBOL}
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
+#   # initialBalance: "1.98"
 
 ${yamlDiffPatch(
   "",

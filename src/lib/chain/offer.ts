@@ -51,6 +51,7 @@ import {
   stringifyUnknown,
 } from "../helpers/utils.js";
 import { checkboxes } from "../prompt.js";
+import { ensureFluenceEnv } from "../resolveFluenceEnv.js";
 
 import {
   cidStringToCIDV1Struct,
@@ -76,9 +77,12 @@ export async function createOffers(flags: OffersArgs) {
   const market = dealClient.getMarket();
   const usdc = dealClient.getUSDC();
   const providerArtifactsConfig = await initNewProviderArtifactsConfig();
+  const fluenceEnv = await ensureFluenceEnv();
 
   const alreadyCreatedOffers = offers.filter(({ offerName }) => {
-    const { id } = providerArtifactsConfig.offers[offerName] ?? {};
+    const { id } =
+      providerArtifactsConfig.offers[fluenceEnv]?.[offerName] ?? {};
+
     return id !== undefined;
   });
 
@@ -193,9 +197,9 @@ export async function createOffers(flags: OffersArgs) {
   const [offerInfoErrors, offersInfo] = await getOffersInfo(offerIds);
 
   offersInfo.forEach(({ offerName, offerId }) => {
-    providerArtifactsConfig.offers[offerName] = {
-      id: offerId,
-    };
+    const offerPerEnv = providerArtifactsConfig.offers[fluenceEnv] ?? {};
+    offerPerEnv[offerName] = { id: offerId };
+    providerArtifactsConfig.offers[fluenceEnv] = offerPerEnv;
   });
 
   await providerArtifactsConfig.$commit();
@@ -644,6 +648,7 @@ async function ensureOfferConfigs() {
   const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
 
   const { ethers } = await import("ethers");
+  const fluenceEnv = await ensureFluenceEnv();
 
   return Promise.all(
     Object.entries(providerConfig.offers).map(
@@ -686,7 +691,8 @@ async function ensureOfferConfigs() {
           }),
         );
 
-        const offerId = providerArtifactsConfig?.offers[offerName]?.id;
+        const offerId =
+          providerArtifactsConfig?.offers[fluenceEnv]?.[offerName]?.id;
 
         const offerInfo =
           offerId === undefined
@@ -748,8 +754,10 @@ export async function resolveOffersFromProviderArtifactsConfig(
     );
   }
 
+  const fluenceEnv = await ensureFluenceEnv();
+
   const allOffers: OfferFromProviderArtifacts[] = Object.entries(
-    providerArtifactsConfig.offers,
+    providerArtifactsConfig.offers[fluenceEnv] ?? {},
   ).map(([offerName, { id }]) => {
     return { offerName, offerId: id };
   });

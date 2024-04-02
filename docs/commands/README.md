@@ -61,6 +61,7 @@
 * [`fluence provider register`](#fluence-provider-register)
 * [`fluence provider signing-wallets`](#fluence-provider-signing-wallets)
 * [`fluence provider tokens-distribute`](#fluence-provider-tokens-distribute)
+* [`fluence provider tokens-withdraw`](#fluence-provider-tokens-withdraw)
 * [`fluence provider update`](#fluence-provider-update)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
@@ -1717,6 +1718,36 @@ ALIASES
 ```
 
 _See code: [src/commands/provider/tokens-distribute.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.15.28/src/commands/provider/tokens-distribute.ts)_
+
+## `fluence provider tokens-withdraw`
+
+Withdraw FLT tokens from noxes
+
+```
+USAGE
+  $ fluence provider tokens-withdraw [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>] [--amount
+  <value>]
+
+FLAGS
+  --amount=<value>                             Amount of FLT tokens to withdraw from noxes. Use --amount max to withdraw
+                                               maximum possible amount
+  --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  Withdraw FLT tokens from noxes
+
+ALIASES
+  $ fluence provider tw
+```
+
+_See code: [src/commands/provider/tokens-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.15.28/src/commands/provider/tokens-withdraw.ts)_
 
 ## `fluence provider update`
 
