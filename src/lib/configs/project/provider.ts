@@ -37,6 +37,7 @@ import {
   validateAddress,
   validateProtocolVersion,
 } from "../../chain/chainValidators.js";
+import { resolveOffersFromProviderConfig } from "../../chain/offer.js";
 import { commandObj } from "../../commandObj.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
@@ -66,6 +67,7 @@ import {
   CHAIN_URLS_FOR_CONTAINERS,
   type ChainENV,
   CLI_NAME,
+  OFFER_FLAG_NAME,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -1990,6 +1992,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
 export async function resolveComputePeersByNames(
   flags: {
     [NOX_NAMES_FLAG_NAME]?: string | undefined;
+    [OFFER_FLAG_NAME]?: string | undefined;
   } = {},
 ) {
   const computePeers = await ensureComputerPeerConfigs();
@@ -1999,6 +2002,20 @@ export async function resolveComputePeersByNames(
   }
 
   const providerConfig = await ensureReadonlyProviderConfig();
+
+  if (flags[OFFER_FLAG_NAME] !== undefined) {
+    const computerPeerNamesFromOffers = (
+      await resolveOffersFromProviderConfig(flags)
+    ).flatMap(({ computePeersFromProviderConfig }) => {
+      return computePeersFromProviderConfig.map(({ name }) => {
+        return name;
+      });
+    });
+
+    return computePeers.filter(({ name }) => {
+      return computerPeerNamesFromOffers.includes(name);
+    });
+  }
 
   if (flags[NOX_NAMES_FLAG_NAME] === undefined) {
     return checkboxes<EnsureComputerPeerConfig, never>({

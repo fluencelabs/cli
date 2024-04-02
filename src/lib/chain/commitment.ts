@@ -27,7 +27,7 @@ import {
   resolveComputePeersByNames,
   type ResolvedComputePeer,
 } from "../configs/project/provider.js";
-import { CLI_NAME, NOX_NAMES_FLAG_NAME } from "../const.js";
+import { CLI_NAME, NOX_NAMES_FLAG_NAME, OFFER_FLAG_NAME } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
   getDealClient,
@@ -75,6 +75,8 @@ export async function getComputePeersWithCC(
     ),
   );
 
+  const { ethers } = await import("ethers");
+
   const computePeersWithChainInfo = (
     await Promise.all(
       computePeers.map(async (computePeer) => {
@@ -111,7 +113,7 @@ export async function getComputePeersWithCC(
       c.commitmentCreatedEvent?.args.commitmentId ??
       c.marketGetComputePeerRes?.commitmentId;
 
-    if (commitmentId === undefined) {
+    if (commitmentId === undefined || commitmentId === ethers.ZeroHash) {
       return c;
     }
 
@@ -145,11 +147,18 @@ export async function getComputePeersWithCC(
     );
   }
 
+  if (computePeersWithCCId.length === 0) {
+    return commandObj.error(
+      "No compute peers with capacity commitments were found on chain.",
+    );
+  }
+
   return computePeersWithCCId;
 }
 
 export type CCFlags = {
   [NOX_NAMES_FLAG_NAME]?: string | undefined;
+  [OFFER_FLAG_NAME]?: string | undefined;
   ids?: string | undefined;
 };
 
@@ -181,6 +190,7 @@ export async function getCommitments(
 export async function createCommitments(flags: {
   env: string | undefined;
   [NOX_NAMES_FLAG_NAME]?: string | undefined;
+  [OFFER_FLAG_NAME]?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
   const { dealClient } = await getDealClient();
@@ -271,7 +281,7 @@ export async function createCommitments(flags: {
 
     if (errorString.includes("Peer doesn't exist")) {
       return commandObj.error(
-        `\n\nNot able to find peers on chain. Make sure you used '${CLI_NAME} provider offer-create' command to create offers that contain the peers you selected right now:\n\n${computePeers
+        `\n\nNot able to find peers on chain. Make sure you used '${CLI_NAME} provider offer-create' command to create offers that contain ALL the peers you selected right now:\n\n${computePeers
           .map(({ name, peerId }) => {
             return `Name: ${name}\nPeerId: ${peerId}`;
           })
@@ -322,15 +332,13 @@ export async function createCommitments(flags: {
     )}`,
   );
 
-  const commitmentInfo = await getCommitmentsInfo({
+  await printCommitmentsInfo({
     "nox-names": computePeers
       .map(({ name }) => {
         return name;
       })
       .join(", "),
   });
-
-  printCommitmentsInfo(commitmentInfo);
 }
 
 export async function removeCommitments(flags: CCFlags) {
@@ -404,7 +412,36 @@ export async function removeCommitments(flags: CCFlags) {
 }
 
 export async function withdrawCollateral(flags: CCFlags) {
-  const commitments = await getCommitments(flags);
+  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
+
+  const [invalidCommitments, commitments] = splitErrorsAndResults(
+    await getCommitmentsInfo(flags),
+    (c) => {
+      if (
+        c.status === CommitmentStatus.Inactive ||
+        c.status === CommitmentStatus.Failed
+      ) {
+        return { result: c };
+      }
+
+      return { error: c };
+    },
+  );
+
+  if (invalidCommitments.length > 0) {
+    commandObj.warn(
+      `You can withdraw collateral only from commitments with "Inactive" or "Failed" status. The following commitments have invalid status:\n\n${await basicCCInfoAndStatusToString(
+        invalidCommitments,
+      )}`,
+    );
+  }
+
+  if (commitments.length === 0) {
+    return commandObj.error(
+      "No commitments with 'Inactive' or 'Failed' status found",
+    );
+  }
+
   const { dealClient } = await getDealClient();
   const capacity = dealClient.getCapacity();
   const market = dealClient.getMarket();
@@ -435,8 +472,10 @@ export async function withdrawCollateralRewards(flags: CCFlags) {
   );
 }
 
-function stringifyBasicCommitmentInfo(
-  commitment: Awaited<ReturnType<typeof getCommitments>>[number],
+export function stringifyBasicCommitmentInfo(
+  commitment:
+    | Awaited<ReturnType<typeof getCommitments>>[number]
+    | Awaited<ReturnType<typeof getCommitmentsInfo>>[number],
 ) {
   if ("providerConfigComputePeer" in commitment) {
     return `${color.yellow(
@@ -451,6 +490,17 @@ function stringifyBasicCommitmentInfo(
     )}`;
   }
 
+  if ("noxName" in commitment) {
+    return `${color.yellow(`Nox: ${commitment.noxName}`)}\n${yamlDiffPatch(
+      "",
+      {},
+      {
+        PeerId: commitment.peerId,
+        CommitmentId: commitment.commitmentId,
+      },
+    )}`;
+  }
+
   return color.yellow(`CommitmentId: ${commitment.commitmentId}`);
 }
 
@@ -458,8 +508,6 @@ export async function getCommitmentsInfo(flags: CCFlags) {
   const { readonlyDealClient } = await getReadonlyDealClient();
   const capacity = readonlyDealClient.getCapacity();
   const commitments = await getCommitments(flags);
-  const { ethers } = await import("ethers");
-  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
   return Promise.all(
     commitments.map(async (c) => {
@@ -482,33 +530,27 @@ export async function getCommitmentsInfo(flags: CCFlags) {
       return {
         ...("providerConfigComputePeer" in c
           ? {
-              Nox: c.providerConfigComputePeer.name,
-              PeerId: c.providerConfigComputePeer.peerId,
+              noxName: c.providerConfigComputePeer.name,
+              peerId: c.providerConfigComputePeer.peerId,
             }
           : {}),
-        "PeerId Hex": commitment.peerId,
-        "Capacity commitment ID": c.commitmentId,
-        Status:
+        peerIdHex: commitment.peerId,
+        commitmentId: c.commitmentId,
+        status:
           commitment.status === undefined
             ? undefined
-            : CommitmentStatus[Number(commitment.status)],
-        "Start epoch": commitment.startEpoch?.toString(),
-        "End epoch": commitment.endEpoch?.toString(),
-        "Reward delegator rate": await rewardDelegationRateToString(
+            : Number(commitment.status),
+        startEpoch: commitment.startEpoch?.toString(),
+        endEpoch: commitment.endEpoch?.toString(),
+        rewardDelegatorRate: await rewardDelegationRateToString(
           commitment.rewardDelegatorRate,
         ),
-        Delegator:
-          commitment.delegator === ethers.ZeroAddress.toString()
-            ? "Anyone can activate capacity commitment"
-            : commitment.delegator,
-        "Total CU": commitment.unitCount?.toString(),
-        "Failed epoch": commitment.failedEpoch?.toString(),
-        "Total CU Fail Count": commitment.totalFailCount?.toString(),
-        "Collateral per unit":
-          commitment.collateralPerUnit === undefined
-            ? undefined
-            : await fltFormatWithSymbol(commitment.collateralPerUnit),
-        "Exited unit count": commitment.exitedUnitCount?.toString(),
+        delegator: commitment.delegator,
+        totalCU: commitment.unitCount?.toString(),
+        failedEpoch: commitment.failedEpoch?.toString(),
+        totalCUFailCount: commitment.totalFailCount?.toString(),
+        collateralPerUnit: commitment.collateralPerUnit,
+        exitedUnitCount: commitment.exitedUnitCount?.toString(),
       };
     }),
   );
@@ -529,16 +571,86 @@ async function rewardDelegationRateToString(
   }%`;
 }
 
-export function printCommitmentsInfo(
-  infos: Awaited<ReturnType<typeof getCommitmentsInfo>>,
-) {
-  for (const { Nox, ...restInfo } of infos) {
-    if (Nox !== undefined) {
-      commandObj.logToStderr(color.yellow(`Nox: ${Nox}`));
-    }
+export async function printCommitmentsInfo(flags: CCFlags) {
+  const ccInfos = await getCommitmentsInfo(flags);
 
-    commandObj.logToStderr(
-      yamlDiffPatch("", {}, omitBy(restInfo, isUndefined)),
-    );
+  commandObj.logToStderr(
+    (
+      await Promise.all(
+        ccInfos.map(async (ccInfo) => {
+          const noxName =
+            ccInfo.noxName === undefined
+              ? ""
+              : color.yellow(`Nox: ${ccInfo.noxName}\n`);
+
+          return `${noxName}${await getCommitmentInfoString(ccInfo)}`;
+        }),
+      )
+    ).join("\n\n"),
+  );
+}
+
+export async function getCommitmentInfoString(
+  ccInfo: Awaited<ReturnType<typeof getCommitmentsInfo>>[number],
+) {
+  const { ethers } = await import("ethers");
+
+  return yamlDiffPatch(
+    "",
+    {},
+    omitBy(
+      {
+        PeerId: ccInfo.peerId,
+        "PeerId Hex": ccInfo.peerIdHex,
+        "Capacity commitment ID": ccInfo.commitmentId,
+        Status: await ccStatusToString(ccInfo.status),
+        "Start epoch": ccInfo.startEpoch,
+        "End epoch": ccInfo.endEpoch,
+        "Reward delegator rate": ccInfo.rewardDelegatorRate,
+        Delegator:
+          ccInfo.delegator === ethers.ZeroAddress
+            ? "Anyone can activate capacity commitment"
+            : ccInfo.delegator,
+        "Total CU": ccInfo.totalCU,
+        "Failed epoch": ccInfo.failedEpoch,
+        "Total CU Fail Count": ccInfo.totalCUFailCount,
+        "Collateral per unit":
+          ccInfo.collateralPerUnit === undefined
+            ? undefined
+            : await fltFormatWithSymbol(ccInfo.collateralPerUnit),
+        "Exited unit count": ccInfo.exitedUnitCount,
+      },
+      isUndefined,
+    ),
+  );
+}
+
+async function ccStatusToString(status: number | undefined) {
+  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
+
+  if (status === undefined) {
+    return "Unknown";
   }
+
+  const statusStr = CommitmentStatus[status];
+
+  if (statusStr === undefined) {
+    return `Unknown (${status})`;
+  }
+
+  return statusStr;
+}
+
+export async function basicCCInfoAndStatusToString(
+  ccInfos: Awaited<ReturnType<typeof getCommitmentsInfo>>,
+) {
+  return (
+    await Promise.all(
+      ccInfos.map(async (ccInfo) => {
+        return `${stringifyBasicCommitmentInfo(
+          ccInfo,
+        )}Status: ${await ccStatusToString(ccInfo.status)}`;
+      }),
+    )
+  ).join("\n\n");
 }

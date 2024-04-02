@@ -18,7 +18,7 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
-import { NOX_NAMES_FLAG_NAME, FLT_SYMBOL } from "../const.js";
+import { NOX_NAMES_FLAG_NAME, FLT_SYMBOL, OFFER_FLAG_NAME } from "../const.js";
 import { getDealClient } from "../dealClient.js";
 import { input } from "../prompt.js";
 
@@ -27,6 +27,7 @@ import { fltFormatWithSymbol, fltParse } from "./currencies.js";
 export async function distributeToNox(flags: {
   amount?: string | undefined;
   [NOX_NAMES_FLAG_NAME]?: string | undefined;
+  [OFFER_FLAG_NAME]?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
   const { signerOrWallet } = await getDealClient();
