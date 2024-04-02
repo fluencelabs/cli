@@ -16,9 +16,9 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
 import { NOX_NAMES_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveComputePeersByNames } from "../../lib/resolveComputePeersByNames.js";
 
 export default class SigningWallets extends BaseCommand<typeof SigningWallets> {
   static override aliases = ["provider:sw"];

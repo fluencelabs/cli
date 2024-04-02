@@ -21,7 +21,6 @@ import { ethers } from "ethers";
 
 import { setChainFlags, chainFlags } from "../chainFlags.js";
 import { commandObj } from "../commandObj.js";
-import { resolveComputePeersByNames } from "../configs/project/provider.js";
 import {
   NOX_NAMES_FLAG_NAME,
   FLT_SYMBOL,
@@ -31,6 +30,7 @@ import {
 } from "../const.js";
 import { getDealClient } from "../dealClient.js";
 import { input } from "../prompt.js";
+import { resolveComputePeersByNames } from "../resolveComputePeersByNames.js";
 
 import { fltFormatWithSymbol, fltParse } from "./currencies.js";
 

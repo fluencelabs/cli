@@ -22,11 +22,7 @@ import parse from "parse-duration";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
-import {
-  initReadonlyProviderConfig,
-  resolveComputePeersByNames,
-  type ResolvedComputePeer,
-} from "../configs/project/provider.js";
+import { initReadonlyProviderConfig } from "../configs/project/provider.js";
 import { CLI_NAME, NOX_NAMES_FLAG_NAME, OFFER_FLAG_NAME } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
@@ -42,6 +38,10 @@ import {
   commaSepStrToArr,
 } from "../helpers/utils.js";
 import { input } from "../prompt.js";
+import {
+  resolveComputePeersByNames,
+  type ResolvedComputePeer,
+} from "../resolveComputePeersByNames.js";
 
 import {
   peerIdHexStringToBase58String,
