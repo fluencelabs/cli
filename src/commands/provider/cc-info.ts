@@ -15,10 +15,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import {
-  getCommitmentsInfo,
-  printCommitmentsInfo,
-} from "../../lib/chain/commitment.js";
+import { printCommitmentsInfo } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -33,7 +30,6 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CCInfo));
-    const infos = await getCommitmentsInfo(flags);
-    printCommitmentsInfo(infos);
+    await printCommitmentsInfo(flags);
   }
 }

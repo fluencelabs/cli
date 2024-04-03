@@ -66,7 +66,7 @@ const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
 
 export type OffersArgs = {
-  [OFFER_FLAG_NAME]: string | undefined;
+  [OFFER_FLAG_NAME]?: string | undefined;
   force?: boolean | undefined;
 };
 
@@ -136,7 +136,7 @@ export async function createOffers(flags: OffersArgs) {
 
   for (const offer of offers) {
     const {
-      computePeersToRegister,
+      computePeersFromProviderConfig,
       effectorPrefixesAndHash,
       minPricePerWorkerEpochBigInt,
       offerName,
@@ -149,7 +149,7 @@ export async function createOffers(flags: OffersArgs) {
       minPricePerWorkerEpochBigInt,
       usdcAddress,
       effectorPrefixesAndHash,
-      computePeersToRegister,
+      computePeersFromProviderConfig,
       minProtocolVersion ?? versions.protocolVersion,
       maxProtocolVersion ?? versions.protocolVersion,
     );
@@ -335,6 +335,7 @@ export async function updateOffers(flags: OffersArgs) {
     offerId,
     effectors,
     offerName,
+    computePeersFromProviderConfig,
     offerInfo: { offerInfo, offerIndexerInfo } = {
       offerInfo: undefined,
       offerIndexerInfo: undefined,
@@ -354,7 +355,7 @@ export async function updateOffers(flags: OffersArgs) {
       commandObj.warn(
         `Can't find offer ${color.yellow(
           offerName,
-        )} info using explorer${COMMON_WARN_MSG}`,
+        )} info using the indexer${COMMON_WARN_MSG}`,
       );
 
       continue;
@@ -423,6 +424,127 @@ export async function updateOffers(flags: OffersArgs) {
       });
     }
 
+    const peersOnChain = await Promise.all(
+      offerIndexerInfo.peers.map(async ({ id, ...rest }) => {
+        return {
+          peerIdBase58: await peerIdHexStringToBase58String(id),
+          hexPeerId: id,
+          ...rest,
+        };
+      }),
+    );
+
+    const computeUnitsToRemove = peersOnChain.flatMap(
+      ({ peerIdBase58, computeUnits }) => {
+        const alreadyRegisteredPeer = computePeersFromProviderConfig.find(
+          (p) => {
+            return p.peerIdBase58 === peerIdBase58;
+          },
+        );
+
+        if (alreadyRegisteredPeer === undefined) {
+          return computeUnits.map(({ id }) => {
+            return id;
+          });
+        }
+
+        if (alreadyRegisteredPeer.unitIds.length < computeUnits.length) {
+          return computeUnits
+            .slice(alreadyRegisteredPeer.unitIds.length - computeUnits.length)
+            .map(({ id }) => {
+              return id;
+            });
+        }
+
+        return [];
+      },
+    );
+
+    if (computeUnitsToRemove.length > 0) {
+      populatedTxs.push(
+        ...computeUnitsToRemove.map((computeUnit) => {
+          return {
+            description: `Removing compute unit: ${computeUnit}`,
+            tx: [market.removeComputeUnit, computeUnit],
+          };
+        }),
+      );
+    }
+
+    const computePeersToRemove = peersOnChain.filter(({ peerIdBase58 }) => {
+      return !computePeersFromProviderConfig.some((p) => {
+        return p.peerIdBase58 === peerIdBase58;
+      });
+    });
+
+    if (computePeersToRemove.length > 0) {
+      populatedTxs.push(
+        ...computePeersToRemove.map(({ peerIdBase58, hexPeerId }) => {
+          return {
+            description: `Removing peer: ${peerIdBase58}`,
+            tx: [market.removeComputePeer, hexPeerId],
+          };
+        }),
+      );
+    }
+
+    const computeUnitsToAdd = peersOnChain.flatMap(
+      ({ peerIdBase58, hexPeerId, computeUnits }) => {
+        const alreadyRegisteredPeer = computePeersFromProviderConfig.find(
+          (p) => {
+            return p.peerIdBase58 === peerIdBase58;
+          },
+        );
+
+        if (
+          alreadyRegisteredPeer === undefined ||
+          alreadyRegisteredPeer.unitIds.length <= computeUnits.length
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            hexPeerId,
+            peerIdBase58: alreadyRegisteredPeer.peerIdBase58,
+            unitIds: alreadyRegisteredPeer.unitIds.slice(
+              computeUnits.length - alreadyRegisteredPeer.unitIds.length,
+            ),
+          },
+        ];
+      },
+    );
+
+    if (computeUnitsToAdd.length > 0) {
+      populatedTxs.push(
+        ...computeUnitsToAdd.map(({ hexPeerId, unitIds, peerIdBase58 }) => {
+          return {
+            description: `Adding ${unitIds.length} compute units to peer id ${peerIdBase58}`,
+            tx: [market.addComputeUnits, hexPeerId, unitIds],
+          };
+        }),
+      );
+    }
+
+    const computePeersToAdd = computePeersFromProviderConfig.filter(
+      ({ peerIdBase58 }) => {
+        return !peersOnChain.some((p) => {
+          return p.peerIdBase58 === peerIdBase58;
+        });
+      },
+    );
+
+    if (computePeersToAdd.length > 0) {
+      populatedTxs.push({
+        description: `Adding peers:\n${computePeersToAdd
+          .map(({ peerIdBase58, unitIds }) => {
+            return `Peer: ${peerIdBase58} with ${unitIds.length} compute units`;
+          })
+          .join("\n")}`,
+        tx: [market.addComputePeers, offerId, computePeersToAdd],
+      });
+    }
+
     if (populatedTxs.length === 0) {
       commandObj.logToStderr(
         `\nNo changes found for offer ${color.yellow(
@@ -452,7 +574,7 @@ export async function updateOffers(flags: OffersArgs) {
   }
 }
 
-async function resolveOffersFromProviderConfig(
+export async function resolveOffersFromProviderConfig(
   flags: OffersArgs,
 ): Promise<EnsureOfferConfig[]> {
   const allOffers = await ensureOfferConfigs();
@@ -547,10 +669,12 @@ async function ensureOfferConfigs() {
           minPricePerWorkerEpoch,
         );
 
-        const computePeersToRegister = await Promise.all(
+        const computePeersFromProviderConfig = await Promise.all(
           computePeerConfigs.map(
-            async ({ computeUnits, walletAddress, peerId }) => {
+            async ({ computeUnits, name, walletAddress, peerId }) => {
               return {
+                name,
+                peerIdBase58: peerId,
                 peerId: await peerIdToUint8Array(peerId),
                 unitIds: times(computeUnits).map(() => {
                   return ethers.randomBytes(32);
@@ -580,7 +704,7 @@ async function ensureOfferConfigs() {
           minPricePerWorkerEpochBigInt,
           effectorPrefixesAndHash,
           effectors,
-          computePeersToRegister,
+          computePeersFromProviderConfig,
           offerId,
           offerInfo,
           minProtocolVersion,

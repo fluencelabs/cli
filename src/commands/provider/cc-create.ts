@@ -16,7 +16,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
-import { NOX_NAMES_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
+import { NOX_NAMES_FLAG, CHAIN_FLAGS, OFFER_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CreateCommitment extends BaseCommand<
@@ -28,6 +28,7 @@ export default class CreateCommitment extends BaseCommand<
     ...baseFlags,
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
+    ...OFFER_FLAG,
   };
 
   async run(): Promise<void> {

@@ -19,10 +19,10 @@ import { randomBytes } from "node:crypto";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
 import { setChainFlags, chainFlags } from "../../lib/chainFlags.js";
-import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
 import { CHAIN_FLAGS, PRIV_KEY_FLAG_NAME } from "../../lib/const.js";
 import { getDealClient, signBatch } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveComputePeersByNames } from "../../lib/resolveComputePeersByNames.js";
 
 export default class Proof extends BaseCommand<typeof Proof> {
   hidden = true;

@@ -31,17 +31,16 @@ import {
   dockerComposeDirPath,
 } from "../../lib/configs/project/dockerCompose.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env.js";
-import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   DOCKER_COMPOSE_FLAGS,
+  OFFER_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import {
   ALL_FLAG_VALUE,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   NOXES_FLAG,
-  NOX_NAMES_FLAG_NAME,
   PRIV_KEY_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
@@ -52,7 +51,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Up extends BaseCommand<typeof Up> {
-  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using the first offer from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} file.`;
+  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using all the offers from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} config`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -97,8 +96,6 @@ export default class Up extends BaseCommand<typeof Up> {
       this,
       await this.parse(Up),
     );
-
-    const providerConfig = await initNewReadonlyProviderConfig();
 
     if (flags.reset) {
       const dirPath = dockerComposeDirPath();
@@ -161,19 +158,11 @@ export default class Up extends BaseCommand<typeof Up> {
       },
     });
 
-    const allNoxNames = {
-      [NOX_NAMES_FLAG_NAME]: ALL_FLAG_VALUE,
-    };
-
-    await distributeToNox({ ...flags, ...allNoxNames, amount: "10" });
+    const allOffers = { [OFFER_FLAG_NAME]: ALL_FLAG_VALUE };
+    await distributeToNox({ ...flags, ...allOffers, amount: "10" });
     await registerProvider();
-
-    await createOffers({
-      force: true,
-      offers: Object.keys(providerConfig.offers)[0],
-    });
-
-    await createCommitments({ ...flags, ...allNoxNames, env });
-    await depositCollateral(allNoxNames);
+    await createOffers({ force: true, ...allOffers });
+    await createCommitments({ ...flags, ...allOffers, env });
+    await depositCollateral(allOffers);
   }
 }

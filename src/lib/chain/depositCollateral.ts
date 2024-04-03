@@ -18,12 +18,44 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { getDealClient, sign } from "../dealClient.js";
+import { splitErrorsAndResults } from "../helpers/utils.js";
 
-import { getCommitments, type CCFlags } from "./commitment.js";
+import {
+  stringifyBasicCommitmentInfo,
+  getCommitmentsInfo,
+  basicCCInfoAndStatusToString,
+} from "./commitment.js";
+import { type CCFlags } from "./commitment.js";
 import { fltFormatWithSymbol } from "./currencies.js";
 
 export async function depositCollateral(flags: CCFlags) {
-  const commitments = await getCommitments(flags);
+  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
+
+  const [commitmentsWithInvalidStatus, commitments] = splitErrorsAndResults(
+    await getCommitmentsInfo(flags),
+    (c) => {
+      if (c.status === CommitmentStatus.WaitDelegation) {
+        return { result: c };
+      }
+
+      return { error: c };
+    },
+  );
+
+  if (commitmentsWithInvalidStatus.length > 0) {
+    commandObj.warn(
+      `It's only possible to deposit collateral to the capacity commitments in the "WaitDelegation" status. The following commitments have invalid status:\n\n${await basicCCInfoAndStatusToString(
+        commitmentsWithInvalidStatus,
+      )}`,
+    );
+  }
+
+  if (commitments.length === 0) {
+    return commandObj.error(
+      "No capacity commitments in the 'WaitDelegation' status found",
+    );
+  }
+
   const [firstCommitment] = commitments;
 
   const isProvider =
@@ -75,22 +107,9 @@ Deposited ${color.yellow(
 ${(
   await Promise.all(
     commitmentsWithCollateral.map(async (c) => {
-      return `Capacity commitment${
-        "providerConfigComputePeer" in c
-          ? ` for ${color.yellow(c.providerConfigComputePeer.name)}`
-          : ""
-      } successfully activated!
-Commitment ID: ${color.yellow(c.commitmentId)}
-Collateral: ${color.yellow(await fltFormatWithSymbol(c.collateral))}
-${
-  "providerConfigComputePeer" in c
-    ? `Peer ID: ${color.yellow(c.providerConfigComputePeer.peerId)}
-Number of compute units: ${color.yellow(
-        c.providerConfigComputePeer.computeUnits,
-      )}
-`
-    : ""
-}`;
+      return `Capacity commitment successfully activated!\n${stringifyBasicCommitmentInfo(
+        c,
+      )}\nCollateral: ${color.yellow(await fltFormatWithSymbol(c.collateral))}`;
     }),
   )
 ).join("\n\n")}`,

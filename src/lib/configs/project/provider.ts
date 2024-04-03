@@ -58,8 +58,6 @@ import {
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
-  NOX_NAMES_FLAG_NAME,
-  ALL_FLAG_VALUE,
   WS_CHAIN_URLS,
   PT_SYMBOL,
   DEFAULT_CURL_EFFECTOR_CID,
@@ -70,11 +68,7 @@ import {
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
-import {
-  commaSepStrToArr,
-  jsonStringify,
-  splitErrorsAndResults,
-} from "../../helpers/utils.js";
+import { jsonStringify, splitErrorsAndResults } from "../../helpers/utils.js";
 import {
   type ValidationResult,
   validateCIDs,
@@ -89,7 +83,7 @@ import {
   ensureFluenceSecretsFilePath,
   ensureFluenceCCPConfigsDir,
 } from "../../paths.js";
-import { checkboxes, list } from "../../prompt.js";
+import { list } from "../../prompt.js";
 import { setEnvConfig } from "../globalConfigs.js";
 import {
   getReadonlyConfigInitFunction,
@@ -1986,82 +1980,3 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
     ),
   );
 }
-
-export async function resolveComputePeersByNames(
-  flags: {
-    [NOX_NAMES_FLAG_NAME]?: string | undefined;
-  } = {},
-) {
-  const computePeers = await ensureComputerPeerConfigs();
-
-  if (flags[NOX_NAMES_FLAG_NAME] === ALL_FLAG_VALUE) {
-    return computePeers;
-  }
-
-  const providerConfig = await ensureReadonlyProviderConfig();
-
-  if (flags[NOX_NAMES_FLAG_NAME] === undefined) {
-    return checkboxes<EnsureComputerPeerConfig, never>({
-      message: `Select one or more nox names from ${providerConfig.$getPath()}`,
-      options: computePeers.map((computePeer) => {
-        return {
-          name: computePeer.name,
-          value: computePeer,
-        };
-      }),
-      validate: (choices: string[]) => {
-        if (choices.length === 0) {
-          return "Please select at least one deployment";
-        }
-
-        return true;
-      },
-      oneChoiceMessage(choice) {
-        return `One nox found at ${providerConfig.$getPath()}: ${color.yellow(
-          choice,
-        )}. Do you want to select it`;
-      },
-      onNoChoices() {
-        commandObj.error(
-          `You must have at least one nox specified in ${providerConfig.$getPath()}`,
-        );
-      },
-      flagName: NOX_NAMES_FLAG_NAME,
-    });
-  }
-
-  const noxNames = commaSepStrToArr(flags[NOX_NAMES_FLAG_NAME]);
-
-  const [unknownNoxNames, validNoxNames] = splitErrorsAndResults(
-    noxNames,
-    (name) => {
-      if (
-        computePeers.find((cp) => {
-          return cp.name === name;
-        }) !== undefined
-      ) {
-        return { result: name };
-      }
-
-      return { error: name };
-    },
-  );
-
-  if (unknownNoxNames.length > 0) {
-    commandObj.error(
-      `nox names: ${color.yellow(
-        unknownNoxNames.join(", "),
-      )} not found in ${color.yellow(
-        "computePeers",
-      )} property of ${providerConfig.$getPath()}`,
-    );
-  }
-
-  return computePeers.filter(({ name }) => {
-    return validNoxNames.includes(name);
-  });
-}
-
-export type ResolvedComputePeer = Awaited<
-  ReturnType<typeof resolveComputePeersByNames>
->[number];

@@ -523,6 +523,12 @@ export const CC_FLAGS = {
   }),
 };
 
+export const JSON_FLAG = {
+  json: Flags.boolean({
+    description: "Output JSON",
+  }),
+};
+
 export type FluenceClientFlags = FromFlagsDef<typeof FLUENCE_CLIENT_FLAGS>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -550,6 +556,7 @@ export const PACKAGE_NAME_AND_VERSION_ARG_NAME = `${PACKAGE_NAME} | PACKAGE-NAME
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
 /${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}

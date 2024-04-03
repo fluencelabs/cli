@@ -19,6 +19,7 @@ import { AssertionError } from "node:assert";
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
+import { commandObj } from "../commandObj.js";
 import { dbg } from "../dbg.js";
 
 export function commaSepStrToArr(commaSepStr: string) {
@@ -210,11 +211,13 @@ export async function setTryTimeout<T, U>(
       const previousErrorString = stringifyUnknown(error);
 
       if (errorString === previousErrorString) {
-        dbg(
+        commandObj.logToStderr(
           `Attempt #${attemptCounter} to ${yellowMessage} failed with the same error`,
         );
       } else {
-        dbg(`Failed to ${yellowMessage}. Reason: ${stringifyUnknown(e)}`);
+        const retryMessage = isTrying ? ". Going to retry" : "";
+        commandObj.logToStderr(`Failing to ${yellowMessage}${retryMessage}`);
+        dbg(`Reason: ${stringifyUnknown(e)}`);
       }
 
       error = e;
