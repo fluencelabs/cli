@@ -54,12 +54,12 @@
 * [`fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-deal-rewards-info-deal-address-unit-id)
 * [`fluence provider deal-rewards-withdraw`](#fluence-provider-deal-rewards-withdraw)
 * [`fluence provider gen`](#fluence-provider-gen)
+* [`fluence provider info`](#fluence-provider-info)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider offer-create`](#fluence-provider-offer-create)
 * [`fluence provider offer-info`](#fluence-provider-offer-info)
 * [`fluence provider offer-update`](#fluence-provider-offer-update)
 * [`fluence provider register`](#fluence-provider-register)
-* [`fluence provider signing-wallets`](#fluence-provider-signing-wallets)
 * [`fluence provider tokens-distribute`](#fluence-provider-tokens-distribute)
 * [`fluence provider tokens-withdraw`](#fluence-provider-tokens-withdraw)
 * [`fluence provider update`](#fluence-provider-update)
@@ -1534,6 +1534,34 @@ EXAMPLES
 
 _See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.16.0/src/commands/provider/gen.ts)_
 
+## `fluence provider info`
+
+Print nox signing wallets and peer ids
+
+```
+USAGE
+  $ fluence provider info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>] [--json]
+
+FLAGS
+  --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --json                                       Output JSON
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  Print nox signing wallets and peer ids
+
+ALIASES
+  $ fluence provider i
+```
+
+_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.16.0/src/commands/provider/info.ts)_
+
 ## `fluence provider init`
 
 Init provider config. Creates a provider.yaml file
@@ -1665,33 +1693,6 @@ ALIASES
 ```
 
 _See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.16.0/src/commands/provider/register.ts)_
-
-## `fluence provider signing-wallets`
-
-Print nox signing wallets
-
-```
-USAGE
-  $ fluence provider signing-wallets [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
-
-FLAGS
-  --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                                   Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
-                                               noxes: --nox-names all
-  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
-
-DESCRIPTION
-  Print nox signing wallets
-
-ALIASES
-  $ fluence provider sw
-```
-
-_See code: [src/commands/provider/signing-wallets.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.16.0/src/commands/provider/signing-wallets.ts)_
 
 ## `fluence provider tokens-distribute`
 
