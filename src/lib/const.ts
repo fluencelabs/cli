@@ -523,6 +523,12 @@ export const CC_FLAGS = {
   }),
 };
 
+export const JSON_FLAG = {
+  json: Flags.boolean({
+    description: "Output JSON",
+  }),
+};
+
 export type FluenceClientFlags = FromFlagsDef<typeof FLUENCE_CLIENT_FLAGS>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

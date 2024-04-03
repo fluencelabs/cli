@@ -14,31 +14,44 @@
  * limitations under the License.
  */
 
+import { yamlDiffPatch } from "yaml-diff-patch";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { NOX_NAMES_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
+import { NOX_NAMES_FLAG, CHAIN_FLAGS, JSON_FLAG } from "../../lib/const.js";
+import { jsonStringify } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { resolveComputePeersByNames } from "../../lib/resolveComputePeersByNames.js";
 
-export default class SigningWallets extends BaseCommand<typeof SigningWallets> {
-  static override aliases = ["provider:sw"];
-  static override description = "Print nox signing wallets";
+export default class Info extends BaseCommand<typeof Info> {
+  static override aliases = ["provider:i"];
+  static override description = "Print nox signing wallets and peer ids";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
+    ...JSON_FLAG,
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(SigningWallets));
+    const { flags } = await initCli(this, await this.parse(Info));
     const computePeers = await resolveComputePeersByNames(flags);
 
-    commandObj.log(
-      computePeers
-        .map(({ walletAddress, name }) => {
-          return `${name}: ${walletAddress}`;
-        })
-        .join("\n"),
-    );
+    const infoToPrint = {
+      info: computePeers.map(({ name, peerId, walletAddress }) => {
+        return {
+          nox: name,
+          peerId,
+          wallet: walletAddress,
+        };
+      }),
+    };
+
+    if (flags.json) {
+      commandObj.log(jsonStringify(infoToPrint));
+      return;
+    }
+
+    commandObj.log(yamlDiffPatch("", {}, infoToPrint));
   }
 }
