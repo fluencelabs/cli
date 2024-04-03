@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.16.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.28...fluence-cli-v0.16.0) (2024-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* store unmatched deals, rename commands and flags ([#868](https://github.com/fluencelabs/cli/issues/868))
+
+### Features
+
+* add provider tokens-withdraw [fixes DXJ-755] ([#880](https://github.com/fluencelabs/cli/issues/880)) ([1377ee4](https://github.com/fluencelabs/cli/commit/1377ee4b7438f3c4938fdb76465beabd6f803e2a))
+* bump @fluencelabs/fluence-network-environment v1.2.0 ([#884](https://github.com/fluencelabs/cli/issues/884)) ([3133c16](https://github.com/fluencelabs/cli/commit/3133c1630ac051e3c84323d38cc1b81e1076ec5d))
+* bump deal-ts-clients to 0.13.6 ([#878](https://github.com/fluencelabs/cli/issues/878)) ([3a8865e](https://github.com/fluencelabs/cli/commit/3a8865e0d7d4de178c274dd24f2e583b128b08e5))
+* change dar urls; bump deal-ts-clients to 0.13.5 ([#877](https://github.com/fluencelabs/cli/issues/877)) ([f6e9960](https://github.com/fluencelabs/cli/commit/f6e9960d876980088ac49ec37ded838d2eb7d132))
+* fix DAR ipfs default multiaddr ([#883](https://github.com/fluencelabs/cli/issues/883)) ([e93712c](https://github.com/fluencelabs/cli/commit/e93712c5c127e50bf3017d16d4abf42aac2ddd68))
+* provider artifacts per env [fixes DXJ-756] ([#881](https://github.com/fluencelabs/cli/issues/881)) ([c52ace4](https://github.com/fluencelabs/cli/commit/c52ace4b7bcc45c6ff149809c13e5a9299c76c1a))
+* set default price per epoch as 0.33 [fixes DXJ-757] ([#882](https://github.com/fluencelabs/cli/issues/882)) ([b5aac8e](https://github.com/fluencelabs/cli/commit/b5aac8e10eeb4aa1e001f97da0e8d20e47ee512c))
+* store unmatched deals, rename commands and flags ([#868](https://github.com/fluencelabs/cli/issues/868)) ([1ec9414](https://github.com/fluencelabs/cli/commit/1ec94145904a0c7327e8da3d97e214e375f8ccf8))
+* use cli client, improve cc-info, add deal-list command ([#875](https://github.com/fluencelabs/cli/issues/875)) ([4f6c358](https://github.com/fluencelabs/cli/commit/4f6c3581486ccfac5aac00664276f3489a2725de))
+
+
+### Bug Fixes
+
+* fix repl facade module being first instead of being last ([#873](https://github.com/fluencelabs/cli/issues/873)) ([fe37bb0](https://github.com/fluencelabs/cli/commit/fe37bb02a1a8f2da9c11e8387be1d5777b061d6e))
+* **offer-create:** offer-update suggestion typo ([#876](https://github.com/fluencelabs/cli/issues/876)) ([bdf3f2b](https://github.com/fluencelabs/cli/commit/bdf3f2ba66ea2d5f63a8021fea84085f1c114209))
+
 ## [0.15.28](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.27...fluence-cli-v0.15.28) (2024-03-20)
 
 
