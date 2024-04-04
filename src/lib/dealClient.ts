@@ -340,7 +340,6 @@ export async function signBatch<T extends Array<unknown>>(
   return receipts;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 function methodCallToString([method, ...args]: [
   { name: string },
   ...unknown[],

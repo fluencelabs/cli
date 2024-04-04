@@ -66,6 +66,11 @@ export function jsonStringify(unknown: unknown): string {
   );
 }
 
+/**
+ * Used for error stringification cause one can throw anything in js (not only errors)
+ * also used for e.g. debug logs or "unreachable error" messages where we don't necessarily care much about the output as long as it's somewhat readable.
+ * it would be good to have two functions for this each with a more clear purpose for existence and used accordingly TODO: DXJ-763
+ */
 export function stringifyUnknown(unknown: unknown): string {
   try {
     if (typeof unknown === "string") {
