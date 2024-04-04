@@ -123,13 +123,13 @@ export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
 export const IPFS_CONTAINER_NAME = "ipfs";
-export const IPFS_PORT = 5001;
+export const IPFS_PORT = "5001";
 export const GRAPH_NODE_CONTAINER_NAME = "graph-node";
-export const GRAPH_NODE_PORT = 8020;
+export const GRAPH_NODE_PORT = "8020";
 export const POSTGRES_CONTAINER_NAME = "postgres";
 export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
 export const CHAIN_RPC_CONTAINER_NAME = "chain-rpc";
-export const CHAIN_RPC_PORT = 8545;
+export const CHAIN_RPC_PORT = "8545";
 export const CHAIN_DEPLOY_SCRIPT_NAME = "chain-deploy-script";
 export const SUBGRAPH_DEPLOY_SCRIPT_NAME = "subgraph-deploy-script";
 export const TCP_PORT_START = 7771;

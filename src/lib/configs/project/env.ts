@@ -22,6 +22,7 @@ import {
   FLUENCE_ENVS,
   TOP_LEVEL_SCHEMA_ID,
   type FluenceEnv,
+  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "../../const.js";
 import { getFluenceDir } from "../../paths.js";
 import {
@@ -65,7 +66,7 @@ const getDefault = (fluenceEnv: FluenceEnv | undefined): GetDefaultConfig => {
 version: 0
 
 # Fluence environment to connect to
-${`${fluenceEnv === undefined ? "# " : ""}fluenceEnv: "${fluenceEnv}"`}
+${fluenceEnv === undefined ? `# fluenceEnv: ${DEFAULT_PUBLIC_FLUENCE_ENV}` : `fluenceEnv: "${fluenceEnv}"`}
 `;
   };
 };

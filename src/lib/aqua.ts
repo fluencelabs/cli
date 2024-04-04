@@ -46,6 +46,7 @@ import {
   type AquaLogLevel,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
+import { boolToStr, numToStr } from "./helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "./helpers/utils.js";
 import { projectRootDir } from "./paths.js";
 import { list } from "./prompt.js";
@@ -312,9 +313,14 @@ function formatConstantsFromFlags(
 
 function formatConstantsFromConfig(constants: Constants) {
   return Object.entries(constants).map(([name, value]) => {
-    return `${name}${CONST_SEPARATOR}${
-      typeof value === "string" ? `"${value}"` : value
-    }`;
+    const val =
+      typeof value === "string"
+        ? `"${value}"`
+        : typeof value === "number"
+          ? numToStr(value)
+          : boolToStr(value);
+
+    return `${name}${CONST_SEPARATOR}${val}`;
   });
 }
 

@@ -38,6 +38,7 @@ import {
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
 } from "../../const.js";
+import { numToStr } from "../../helpers/typesafeStringify.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureFluenceConfigsDir, getFluenceDir } from "../../paths.js";
 import {
@@ -94,11 +95,16 @@ function genNox({
 }: GenNoxImageArgs): [name: string, service: Service] {
   const configTomlName = getConfigTomlName(name);
   const configLocation = `/run/${CONFIGS_DIR_NAME}/${configTomlName}`;
+  const tcpPortString = numToStr(tcpPort);
+  const websocketPortString = numToStr(webSocketPort);
   return [
     name,
     {
       image: versions.nox,
-      ports: [`${tcpPort}:${tcpPort}`, `${webSocketPort}:${webSocketPort}`],
+      ports: [
+        `${tcpPortString}:${tcpPortString}`,
+        `${websocketPortString}:${websocketPortString}`,
+      ],
       environment: {
         WASM_LOG: "debug",
         FLUENCE_MAX_SPELL_PARTICLE_TTL: "9s",
@@ -110,12 +116,12 @@ function genNox({
         `--config=${configLocation}`,
         "--dev-mode",
         "--external-maddrs",
-        `/dns4/${name}/tcp/${tcpPort}`,
-        `/dns4/${name}/tcp/${webSocketPort}/ws`,
+        `/dns4/${name}/tcp/${tcpPortString}`,
+        `/dns4/${name}/tcp/${websocketPortString}/ws`,
         "--allow-private-ips",
         bootstrapTcpPort === undefined
           ? "--local"
-          : `--bootstraps=/dns/${bootstrapName}/tcp/${bootstrapTcpPort}`,
+          : `--bootstraps=/dns/${bootstrapName}/tcp/${numToStr(bootstrapTcpPort)}`,
       ],
       depends_on: {
         [IPFS_CONTAINER_NAME]: { condition: "service_healthy" },
@@ -130,7 +136,7 @@ function genNox({
       ],
       secrets: [name],
       healthcheck: {
-        test: `curl -f http://localhost:${httpPort}/health`,
+        test: `curl -f http://localhost:${numToStr(httpPort)}/health`,
         interval: "5s",
         timeout: "2s",
         retries: 10,
@@ -290,13 +296,13 @@ async function genDockerCompose(): Promise<LatestConfig> {
         }),
       ]),
       ...Object.fromEntries(
-        restNoxes.map(({ name, tcpPort, webSocketPort, httpPort }, index) => {
+        restNoxes.map(({ name, tcpPort, webSocketPort, httpPort }) => {
           return genNox({
             name,
-            tcpPort: tcpPort ?? TCP_PORT_START + index + 1,
-            webSocketPort: webSocketPort ?? WEB_SOCKET_PORT_START + index + 1,
-            httpPort: httpPort ?? HTTP_PORT_START + index + 1,
-            bootstrapName: bootstrapName,
+            tcpPort,
+            webSocketPort,
+            httpPort,
+            bootstrapName,
             bootstrapTcpPort,
           });
         }),

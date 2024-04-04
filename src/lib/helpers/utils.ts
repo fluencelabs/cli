@@ -22,6 +22,8 @@ import { CLIError } from "@oclif/core/lib/errors/index.js";
 import { commandObj } from "../commandObj.js";
 import { dbg } from "../dbg.js";
 
+import { bigintToStr, numToStr } from "./typesafeStringify.js";
+
 export function commaSepStrToArr(commaSepStr: string) {
   return commaSepStr.split(",").map((s) => {
     return s.trim();
@@ -55,7 +57,7 @@ export function jsonStringify(unknown: unknown): string {
       }
 
       if (typeof value === "bigint") {
-        return value.toString();
+        return bigintToStr(value);
       }
 
       return value;
@@ -64,9 +66,19 @@ export function jsonStringify(unknown: unknown): string {
   );
 }
 
+/**
+ * Used for error stringification cause one can throw anything in js (not only errors)
+ * also used for e.g. debug logs or "unreachable error" messages where we don't necessarily care much about the output as long as it's somewhat readable.
+ * it would be good to have two functions for this each with a more clear purpose for existence and used accordingly TODO: DXJ-763
+ */
 export function stringifyUnknown(unknown: unknown): string {
   try {
+    if (typeof unknown === "string") {
+      return unknown;
+    }
+
     if (unknown instanceof CLIError || unknown instanceof AssertionError) {
+      // eslint-disable-next-line no-restricted-syntax
       return String(unknown);
     }
 
@@ -98,6 +110,7 @@ export function stringifyUnknown(unknown: unknown): string {
 
     return jsonStringify(unknown);
   } catch {
+    // eslint-disable-next-line no-restricted-syntax
     return String(unknown);
   }
 }
@@ -116,7 +129,10 @@ function flagToArg(
     return [flag];
   }
 
-  return [flag, String(flagValue)];
+  return [
+    flag,
+    typeof flagValue === "number" ? numToStr(flagValue) : flagValue,
+  ];
 }
 
 export type Flags = Record<
@@ -212,7 +228,9 @@ export async function setTryTimeout<T, U>(
 
       if (errorString === previousErrorString) {
         commandObj.logToStderr(
-          `Attempt #${attemptCounter} to ${yellowMessage} failed with the same error`,
+          `Attempt #${numToStr(
+            attemptCounter,
+          )} to ${yellowMessage} failed with the same error`,
         );
       } else {
         const retryMessage = isTrying ? ". Going to retry" : "";

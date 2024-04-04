@@ -28,6 +28,7 @@ import {
 import type { UserConfig } from "./configs/user/config.js";
 import { FS_OPTIONS } from "./const.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
+import { bufferToBase64 } from "./helpers/typesafeStringify.js";
 import {
   ensureUserFluenceSecretsDir,
   getFluenceSecretsDir,
@@ -403,7 +404,7 @@ export async function getExistingSecretKey(
     ...userKeyPairOptions,
   );
 
-  const { key } = await list({
+  const { key } = await list<{ key: string }, never>({
     message: "Select existing secret key name",
     options,
     oneChoiceMessage: (name): string => {
@@ -474,7 +475,7 @@ export async function genSecretKeyString(): Promise<string> {
   const { KeyPair } = await import("@fluencelabs/js-client");
   const keyPair = await KeyPair.randomEd25519();
   const privateKey = keyPair.toEd25519PrivateKey();
-  return Buffer.from(privateKey).toString("base64");
+  return bufferToBase64(Buffer.from(privateKey));
 }
 
 export function base64ToUint8Array(base64: string) {

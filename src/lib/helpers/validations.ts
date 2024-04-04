@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { numToStr } from "./typesafeStringify.js";
 import { splitErrorsAndResults, stringifyUnknown } from "./utils.js";
 
 export type ValidationResult = string | true;
@@ -105,7 +106,7 @@ export function lessThenValidator(lessThen: number) {
       return true;
     }
 
-    return `Must be less then ${lessThen}`;
+    return `Must be less then ${numToStr(lessThen)}`;
   };
 }
 
@@ -115,7 +116,7 @@ export function greaterThenValidator(greaterThen: number) {
       return true;
     }
 
-    return `Must be greater then ${greaterThen}`;
+    return `Must be greater then ${numToStr(greaterThen)}`;
   };
 }
 

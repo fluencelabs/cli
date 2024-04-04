@@ -27,6 +27,7 @@ import { envConfig } from "./configs/globalConfigs.js";
 import { initFluenceConfig } from "./configs/project/fluence.js";
 import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
 import { FLUENCE_ENVS, type FluenceEnv } from "./const.js";
+import { numToStr } from "./helpers/typesafeStringify.js";
 import { jsonStringify, splitErrorsAndResults } from "./helpers/utils.js";
 import {
   getPeerId,
@@ -39,7 +40,7 @@ async function ensureLocalAddrsAndPeerIds() {
   return (await ensureComputerPeerConfigs()).map(
     ({ peerId, overriddenNoxConfig }): AddrAndPeerId => {
       return {
-        multiaddr: `/ip4/127.0.0.1/tcp/${overriddenNoxConfig.websocketPort}/ws/p2p/${peerId}`,
+        multiaddr: `/ip4/127.0.0.1/tcp/${numToStr(overriddenNoxConfig.websocketPort)}/ws/p2p/${peerId}`,
         peerId,
       };
     },
@@ -119,7 +120,7 @@ function parseNamedPeer(
   }
 
   if (index < 0 || index >= relaysLength) {
-    return `Index ${index} is out of range`;
+    return `Index ${numToStr(index)} is out of range`;
   }
 
   return index;

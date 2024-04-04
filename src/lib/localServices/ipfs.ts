@@ -54,6 +54,7 @@ const upload = async (
       cidVersion: 1,
     });
 
+    // eslint-disable-next-line no-restricted-syntax
     const cidString = cid.toString();
 
     await ipfsClient.pin.add(cidString);
@@ -97,6 +98,7 @@ const dagUpload = async (
       pin: true,
     });
 
+    // eslint-disable-next-line no-restricted-syntax
     const cidString = cid.toString();
 
     await ipfsClient.pin.add(cidString);
@@ -175,6 +177,7 @@ export const doRegisterIpfsClient = async (
     async id(multiaddr): Promise<string> {
       const ipfsClient = await createIPFSClient(multiaddr);
       const result = await ipfsClient.id();
+      // eslint-disable-next-line no-restricted-syntax
       return result.id.toString();
     },
     async exists(multiaddr, cid): Promise<boolean> {

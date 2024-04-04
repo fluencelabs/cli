@@ -20,6 +20,8 @@ import parseDuration from "parse-duration";
 import { versions } from "../../versions.js";
 import { getReadonlyDealClient } from "../dealClient.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
+import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
+import { stringifyUnknown } from "../helpers/utils.js";
 import type { ValidationResult } from "../helpers/validations.js";
 
 export async function getMinCCDuration(): Promise<bigint> {
@@ -49,7 +51,7 @@ export async function ccDurationValidator() {
     const parsedSeconds = parsed / 1000;
 
     if (parsedSeconds < minDuration) {
-      return `Must be at least ${minDuration} sec. Got: ${parsedSeconds} sec`;
+      return `Must be at least ${bigintToStr(minDuration)} sec. Got: ${numToStr(parsedSeconds)} sec`;
     }
 
     return true;
@@ -65,7 +67,7 @@ export async function validateAddress(
     return true;
   }
 
-  return `Must be a valid address. Got: ${color.yellow(String(input))}`;
+  return `Must be a valid address. Got: ${color.yellow(stringifyUnknown(input))}`;
 }
 
 async function getProtocolVersions() {
@@ -99,15 +101,17 @@ export async function validateProtocolVersion(
     protocolVersion < minProtocolVersion ||
     protocolVersion > maxProtocolVersion
   ) {
+    const minProtocolVersionStr = bigintToStr(minProtocolVersion);
+
     if (minProtocolVersion === maxProtocolVersion) {
       return `Protocol version must be equal to ${color.yellow(
-        `${minProtocolVersion}`,
+        minProtocolVersionStr,
       )}. Got: ${color.yellow(protocolVersion)}`;
     }
 
     return `Protocol version must be ${color.yellow(
-      `>=${minProtocolVersion}`,
-    )} and ${color.yellow(`<=${maxProtocolVersion}`)}. Got: ${color.yellow(
+      `>=${minProtocolVersionStr}`,
+    )} and ${color.yellow(`<=${minProtocolVersionStr}`)}. Got: ${color.yellow(
       protocolVersion,
     )}`;
   }

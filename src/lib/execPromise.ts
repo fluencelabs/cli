@@ -23,6 +23,7 @@ import { CLIError } from "@oclif/core/lib/errors/index.js";
 import { CLI_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { dbg } from "./dbg.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
+import { numToStr, bufferToStr } from "./helpers/typesafeStringify.js";
 import { type Flags, flagsToArgs } from "./helpers/utils.js";
 
 const PATH_TO_RUN_JS = join(CLI_NAME, "bin", "run.js");
@@ -59,13 +60,16 @@ export const execPromise = async ({
 
   dbg(
     isRunningCLITest
-      ? `${CLI_NAME}${fullCommand.split(PATH_TO_RUN_JS)[1]}`
+      ? `${CLI_NAME}${(() => {
+          const [, restCommand] = fullCommand.split(PATH_TO_RUN_JS);
+          return restCommand ?? "";
+        })()}`
       : fullCommand,
   );
 
   const getCommandFailedMessage = (code: number | null = null) => {
     const exitCodeMessage =
-      code === null ? "failed" : `exited with code ${code}`;
+      code === null ? "failed" : `exited with code ${numToStr(code)}`;
 
     return `Command: ${color.yellow(fullCommand)} ${exitCodeMessage}`;
   };
@@ -88,7 +92,7 @@ export const execPromise = async ({
         res(
           new Error(
             `${commandFailedMessage}. Reason: Execution timed out: command didn't yield any result in ${color.yellow(
-              `${timeout}ms`,
+              `${numToStr(timeout)}ms`,
             )}`,
           ),
         );
@@ -107,7 +111,7 @@ export const execPromise = async ({
         process.stdout.write(data);
       }
 
-      stdout = `${stdout}${data.toString()}`;
+      stdout = `${stdout}${bufferToStr(data)}`;
     });
 
     let stderr = "";
@@ -121,7 +125,7 @@ export const execPromise = async ({
         process.stderr.write(data);
       }
 
-      stderr = `${stderr}${data.toString()}`;
+      stderr = `${stderr}${bufferToStr(data)}`;
     });
 
     childProcess.on("error", (error: string): void => {

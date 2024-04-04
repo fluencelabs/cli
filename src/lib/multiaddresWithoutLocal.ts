@@ -26,7 +26,7 @@ import { color } from "@oclif/color";
 import { commandObj } from "./commandObj.js";
 import { initFluenceConfig } from "./configs/project/fluence.js";
 import { CHAIN_ENV, type PublicFluenceEnv, type FluenceEnv } from "./const.js";
-import { commaSepStrToArr } from "./helpers/utils.js";
+import { commaSepStrToArr, stringifyUnknown } from "./helpers/utils.js";
 import { input, list } from "./prompt.js";
 
 export function getPeerId(addr: string): string {
@@ -70,7 +70,7 @@ export async function ensureCustomAddrsAndPeerIds() {
       commandObj.error(
         `${fluenceConfig.$getPath()} at ${color.yellow(
           "customFluenceEnv.relays",
-        )}: ${e instanceof Error ? e.message : String(e)}`,
+        )}: ${stringifyUnknown(e)}`,
       );
     }
 

@@ -57,10 +57,13 @@ export async function ensureValidServiceName(
 
 function createServiceNameValidator(fluenceConfig: FluenceConfig | null) {
   return function validateServiceName(serviceName: string): true | string {
-    if (serviceName in (fluenceConfig?.services ?? {})) {
+    if (
+      fluenceConfig !== null &&
+      serviceName in (fluenceConfig.services ?? {})
+    ) {
       return `Service with name ${color.yellow(
         serviceName,
-      )} already exists in ${fluenceConfig?.$getPath()}. Please enter another name`;
+      )} already exists in ${fluenceConfig.$getPath()}. Please enter another name`;
     }
 
     const validity = validateAquaName(serviceName);

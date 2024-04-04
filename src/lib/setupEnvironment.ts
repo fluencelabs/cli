@@ -37,7 +37,9 @@ const resolveEnvVariable = <T>(
 
   if (!isValid(variable)) {
     throw new Error(
-      `Invalid environment variable: ${variableName}="${String(variable)}"`,
+      variable === undefined
+        ? `Environment variable not set: ${variableName}`
+        : `Invalid environment variable: ${variableName}="${variable}"`,
     );
   }
 

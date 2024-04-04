@@ -19,7 +19,6 @@ import { rm } from "node:fs/promises";
 import { isAbsolute, join, relative } from "node:path";
 
 import type { CompileFromPathArgs } from "@fluencelabs/aqua-api";
-import { kras } from "@fluencelabs/fluence-network-environment";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import { yamlDiffPatch } from "yaml-diff-patch";
@@ -60,6 +59,7 @@ import {
   COMPILE_AQUA_PROPERTY_NAME,
   DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "../../const.js";
+import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
   validateCIDs,
@@ -338,7 +338,7 @@ const dealSchemaObj = {
     },
     protocolVersion: {
       type: "integer",
-      description: `Protocol version. Default: ${versions.protocolVersion}`,
+      description: `Protocol version. Default: ${numToStr(versions.protocolVersion)}`,
       nullable: true,
       default: versions.protocolVersion,
       minimum: 1,
@@ -943,7 +943,7 @@ version: 8
 # A map of deployment names as keys and deployments as values
 deployments:
   ${DEFAULT_DEPLOYMENT_NAME}:
-    targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
+    targetWorkers: ${numToStr(TARGET_WORKERS_DEFAULT)} # max amount of workers in the deal
     pricePerWorkerEpoch: "${DEFAULT_PRICE_PER_EPOCH_DEVELOPER}" # price per worker epoch in ${PT_SYMBOL}
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
@@ -984,7 +984,7 @@ ${yamlDiffPatch(
 # customFluenceEnv:
 #   contractsEnv: local
 #   relays:
-#     - "${kras[0]?.multiaddr}"
+#     - "/ip4/127.0.0.1/tcp/10010/ws/p2p/12D3KooWGpqaLpVUoLB5cJPLDS6CjBNZePBNTYPGpNPNZMDs6osY"
 # # A map with service names as keys and service configs as values.
 # # Service names must start with a lowercase letter and contain only letters numbers and underscores.
 # # You can use \`fluence service new\` or \`fluence service add\` command to add a service

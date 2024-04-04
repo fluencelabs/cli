@@ -21,6 +21,7 @@ import { type ChainENV } from "../const.js";
 import { type DealNameAndId } from "../deal.js";
 import { getReadonlyDealClient } from "../dealClient.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
+import { bigintToStr } from "../helpers/typesafeStringify.js";
 
 import { peerIdHexStringToBase58String } from "./conversions.js";
 import { ptFormatWithSymbol } from "./currencies.js";
@@ -44,7 +45,7 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   }
 
   commandObj.log(`DealID: "${dealId}"`);
-  commandObj.log(`Status: ${DealStatus[Number(status)]}`);
+  commandObj.log(`Status: ${DealStatus[Number(status)] ?? "Unknown"}`);
   const { ethers } = await import("ethers");
 
   commandObj.log(
@@ -58,12 +59,14 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   );
 
   commandObj.log(`Payment token: ${await deal.paymentToken()}`);
-  commandObj.log(`Min workers: ${await deal.minWorkers()}`);
-  commandObj.log(`Target workers: ${await deal.targetWorkers()}`);
+  commandObj.log(`Min workers: ${bigintToStr(await deal.minWorkers())}`);
+  commandObj.log(`Target workers: ${bigintToStr(await deal.targetWorkers())}`);
 
   const currentComputeUnitCount = await deal["getComputeUnitCount()"]();
 
-  commandObj.log(`Current compute units: ${currentComputeUnitCount}`);
+  commandObj.log(
+    `Current compute units: ${bigintToStr(currentComputeUnitCount)}`,
+  );
 
   if (currentComputeUnitCount === 0n) {
     commandObj.log(`No compute units`);

@@ -31,6 +31,7 @@ import {
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "./const.js";
+import { bigintToStr, numToStr } from "./helpers/typesafeStringify.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
 import {
   validatePercent,
@@ -66,7 +67,7 @@ export async function addComputePeers(
   const validateCCDuration = await ccDurationValidator();
 
   do {
-    const defaultName = `nox-${computePeersCounter}`;
+    const defaultName = `nox-${numToStr(computePeersCounter)}`;
 
     let name =
       numberOfNoxes === undefined
@@ -83,13 +84,13 @@ export async function addComputePeers(
 
     const computeUnitsString = await input({
       message: `Enter number of compute units for ${color.yellow(name)}`,
-      default: `${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX}`,
+      default: numToStr(DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX),
       validate: validatePositiveNumberOrEmpty,
     });
 
     const capacityCommitmentDuration = await input({
       message: `Enter capacity commitment duration ${DURATION_EXAMPLE}`,
-      default: `${minDuration} sec`,
+      default: `${bigintToStr(minDuration)} sec`,
       validate: validateCCDuration,
     });
 
@@ -102,7 +103,7 @@ export async function addComputePeers(
 
     const capacityCommitmentRewardDelegationRate = await input({
       message: `Enter capacity commitment reward delegation rate (in %)`,
-      default: `${DEFAULT_CC_REWARD_DELEGATION_RATE}`,
+      default: numToStr(DEFAULT_CC_REWARD_DELEGATION_RATE),
       validate: validatePercent,
     });
 
@@ -139,7 +140,7 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
 
   do {
     const defaultName =
-      offersCounter === 0 ? "offer" : `offer-${offersCounter}`;
+      offersCounter === 0 ? "offer" : `offer-${numToStr(offersCounter)}`;
 
     const name = await input({
       message: `Enter name for offer`,

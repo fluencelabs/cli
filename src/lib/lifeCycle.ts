@@ -49,6 +49,7 @@ import "./setupEnvironment.js";
 import { dbg } from "./dbg.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
+import { numToStr } from "./helpers/typesafeStringify.js";
 import {
   projectRootDir,
   recursivelyFindProjectRootDir,
@@ -56,6 +57,8 @@ import {
   getProviderConfigPath,
 } from "./paths.js";
 import { confirm } from "./prompt.js";
+
+const NODE_JS_MAJOR_VERSION_STR = numToStr(NODE_JS_MAJOR_VERSION);
 
 const ensureUserConfig = async (): Promise<void> => {
   const maybeUserConfig = await initUserConfig();
@@ -144,7 +147,7 @@ export async function initCli<
 
   if (majorVersion !== NODE_JS_MAJOR_VERSION) {
     return commandObj.error(
-      `${CLI_NAME_FULL} requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`,
+      `${CLI_NAME_FULL} requires Node.js version "${NODE_JS_MAJOR_VERSION_STR}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION_STR} && nvm use ${NODE_JS_MAJOR_VERSION_STR} && nvm alias default ${NODE_JS_MAJOR_VERSION_STR}"`,
     );
   }
 

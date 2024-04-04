@@ -29,6 +29,7 @@ import { AQUA_EXT, FS_OPTIONS } from "../const.js";
 import { input } from "../prompt.js";
 
 import { validateAquaTypeName, validateAquaName } from "./downloadFile.js";
+import { boolToStr, numToStr } from "./typesafeStringify.js";
 import { stringifyUnknown } from "./utils.js";
 
 /**
@@ -223,7 +224,7 @@ export const jsToAquaImpl = ({
       return "u64";
     })();
 
-    const stringNumber = valueToConvert.toString();
+    const stringNumber = numToStr(valueToConvert);
 
     const value =
       type === "f64" && isInteger ? `${stringNumber}.0` : stringNumber;
@@ -232,7 +233,7 @@ export const jsToAquaImpl = ({
   }
 
   if (typeof valueToConvert === "boolean") {
-    return { type: "bool", value: valueToConvert.toString() };
+    return { type: "bool", value: boolToStr(valueToConvert) };
   }
 
   if (isNilInAqua(valueToConvert)) {

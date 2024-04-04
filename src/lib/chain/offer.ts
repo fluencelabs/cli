@@ -45,6 +45,7 @@ import {
   signBatch,
   getReadonlyDealClient,
 } from "../dealClient.js";
+import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
@@ -290,7 +291,7 @@ async function resolveOfferInfo({
       "Price Per Epoch": await ptFormatWithSymbol(
         offerInfo.minPricePerWorkerEpoch,
       ),
-      "Peer Count": offerInfo.peerCount.toString(),
+      "Peer Count": bigintToStr(offerInfo.peerCount),
     };
   }
 
@@ -519,7 +520,9 @@ export async function updateOffers(flags: OffersArgs) {
       populatedTxs.push(
         ...computeUnitsToAdd.map(({ hexPeerId, unitIds, peerIdBase58 }) => {
           return {
-            description: `Adding ${unitIds.length} compute units to peer id ${peerIdBase58}`,
+            description: `Adding ${numToStr(
+              unitIds.length,
+            )} compute units to peer id ${peerIdBase58}`,
             tx: [market.addComputeUnits, hexPeerId, unitIds],
           };
         }),
@@ -538,7 +541,7 @@ export async function updateOffers(flags: OffersArgs) {
       populatedTxs.push({
         description: `Adding peers:\n${computePeersToAdd
           .map(({ peerIdBase58, unitIds }) => {
-            return `Peer: ${peerIdBase58} with ${unitIds.length} compute units`;
+            return `Peer: ${peerIdBase58} with ${numToStr(unitIds.length)} compute units`;
           })
           .join("\n")}`,
         tx: [market.addComputePeers, offerId, computePeersToAdd],
@@ -742,7 +745,7 @@ export async function resolveOffersFromProviderArtifactsConfig(
 
   if (flags[OFFER_IDS_FLAG_NAME] !== undefined) {
     return commaSepStrToArr(flags[OFFER_IDS_FLAG_NAME]).map((offerId, i) => {
-      return { offerName: `#${i}`, offerId };
+      return { offerName: `#${numToStr(i)}`, offerId };
     });
   }
 

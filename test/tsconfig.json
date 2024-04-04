@@ -1,8 +1,9 @@
 {
-  "extends": "../tsconfig",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "rootDir": "../"
+    "rootDir": "../",
   },
-  "include": ["../src/**/*", "../test/**/*"]
+  "include": ["../src/**/*", "../test/**/*"],
+  "types": ["node", "jest"],
 }

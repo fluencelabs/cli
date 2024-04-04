@@ -85,6 +85,7 @@ import {
   type CustomTypes,
 } from "./helpers/jsToAqua.js";
 import { genServiceConfigToml } from "./helpers/serviceConfigToml.js";
+import { numToStr } from "./helpers/typesafeStringify.js";
 import { commaSepStrToArr, splitErrorsAndResults } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
@@ -814,7 +815,7 @@ async function resolveDeployment({
   if (!isDealDeploy) {
     dummyDealId =
       maybeWorkersConfig?.hosts?.[fluenceEnv]?.[deploymentName]?.dummyDealId ??
-      `${deploymentName}_${initPeerId}_${Math.random().toString().slice(2)}`;
+      `${deploymentName}_${initPeerId}_${numToStr(Math.random()).slice(2)}`;
   }
 
   const peerIdsOrNamedNodes =

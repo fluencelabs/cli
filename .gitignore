@@ -19,7 +19,6 @@ oclif.manifest.json
 **/node_modules
 **/target/
 .repl_history
-.vscode/settings.json
 
 # ignore compiled files
 src/lib/compiled-aqua

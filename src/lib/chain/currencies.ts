@@ -17,6 +17,7 @@
 import { FLT_SYMBOL, PT_SYMBOL } from "../const.js";
 import { dbg } from "../dbg.js";
 import { getDealClient } from "../dealClient.js";
+import { numToStr } from "../helpers/typesafeStringify.js";
 
 export async function fltParse(value: string): Promise<bigint> {
   const { ethers } = await import("ethers");
@@ -61,7 +62,7 @@ export async function getPtDecimals() {
       });
 
       const decimals = parseInt(decimalsRaw);
-      dbg(`Got ${PT_SYMBOL} number of decimals: ${decimals}`);
+      dbg(`Got ${PT_SYMBOL} number of decimals: ${numToStr(decimals)}`);
       return decimals;
     })();
   }

@@ -40,6 +40,7 @@ import {
   getEventValues,
 } from "./dealClient.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
+import { bigintToStr } from "./helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
   setTryTimeout,
@@ -102,7 +103,9 @@ export async function dealCreate({
         deploymentName === undefined ? "" : `${color.yellow(deploymentName)} :`
       }initialBalance ${color.yellow(
         initialBalance,
-      )} is less than minimum initialBalance = targetWorkers * pricePerWorkerEpoch * ${minDealDepositedEpochs} = ${color.yellow(
+      )} is less than minimum initialBalance = targetWorkers * pricePerWorkerEpoch * ${bigintToStr(
+        minDealDepositedEpochs,
+      )} = ${color.yellow(
         await ptFormatWithSymbol(minInitialBalanceBigInt),
       )}. Please, increase initialBalance or decrease targetWorkers or pricePerWorkerEpoch`,
     );
@@ -191,7 +194,9 @@ export async function match(dealAddress: string) {
   const core = dealClient.getCore();
 
   dbg(
-    `initTimestamp: ${await core.initTimestamp()} Current epoch: ${await core.currentEpoch()}`,
+    `initTimestamp: ${bigintToStr(
+      await core.initTimestamp(),
+    )} Current epoch: ${bigintToStr(await core.currentEpoch())}`,
   );
 
   const matchedOffers = await setTryTimeout(
