@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.16.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.16.0...fluence-cli-v0.16.1) (2024-04-04)
+
+
+### Features
+
+* allow updating peers and CU in offer [DXJ-668] ([#885](https://github.com/fluencelabs/cli/issues/885)) ([6bc05c8](https://github.com/fluencelabs/cli/commit/6bc05c8c581d5366adc72c3165b41288abece251))
+* bump fluence-network-environment 0.2.1 ([#887](https://github.com/fluencelabs/cli/issues/887)) ([ef225de](https://github.com/fluencelabs/cli/commit/ef225de808f5d53d9493eac4138ca5dc116d1a06))
+
 ## [0.16.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.28...fluence-cli-v0.16.0) (2024-04-02)
 
 
