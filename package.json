@@ -133,7 +133,7 @@
     "ts-unused-exports": "10.0.1",
     "tslib": "2.6.2",
     "tsx": "4.7.1",
-    "typescript": "5.4.3",
+    "typescript": "5.3.3",
     "typescript-eslint": "7.4.0",
     "undici": "6.6.1"
   },
