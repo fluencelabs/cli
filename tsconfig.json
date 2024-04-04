@@ -16,7 +16,6 @@
     "esm": true,
   },
   "include": ["src/**/*"],
-  "exclude": ["src/ts/**/*", "src/js/**/*"],
   "files": ["src/environment.d.ts", "src/types.d.ts", "src/fetch.d.ts"],
-  "types": ["node", "jest"],
+  "types": ["node"],
 }
