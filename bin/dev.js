@@ -35,6 +35,9 @@ oclif.settings.debug = true;
 oclif
   .run(process.argv.slice(2), import.meta.url)
   .then(oclif.flush)
-  .catch((error) => {
-    return createErrorPromise(error);
-  });
+  .catch(
+    /** @param {unknown} error */
+    (error) => {
+      return createErrorPromise(error);
+    },
+  );

@@ -32,6 +32,7 @@ import {
   sign,
   getReadonlyDealClient,
 } from "../dealClient.js";
+import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import {
   splitErrorsAndResults,
   stringifyUnknown,
@@ -219,12 +220,16 @@ export async function createCommitments(flags: {
           );
 
           dbg(
-            `initTimestamp: ${await core.initTimestamp()} Epoch duration: ${epochDuration.toString()}. Current epoch: ${await core.currentEpoch()}`,
+            `initTimestamp: ${bigintToStr(
+              await core.initTimestamp(),
+            )} Epoch duration: ${bigintToStr(
+              epochDuration,
+            )}. Current epoch: ${bigintToStr(await core.currentEpoch())}`,
           );
 
-          dbg(`Duration in seconds: ${durationInSec.toString()}`);
+          dbg(`Duration in seconds: ${bigintToStr(durationInSec)}`);
           const durationEpoch = durationInSec / epochDuration;
-          dbg(`Duration in epochs: ${durationEpoch.toString()}`);
+          dbg(`Duration in epochs: ${bigintToStr(durationEpoch)}`);
           const ccDelegator = capacityCommitment.delegator;
 
           const minDuration = await core.minDuration();
@@ -389,7 +394,7 @@ export async function removeCommitments(flags: CCFlags) {
       `You can remove commitments only if they have WaitDelegation status. Got:\n\n${commitmentsWithInvalidStatus
         .map(({ commitment, info }) => {
           return `${stringifyBasicCommitmentInfo(commitment)}Status: ${
-            CommitmentStatus[Number(info.status)]
+            CommitmentStatus[Number(info.status)] ?? "Unknown"
           }`;
         })
         .join("\n\n")}`,
@@ -540,20 +545,24 @@ export async function getCommitmentsInfo(flags: CCFlags) {
           commitment.status === undefined
             ? undefined
             : Number(commitment.status),
-        startEpoch: commitment.startEpoch?.toString(),
-        endEpoch: commitment.endEpoch?.toString(),
+        startEpoch: optBigIntToStr(commitment.startEpoch),
+        endEpoch: optBigIntToStr(commitment.endEpoch),
         rewardDelegatorRate: await rewardDelegationRateToString(
           commitment.rewardDelegatorRate,
         ),
         delegator: commitment.delegator,
-        totalCU: commitment.unitCount?.toString(),
-        failedEpoch: commitment.failedEpoch?.toString(),
-        totalCUFailCount: commitment.totalFailCount?.toString(),
+        totalCU: optBigIntToStr(commitment.unitCount),
+        failedEpoch: optBigIntToStr(commitment.failedEpoch),
+        totalCUFailCount: optBigIntToStr(commitment.totalFailCount),
         collateralPerUnit: commitment.collateralPerUnit,
-        exitedUnitCount: commitment.exitedUnitCount?.toString(),
+        exitedUnitCount: optBigIntToStr(commitment.exitedUnitCount),
       };
     }),
   );
+}
+
+function optBigIntToStr(value: bigint | undefined) {
+  return value === undefined ? undefined : bigintToStr(value);
 }
 
 async function rewardDelegationRateToString(
@@ -566,9 +575,9 @@ async function rewardDelegationRateToString(
   const { readonlyDealClient } = await getReadonlyDealClient();
   const core = readonlyDealClient.getCore();
   const precision = await core.precision();
-  return `${
-    (Number(rewardDelegatorRate) * HUNDRED_PERCENT) / Number(precision)
-  }%`;
+  return `${numToStr(
+    (Number(rewardDelegatorRate) * HUNDRED_PERCENT) / Number(precision),
+  )}%`;
 }
 
 export async function printCommitmentsInfo(flags: CCFlags) {
@@ -635,7 +644,7 @@ async function ccStatusToString(status: number | undefined) {
   const statusStr = CommitmentStatus[status];
 
   if (statusStr === undefined) {
-    return `Unknown (${status})`;
+    return `Unknown (${numToStr(status)})`;
   }
 
   return statusStr;

@@ -10,13 +10,13 @@
     "resolveJsonModule": true,
     "importsNotUsedAsValues": "remove",
     "verbatimModuleSyntax": true,
-    "lib": ["es2023"]
+    "lib": ["es2023"],
   },
   "ts-node": {
-    "esm": true
+    "esm": true,
   },
   "include": ["src/**/*"],
   "exclude": ["src/ts/**/*", "src/js/**/*"],
   "files": ["src/environment.d.ts", "src/types.d.ts", "src/fetch.d.ts"],
-  "types": ["node", "jest"]
+  "types": ["node", "jest"],
 }

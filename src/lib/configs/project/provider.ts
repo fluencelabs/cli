@@ -68,6 +68,7 @@ import {
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
+import { boolToStr, numToStr } from "../../helpers/typesafeStringify.js";
 import { jsonStringify, splitErrorsAndResults } from "../../helpers/utils.js";
 import {
   type ValidationResult,
@@ -207,22 +208,30 @@ const noxConfigYAMLSchemaV0 = {
     tcpPort: {
       nullable: true,
       type: "integer",
-      description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
+      description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${numToStr(
+        TCP_PORT_START,
+      )}`,
     },
     websocketPort: {
       nullable: true,
       type: "integer",
-      description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
+      description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${numToStr(
+        WEB_SOCKET_PORT_START,
+      )}`,
     },
     httpPort: {
       nullable: true,
       type: "integer",
-      description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${HTTP_PORT_START}`,
+      description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${numToStr(
+        HTTP_PORT_START,
+      )}`,
     },
     aquavmPoolSize: {
       nullable: true,
       type: "integer",
-      description: `Number of aquavm instances to run. Default: ${DEFAULT_AQUAVM_POOL_SIZE}`,
+      description: `Number of aquavm instances to run. Default: ${numToStr(
+        DEFAULT_AQUAVM_POOL_SIZE,
+      )}`,
     },
     systemServices: {
       nullable: true,
@@ -419,22 +428,30 @@ const noxConfigYAMLSchemaV1 = {
     tcpPort: {
       nullable: true,
       type: "integer",
-      description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
+      description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${numToStr(
+        TCP_PORT_START,
+      )}`,
     },
     websocketPort: {
       nullable: true,
       type: "integer",
-      description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
+      description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${numToStr(
+        WEB_SOCKET_PORT_START,
+      )}`,
     },
     httpPort: {
       nullable: true,
       type: "integer",
-      description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${HTTP_PORT_START}`,
+      description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${numToStr(
+        HTTP_PORT_START,
+      )}`,
     },
     aquavmPoolSize: {
       nullable: true,
       type: "integer",
-      description: `Number of aquavm instances to run. Default: ${DEFAULT_AQUAVM_POOL_SIZE}`,
+      description: `Number of aquavm instances to run. Default: ${numToStr(
+        DEFAULT_AQUAVM_POOL_SIZE,
+      )}`,
     },
     systemServices: {
       nullable: true,
@@ -752,7 +769,9 @@ const ccpConfigYAMLSchemaV1 = {
         port: {
           nullable: true,
           type: "integer",
-          description: `RPC port. Default: ${DEFAULT_RPC_ENDPOINT_PORT}`,
+          description: `RPC port. Default: ${numToStr(
+            DEFAULT_RPC_ENDPOINT_PORT,
+          )}`,
           default: DEFAULT_RPC_ENDPOINT_PORT,
         },
         utilityThreadIds: {
@@ -779,7 +798,9 @@ const ccpConfigYAMLSchemaV1 = {
         port: {
           nullable: true,
           type: "integer",
-          description: `Prometheus port. Default: ${DEFAULT_PROMETHEUS_ENDPOINT_PORT}`,
+          description: `Prometheus port. Default: ${numToStr(
+            DEFAULT_PROMETHEUS_ENDPOINT_PORT,
+          )}`,
           default: DEFAULT_PROMETHEUS_ENDPOINT_PORT,
         },
       },
@@ -794,7 +815,9 @@ const ccpConfigYAMLSchemaV1 = {
         reportHashrate: {
           nullable: true,
           type: "boolean",
-          description: `Report hashrate. Default: ${DEFAULT_REPORT_HASHRATE}`,
+          description: `Report hashrate. Default: ${boolToStr(
+            DEFAULT_REPORT_HASHRATE,
+          )}`,
           default: DEFAULT_REPORT_HASHRATE,
         },
         logLevel: {
@@ -863,14 +886,18 @@ const offerSchema = {
     effectors: { type: "array", items: { type: "string" }, nullable: true },
     minProtocolVersion: {
       type: "integer",
-      description: `Min protocol version. Must be less then or equal to maxProtocolVersion. Default: ${versions.protocolVersion}`,
+      description: `Min protocol version. Must be less then or equal to maxProtocolVersion. Default: ${numToStr(
+        versions.protocolVersion,
+      )}`,
       nullable: true,
       default: versions.protocolVersion,
       minimum: 1,
     },
     maxProtocolVersion: {
       type: "integer",
-      description: `Max protocol version. Must be more then or equal to minProtocolVersion. Default: ${versions.protocolVersion}`,
+      description: `Max protocol version. Must be more then or equal to minProtocolVersion. Default: ${numToStr(
+        versions.protocolVersion,
+      )}`,
       nullable: true,
       default: versions.protocolVersion,
       minimum: 1,
@@ -886,7 +913,9 @@ const computePeerSchemaV0 = {
   properties: {
     computeUnits: {
       type: "integer",
-      description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
+      description: `How many compute units should nox have. Default: ${numToStr(
+        DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+      )} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
     },
     nox: noxConfigYAMLSchemaV0,
   },
@@ -955,7 +984,9 @@ const computePeerSchemaV1 = {
   properties: {
     computeUnits: {
       type: "integer",
-      description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
+      description: `How many compute units should nox have. Default: ${numToStr(
+        DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+      )} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
     },
     nox: noxConfigYAMLSchemaV1,
     ccp: ccpConfigYAMLSchemaV1,
@@ -1055,7 +1086,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
     userProvidedConfig.computePeers = Object.fromEntries(
       times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
         return [
-          `nox-${i}`,
+          `nox-${numToStr(i)}`,
           { computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX },
         ] as const;
       }),
@@ -1267,8 +1298,8 @@ async function validateProtocolVersions(providerConfig: LatestConfig) {
         },
       ),
     )
-  ).filter(({ validity }) => {
-    return validity !== true;
+  ).filter((a): a is typeof a & { validity: string } => {
+    return a.validity !== true;
   });
 
   if (errors.length > 0) {
@@ -1539,33 +1570,20 @@ async function resolveNoxConfigYAML(
 
   config = mergeConfigYAMLWithRawConfig(config, computePeerNoxConfig);
 
-  if (config.tcpPort === undefined) {
-    config.tcpPort = TCP_PORT_START + i;
-  }
-
-  if (config.websocketPort === undefined) {
-    config.websocketPort = WEB_SOCKET_PORT_START + i;
-  }
-
-  if (config.httpPort === undefined) {
-    config.httpPort = HTTP_PORT_START + i;
-  }
+  const tcpPort = config.tcpPort ?? TCP_PORT_START + i;
+  const websocketPort = config.websocketPort ?? WEB_SOCKET_PORT_START + i;
+  const httpPort = config.httpPort ?? HTTP_PORT_START + i;
+  const walletPrivateKey = config.chain?.walletPrivateKey ?? signingWallet;
 
   if (config.chain?.walletPrivateKey === undefined) {
-    config.chain = {
-      ...config.chain,
-      walletPrivateKey: signingWallet,
-    };
+    config.chain = { ...config.chain, walletPrivateKey };
   }
 
   config.systemServices = {
     ...config.systemServices,
     decider: {
       ...config.systemServices?.decider,
-      walletKey:
-        config.systemServices?.decider?.walletKey ??
-        config.chain.walletPrivateKey ??
-        signingWallet,
+      walletKey: config.systemServices?.decider?.walletKey ?? walletPrivateKey,
       startBlock:
         config.systemServices?.decider?.startBlock ??
         config.chain.dealSyncStartBlock ??
@@ -1600,7 +1618,7 @@ async function resolveNoxConfigYAML(
     },
   };
 
-  return config;
+  return { ...config, tcpPort, websocketPort, httpPort };
 }
 
 function resolveCCPConfigYAML(
@@ -1658,7 +1676,9 @@ function noxConfigYAMLToConfigToml(
               ccp?.ccpEndpoint ??
               `http://${
                 ccpConfig.rpcEndpoint?.host ?? DEFAULT_RPC_ENDPOINT_HOST
-              }:${ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT}`,
+              }:${numToStr(
+                ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT,
+              )}`,
             proofPollPeriod: ccp?.proofPollPeriod,
           },
         }),

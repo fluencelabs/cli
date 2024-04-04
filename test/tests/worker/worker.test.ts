@@ -41,6 +41,7 @@ import {
   NEW_SERVICE_NAME,
   NEW_SPELL_NAME,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
+  RUN_DEPLOYED_SERVICES_TIMEOUT_STR,
   SERVICE_INTERFACES,
   UPDATED_SERVICE_INTERFACES,
 } from "../../helpers/constants.js";
@@ -80,7 +81,7 @@ const assertHasPeer = (result: unknown): { peer: string } => {
     throw new Error(
       `Running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is supposed to return an array of objects of a particular shape: { peer: string }. One of the received objects doesn't match the shape: ${jsonStringify(
         result,
-      )}. Error: ${err instanceof Error ? err.message : String(err)}`,
+      )}. Error: ${stringifyUnknown(err)}`,
     );
   }
 };
@@ -213,7 +214,7 @@ describe("integration tests", () => {
         },
         (error) => {
           throw new Error(
-            `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+            `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
               error,
             )}`,
           );

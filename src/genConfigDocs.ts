@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -101,9 +102,14 @@ await writeFile(
 
 ${configsInfo
   .map(({ fullFileName, schema, docFileName }): string => {
-    return `## [${fullFileName}](./${docFileName})\n\n${String(
-      schema["description"],
-    )}`;
+    const description: unknown = schema["description"];
+
+    assert(
+      typeof description === "string",
+      `Please provide description for ${fullFileName} config`,
+    );
+
+    return `## [${fullFileName}](./${docFileName})\n\n${description}`;
   })
   .join("\n\n")}`,
 );

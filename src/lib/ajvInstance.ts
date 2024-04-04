@@ -17,6 +17,7 @@
 import { color } from "@oclif/color";
 import Ajv from "ajv";
 
+import { numToStr } from "./helpers/typesafeStringify.js";
 import { jsonStringify } from "./helpers/utils.js";
 
 export const ajv = new Ajv.default({
@@ -33,10 +34,10 @@ type AjvErrors =
 const NOT_USEFUL_AJV_ERROR =
   "must match exactly one schema in oneOf\npassingSchemas: null\n";
 
-export const validationErrorToString = async (
+export async function validationErrorToString(
   errors: AjvErrors,
   latestConfigVersion?: string | number,
-) => {
+) {
   if (errors === null || errors === undefined) {
     return "";
   }
@@ -54,7 +55,11 @@ export const validationErrorToString = async (
           latestConfigVersion !== undefined &&
           instancePath === "/version" &&
           message === "must be equal to constant" &&
-          !paramsMessage.includes(`${latestConfigVersion}`);
+          !paramsMessage.includes(
+            typeof latestConfigVersion === "string"
+              ? latestConfigVersion
+              : numToStr(latestConfigVersion),
+          );
 
         const isDuplicateError =
           prevError?.instancePath === instancePath &&
@@ -65,13 +70,11 @@ export const validationErrorToString = async (
           return "";
         }
 
-        return `${instancePath === "" ? "" : `${color.yellow(instancePath)} `}${
-          message ?? ""
-        }${paramsMessage === "" ? "" : `\n${paramsMessage}`}`;
+        return `${instancePath === "" ? "" : `${color.yellow(instancePath)} `}${message ?? ""}${paramsMessage === "" ? "" : `\n${paramsMessage}`}`;
       })
       .filter((s) => {
         return s !== "" && s !== NOT_USEFUL_AJV_ERROR;
       })
       .join("\n")
   );
-};
+}

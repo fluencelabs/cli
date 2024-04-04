@@ -75,11 +75,9 @@ export function wrappedTest(
 ) {
   test(
     name,
-    // @ts-expect-error fix later
-    async (...args) => {
+    async (...args: Parameters<NonNullable<typeof fn>>) => {
       core.startGroup(name);
-      // @ts-expect-error fix later
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      // @ts-expect-error fn is never undefined here
       await fn(...args);
       core.endGroup();
     },

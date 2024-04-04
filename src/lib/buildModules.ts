@@ -28,6 +28,7 @@ import type { MarineCLI } from "../lib/marineCli.js";
 import { ajv, validationErrorToString } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
 import { FS_OPTIONS } from "./const.js";
+import { numToStr } from "./helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "./helpers/utils.js";
 import { projectRootDir, getCargoTomlPath } from "./paths.js";
 
@@ -214,7 +215,7 @@ members = []
           .map(({ name, versions }) => {
             return versions
               .map((version, i) => {
-                return `[workspace.dependencies.${name}_${i}]\npackage = "${name}"\nversion = "${version}"`;
+                return `[workspace.dependencies.${name}_${numToStr(i)}]\npackage = "${name}"\nversion = "${version}"`;
               })
               .join("\n");
           })

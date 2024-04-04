@@ -20,6 +20,7 @@ import {
   LOCAL_NET_DEFAULT_ACCOUNTS,
   type Account,
 } from "../../src/lib/accounts.js";
+import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 
 import { lockAndProcessFile } from "./utils.js";
 
@@ -53,7 +54,7 @@ function getNextIndex(dataFromFile: string): string {
     index = 0;
   }
 
-  return index.toString();
+  return numToStr(index);
 }
 
 /**

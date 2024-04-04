@@ -42,6 +42,7 @@ import {
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
+import { numToStr, urlToStr } from "./helpers/typesafeStringify.js";
 import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
@@ -182,7 +183,7 @@ async function getWalletConnectProvider() {
     url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
 
     commandObj.logToStderr(
-      `To continue, please connect your wallet using metamask by opening the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`,
+      `To continue, please connect your wallet using metamask by opening the following url:\n\n${urlToStr(url)}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`,
     );
   });
 
@@ -199,7 +200,7 @@ async function getWalletConnectProvider() {
           "personal_sign",
           "eth_signTypedData",
         ],
-        chains: [`eip155:${chainId}`],
+        chains: [`eip155:${numToStr(chainId)}`],
         events: ["chainChanged", "accountsChanged"],
         rpcMap: { [chainId]: CHAIN_URLS[chainEnv] },
       },

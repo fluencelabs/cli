@@ -28,6 +28,7 @@ import {
   U32_MAX,
 } from "../../const.js";
 import { ensureSpellAbsolutePath } from "../../helpers/downloadFile.js";
+import { numToStr } from "../../helpers/typesafeStringify.js";
 import { validateBatchAsync } from "../../helpers/validations.js";
 import { getFluenceDir } from "../../paths.js";
 import {
@@ -220,19 +221,19 @@ const validate: ConfigValidateFunction<LatestConfig> = async (
         }
 
         if (endSec !== 0 && endSec < startSec) {
-          return `Start time must be earlier than end time. Got: start time ${startSec}, end time ${endSec}`;
+          return `Start time must be earlier than end time. Got: start time ${numToStr(startSec)}, end time ${numToStr(endSec)}`;
         }
 
         const currentSec = getDateSec(new Date());
 
         if (endSec !== 0 && endSec < currentSec) {
-          return `End time must be later than current time. Got: current time ${currentSec}, end time ${endSec}`;
+          return `End time must be later than current time. Got: current time ${numToStr(currentSec)}, end time ${numToStr(endSec)}`;
         }
 
         if ((config.clock?.periodSec ?? 0) > MAX_PERIOD_SEC) {
-          return `Period must be less than ${MAX_PERIOD_YEAR} years (${MAX_PERIOD_SEC} seconds). Got: ${
-            endSec - startSec
-          } seconds`;
+          return `Period must be less than ${numToStr(MAX_PERIOD_YEAR)} years (${numToStr(MAX_PERIOD_SEC)} seconds). Got: ${numToStr(
+            endSec - startSec,
+          )} seconds`;
         }
 
         return true;

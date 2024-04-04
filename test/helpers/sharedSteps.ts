@@ -26,6 +26,7 @@ import {
 } from "@fluencelabs/fluence-network-environment";
 import sortBy from "lodash-es/sortBy.js";
 
+import { validationErrorToString } from "../../src/lib/ajvInstance.js";
 import {
   initFluenceConfigWithPath,
   initReadonlyFluenceConfigWithPath,
@@ -58,6 +59,7 @@ import {
   MY_SERVICE_NAME,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
 } from "./constants.js";
+import { RUN_DEPLOYED_SERVICES_TIMEOUT_STR } from "./constants.js";
 import {
   getInitializedTemplatePath,
   getMainRsPath,
@@ -261,7 +263,7 @@ export async function deployDealAndWaitUntilDeployed(
     },
     (error) => {
       throw new Error(
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
           error,
         )}`,
       );
@@ -424,7 +426,7 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
     },
     (error) => {
       throw new Error(
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
           error,
         )}`,
       );
@@ -469,7 +471,7 @@ export async function waitUntilShowSubnetReturnsExpected(
     },
     (error) => {
       throw new Error(
-        `showSubnet() didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+        `showSubnet() didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
           error,
         )}`,
       );
@@ -496,7 +498,7 @@ export async function waitUntilAquaScriptReturnsExpected(
 
       if (!validateSpellLogs(spellLogs)) {
         throw new Error(
-          `result of running ${functionName} aqua function has unexpected structure: ${validateSpellLogs.errors?.toString()}`,
+          `result of running ${functionName} aqua function has unexpected structure: ${await validationErrorToString(validateSpellLogs.errors)}`,
         );
       }
 
@@ -510,7 +512,7 @@ export async function waitUntilAquaScriptReturnsExpected(
 
         assert(
           lastLogMessage === answer,
-          `Worker ${w.worker_id} last log message is expected to be ${answer}, but it is ${lastLogMessage}`,
+          `Worker ${w.worker_id} last log message is expected to be ${answer}, but it is ${lastLogMessage === undefined ? "undefined" : lastLogMessage}`,
         );
       });
 
@@ -518,7 +520,7 @@ export async function waitUntilAquaScriptReturnsExpected(
     },
     (error) => {
       throw new Error(
-        `${functionName} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+        `${functionName} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
           error,
         )}`,
       );

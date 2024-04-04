@@ -97,6 +97,7 @@ export async function packModule({
     onlyHash: true,
   });
 
+  // eslint-disable-next-line no-restricted-syntax
   moduleToPackConfig.cid = cid.toString();
   /* eslint-enable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
 

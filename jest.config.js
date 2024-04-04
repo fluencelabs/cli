@@ -19,6 +19,7 @@ import { RUN_TESTS_IN_PARALLEL } from "./dist/lib/setupEnvironment.js";
 /** @type {import("ts-jest").JestConfigWithTsJest} */
 export default {
   maxConcurrency: 1, // increasing number of concurrent tests leads to a problem with nonce
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   maxWorkers: process.env[RUN_TESTS_IN_PARALLEL] === "false" ? 1 : 5,
   extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {

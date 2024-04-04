@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { FLUENCE_ENV } from "../../src/lib/setupEnvironment.js";
 
 export const fluenceEnv = process.env[FLUENCE_ENV];
 
-export const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
+const RUN_DEPLOYED_SERVICES_TIMEOUT_MIN = 3;
+export const RUN_DEPLOYED_SERVICES_TIMEOUT =
+  1000 * 60 * RUN_DEPLOYED_SERVICES_TIMEOUT_MIN;
+export const RUN_DEPLOYED_SERVICES_TIMEOUT_STR = `${numToStr(RUN_DEPLOYED_SERVICES_TIMEOUT_MIN)} minutes`;
 
 export const MY_SERVICE_NAME = "myService";
 export const NEW_SERVICE_NAME = "newService";

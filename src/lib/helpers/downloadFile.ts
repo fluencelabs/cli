@@ -36,6 +36,8 @@ import {
   projectRootDir,
 } from "../paths.js";
 
+import { bufferToHex } from "./typesafeStringify.js";
+
 function getHashOfString(str: string): Promise<string> {
   const md5Hash = crypto.createHash("md5");
   return new Promise((resolve): void => {
@@ -43,7 +45,7 @@ function getHashOfString(str: string): Promise<string> {
       const data: unknown = md5Hash.read();
 
       if (data instanceof Buffer) {
-        resolve(data.toString("hex"));
+        resolve(bufferToHex(data));
       }
     });
 

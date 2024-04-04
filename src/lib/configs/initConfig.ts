@@ -72,7 +72,7 @@ type MigrateConfigOptions<
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
   validate: undefined | ConfigValidateFunction<LatestConfig>;
-  latestConfigVersion: string;
+  latestConfigVersion: string | number;
 };
 
 const migrateConfig = async <
@@ -150,7 +150,7 @@ type EnsureConfigOptions<
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
   validate: undefined | ConfigValidateFunction<LatestConfig>;
-  latestConfigVersion: string;
+  latestConfigVersion: string | number;
 };
 
 const ensureConfigIsValidLatest = async <
@@ -290,7 +290,10 @@ export function getReadonlyConfigInitFunction<
     // every config schema must have a version, because LatestConfig extends BaseConfig
     // but ajv doesn't currently produce correct types for this unfortunately
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-member-access
-    const latestConfigVersion = latestSchema.properties.version.const as string;
+    const latestConfigVersion = latestSchema.properties.version.const as
+      | string
+      | number;
+
     const configFullName = `${name}.${YAML_EXT}`;
 
     const getConfigPathResult = getConfigPath(
