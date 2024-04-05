@@ -862,7 +862,7 @@ __metadata:
     oclif: 4.1.0
     parse-duration: 1.1.0
     platform: 1.3.6
-    prettier: 3.2.3
+    prettier: 3.2.5
     proper-lockfile: ^4.1.2
     semver: 7.5.4
     shx: 0.3.4
@@ -13431,12 +13431,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:3.2.3":
-  version: 3.2.3
-  resolution: "prettier@npm:3.2.3"
+"prettier@npm:3.2.5":
+  version: 3.2.5
+  resolution: "prettier@npm:3.2.5"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 24b7c0e32cbe5a9b2d6dfbb85f67255a1132977d82885fe0dd86e080567026c10e678aae40a99fd793e477b5544b91458b37bb6a08a35041321d7de502c8aed0
+  checksum: 2ee4e1417572372afb7a13bb446b34f20f1bf1747db77cf6ccaf57a9be005f2f15c40f903d41a6b79eec3f57fff14d32a20fb6dee1f126da48908926fe43c311
   languageName: node
   linkType: hard
 
