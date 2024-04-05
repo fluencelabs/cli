@@ -209,7 +209,7 @@ export async function match(dealAddress: string) {
         `Wasn't able to find a match for the deal ${dealAddress}: ${stringifyUnknown(err)}`,
       );
     },
-    1000 * 5,
+    1000 * 5, // 5 seconds
   );
 
   if (matchedOffers.offers.length === 0) {
