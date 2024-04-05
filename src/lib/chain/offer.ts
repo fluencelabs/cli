@@ -44,6 +44,7 @@ import {
   getEventValue,
   signBatch,
   getReadonlyDealClient,
+  populate,
 } from "../dealClient.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import {
@@ -371,11 +372,11 @@ export async function updateOffers(flags: OffersArgs) {
         )} to ${color.yellow(
           await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
         )}`,
-        tx: [
+        tx: populate(
           market.changeMinPricePerWorkerEpoch,
           offerId,
           minPricePerWorkerEpochBigInt,
-        ],
+        ),
       });
     }
 
@@ -392,7 +393,7 @@ export async function updateOffers(flags: OffersArgs) {
     if (removedEffectors.length > 0) {
       populatedTxs.push({
         description: `Removing effectors: ${removedEffectors.join(", ")}`,
-        tx: [
+        tx: populate(
           market.removeEffector,
           offerId,
           await Promise.all(
@@ -400,7 +401,7 @@ export async function updateOffers(flags: OffersArgs) {
               return cidStringToCIDV1Struct(cid);
             }),
           ),
-        ],
+        ),
       });
     }
 
@@ -413,7 +414,7 @@ export async function updateOffers(flags: OffersArgs) {
     if (addedEffectors.length > 0) {
       populatedTxs.push({
         description: `Adding effectors: ${addedEffectors.join(", ")}`,
-        tx: [
+        tx: populate(
           market.addEffector,
           offerId,
           await Promise.all(
@@ -421,7 +422,7 @@ export async function updateOffers(flags: OffersArgs) {
               return cidStringToCIDV1Struct(effector);
             }),
           ),
-        ],
+        ),
       });
     }
 
@@ -466,7 +467,7 @@ export async function updateOffers(flags: OffersArgs) {
         ...computeUnitsToRemove.map((computeUnit) => {
           return {
             description: `Removing compute unit: ${computeUnit}`,
-            tx: [market.removeComputeUnit, computeUnit],
+            tx: populate(market.removeComputeUnit, computeUnit),
           };
         }),
       );
@@ -483,7 +484,7 @@ export async function updateOffers(flags: OffersArgs) {
         ...computePeersToRemove.map(({ peerIdBase58, hexPeerId }) => {
           return {
             description: `Removing peer: ${peerIdBase58}`,
-            tx: [market.removeComputePeer, hexPeerId],
+            tx: populate(market.removeComputePeer, hexPeerId),
           };
         }),
       );
@@ -523,7 +524,7 @@ export async function updateOffers(flags: OffersArgs) {
             description: `Adding ${numToStr(
               unitIds.length,
             )} compute units to peer id ${peerIdBase58}`,
-            tx: [market.addComputeUnits, hexPeerId, unitIds],
+            tx: populate(market.addComputeUnits, hexPeerId, unitIds),
           };
         }),
       );
@@ -544,7 +545,7 @@ export async function updateOffers(flags: OffersArgs) {
             return `Peer: ${peerIdBase58} with ${numToStr(unitIds.length)} compute units`;
           })
           .join("\n")}`,
-        tx: [market.addComputePeers, offerId, computePeersToAdd],
+        tx: populate(market.addComputePeers, offerId, computePeersToAdd),
       });
     }
 
@@ -569,7 +570,6 @@ export async function updateOffers(flags: OffersArgs) {
     );
 
     await signBatch(
-      // @ts-expect-error TODO: don't know at this moment how to fix this error. Will solve later
       populatedTxs.map(({ tx }) => {
         return tx;
       }),

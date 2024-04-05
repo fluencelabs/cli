@@ -281,24 +281,30 @@ export async function sign<T extends unknown[]>(
   return res;
 }
 
-export type CallsToBatch<T extends Array<unknown>> = Array<
-  [
-    {
-      populateTransaction: (...args: T) => Promise<ethers.ContractTransaction>;
-      name: string;
-    },
-    ...T,
-  ]
->;
+export function populate<T extends unknown[]>(
+  method: {
+    populateTransaction: (...args: T) => Promise<ethers.ContractTransaction>;
+    name: string;
+  },
+  ...args: T
+): {
+  populated: Promise<ethers.ContractTransaction>;
+  debugInfo: [{ name: string }, ...unknown[]];
+} {
+  return {
+    populated: method.populateTransaction(...args),
+    debugInfo: [method, ...args],
+  };
+}
 
 const BATCH_SIZE = 10;
 
-export async function signBatch<T extends Array<unknown>>(
-  callsToBatch: CallsToBatch<T>,
+export async function signBatch(
+  populatedTxsWithDebugInfo: Array<ReturnType<typeof populate>>,
 ) {
   const populatedTxs = await Promise.all(
-    callsToBatch.map(([method, ...args]) => {
-      return method.populateTransaction(...args);
+    populatedTxsWithDebugInfo.map(({ populated }) => {
+      return populated;
     }),
   );
 
@@ -330,8 +336,8 @@ export async function signBatch<T extends Array<unknown>>(
   const { multicall } = Multicall__factory.connect(firstAddr, signerOrWallet);
 
   dbg(
-    `${color.yellow("MULTICALL START")}:\n${callsToBatch
-      .map(([method, ...args]) => {
+    `${color.yellow("MULTICALL START")}:\n${populatedTxsWithDebugInfo
+      .map(({ debugInfo: [method, ...args] }) => {
         return methodCallToString([method, ...args]);
       })
       .join("\n")}\n${color.yellow("MULTICALL END")}`,
