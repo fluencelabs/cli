@@ -16,7 +16,7 @@
 
 import { FLT_SYMBOL, PT_SYMBOL } from "../const.js";
 import { dbg } from "../dbg.js";
-import { getDealClient } from "../dealClient.js";
+import { getReadonlyDealClient } from "../dealClient.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
 
 export async function fltParse(value: string): Promise<bigint> {
@@ -53,10 +53,10 @@ export async function getPtDecimals() {
   if (ptDecimalsPromise === undefined) {
     ptDecimalsPromise = (async () => {
       const { ethers } = await import("ethers");
-      const { dealClient, signerOrWallet } = await getDealClient();
-      const usdc = dealClient.getUSDC();
+      const { readonlyDealClient, provider } = await getReadonlyDealClient();
+      const usdc = readonlyDealClient.getUSDC();
 
-      const decimalsRaw = await signerOrWallet.call({
+      const decimalsRaw = await provider.call({
         to: await usdc.getAddress(),
         data: ethers.id("decimals()").substring(0, 10),
       });
