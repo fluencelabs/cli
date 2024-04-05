@@ -38,6 +38,7 @@ import {
   getDealMatcherClient,
   getEventValue,
   getEventValues,
+  getReadonlyDealClient,
 } from "./dealClient.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
 import { bigintToStr } from "./helpers/typesafeStringify.js";
@@ -159,8 +160,8 @@ async function getDefaultInitialBalance(
   targetWorkersBigInt: bigint,
 ) {
   if ((await ensureChainEnv()) === "local") {
-    const { dealClient } = await getDealClient();
-    const core = dealClient.getCore();
+    const { readonlyDealClient } = await getReadonlyDealClient();
+    const core = readonlyDealClient.getCore();
 
     const balance =
       (DEFAULT_DEAL_ACTIVE_DURATION_FOR_LOCAL_ENV /
