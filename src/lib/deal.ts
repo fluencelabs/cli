@@ -205,9 +205,11 @@ export async function match(dealAddress: string) {
       return dealMatcherClient.getMatchedOffersByDealId(dealAddress);
     },
     (err) => {
-      commandObj.error(stringifyUnknown(err));
+      commandObj.error(
+        `Wasn't able to find a match for the deal ${dealAddress}: ${stringifyUnknown(err)}`,
+      );
     },
-    1000 * 60 * 2, // 2 minutes
+    1000 * 5, // 5 seconds
   );
 
   if (matchedOffers.offers.length === 0) {

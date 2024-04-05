@@ -140,9 +140,11 @@ async function createDealClient(
       await core.minDealDepositedEpochs();
     },
     (err) => {
-      throw new Error(stringifyUnknown(err));
+      commandObj.error(
+        `Check if blockchain client is connected by running core.minDealDepositedEpochs() failed: ${stringifyUnknown(err)}`,
+      );
     },
-    1000 * 60 * 5,
+    1000 * 5, // 5 seconds
   );
 
   return client;
@@ -255,11 +257,15 @@ export async function sign<T extends unknown[]>(
     (err) => {
       throw err;
     },
-    1000 * 60 * 3,
+    1000 * 5, // 5 seconds
     1000,
     (err: unknown) => {
       // only retry data=null errors
-      return !(err instanceof Error && err.message.includes("data=null"));
+      return !(
+        err instanceof Error &&
+        (err.message.includes("data=null") ||
+          err.message.includes("connection error"))
+      );
     },
   );
 
