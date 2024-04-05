@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.16.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.16.1...fluence-cli-v0.16.2) (2024-04-04)
+
+
+### Features
+
+* bump deal-ts-clients 0.13.8 ([#891](https://github.com/fluencelabs/cli/issues/891)) ([6d0d447](https://github.com/fluencelabs/cli/commit/6d0d44725243ce3cc2971b6266669b24fae33952))
+* remove env config from default gitignore ([#890](https://github.com/fluencelabs/cli/issues/890)) ([17e1aec](https://github.com/fluencelabs/cli/commit/17e1aec198b015b466228df89008d23662168a62))
+* update eslint ([#888](https://github.com/fluencelabs/cli/issues/888)) ([9f71006](https://github.com/fluencelabs/cli/commit/9f71006b407ede062c74d4d17f681b7e4a6adc51))
+
 ## [0.16.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.16.0...fluence-cli-v0.16.1) (2024-04-04)
 
 
