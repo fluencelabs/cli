@@ -144,7 +144,7 @@ async function createDealClient(
         `Check if blockchain client is connected by running core.minDealDepositedEpochs() failed: ${stringifyUnknown(err)}`,
       );
     },
-    1000 * 5,
+    1000 * 5, // 5 seconds
   );
 
   return client;
