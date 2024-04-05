@@ -257,7 +257,7 @@ export async function sign<T extends unknown[]>(
     (err) => {
       throw err;
     },
-    1000 * 5,
+    1000 * 5, // 5 seconds
     1000,
     (err: unknown) => {
       // only retry data=null errors
