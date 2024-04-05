@@ -261,7 +261,11 @@ export async function sign<T extends unknown[]>(
     1000,
     (err: unknown) => {
       // only retry data=null errors
-      return !(err instanceof Error && err.message.includes("data=null"));
+      return !(
+        err instanceof Error &&
+        (err.message.includes("data=null") ||
+          err.message.includes("connection error"))
+      );
     },
   );
 
