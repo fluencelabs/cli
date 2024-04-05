@@ -17,7 +17,7 @@
 import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
-import { getDealClient, sign } from "../dealClient.js";
+import { getDealClient, getReadonlyDealClient, sign } from "../dealClient.js";
 import { splitErrorsAndResults } from "../helpers/utils.js";
 
 import {
@@ -117,8 +117,8 @@ ${(
 }
 
 async function getCollateral(commitmentId: string) {
-  const { dealClient } = await getDealClient();
-  const capacity = dealClient.getCapacity();
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const capacity = readonlyDealClient.getCapacity();
   const commitment = await capacity.getCommitment(commitmentId);
   return commitment.collateralPerUnit * commitment.unitCount;
 }
