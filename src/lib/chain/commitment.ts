@@ -64,9 +64,9 @@ export type ComputePeersWithCC = Awaited<
 export async function getComputePeersWithCC(
   computePeers: ResolvedComputePeer[],
 ) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
-  const capacity = dealClient.getCapacity();
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const market = readonlyDealClient.getMarket();
+  const capacity = readonlyDealClient.getCapacity();
 
   const commitmentCreatedEvents = Object.fromEntries(
     await Promise.all(
