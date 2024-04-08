@@ -663,7 +663,7 @@ export async function basicCCInfoAndStatusToString(
       ccInfos.map(async (ccInfo) => {
         return `${stringifyBasicCommitmentInfo(
           ccInfo,
-        )}Status: ${await ccStatusToString(ccInfo.status)}`;
+        )} Status: ${await ccStatusToString(ccInfo.status)}`;
       }),
     )
   ).join("\n\n");
