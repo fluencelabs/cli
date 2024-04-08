@@ -23,6 +23,7 @@ import type { MarineCLI } from "../marineCli.js";
 import { ensureFluenceAquaServicesPath } from "../paths.js";
 
 const SERVICE_DEFINITION_SEPARATOR = "\n\n\n";
+const SERVICE_AND_DATA_DEFINITION_SEPARATOR = "\n\n";
 
 type GenerateServiceInterfaceArg = {
   serviceId: string;
@@ -54,7 +55,10 @@ const generateAquaInterfaceForService = async ({
 };
 
 const getServiceIdFromServiceInterface = (dataAndServiceDefinition: string) => {
-  const dataAndServiceDefinitionAr = dataAndServiceDefinition.split("\n\n");
+  const dataAndServiceDefinitionAr = dataAndServiceDefinition.split(
+    SERVICE_AND_DATA_DEFINITION_SEPARATOR,
+  );
+
   const serviceDefinition = dataAndServiceDefinitionAr.pop();
 
   assert(
@@ -73,13 +77,29 @@ const getServiceIdFromServiceInterface = (dataAndServiceDefinition: string) => {
   return serviceId;
 };
 
-const getServiceInterfaceFileContent = (serviceInterfaces: string[]) => {
+function getServiceInterfaceFileContent(serviceInterfaces: string[]) {
+  const definitions = new Set<string>();
+
+  const deduplicatedDefinitions = serviceInterfaces.map((s) => {
+    return s
+      .split(SERVICE_AND_DATA_DEFINITION_SEPARATOR)
+      .filter((d) => {
+        if (definitions.has(d)) {
+          return false;
+        }
+
+        definitions.add(d);
+        return true;
+      })
+      .join(SERVICE_AND_DATA_DEFINITION_SEPARATOR);
+  });
+
   return (
-    [SERVICE_INTERFACE_FILE_HEADER, ...serviceInterfaces].join(
+    [SERVICE_INTERFACE_FILE_HEADER, ...deduplicatedDefinitions].join(
       SERVICE_DEFINITION_SEPARATOR,
     ) + "\n"
   );
-};
+}
 
 export const updateAquaServiceInterfaceFile = async (
   serviceNamePathToFacadeMap: Record<string, string>,
