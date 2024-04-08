@@ -302,14 +302,19 @@ const BATCH_SIZE = 10;
 export async function signBatch(
   populatedTxsWithDebugInfo: Array<ReturnType<typeof populate>>,
 ) {
-  const populatedTxs = await Promise.all(
-    populatedTxsWithDebugInfo.map(({ populated }) => {
-      return populated;
+  const populatedTxsWithDebugInfoResolved = await Promise.all(
+    populatedTxsWithDebugInfo.map(async ({ populated, debugInfo }) => {
+      return {
+        populated: await populated,
+        debugInfo,
+      };
     }),
   );
 
-  const [{ to: firstAddr } = { to: undefined }, ...restPopulatedTxs] =
-    populatedTxs;
+  const [firstPopulatedTx, ...restPopulatedTxs] =
+    populatedTxsWithDebugInfoResolved;
+
+  const firstAddr = firstPopulatedTx?.populated.to;
 
   if (firstAddr === undefined) {
     // if populatedTxsPromises is an empty array - do nothing
@@ -317,36 +322,40 @@ export async function signBatch(
   }
 
   if (
-    restPopulatedTxs.some(({ to }) => {
+    restPopulatedTxs.some(({ populated: { to } }) => {
       return to !== firstAddr;
     })
   ) {
     throw new Error("All transactions must be to the same address");
   }
 
-  const data = chunk(
-    populatedTxs.map(({ data }) => {
-      return data;
-    }),
+  const populatedTxsChunked = chunk(
+    populatedTxsWithDebugInfoResolved,
     BATCH_SIZE,
   );
 
   const { Multicall__factory } = await import("@fluencelabs/deal-ts-clients");
   const { signerOrWallet } = await getDealClient();
   const { multicall } = Multicall__factory.connect(firstAddr, signerOrWallet);
-
-  dbg(
-    `${color.yellow("MULTICALL START")}:\n${populatedTxsWithDebugInfo
-      .map(({ debugInfo: [method, ...args] }) => {
-        return methodCallToString([method, ...args]);
-      })
-      .join("\n")}\n${color.yellow("MULTICALL END")}`,
-  );
-
   const receipts = [];
 
-  for (const d of data) {
-    receipts.push(await sign(multicall, d));
+  for (const txs of populatedTxsChunked) {
+    dbg(
+      `${color.yellow("MULTICALL START")}:\n${txs
+        .map(({ debugInfo }) => {
+          return methodCallToString(debugInfo);
+        })
+        .join("\n")}\n${color.yellow("MULTICALL END")}`,
+    );
+
+    receipts.push(
+      await sign(
+        multicall,
+        txs.map(({ populated: { data } }) => {
+          return data;
+        }),
+      ),
+    );
   }
 
   return receipts;

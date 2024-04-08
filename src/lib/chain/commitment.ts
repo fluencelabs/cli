@@ -452,10 +452,13 @@ export async function withdrawCollateral(flags: CCFlags) {
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
-    await signBatch([
-      ...unitIds.map((unitId) => {
+    await signBatch(
+      unitIds.map((unitId) => {
         return populate(market.returnComputeUnitFromDeal, unitId);
       }),
+    );
+
+    await signBatch([
       populate(capacity.removeCUFromCC, commitmentId, [...unitIds]),
       populate(capacity.finishCommitment, commitmentId),
     ]);
