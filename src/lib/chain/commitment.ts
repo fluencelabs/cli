@@ -414,6 +414,7 @@ export async function removeCommitments(flags: CCFlags) {
 
 export async function withdrawCollateral(flags: CCFlags) {
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
+  const { ethers } = await import("ethers");
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
     await getCommitmentsInfo(flags),
@@ -452,10 +453,23 @@ export async function withdrawCollateral(flags: CCFlags) {
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
-    await signBatch(
-      unitIds.map((unitId) => {
-        return populate(market.returnComputeUnitFromDeal, unitId);
+    const units = await Promise.all(
+      unitIds.map(async (unitId) => {
+        return {
+          unitId,
+          unitInfo: await market.getComputeUnit(unitId),
+        };
       }),
+    );
+
+    await signBatch(
+      units
+        .filter((unit) => {
+          return unit.unitInfo.deal !== ethers.ZeroAddress;
+        })
+        .map((unit) => {
+          return populate(market.returnComputeUnitFromDeal, unit.unitId);
+        }),
     );
 
     await signBatch([
