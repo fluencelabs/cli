@@ -281,7 +281,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
       [SUBGRAPH_DEPLOY_SCRIPT_NAME]: {
         image: versions[SUBGRAPH_DEPLOY_SCRIPT_NAME],
         environment: {
-          GRAPHNODE_URL: `http://${GRAPH_NODE_CONTAINER_NAME}:${GRAPH_NODE_PORT}`,
+          GRAPHNODE_ADMIN_URL_LOCAL: `http://${GRAPH_NODE_CONTAINER_NAME}:${GRAPH_NODE_PORT}`,
           IPFS_URL: `http://${IPFS_CONTAINER_NAME}:${IPFS_PORT}`,
         },
         depends_on: [GRAPH_NODE_CONTAINER_NAME],
