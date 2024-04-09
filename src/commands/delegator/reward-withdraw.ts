@@ -18,7 +18,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { withdrawCollateralRewards } from "../../lib/chain/commitment.js";
-import { CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
+import { CC_IDS_FLAG_NAME, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
@@ -36,6 +36,6 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
 
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(WithdrawReward));
-    await withdrawCollateralRewards({ ids: args.IDS });
+    await withdrawCollateralRewards({ [CC_IDS_FLAG_NAME]: args.IDS });
   }
 }

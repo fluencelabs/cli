@@ -510,7 +510,7 @@ export const FLUENCE_CLIENT_FLAGS = {
   ...ENV_FLAG,
 } as const;
 
-const CC_IDS_FLAG_NAME = "cc-ids";
+export const CC_IDS_FLAG_NAME = "cc-ids";
 
 export const CC_FLAGS = {
   [NOX_NAMES_FLAG_NAME]: Flags.string({
