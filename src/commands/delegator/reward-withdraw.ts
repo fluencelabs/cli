@@ -17,11 +17,11 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { withdrawCollateralRewards } from "../../lib/chain/commitment.js";
+import { collateralRewardWithdraw } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
+export default class RewardWithdraw extends BaseCommand<typeof RewardWithdraw> {
   static override aliases = ["delegator:rw"];
   static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitment`;
   static override flags = {
@@ -35,7 +35,7 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(WithdrawReward));
-    await withdrawCollateralRewards({ ids: args.IDS });
+    const { args } = await initCli(this, await this.parse(RewardWithdraw));
+    await collateralRewardWithdraw({ ids: args.IDS });
   }
 }

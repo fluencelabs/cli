@@ -21,7 +21,7 @@ import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
+export default class CollateralAdd extends BaseCommand<typeof CollateralAdd> {
   static override aliases = ["delegator:ca"];
   static override description = `Add ${FLT_SYMBOL} collateral to capacity commitment`;
   static override flags = {
@@ -35,7 +35,7 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(AddCollateral));
+    const { args } = await initCli(this, await this.parse(CollateralAdd));
     await depositCollateral({ ids: args.IDS });
   }
 }

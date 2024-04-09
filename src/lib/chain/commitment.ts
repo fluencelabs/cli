@@ -412,7 +412,7 @@ export async function removeCommitments(flags: CCFlags) {
   );
 }
 
-export async function withdrawCollateral(flags: CCFlags) {
+export async function collateralWithdraw(flags: CCFlags) {
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
   const { ethers } = await import("ethers");
 
@@ -462,15 +462,28 @@ export async function withdrawCollateral(flags: CCFlags) {
       }),
     );
 
-    await signBatch(
-      units
-        .filter((unit) => {
-          return unit.unitInfo.deal !== ethers.ZeroAddress;
-        })
-        .map((unit) => {
-          return populate(market.returnComputeUnitFromDeal, unit.unitId);
-        }),
-    );
+    const unitsWithDeals = units.filter((unit) => {
+      return unit.unitInfo.deal !== ethers.ZeroAddress;
+    });
+
+    const returnComputeUnitFromDealTxs = unitsWithDeals.map((unit) => {
+      return populate(market.returnComputeUnitFromDeal, unit.unitId);
+    });
+
+    try {
+      await signBatch(returnComputeUnitFromDealTxs);
+    } catch (e) {
+      commandObj.warn(
+        `Wasn't able to return compute units from deals for ${stringifyBasicCommitmentInfo(commitment)}. Most likely the reason is you must wait until the provider exits from the following deals:\n${unitsWithDeals
+          .map(({ unitInfo }) => {
+            return unitInfo.deal;
+          })
+          .join("\n")}`,
+      );
+
+      dbg(stringifyUnknown(e));
+      continue;
+    }
 
     await signBatch([
       populate(capacity.removeCUFromCC, commitmentId, [...unitIds]),
@@ -483,7 +496,7 @@ export async function withdrawCollateral(flags: CCFlags) {
   }
 }
 
-export async function withdrawCollateralRewards(flags: CCFlags) {
+export async function collateralRewardWithdraw(flags: CCFlags) {
   const commitments = await getCommitments(flags);
   const { dealClient } = await getDealClient();
   const capacity = dealClient.getCapacity();

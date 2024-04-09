@@ -15,7 +15,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { withdrawCollateralRewards } from "../../lib/chain/commitment.js";
+import { collateralRewardWithdraw } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, NOX_NAMES_FLAG, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -32,6 +32,6 @@ export default class CCRewardsWithdraw extends BaseCommand<
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CCRewardsWithdraw));
-    await withdrawCollateralRewards(flags);
+    await collateralRewardWithdraw(flags);
   }
 }
