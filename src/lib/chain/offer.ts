@@ -305,6 +305,8 @@ export async function updateOffers(flags: OffersArgs) {
   await assertProviderIsRegistered();
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
+  const usdc = dealClient.getUSDC();
+  const usdcAddress = await usdc.getAddress();
 
   const [notCreatedOffers, offersToUpdate] = splitErrorsAndResults(
     offers,
@@ -363,6 +365,15 @@ export async function updateOffers(flags: OffersArgs) {
     }
 
     const populatedTxs = [];
+
+    if (offerInfo.paymentToken !== usdcAddress) {
+      populatedTxs.push({
+        description: `changing payment token from ${color.yellow(
+          offerInfo.paymentToken,
+        )} to ${color.yellow(usdcAddress)}`,
+        tx: [market.changePaymentToken, offerId, usdcAddress],
+      });
+    }
 
     if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {
       populatedTxs.push({
