@@ -24,8 +24,13 @@ import type {
   DealMatcherClient,
 } from "@fluencelabs/deal-ts-clients";
 import type { DealCliClient } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/dealCliClient.js";
+import type {
+  TypedContractMethod,
+  StateMutability,
+} from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.d.ts";
 import { color } from "@oclif/color";
 import type { ethers, LogDescription } from "ethers";
+import type { TransactionRequest } from "ethers";
 import chunk from "lodash-es/chunk.js";
 
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
@@ -225,10 +230,29 @@ async function getWallet(privKey: string): Promise<ethers.Wallet> {
   return new ethers.Wallet(privKey, await ensureProvider());
 }
 
-export async function sign<T extends unknown[]>(
-  method: (...args: T) => Promise<ethers.TransactionResponse>,
-  ...args: T
+const DEFAULT_OVERRIDES: TransactionRequest = {
+  maxPriorityFeePerGas: 0,
+};
+
+export async function sign<
+  A extends Array<unknown> = Array<unknown>,
+  R = unknown,
+  S extends Exclude<StateMutability, "view"> = "payable",
+>(
+  method: TypedContractMethod<A, R, S>,
+  ...originalArgs: Parameters<TypedContractMethod<A, R, S>>
 ) {
+  const overrides = originalArgs[originalArgs.length - 1];
+
+  const hasOverrides =
+    method.fragment.inputs.length === originalArgs.length - 1 &&
+    typeof overrides === "object";
+
+  // @ts-expect-error this probably impossible to type correctly with current TypeScript compiler
+  const args: Parameters<TypedContractMethod<A, R, S>> = hasOverrides
+    ? [...originalArgs.slice(0, -1), { ...DEFAULT_OVERRIDES, ...overrides }]
+    : [...originalArgs, DEFAULT_OVERRIDES];
+
   if (
     chainFlags[PRIV_KEY_FLAG_NAME] === undefined &&
     (await ensureChainEnv()) !== "local"
