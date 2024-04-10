@@ -245,7 +245,8 @@ export async function sign<
   const overrides = originalArgs[originalArgs.length - 1];
 
   const hasOverrides =
-    method.length === originalArgs.length - 1 && typeof overrides === "object";
+    method.fragment.inputs.length === originalArgs.length - 1 &&
+    typeof overrides === "object";
 
   // @ts-expect-error this probably impossible to type correctly with current TypeScript compiler
   const args: Parameters<TypedContractMethod<A, R, S>> = hasOverrides
