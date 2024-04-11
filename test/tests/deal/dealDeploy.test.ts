@@ -17,6 +17,8 @@
 import assert from "node:assert";
 import { join, relative } from "node:path";
 
+import { jest } from "@jest/globals";
+
 import { initServiceConfig } from "../../../src/lib/configs/project/service.js";
 import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
 import { fluence } from "../../helpers/commonWithSetupTests.js";

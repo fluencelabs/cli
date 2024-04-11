@@ -17,6 +17,8 @@
 import { cp } from "fs/promises";
 import { join } from "node:path";
 
+import { jest } from "@jest/globals";
+
 import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
 import { fluence } from "../../helpers/commonWithSetupTests.js";
 import {
