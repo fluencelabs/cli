@@ -43,6 +43,9 @@ import {
 } from "../../helpers/sharedSteps.js";
 import { wrappedTest } from "../../helpers/utils.js";
 
+// TODO: remove when decider is updated on nox
+jest.retryTimes(2);
+
 describe("Deal update tests", () => {
   wrappedTest("should update deal after new spell is created", async () => {
     const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");

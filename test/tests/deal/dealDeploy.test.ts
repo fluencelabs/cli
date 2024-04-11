@@ -32,6 +32,9 @@ import {
 } from "../../helpers/sharedSteps.js";
 import { wrappedTest } from "../../helpers/utils.js";
 
+// TODO: remove when decider is updated on nox
+jest.retryTimes(2);
+
 describe("fluence deploy tests", () => {
   wrappedTest(
     "should deploy deals with spell and service, resolve and run services on them",
