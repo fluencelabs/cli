@@ -813,6 +813,7 @@ __metadata:
     "@fluencelabs/js-client": 0.9.0
     "@fluencelabs/npm-aqua-compiler": 0.0.3
     "@iarna/toml": 2.2.5
+    "@jest/globals": 29.7.0
     "@mswjs/interceptors": 0.25.14
     "@multiformats/multiaddr": 12.1.12
     "@oclif/color": 1.0.13
@@ -1236,7 +1237,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/globals@npm:^29.7.0":
+"@jest/globals@npm:29.7.0, @jest/globals@npm:^29.7.0":
   version: 29.7.0
   resolution: "@jest/globals@npm:29.7.0"
   dependencies:

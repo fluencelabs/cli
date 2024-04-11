@@ -17,6 +17,8 @@
 import assert from "node:assert";
 import { join, relative } from "node:path";
 
+import { jest } from "@jest/globals";
+
 import { initServiceConfig } from "../../../src/lib/configs/project/service.js";
 import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
 import { fluence } from "../../helpers/commonWithSetupTests.js";
@@ -31,6 +33,9 @@ import {
   waitUntilShowSubnetReturnsExpected,
 } from "../../helpers/sharedSteps.js";
 import { wrappedTest } from "../../helpers/utils.js";
+
+// TODO: remove when decider is updated on nox
+jest.retryTimes(2);
 
 describe("fluence deploy tests", () => {
   wrappedTest(
