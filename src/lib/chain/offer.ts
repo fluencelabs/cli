@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { OfferDetail } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/types/schemes.js";
 import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
@@ -32,9 +33,7 @@ import {
   ALL_FLAG_VALUE,
   CLI_NAME,
   PT_SYMBOL,
-  DOT_FLUENCE_DIR_NAME,
   OFFER_FLAG_NAME,
-  PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   OFFER_IDS_FLAG_NAME,
 } from "../const.js";
 import {
@@ -43,9 +42,8 @@ import {
   sign,
   getEventValue,
   signBatch,
-  getReadonlyDealClient,
 } from "../dealClient.js";
-import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
+import { numToStr } from "../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
@@ -74,7 +72,7 @@ export type OffersArgs = {
 export async function createOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
   await assertProviderIsRegistered();
-  const { dealClient } = await getDealClient();
+  const { dealClient, signerOrWallet } = await getDealClient();
   const market = dealClient.getMarket();
   const usdc = dealClient.getUSDC();
   const providerArtifactsConfig = await initNewProviderArtifactsConfig();
@@ -197,9 +195,14 @@ export async function createOffers(flags: OffersArgs) {
 
   const [offerInfoErrors, offersInfo] = await getOffersInfo(offerIds);
 
-  offersInfo.forEach(({ offerName, offerId }) => {
+  offersInfo.forEach(({ offerName, offerIndexerInfo }) => {
     const offerPerEnv = providerArtifactsConfig.offers[fluenceEnv] ?? {};
-    offerPerEnv[offerName] = { id: offerId };
+
+    offerPerEnv[offerName] = {
+      id: offerIndexerInfo.id,
+      providerAddress: signerOrWallet.address,
+    };
+
     providerArtifactsConfig.offers[fluenceEnv] = offerPerEnv;
   });
 
@@ -228,18 +231,22 @@ export async function offersInfoToString([
   const offerInfoErrorsStr =
     offersInfoErrors.length > 0
       ? `${color.red(
-          "Got errors when getting offer info from chain",
-        )}: ${offersInfoErrors.join("\n\n")}`
+          "Wasn't able to get the following offers from indexer:",
+        )}\n${offersInfoErrors
+          .map((offer) => {
+            return `${offer.offerName === undefined ? "" : `${offer.offerName}: `}${offer.offerId}`;
+          })
+          .join("\n\n")}`
       : "";
 
   const offersInfoStr =
     offersInfos.length > 0
-      ? `${color.green("Got offers info from chain:")}\n\n${(
+      ? `${color.green("Got offers info from indexer:")}\n\n${(
           await Promise.all(
             offersInfos.map(async (offerInfo) => {
               return `Offer: ${color.yellow(
-                offerInfo.offerName,
-              )}\n${yamlDiffPatch("", {}, await resolveOfferInfo(offerInfo))}`;
+                offerInfo.offerName ?? offerInfo.offerIndexerInfo.id,
+              )}\n${await formatOfferInfo(offerInfo.offerIndexerInfo)}`;
             }),
           )
         ).join("\n\n")}`
@@ -248,23 +255,22 @@ export async function offersInfoToString([
   return [offerInfoErrorsStr, offersInfoStr].join("\n\n");
 }
 
-async function resolveOfferInfo({
-  offerId,
-  offerInfo,
-  offerIndexerInfo,
-}: Awaited<ReturnType<typeof getOfferInfo>>) {
-  if (offerIndexerInfo !== undefined) {
-    return {
+async function formatOfferInfo(
+  offerIndexerInfo: Awaited<
+    ReturnType<typeof getOffersInfo>
+  >[1][number]["offerIndexerInfo"],
+) {
+  return yamlDiffPatch(
+    "",
+    {},
+    {
       "Provider ID": offerIndexerInfo.providerId,
       "Offer ID": offerIndexerInfo.id,
       "Created At": new Date(offerIndexerInfo.createdAt * 1000).toISOString(),
       "Last Updated At": new Date(
         offerIndexerInfo.updatedAt * 1000,
       ).toISOString(),
-      "Price Per Epoch":
-        offerInfo === undefined
-          ? `${offerIndexerInfo.pricePerEpoch} ${PT_SYMBOL}`
-          : await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
+      "Price Per Epoch": `${offerIndexerInfo.pricePerEpoch} ${PT_SYMBOL}`,
       Effectors: await Promise.all(
         offerIndexerInfo.effectors.map(({ cid }) => {
           return cidHexStringToBase32(cid);
@@ -281,24 +287,9 @@ async function resolveOfferInfo({
           };
         }),
       ),
-    };
-  }
-
-  if (offerInfo !== undefined) {
-    return {
-      "Provider ID": offerInfo.provider,
-      "Offer ID": offerId,
-      "Price Per Epoch": await ptFormatWithSymbol(
-        offerInfo.minPricePerWorkerEpoch,
-      ),
-      "Peer Count": bigintToStr(offerInfo.peerCount),
-    };
-  }
-
-  return { offerId };
+    },
+  );
 }
-
-const COMMON_WARN_MSG = `. Please check whether the offer exists and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`;
 
 export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
@@ -333,52 +324,51 @@ export async function updateOffers(flags: OffersArgs) {
     );
   }
 
+  const [notFoundOffersInfo, offersInfo] = await getOffersInfo(offersToUpdate);
+
+  if (notFoundOffersInfo.length > 0) {
+    commandObj.warn(
+      commandObj.warn(
+        `Can't find offer info using the indexer:\n${notFoundOffersInfo
+          .map((offer) => {
+            return `${offer.offerName}: ${offer.offerId}`;
+          })
+          .join(
+            "",
+          )}\n\nPlease check whether the offer exists and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`,
+      ),
+    );
+  }
+
   for (const {
     minPricePerWorkerEpochBigInt,
     offerId,
     effectors,
     offerName,
     computePeersFromProviderConfig,
-    offerInfo: { offerInfo, offerIndexerInfo } = {
-      offerInfo: undefined,
-      offerIndexerInfo: undefined,
-    },
-  } of offersToUpdate) {
-    if (offerInfo === undefined) {
-      commandObj.warn(
-        `Can't find offer ${color.yellow(
-          offerName,
-        )} info on chain${COMMON_WARN_MSG}`,
-      );
-
-      continue;
-    }
-
-    if (offerIndexerInfo === undefined) {
-      commandObj.warn(
-        `Can't find offer ${color.yellow(
-          offerName,
-        )} info using the indexer${COMMON_WARN_MSG}`,
-      );
-
-      continue;
-    }
-
+    offerIndexerInfo,
+  } of offersInfo) {
     const populatedTxs = [];
 
-    if (offerInfo.paymentToken !== usdcAddress) {
+    if (offerIndexerInfo.paymentToken.address !== usdcAddress.toLowerCase()) {
       populatedTxs.push({
         description: `changing payment token from ${color.yellow(
-          offerInfo.paymentToken,
+          offerIndexerInfo.paymentToken.address,
         )} to ${color.yellow(usdcAddress)}`,
         tx: [market.changePaymentToken, offerId, usdcAddress],
       });
     }
 
-    if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {
+    const minPricePerWorkerEpochBigIntFromIndexer = await ptParse(
+      offerIndexerInfo.pricePerEpoch,
+    );
+
+    if (
+      minPricePerWorkerEpochBigIntFromIndexer !== minPricePerWorkerEpochBigInt
+    ) {
       populatedTxs.push({
         description: `changing minPricePerWorker from ${color.yellow(
-          await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
+          await ptFormatWithSymbol(minPricePerWorkerEpochBigIntFromIndexer),
         )} to ${color.yellow(
           await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
         )}`,
@@ -708,11 +698,6 @@ async function ensureOfferConfigs() {
         const offerId =
           providerArtifactsConfig?.offers[fluenceEnv]?.[offerName]?.id;
 
-        const offerInfo =
-          offerId === undefined
-            ? undefined
-            : await getOfferInfo({ offerId, offerName });
-
         return {
           offerName,
           minPricePerWorkerEpochBigInt,
@@ -720,7 +705,6 @@ async function ensureOfferConfigs() {
           effectors,
           computePeersFromProviderConfig,
           offerId,
-          offerInfo,
           minProtocolVersion,
           maxProtocolVersion,
         };
@@ -729,8 +713,8 @@ async function ensureOfferConfigs() {
   );
 }
 
-type OfferFromProviderArtifacts = {
-  offerName: string;
+type OfferNameAndId = {
+  offerName?: string;
   offerId: string;
 };
 
@@ -738,9 +722,9 @@ type OfferArtifactsArgs = OffersArgs & {
   [OFFER_IDS_FLAG_NAME]: string | undefined;
 };
 
-export async function resolveOffersFromProviderArtifactsConfig(
+export async function resolveCreatedOffers(
   flags: OfferArtifactsArgs,
-): Promise<OfferFromProviderArtifacts[]> {
+): Promise<OfferNameAndId[]> {
   if (
     flags[OFFER_FLAG_NAME] !== undefined &&
     flags[OFFER_IDS_FLAG_NAME] !== undefined
@@ -762,30 +746,39 @@ export async function resolveOffersFromProviderArtifactsConfig(
 
   const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
 
+  let allOffers: OfferNameAndId[];
+
   if (providerArtifactsConfig === null) {
-    commandObj.error(
-      `Wasn't able to find ${PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME} in ${DOT_FLUENCE_DIR_NAME} which means you probably didn't create any offers yet. Please run '${CLI_NAME} provider offer-create' command first`,
+    const dealCliClient = await getDealCliClient();
+    const { signerOrWallet } = await getDealClient();
+
+    const offers = await dealCliClient.getOffersByProvider(
+      signerOrWallet.address,
     );
+
+    allOffers = offers.map(({ id }) => {
+      return { offerId: id };
+    });
+  } else {
+    const fluenceEnv = await ensureFluenceEnv();
+
+    allOffers = Object.entries(
+      providerArtifactsConfig.offers[fluenceEnv] ?? {},
+    ).map(([offerName, { id }]) => {
+      return { offerName, offerId: id };
+    });
   }
-
-  const fluenceEnv = await ensureFluenceEnv();
-
-  const allOffers: OfferFromProviderArtifacts[] = Object.entries(
-    providerArtifactsConfig.offers[fluenceEnv] ?? {},
-  ).map(([offerName, { id }]) => {
-    return { offerName, offerId: id };
-  });
 
   if (flags[OFFER_FLAG_NAME] === ALL_FLAG_VALUE) {
     return allOffers;
   }
 
   if (flags[OFFER_FLAG_NAME] === undefined) {
-    return checkboxes<OfferFromProviderArtifacts, never>({
-      message: `Select one or more offer names from ${providerArtifactsConfig.$getPath()}`,
+    return checkboxes<OfferNameAndId, never>({
+      message: `Select one or more offer names${providerArtifactsConfig === null ? "" : ` from ${providerArtifactsConfig.$getPath()}`}`,
       options: allOffers.map((offer) => {
         return {
-          name: offer.offerName,
+          name: offer.offerName === undefined ? offer.offerId : offer.offerName,
           value: offer,
         };
       }),
@@ -797,13 +790,13 @@ export async function resolveOffersFromProviderArtifactsConfig(
         return true;
       },
       oneChoiceMessage(choice) {
-        return `One offer found at ${providerArtifactsConfig.$getPath()}: ${color.yellow(
+        return `One offer found${providerArtifactsConfig === null ? "" : ` at ${providerArtifactsConfig.$getPath()}`}: ${color.yellow(
           choice,
         )}. Do you want to select it`;
       },
       onNoChoices() {
         commandObj.error(
-          `You must have at least one offer specified in ${providerArtifactsConfig.$getPath()}`,
+          `You must have at least one offer ${providerArtifactsConfig === null ? `created` : `specified in ${providerArtifactsConfig.$getPath()}`}`,
         );
       },
       flagName: OFFER_FLAG_NAME,
@@ -829,74 +822,44 @@ export async function resolveOffersFromProviderArtifactsConfig(
     commandObj.error(
       `Offers: ${color.yellow(
         notFoundOffers.join(", "),
-      )} are not found in 'offers' section of ${providerArtifactsConfig.$getPath()}`,
+      )} are not found${providerArtifactsConfig === null ? "" : ` in 'offers' section of ${providerArtifactsConfig.$getPath()}`}`,
     );
   }
 
   return foundOffers;
 }
 
-export async function getOfferInfo(
-  {
-    offerId,
-    offerName,
-  }: {
-    offerId: string;
-    offerName: string;
-  },
-  isAllowedToFail = false,
-) {
-  const { readonlyDealClient } = await getReadonlyDealClient();
-  const market = readonlyDealClient.getMarket();
+export async function getOffersInfo<T extends OfferNameAndId>(
+  offers: T[],
+): Promise<[T[], (T & { offerIndexerInfo: OfferDetail })[]]> {
   const dealCliClient = await getDealCliClient();
 
-  let offerInfo = undefined;
+  const offersIndexerInfo = await dealCliClient.getOffers({
+    ids: offers.map(({ offerId }) => {
+      return offerId;
+    }),
+  });
 
-  try {
-    offerInfo = await market.getOffer(offerId);
-  } catch (e) {
-    if (isAllowedToFail) {
-      throw e;
-    }
-  }
-
-  let offerIndexerInfo = undefined;
-
-  try {
-    offerIndexerInfo = (await dealCliClient.getOffer(offerId)) ?? undefined;
-  } catch {}
-
-  return { offerName, offerId, offerInfo, offerIndexerInfo };
-}
-
-export async function getOffersInfo(offers: OfferFromProviderArtifacts[]) {
-  const getOfferResults = await Promise.allSettled(
-    offers.map((args) => {
-      return getOfferInfo(args, true);
+  const offersInfoMap = Object.fromEntries(
+    offersIndexerInfo.map((o) => {
+      return [o.id, o] as const;
     }),
   );
 
-  const [offersInfoErrors, offersInfo] = splitErrorsAndResults(
-    getOfferResults,
-    (getOfferResult, i) => {
-      if (getOfferResult.status === "fulfilled") {
-        return { result: getOfferResult.value };
-      }
+  return splitErrorsAndResults(offers, (offer) => {
+    const offerIndexerInfo = offersInfoMap[offer.offerId];
 
-      const error = stringifyUnknown(getOfferResult.reason);
-      const { offerId: offerId, offerName } = offers[i] ?? {};
-
+    if (offerIndexerInfo === undefined) {
       return {
-        error: error.includes("Offer doesn't exist")
-          ? `Offer ${color.yellow(offerName)} with id ${color.yellow(
-              offerId,
-            )} doesn't exist`
-          : `Error when getting info for offer ${color.yellow(
-              offerName,
-            )} with id ${color.yellow(offerId)}: ${error}`,
+        error: offer,
       };
-    },
-  );
+    }
 
-  return [offersInfoErrors, offersInfo] as const;
+    return {
+      result: {
+        ...offer,
+        offerIndexerInfo,
+      },
+    };
+  });
 }

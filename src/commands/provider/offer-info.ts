@@ -16,7 +16,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import {
-  resolveOffersFromProviderArtifactsConfig,
+  resolveCreatedOffers,
   getOffersInfo,
   offersInfoToString,
 } from "../../lib/chain/offer.js";
@@ -35,7 +35,7 @@ export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(OfferInfo));
-    const offers = await resolveOffersFromProviderArtifactsConfig(flags);
+    const offers = await resolveCreatedOffers(flags);
     const offerInfoResult = await getOffersInfo(offers);
     commandObj.logToStderr(await offersInfoToString(offerInfoResult));
   }
