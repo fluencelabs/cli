@@ -202,12 +202,14 @@ export async function match(dealAddress: string) {
   );
 
   // TODO: get this from chain
-  const lastMatchedEpoch: bigint = 1n;
+  const lastMatchedEpoch: bigint = 0n;
   const minDealRematchingEpochs = await core.minDealRematchingEpochs();
 
   if (
-    lastMatchedEpoch === 0n ||
-    currentEpoch > lastMatchedEpoch + minDealRematchingEpochs
+    !(
+      lastMatchedEpoch === 0n ||
+      currentEpoch > lastMatchedEpoch + minDealRematchingEpochs
+    )
   ) {
     commandObj.error(
       `You have to wait at least ${bigintToStr(minDealRematchingEpochs)} epochs before you can match again. You previously matched on epoch ${bigintToStr(lastMatchedEpoch)}`,
