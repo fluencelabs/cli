@@ -120,7 +120,6 @@ export default class New extends BaseCommand<typeof New> {
       Object.values(fluenceConfig.deployments).length === 0 ||
       !(await confirm({
         message: `Do you want to add spell ${color.yellow(spellName)} to some of your deployments`,
-        default: true,
       }))
     ) {
       return;
