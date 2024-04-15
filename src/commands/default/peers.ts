@@ -15,8 +15,9 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { setChainFlags } from "../../lib/chainFlags.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ENV_ARG } from "../../lib/const.js";
+import { ENV_ARG, ENV_ARG_NAME, ENV_FLAG_NAME } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { resolveRelays } from "../../lib/multiaddres.js";
 
@@ -30,7 +31,8 @@ export default class Peers extends BaseCommand<typeof Peers> {
     ...ENV_ARG,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Peers));
+    const { args } = await initCli(this, await this.parse(Peers));
+    setChainFlags({ [ENV_FLAG_NAME]: args[ENV_ARG_NAME] });
     const relays = await resolveRelays();
     commandObj.log(relays.join("\n"));
   }
