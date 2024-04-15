@@ -120,12 +120,14 @@ export default class New extends BaseCommand<typeof New> {
       Object.values(fluenceConfig.deployments).length === 0 ||
       !(await confirm({
         message: `Do you want to add spell ${color.yellow(spellName)} to some of your deployments`,
+        default: true,
       }))
     ) {
       return;
     }
 
-    const deploymentNames = await checkboxes({
+    const deploymentNames = await checkboxes<string, string[]>({
+      type: "checkbox",
       message: "Select deployments to add spell to",
       options: Object.keys(fluenceConfig.deployments),
       oneChoiceMessage(deploymentName) {
@@ -134,6 +136,7 @@ export default class New extends BaseCommand<typeof New> {
       onNoChoices(): Array<string> {
         return [];
       },
+      default: [],
     });
 
     if (deploymentNames.length === 0) {
