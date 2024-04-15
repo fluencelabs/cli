@@ -284,11 +284,12 @@ export async function sign<
     1000 * 5, // 5 seconds
     1000,
     (err: unknown) => {
-      // only retry data=null errors
       return !(
         err instanceof Error &&
-        (err.message.includes("data=null") ||
-          err.message.includes("connection error"))
+        // only retry if the error contains the following messages
+        ["data=null", "connection error", "connection closed"].some((msg) => {
+          return err.message.includes(msg);
+        })
       );
     },
   );
