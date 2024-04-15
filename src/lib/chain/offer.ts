@@ -36,6 +36,7 @@ import {
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
 } from "../const.js";
+import { dbg } from "../dbg.js";
 import {
   getDealClient,
   getDealCliClient,
@@ -46,6 +47,7 @@ import {
 import { numToStr } from "../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
+  jsonStringify,
   splitErrorsAndResults,
   stringifyUnknown,
 } from "../helpers/utils.js";
@@ -834,11 +836,14 @@ export async function getOffersInfo<T extends OfferNameAndId>(
 ): Promise<[T[], (T & { offerIndexerInfo: OfferDetail })[]]> {
   const dealCliClient = await getDealCliClient();
 
-  const offersIndexerInfo = await dealCliClient.getOffers({
+  const getOffersArg: Parameters<typeof dealCliClient.getOffers>[0] = {
     ids: offers.map(({ offerId }) => {
       return offerId;
     }),
-  });
+  };
+
+  dbg(`Running dealCliClient.getOffers with ${jsonStringify(getOffersArg)}`);
+  const offersIndexerInfo = await dealCliClient.getOffers(getOffersArg);
 
   const offersInfoMap = Object.fromEntries(
     offersIndexerInfo.map((o) => {
