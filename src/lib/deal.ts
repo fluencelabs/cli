@@ -189,16 +189,30 @@ export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
 }
 
 export async function match(dealAddress: string) {
-  const { dealClient } = await getDealClient();
+  const { readonlyDealClient } = await getReadonlyDealClient();
   const dealMatcherClient = await getDealMatcherClient();
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
-  const core = dealClient.getCore();
+  const core = readonlyDealClient.getCore();
+  const currentEpoch = await core.currentEpoch();
 
   dbg(
     `initTimestamp: ${bigintToStr(
       await core.initTimestamp(),
-    )} Current epoch: ${bigintToStr(await core.currentEpoch())}`,
+    )} Current epoch: ${bigintToStr(currentEpoch)}`,
   );
+
+  // TODO: get this from chain
+  const lastMatchedEpoch: bigint = 1n;
+  const minDealRematchingEpochs = await core.minDealRematchingEpochs();
+
+  if (
+    lastMatchedEpoch === 0n ||
+    currentEpoch > lastMatchedEpoch + minDealRematchingEpochs
+  ) {
+    commandObj.error(
+      `You have to wait at least ${bigintToStr(minDealRematchingEpochs)} epochs before you can match again. You previously matched on epoch ${bigintToStr(lastMatchedEpoch)}`,
+    );
+  }
 
   const matchedOffers = await setTryTimeout(
     "get matched offers by deal id",
@@ -219,6 +233,7 @@ export async function match(dealAddress: string) {
 
   dbg(`got matchedOffers: ${stringifyUnknown(matchedOffers)}`);
 
+  const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
 
   const matchDealTxReceipt = await sign(
