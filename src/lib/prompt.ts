@@ -371,6 +371,9 @@ export const checkboxes = async <T, U>(
     onNoChoices,
     flagName,
     argName,
+    // TODO: fix inquirer types so this part is type-checked
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    default: question.default,
   });
 
   if (result !== undefined) {
