@@ -22,7 +22,7 @@ import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
+import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initNewReadonlySpellConfig } from "../../lib/configs/project/spell.js";
 import {
   FS_OPTIONS,
@@ -116,6 +116,7 @@ export default class New extends BaseCommand<typeof New> {
     await fluenceConfig.$commit();
 
     if (
+      !isInteractive ||
       fluenceConfig.deployments === undefined ||
       Object.values(fluenceConfig.deployments).length === 0 ||
       !(await confirm({
@@ -126,8 +127,7 @@ export default class New extends BaseCommand<typeof New> {
       return;
     }
 
-    const deploymentNames = await checkboxes<string, string[]>({
-      type: "checkbox",
+    const deploymentNames = await checkboxes({
       message: "Select deployments to add spell to",
       options: Object.keys(fluenceConfig.deployments),
       oneChoiceMessage(deploymentName) {
@@ -136,7 +136,6 @@ export default class New extends BaseCommand<typeof New> {
       onNoChoices(): Array<string> {
         return [];
       },
-      default: [],
     });
 
     if (deploymentNames.length === 0) {
