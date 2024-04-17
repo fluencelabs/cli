@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { mkdir, writeFile } from "fs/promises";
+import assert from "assert";
+import { access, mkdir, writeFile } from "fs/promises";
 import { join, relative } from "path";
 
 import { color } from "@oclif/color";
@@ -24,14 +25,13 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initNewReadonlySpellConfig } from "../../lib/configs/project/spell.js";
 import {
-  DEFAULT_DEPLOYMENT_NAME,
   FS_OPTIONS,
   getSpellAquaFileContent,
   SPELL_AQUA_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { ensureSpellsDir, projectRootDir } from "../../lib/paths.js";
-import { confirm, input } from "../../lib/prompt.js";
+import { checkboxes, confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create a new spell template";
@@ -54,10 +54,42 @@ export default class New extends BaseCommand<typeof New> {
       await this.parse(New),
     );
 
-    const spellName =
-      args.name ?? (await input({ message: "Enter spell name" }));
-
     const pathToSpellsDir = flags.path ?? (await ensureSpellsDir());
+
+    function getPathToSpellDir(spellName: string) {
+      return join(pathToSpellsDir, spellName);
+    }
+
+    async function validateSpellName(spellName: string) {
+      if (maybeFluenceConfig?.spells?.[spellName] !== undefined) {
+        return `Spell ${color.yellow(spellName)} already exists in ${maybeFluenceConfig.$getPath()}`;
+      }
+
+      const pathToSpellDir = getPathToSpellDir(spellName);
+
+      try {
+        await access(pathToSpellDir);
+        return `There is already a file or directory at ${color.yellow(pathToSpellDir)}`;
+      } catch {}
+
+      return true;
+    }
+
+    const spellName =
+      args.name ??
+      (await input({
+        message: "Enter spell name",
+        validate(spellName: string) {
+          return validateSpellName(spellName);
+        },
+      }));
+
+    const spellNameValidity = await validateSpellName(spellName);
+
+    if (spellNameValidity !== true) {
+      return commandObj.error(spellNameValidity);
+    }
+
     const pathToSpellDir = join(pathToSpellsDir, spellName);
     await generateNewSpell(pathToSpellDir, spellName);
 
@@ -84,36 +116,60 @@ export default class New extends BaseCommand<typeof New> {
     await fluenceConfig.$commit();
 
     if (
-      !(
-        isInteractive &&
-        fluenceConfig.deployments !== undefined &&
-        DEFAULT_DEPLOYMENT_NAME in fluenceConfig.deployments &&
-        !(
-          fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].spells ?? []
-        ).includes(spellName) &&
-        (await confirm({
-          message: `Do you want to add spell ${color.yellow(
-            spellName,
-          )} to a default deployment ${color.yellow(DEFAULT_DEPLOYMENT_NAME)}`,
-        }))
-      )
+      !isInteractive ||
+      fluenceConfig.deployments === undefined ||
+      Object.values(fluenceConfig.deployments).length === 0 ||
+      !(await confirm({
+        message: `Do you want to add spell ${color.yellow(spellName)} to some of your deployments`,
+        default: true,
+      }))
     ) {
       return;
     }
 
-    const defaultDeployment =
-      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME];
+    const deploymentNames = await checkboxes({
+      message: "Select deployments to add spell to",
+      options: Object.keys(fluenceConfig.deployments),
+      oneChoiceMessage(deploymentName) {
+        return `Do you want to select deployment ${color.yellow(deploymentName)}`;
+      },
+      onNoChoices(): Array<string> {
+        return [];
+      },
+    });
 
-    fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] = {
-      ...defaultDeployment,
-      spells: [...(defaultDeployment.spells ?? []), spellName],
-    };
+    if (deploymentNames.length === 0) {
+      commandObj.logToStderr(
+        `No deployments selected. You can add it manually later to ${fluenceConfig.$getPath()}`,
+      );
+
+      return;
+    }
+
+    deploymentNames.forEach((deploymentName) => {
+      assert(
+        fluenceConfig.deployments !== undefined,
+        "Unreachable. It's checked above that fluenceConfig.deployments is not undefined",
+      );
+
+      const deployment = fluenceConfig.deployments[deploymentName];
+
+      assert(
+        deployment !== undefined,
+        "Unreachable. deploymentName is guaranteed to exist in fluenceConfig.deployments",
+      );
+
+      fluenceConfig.deployments[deploymentName] = {
+        ...deployment,
+        spells: [...(deployment.spells ?? []), spellName],
+      };
+    });
 
     await fluenceConfig.$commit();
 
     commandObj.log(
-      `Added ${color.yellow(spellName)} to ${color.yellow(
-        DEFAULT_DEPLOYMENT_NAME,
+      `Added ${color.yellow(spellName)} to deployments: ${color.yellow(
+        deploymentNames.join(", "),
       )}`,
     );
   }
