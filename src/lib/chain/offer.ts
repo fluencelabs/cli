@@ -45,6 +45,7 @@ import {
   signBatch,
   getReadonlyDealClient,
 } from "../dealClient.js";
+import { uint8ArrayToHex } from "../helpers/typesafeStringify.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
@@ -554,9 +555,11 @@ export async function updateOffers(flags: OffersArgs) {
       populatedTxs.push(
         ...computeUnitsToAdd.map(({ hexPeerId, unitIds, peerIdBase58 }) => {
           return {
-            description: `\nAdding compute units to peer ${peerIdBase58}:\n${unitIds.join(
-              "\n",
-            )}`,
+            description: `\nAdding compute units to peer ${peerIdBase58}:\n${unitIds
+              .map((unitId) => {
+                return uint8ArrayToHex(Buffer.from(unitId));
+              })
+              .join("\n")}`,
             tx: [market.addComputeUnits, hexPeerId, unitIds],
           };
         }),
@@ -575,7 +578,11 @@ export async function updateOffers(flags: OffersArgs) {
       populatedTxs.push({
         description: computePeersToAdd
           .map(({ peerIdBase58, unitIds }) => {
-            return `\nAdding peer ${peerIdBase58} with compute units:\n${unitIds.join("\n")}`;
+            return `\nAdding peer ${peerIdBase58} with compute units:\n${unitIds
+              .map((unitId) => {
+                return uint8ArrayToHex(Buffer.from(unitId));
+              })
+              .join("\n")}`;
           })
           .join("\n"),
         tx: [market.addComputePeers, offerId, computePeersToAdd],
