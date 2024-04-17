@@ -125,6 +125,25 @@ export async function getDealCliClient() {
     const { DealCliClient } = await import("@fluencelabs/deal-ts-clients");
     const env = await ensureChainEnv();
     dealCliClient = new DealCliClient(env);
+
+    await setTryTimeout(
+      "CLI Indexer client is ready check",
+      async () => {
+        assert(
+          dealCliClient !== undefined,
+          "Unreachable. dealCliClient can't be undefined",
+        );
+
+        // By calling this method we ensure that the blockchain client is connected
+        await dealCliClient.getOffers({ ids: [] });
+      },
+      (err) => {
+        commandObj.error(
+          `CLI Indexer client is ready check by running dealCliClient.getOffers({ ids: [] }) failed: ${stringifyUnknown(err)}`,
+        );
+      },
+      1000 * 5, // 5 seconds
+    );
   }
 
   return dealCliClient;
