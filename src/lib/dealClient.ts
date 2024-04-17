@@ -142,7 +142,7 @@ export async function getDealCliClient() {
           `CLI Indexer client is ready check by running dealCliClient.getOffers({ ids: [] }) failed: ${stringifyUnknown(err)}`,
         );
       },
-      1000 * 5, // 5 seconds
+      1000 * 60, // 1 minute
     );
   }
 
