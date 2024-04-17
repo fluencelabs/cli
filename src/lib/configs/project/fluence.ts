@@ -1437,7 +1437,7 @@ function checkDuplicatesAndPresenceImplementation({
       ? `Worker ${color.yellow(
           workerName,
         )} has ${servicesOrSpells} that are not listed in ${color.yellow(
-          "services",
+          servicesOrSpells,
         )} property in ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${color.yellow(
           [...new Set(notListedInFluenceYAML)].join(", "),
         )}`
