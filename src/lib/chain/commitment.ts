@@ -23,7 +23,12 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
 import { initReadonlyProviderConfig } from "../configs/project/provider.js";
-import { CLI_NAME, NOX_NAMES_FLAG_NAME, OFFER_FLAG_NAME } from "../const.js";
+import {
+  CLI_NAME,
+  NOX_NAMES_FLAG_NAME,
+  OFFER_FLAG_NAME,
+  CC_IDS_FLAG_NAME,
+} from "../const.js";
 import { dbg } from "../dbg.js";
 import {
   getDealClient,
@@ -160,14 +165,14 @@ export async function getComputePeersWithCC(
 export type CCFlags = {
   [NOX_NAMES_FLAG_NAME]?: string | undefined;
   [OFFER_FLAG_NAME]?: string | undefined;
-  ids?: string | undefined;
+  [CC_IDS_FLAG_NAME]?: string | undefined;
 };
 
 export async function getCommitments(
   flags: CCFlags,
 ): Promise<{ commitmentId: string }[] | ComputePeersWithCC> {
-  if (flags.ids !== undefined) {
-    return commaSepStrToArr(flags.ids).map((commitmentId) => {
+  if (flags[CC_IDS_FLAG_NAME] !== undefined) {
+    return commaSepStrToArr(flags[CC_IDS_FLAG_NAME]).map((commitmentId) => {
       return { commitmentId };
     });
   }
@@ -690,7 +695,7 @@ export async function basicCCInfoAndStatusToString(
       ccInfos.map(async (ccInfo) => {
         return `${stringifyBasicCommitmentInfo(
           ccInfo,
-        )}Status: ${await ccStatusToString(ccInfo.status)}`;
+        )} Status: ${await ccStatusToString(ccInfo.status)}`;
       }),
     )
   ).join("\n\n");

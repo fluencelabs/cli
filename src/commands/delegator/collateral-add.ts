@@ -18,7 +18,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
-import { CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
+import { CC_IDS_FLAG_NAME, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CollateralAdd extends BaseCommand<typeof CollateralAdd> {
@@ -36,6 +36,6 @@ export default class CollateralAdd extends BaseCommand<typeof CollateralAdd> {
 
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(CollateralAdd));
-    await depositCollateral({ ids: args.IDS });
+    await depositCollateral({ [CC_IDS_FLAG_NAME]: args.IDS });
   }
 }

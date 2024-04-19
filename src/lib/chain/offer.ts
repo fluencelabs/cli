@@ -46,6 +46,7 @@ import {
   getReadonlyDealClient,
   populate,
 } from "../dealClient.js";
+import { uint8ArrayToHex } from "../helpers/typesafeStringify.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
@@ -306,6 +307,8 @@ export async function updateOffers(flags: OffersArgs) {
   await assertProviderIsRegistered();
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
+  const usdc = dealClient.getUSDC();
+  const usdcAddress = await usdc.getAddress();
 
   const [notCreatedOffers, offersToUpdate] = splitErrorsAndResults(
     offers,
@@ -365,9 +368,18 @@ export async function updateOffers(flags: OffersArgs) {
 
     const populatedTxs = [];
 
+    if (offerInfo.paymentToken !== usdcAddress) {
+      populatedTxs.push({
+        description: `\nchanging payment token from ${color.yellow(
+          offerInfo.paymentToken,
+        )} to ${color.yellow(usdcAddress)}`,
+        tx: populate(market.changePaymentToken, offerId, usdcAddress),
+      });
+    }
+
     if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {
       populatedTxs.push({
-        description: `changing minPricePerWorker from ${color.yellow(
+        description: `\nchanging minPricePerWorker from ${color.yellow(
           await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
         )} to ${color.yellow(
           await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
@@ -392,7 +404,7 @@ export async function updateOffers(flags: OffersArgs) {
 
     if (removedEffectors.length > 0) {
       populatedTxs.push({
-        description: `Removing effectors: ${removedEffectors.join(", ")}`,
+        description: `\nRemoving effectors:\n${removedEffectors.join("\n")}`,
         tx: populate(
           market.removeEffector,
           offerId,
@@ -413,7 +425,7 @@ export async function updateOffers(flags: OffersArgs) {
 
     if (addedEffectors.length > 0) {
       populatedTxs.push({
-        description: `Adding effectors: ${addedEffectors.join(", ")}`,
+        description: `\nAdding effectors:\n${addedEffectors.join("\n")}`,
         tx: populate(
           market.addEffector,
           offerId,
@@ -445,17 +457,22 @@ export async function updateOffers(flags: OffersArgs) {
         );
 
         if (alreadyRegisteredPeer === undefined) {
-          return computeUnits.map(({ id }) => {
-            return id;
-          });
+          return [];
         }
 
         if (alreadyRegisteredPeer.unitIds.length < computeUnits.length) {
-          return computeUnits
-            .slice(alreadyRegisteredPeer.unitIds.length - computeUnits.length)
-            .map(({ id }) => {
-              return id;
-            });
+          return [
+            {
+              peerIdBase58,
+              computeUnits: computeUnits
+                .slice(
+                  alreadyRegisteredPeer.unitIds.length - computeUnits.length,
+                )
+                .map(({ id }) => {
+                  return id;
+                }),
+            },
+          ];
         }
 
         return [];
@@ -464,11 +481,16 @@ export async function updateOffers(flags: OffersArgs) {
 
     if (computeUnitsToRemove.length > 0) {
       populatedTxs.push(
-        ...computeUnitsToRemove.map((computeUnit) => {
-          return {
-            description: `Removing compute unit: ${computeUnit}`,
-            tx: populate(market.removeComputeUnit, computeUnit),
-          };
+        ...computeUnitsToRemove.flatMap(({ peerIdBase58, computeUnits }) => {
+          return computeUnits.map((computeUnit, index) => {
+            return {
+              description:
+                index === 0
+                  ? `\nRemoving compute units from peer ${peerIdBase58}:\n${computeUnit}`
+                  : computeUnit,
+              tx: populate(market.removeComputeUnit, computeUnit),
+            };
+          });
         }),
       );
     }
@@ -481,12 +503,25 @@ export async function updateOffers(flags: OffersArgs) {
 
     if (computePeersToRemove.length > 0) {
       populatedTxs.push(
-        ...computePeersToRemove.map(({ peerIdBase58, hexPeerId }) => {
-          return {
-            description: `Removing peer: ${peerIdBase58}`,
-            tx: populate(market.removeComputePeer, hexPeerId),
-          };
-        }),
+        ...computePeersToRemove.flatMap(
+          ({ peerIdBase58, hexPeerId, computeUnits }) => {
+            return [
+              ...computeUnits.map((computeUnit, index) => {
+                return {
+                  description:
+                    index === 0
+                      ? `\nRemoving peer ${peerIdBase58} with compute units:\n${computeUnit.id}`
+                      : computeUnit.id,
+                  tx: populate(market.removeComputeUnit, computeUnit.id),
+                };
+              }),
+              {
+                description: "",
+                tx: populate(market.removeComputePeer, hexPeerId),
+              },
+            ];
+          },
+        ),
       );
     }
 
@@ -521,9 +556,11 @@ export async function updateOffers(flags: OffersArgs) {
       populatedTxs.push(
         ...computeUnitsToAdd.map(({ hexPeerId, unitIds, peerIdBase58 }) => {
           return {
-            description: `Adding ${numToStr(
-              unitIds.length,
-            )} compute units to peer id ${peerIdBase58}`,
+            description: `\nAdding compute units to peer ${peerIdBase58}:\n${unitIds
+              .map((unitId) => {
+                return uint8ArrayToHex(Buffer.from(unitId));
+              })
+              .join("\n")}`,
             tx: populate(market.addComputeUnits, hexPeerId, unitIds),
           };
         }),
@@ -540,11 +577,15 @@ export async function updateOffers(flags: OffersArgs) {
 
     if (computePeersToAdd.length > 0) {
       populatedTxs.push({
-        description: `Adding peers:\n${computePeersToAdd
+        description: computePeersToAdd
           .map(({ peerIdBase58, unitIds }) => {
-            return `Peer: ${peerIdBase58} with ${numToStr(unitIds.length)} compute units`;
+            return `\nAdding peer ${peerIdBase58} with compute units:\n${unitIds
+              .map((unitId) => {
+                return uint8ArrayToHex(Buffer.from(unitId));
+              })
+              .join("\n")}`;
           })
-          .join("\n")}`,
+          .join("\n"),
         tx: populate(market.addComputePeers, offerId, computePeersToAdd),
       });
     }
@@ -563,6 +604,9 @@ export async function updateOffers(flags: OffersArgs) {
       `\nUpdating offer ${color.yellow(offerName)} with id ${color.yellow(
         offerId,
       )}:\n${populatedTxs
+        .filter(({ description }) => {
+          return description !== "";
+        })
         .map(({ description }) => {
           return description;
         })
