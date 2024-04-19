@@ -307,7 +307,6 @@ export async function sign<
     (err: unknown) => {
       return !(
         err instanceof Error &&
-        // only retry if the error contains the following messages
         ["data=null", "connection error", "connection closed"].some((msg) => {
           return err.message.includes(msg);
         })
