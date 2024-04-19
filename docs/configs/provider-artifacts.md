@@ -29,19 +29,18 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description        |
-|-----------|--------------------|----------|--------------------|
-| `noxName` | [object](#noxname) | No       | Created offer info |
+| Property  | Type               | Required | Description |
+|-----------|--------------------|----------|-------------|
+| `noxName` | [object](#noxname) | No       |             |
 
 #### noxName
 
-Created offer info
-
 ##### Properties
 
-| Property | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| `id`     | string | **Yes**  | Offer id    |
+| Property          | Type   | Required | Description      |
+|-------------------|--------|----------|------------------|
+| `id`              | string | **Yes**  | Offer id         |
+| `providerAddress` | string | **Yes**  | Provider address |
 
 ### dar
 
@@ -49,19 +48,18 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description        |
-|-----------|--------------------|----------|--------------------|
-| `noxName` | [object](#noxname) | No       | Created offer info |
+| Property  | Type               | Required | Description |
+|-----------|--------------------|----------|-------------|
+| `noxName` | [object](#noxname) | No       |             |
 
 #### noxName
 
-Created offer info
-
 ##### Properties
 
-| Property | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| `id`     | string | **Yes**  | Offer id    |
+| Property          | Type   | Required | Description      |
+|-------------------|--------|----------|------------------|
+| `id`              | string | **Yes**  | Offer id         |
+| `providerAddress` | string | **Yes**  | Provider address |
 
 ### kras
 
@@ -69,19 +67,18 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description        |
-|-----------|--------------------|----------|--------------------|
-| `noxName` | [object](#noxname) | No       | Created offer info |
+| Property  | Type               | Required | Description |
+|-----------|--------------------|----------|-------------|
+| `noxName` | [object](#noxname) | No       |             |
 
 #### noxName
 
-Created offer info
-
 ##### Properties
 
-| Property | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| `id`     | string | **Yes**  | Offer id    |
+| Property          | Type   | Required | Description      |
+|-------------------|--------|----------|------------------|
+| `id`              | string | **Yes**  | Offer id         |
+| `providerAddress` | string | **Yes**  | Provider address |
 
 ### local
 
@@ -89,19 +86,18 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description        |
-|-----------|--------------------|----------|--------------------|
-| `noxName` | [object](#noxname) | No       | Created offer info |
+| Property  | Type               | Required | Description |
+|-----------|--------------------|----------|-------------|
+| `noxName` | [object](#noxname) | No       |             |
 
 #### noxName
 
-Created offer info
-
 ##### Properties
 
-| Property | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| `id`     | string | **Yes**  | Offer id    |
+| Property          | Type   | Required | Description      |
+|-------------------|--------|----------|------------------|
+| `id`              | string | **Yes**  | Offer id         |
+| `providerAddress` | string | **Yes**  | Provider address |
 
 ### stage
 
@@ -109,17 +105,16 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description        |
-|-----------|--------------------|----------|--------------------|
-| `noxName` | [object](#noxname) | No       | Created offer info |
+| Property  | Type               | Required | Description |
+|-----------|--------------------|----------|-------------|
+| `noxName` | [object](#noxname) | No       |             |
 
 #### noxName
 
-Created offer info
-
 ##### Properties
 
-| Property | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| `id`     | string | **Yes**  | Offer id    |
+| Property          | Type   | Required | Description      |
+|-------------------|--------|----------|------------------|
+| `id`              | string | **Yes**  | Offer id         |
+| `providerAddress` | string | **Yes**  | Provider address |
 
