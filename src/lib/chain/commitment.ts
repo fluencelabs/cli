@@ -34,7 +34,7 @@ import {
   getDealClient,
   getEventValues,
   signBatch,
-  sign,
+  populate,
   getReadonlyDealClient,
 } from "../dealClient.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
@@ -255,13 +255,13 @@ export async function createCommitments(flags: {
           );
 
           return {
-            result: [
+            result: populate(
               capacity.createCommitment,
               peerIdUint8Arr,
               durationEpoch,
               ccDelegator ?? ethers.ZeroAddress,
               ccRewardDelegationRate,
-            ] as const,
+            ),
           };
         }),
       ),
@@ -281,11 +281,7 @@ export async function createCommitments(flags: {
   let createCommitmentsTxReceipts;
 
   try {
-    createCommitmentsTxReceipts = await signBatch(
-      createCommitmentsTxs.map((tx) => {
-        return [...tx];
-      }),
-    );
+    createCommitmentsTxReceipts = await signBatch(createCommitmentsTxs);
   } catch (e) {
     const errorString = stringifyUnknown(e);
 
@@ -408,7 +404,7 @@ export async function removeCommitments(flags: CCFlags) {
 
   await signBatch(
     commitments.map(({ commitmentId }) => {
-      return [capacity.removeCommitment, commitmentId];
+      return populate(capacity.removeCommitment, commitmentId);
     }),
   );
 
@@ -421,7 +417,7 @@ export async function removeCommitments(flags: CCFlags) {
   );
 }
 
-export async function withdrawCollateral(flags: CCFlags) {
+export async function collateralWithdraw(flags: CCFlags) {
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
@@ -460,8 +456,11 @@ export async function withdrawCollateral(flags: CCFlags) {
     const { commitmentId } = commitment;
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
-    await sign(capacity.removeCUFromCC, commitmentId, [...unitIds]);
-    await sign(capacity.finishCommitment, commitmentId);
+
+    await signBatch([
+      populate(capacity.removeCUFromCC, commitmentId, [...unitIds]),
+      populate(capacity.finishCommitment, commitmentId),
+    ]);
 
     commandObj.logToStderr(
       `Collateral withdrawn for:\n${stringifyBasicCommitmentInfo(commitment)}`,
@@ -469,7 +468,7 @@ export async function withdrawCollateral(flags: CCFlags) {
   }
 }
 
-export async function withdrawCollateralRewards(flags: CCFlags) {
+export async function collateralRewardWithdraw(flags: CCFlags) {
   const commitments = await getCommitments(flags);
   const { dealClient } = await getDealClient();
   const capacity = dealClient.getCapacity();
@@ -477,7 +476,7 @@ export async function withdrawCollateralRewards(flags: CCFlags) {
   // TODO: add logs here
   await signBatch(
     commitments.map(({ commitmentId }) => {
-      return [capacity.withdrawReward, commitmentId];
+      return populate(capacity.withdrawReward, commitmentId);
     }),
   );
 }
@@ -544,7 +543,6 @@ export async function getCommitmentsInfo(flags: CCFlags) {
               peerId: c.providerConfigComputePeer.peerId,
             }
           : {}),
-        peerIdHex: commitment.peerId,
         commitmentId: c.commitmentId,
         status:
           commitment.status === undefined
@@ -615,7 +613,6 @@ export async function getCommitmentInfoString(
     omitBy(
       {
         PeerId: ccInfo.peerId,
-        "PeerId Hex": ccInfo.peerIdHex,
         "Capacity commitment ID": ccInfo.commitmentId,
         Status: await ccStatusToString(ccInfo.status),
         "Start epoch": ccInfo.startEpoch,

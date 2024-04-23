@@ -44,6 +44,7 @@ import {
   getEventValue,
   signBatch,
   getReadonlyDealClient,
+  populate,
 } from "../dealClient.js";
 import { uint8ArrayToHex } from "../helpers/typesafeStringify.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
@@ -53,6 +54,7 @@ import {
   stringifyUnknown,
 } from "../helpers/utils.js";
 import { checkboxes } from "../prompt.js";
+import { confirm } from "../prompt.js";
 import { ensureFluenceEnv } from "../resolveFluenceEnv.js";
 
 import {
@@ -276,7 +278,6 @@ async function resolveOfferInfo({
       Peers: await Promise.all(
         offerIndexerInfo.peers.map(async ({ id, computeUnits }) => {
           return {
-            "Hex ID": id,
             "Peer ID": await peerIdHexStringToBase58String(id),
             "CU Count": computeUnits.length,
           };
@@ -298,8 +299,6 @@ async function resolveOfferInfo({
 
   return { offerId };
 }
-
-const COMMON_WARN_MSG = `. Please check whether the offer exists and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`;
 
 export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
@@ -334,45 +333,68 @@ export async function updateOffers(flags: OffersArgs) {
     );
   }
 
+  const [offersNotFoundOnChain, offersToUpdateFoundOnChain] =
+    splitErrorsAndResults(
+      offersToUpdate,
+      ({
+        offerInfo: { offerInfo, offerIndexerInfo } = {
+          offerInfo: undefined,
+          offerIndexerInfo: undefined,
+        },
+        ...rest
+      }) => {
+        return offerInfo === undefined || offerIndexerInfo === undefined
+          ? { error: rest }
+          : { result: { offerInfo, offerIndexerInfo, ...rest } };
+      },
+    );
+
+  if (offersNotFoundOnChain.length > 0) {
+    commandObj.warn(
+      `Some of the offers are not found on chain:\n${offersNotFoundOnChain
+        .map(({ offerName, offerId }) => {
+          return `${color.yellow(offerName)}: ${offerId}`;
+        })
+        .join(
+          "\n",
+        )}\n\nPlease check whether the offers exist and try again. If the offers don't exist you can create them using '${CLI_NAME} provider offer-create' command`,
+    );
+  }
+
+  const offerIdTxsMap: Record<
+    string,
+    {
+      offerName: string;
+      removeTxs: { description: string; tx: ReturnType<typeof populate> }[];
+      txs: { description: string; tx: ReturnType<typeof populate> }[];
+    }
+  > = {};
+
   for (const {
     minPricePerWorkerEpochBigInt,
     offerId,
     effectors,
     offerName,
     computePeersFromProviderConfig,
-    offerInfo: { offerInfo, offerIndexerInfo } = {
-      offerInfo: undefined,
-      offerIndexerInfo: undefined,
-    },
-  } of offersToUpdate) {
-    if (offerInfo === undefined) {
-      commandObj.warn(
-        `Can't find offer ${color.yellow(
-          offerName,
-        )} info on chain${COMMON_WARN_MSG}`,
-      );
+    offerInfo,
+    offerIndexerInfo,
+  } of offersToUpdateFoundOnChain) {
+    let txsPerOffer = offerIdTxsMap[offerId];
 
-      continue;
+    if (txsPerOffer === undefined) {
+      txsPerOffer = { offerName, removeTxs: [], txs: [] };
+      offerIdTxsMap[offerId] = txsPerOffer;
     }
 
-    if (offerIndexerInfo === undefined) {
-      commandObj.warn(
-        `Can't find offer ${color.yellow(
-          offerName,
-        )} info using the indexer${COMMON_WARN_MSG}`,
-      );
-
-      continue;
-    }
-
-    const populatedTxs = [];
+    const populatedRemoveTxs = txsPerOffer.removeTxs;
+    const populatedTxs = txsPerOffer.txs;
 
     if (offerInfo.paymentToken !== usdcAddress) {
       populatedTxs.push({
         description: `\nchanging payment token from ${color.yellow(
           offerInfo.paymentToken,
         )} to ${color.yellow(usdcAddress)}`,
-        tx: [market.changePaymentToken, offerId, usdcAddress],
+        tx: populate(market.changePaymentToken, offerId, usdcAddress),
       });
     }
 
@@ -383,11 +405,11 @@ export async function updateOffers(flags: OffersArgs) {
         )} to ${color.yellow(
           await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
         )}`,
-        tx: [
+        tx: populate(
           market.changeMinPricePerWorkerEpoch,
           offerId,
           minPricePerWorkerEpochBigInt,
-        ],
+        ),
       });
     }
 
@@ -404,7 +426,7 @@ export async function updateOffers(flags: OffersArgs) {
     if (removedEffectors.length > 0) {
       populatedTxs.push({
         description: `\nRemoving effectors:\n${removedEffectors.join("\n")}`,
-        tx: [
+        tx: populate(
           market.removeEffector,
           offerId,
           await Promise.all(
@@ -412,7 +434,7 @@ export async function updateOffers(flags: OffersArgs) {
               return cidStringToCIDV1Struct(cid);
             }),
           ),
-        ],
+        ),
       });
     }
 
@@ -425,7 +447,7 @@ export async function updateOffers(flags: OffersArgs) {
     if (addedEffectors.length > 0) {
       populatedTxs.push({
         description: `\nAdding effectors:\n${addedEffectors.join("\n")}`,
-        tx: [
+        tx: populate(
           market.addEffector,
           offerId,
           await Promise.all(
@@ -433,7 +455,7 @@ export async function updateOffers(flags: OffersArgs) {
               return cidStringToCIDV1Struct(effector);
             }),
           ),
-        ],
+        ),
       });
     }
 
@@ -479,7 +501,7 @@ export async function updateOffers(flags: OffersArgs) {
     );
 
     if (computeUnitsToRemove.length > 0) {
-      populatedTxs.push(
+      populatedRemoveTxs.push(
         ...computeUnitsToRemove.flatMap(({ peerIdBase58, computeUnits }) => {
           return computeUnits.map((computeUnit, index) => {
             return {
@@ -487,7 +509,7 @@ export async function updateOffers(flags: OffersArgs) {
                 index === 0
                   ? `\nRemoving compute units from peer ${peerIdBase58}:\n${computeUnit}`
                   : computeUnit,
-              tx: [market.removeComputeUnit, computeUnit],
+              tx: populate(market.removeComputeUnit, computeUnit),
             };
           });
         }),
@@ -501,7 +523,7 @@ export async function updateOffers(flags: OffersArgs) {
     });
 
     if (computePeersToRemove.length > 0) {
-      populatedTxs.push(
+      populatedRemoveTxs.push(
         ...computePeersToRemove.flatMap(
           ({ peerIdBase58, hexPeerId, computeUnits }) => {
             return [
@@ -511,12 +533,12 @@ export async function updateOffers(flags: OffersArgs) {
                     index === 0
                       ? `\nRemoving peer ${peerIdBase58} with compute units:\n${computeUnit.id}`
                       : computeUnit.id,
-                  tx: [market.removeComputeUnit, computeUnit.id],
+                  tx: populate(market.removeComputeUnit, computeUnit.id),
                 };
               }),
               {
                 description: "",
-                tx: [market.removeComputePeer, hexPeerId],
+                tx: populate(market.removeComputePeer, hexPeerId),
               },
             ];
           },
@@ -560,7 +582,7 @@ export async function updateOffers(flags: OffersArgs) {
                 return uint8ArrayToHex(Buffer.from(unitId));
               })
               .join("\n")}`,
-            tx: [market.addComputeUnits, hexPeerId, unitIds],
+            tx: populate(market.addComputeUnits, hexPeerId, unitIds),
           };
         }),
       );
@@ -585,40 +607,59 @@ export async function updateOffers(flags: OffersArgs) {
               .join("\n")}`;
           })
           .join("\n"),
-        tx: [market.addComputePeers, offerId, computePeersToAdd],
+        tx: populate(market.addComputePeers, offerId, computePeersToAdd),
       });
     }
-
-    if (populatedTxs.length === 0) {
-      commandObj.logToStderr(
-        `\nNo changes found for offer ${color.yellow(
-          offerName,
-        )}. Skipping update`,
-      );
-
-      continue;
-    }
-
-    commandObj.logToStderr(
-      `\nUpdating offer ${color.yellow(offerName)} with id ${color.yellow(
-        offerId,
-      )}:\n${populatedTxs
-        .filter(({ description }) => {
-          return description !== "";
-        })
-        .map(({ description }) => {
-          return description;
-        })
-        .join("\n")}\n`,
-    );
-
-    await signBatch(
-      // @ts-expect-error TODO: don't know at this moment how to fix this error. Will solve later
-      populatedTxs.map(({ tx }) => {
-        return tx;
-      }),
-    );
   }
+
+  const txs = Object.entries(offerIdTxsMap).map(([offerId, t]) => {
+    return { offerId, ...t };
+  });
+
+  if (txs.length === 0) {
+    commandObj.logToStderr("No changes found for selected offers");
+    return;
+  }
+
+  commandObj.logToStderr(
+    `Offers to update:\n\n${txs
+      .map(({ offerId, offerName, removeTxs, txs }) => {
+        return `Offer ${color.yellow(offerName)} with id ${color.yellow(
+          offerId,
+        )}:\n${[...removeTxs, ...txs]
+          .filter(({ description }) => {
+            return description !== "";
+          })
+          .map(({ description }) => {
+            return description;
+          })
+          .join("\n")}\n`;
+      })
+      .join("\n\n")}`,
+  );
+
+  if (
+    !(await confirm({
+      message: "Would you like to continue?",
+      default: true,
+    }))
+  ) {
+    commandObj.logToStderr("Offers update canceled");
+    return;
+  }
+
+  await signBatch([
+    ...txs.flatMap(({ removeTxs }) => {
+      return removeTxs.map(({ tx }) => {
+        return tx;
+      });
+    }),
+    ...txs.flatMap(({ txs }) => {
+      return txs.map(({ tx }) => {
+        return tx;
+      });
+    }),
+  ]);
 }
 
 export async function resolveOffersFromProviderConfig(
