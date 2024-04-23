@@ -44,7 +44,7 @@ import {
   getEventValue,
   signBatch,
   getReadonlyDealClient,
-  populate,
+  populateTx,
 } from "../dealClient.js";
 import { uint8ArrayToHex } from "../helpers/typesafeStringify.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
@@ -365,8 +365,8 @@ export async function updateOffers(flags: OffersArgs) {
     string,
     {
       offerName: string;
-      removeTxs: { description: string; tx: ReturnType<typeof populate> }[];
-      txs: { description: string; tx: ReturnType<typeof populate> }[];
+      removeTxs: { description: string; tx: ReturnType<typeof populateTx> }[];
+      txs: { description: string; tx: ReturnType<typeof populateTx> }[];
     }
   > = {};
 
@@ -394,7 +394,7 @@ export async function updateOffers(flags: OffersArgs) {
         description: `\nchanging payment token from ${color.yellow(
           offerInfo.paymentToken,
         )} to ${color.yellow(usdcAddress)}`,
-        tx: populate(market.changePaymentToken, offerId, usdcAddress),
+        tx: populateTx(market.changePaymentToken, offerId, usdcAddress),
       });
     }
 
@@ -405,7 +405,7 @@ export async function updateOffers(flags: OffersArgs) {
         )} to ${color.yellow(
           await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
         )}`,
-        tx: populate(
+        tx: populateTx(
           market.changeMinPricePerWorkerEpoch,
           offerId,
           minPricePerWorkerEpochBigInt,
@@ -426,7 +426,7 @@ export async function updateOffers(flags: OffersArgs) {
     if (removedEffectors.length > 0) {
       populatedTxs.push({
         description: `\nRemoving effectors:\n${removedEffectors.join("\n")}`,
-        tx: populate(
+        tx: populateTx(
           market.removeEffector,
           offerId,
           await Promise.all(
@@ -447,7 +447,7 @@ export async function updateOffers(flags: OffersArgs) {
     if (addedEffectors.length > 0) {
       populatedTxs.push({
         description: `\nAdding effectors:\n${addedEffectors.join("\n")}`,
-        tx: populate(
+        tx: populateTx(
           market.addEffector,
           offerId,
           await Promise.all(
@@ -509,7 +509,7 @@ export async function updateOffers(flags: OffersArgs) {
                 index === 0
                   ? `\nRemoving compute units from peer ${peerIdBase58}:\n${computeUnit}`
                   : computeUnit,
-              tx: populate(market.removeComputeUnit, computeUnit),
+              tx: populateTx(market.removeComputeUnit, computeUnit),
             };
           });
         }),
@@ -533,12 +533,12 @@ export async function updateOffers(flags: OffersArgs) {
                     index === 0
                       ? `\nRemoving peer ${peerIdBase58} with compute units:\n${computeUnit.id}`
                       : computeUnit.id,
-                  tx: populate(market.removeComputeUnit, computeUnit.id),
+                  tx: populateTx(market.removeComputeUnit, computeUnit.id),
                 };
               }),
               {
                 description: "",
-                tx: populate(market.removeComputePeer, hexPeerId),
+                tx: populateTx(market.removeComputePeer, hexPeerId),
               },
             ];
           },
@@ -582,7 +582,7 @@ export async function updateOffers(flags: OffersArgs) {
                 return uint8ArrayToHex(Buffer.from(unitId));
               })
               .join("\n")}`,
-            tx: populate(market.addComputeUnits, hexPeerId, unitIds),
+            tx: populateTx(market.addComputeUnits, hexPeerId, unitIds),
           };
         }),
       );
@@ -607,7 +607,7 @@ export async function updateOffers(flags: OffersArgs) {
               .join("\n")}`;
           })
           .join("\n"),
-        tx: populate(market.addComputePeers, offerId, computePeersToAdd),
+        tx: populateTx(market.addComputePeers, offerId, computePeersToAdd),
       });
     }
   }

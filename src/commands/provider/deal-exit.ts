@@ -23,7 +23,7 @@ import {
   DEAL_IDS_FLAG,
   DEAL_IDS_FLAG_NAME,
 } from "../../lib/const.js";
-import { getDealClient, populate, signBatch } from "../../lib/dealClient.js";
+import { getDealClient, populateTx, signBatch } from "../../lib/dealClient.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -69,7 +69,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
 
     await signBatch(
       computeUnits.map((computeUnit) => {
-        return populate(market.returnComputeUnitFromDeal, computeUnit.id);
+        return populateTx(market.returnComputeUnitFromDeal, computeUnit.id);
       }),
     );
   }

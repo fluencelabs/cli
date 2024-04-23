@@ -326,7 +326,7 @@ export async function sign<
   return res;
 }
 
-export function populate<T extends unknown[]>(
+export function populateTx<T extends unknown[]>(
   method: {
     populateTransaction: (...args: T) => Promise<ethers.ContractTransaction>;
     name: string;
@@ -345,7 +345,7 @@ export function populate<T extends unknown[]>(
 const BATCH_SIZE = 10;
 
 export async function signBatch(
-  populatedTxsWithDebugInfo: Array<ReturnType<typeof populate>>,
+  populatedTxsWithDebugInfo: Array<ReturnType<typeof populateTx>>,
 ) {
   const populatedTxsWithDebugInfoResolved = await Promise.all(
     populatedTxsWithDebugInfo.map(async ({ populated, debugInfo }) => {

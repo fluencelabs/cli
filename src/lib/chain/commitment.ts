@@ -34,7 +34,7 @@ import {
   getDealClient,
   getEventValues,
   signBatch,
-  populate,
+  populateTx,
   getReadonlyDealClient,
 } from "../dealClient.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
@@ -255,7 +255,7 @@ export async function createCommitments(flags: {
           );
 
           return {
-            result: populate(
+            result: populateTx(
               capacity.createCommitment,
               peerIdUint8Arr,
               durationEpoch,
@@ -404,7 +404,7 @@ export async function removeCommitments(flags: CCFlags) {
 
   await signBatch(
     commitments.map(({ commitmentId }) => {
-      return populate(capacity.removeCommitment, commitmentId);
+      return populateTx(capacity.removeCommitment, commitmentId);
     }),
   );
 
@@ -458,8 +458,8 @@ export async function collateralWithdraw(flags: CCFlags) {
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
     await signBatch([
-      populate(capacity.removeCUFromCC, commitmentId, [...unitIds]),
-      populate(capacity.finishCommitment, commitmentId),
+      populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
+      populateTx(capacity.finishCommitment, commitmentId),
     ]);
 
     commandObj.logToStderr(
@@ -476,7 +476,7 @@ export async function collateralRewardWithdraw(flags: CCFlags) {
   // TODO: add logs here
   await signBatch(
     commitments.map(({ commitmentId }) => {
-      return populate(capacity.withdrawReward, commitmentId);
+      return populateTx(capacity.withdrawReward, commitmentId);
     }),
   );
 }
