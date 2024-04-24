@@ -35,6 +35,7 @@ import {
   PT_SYMBOL,
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
+  PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
@@ -44,6 +45,7 @@ import {
   getEventValue,
   signBatch,
 } from "../dealClient.js";
+import { startSpinner, stopSpinner } from "../helpers/spinner.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
 import { uint8ArrayToHex } from "../helpers/typesafeStringify.js";
 import {
@@ -219,7 +221,7 @@ export async function createOffers(flags: OffersArgs) {
 
   commandObj.logToStderr(`
 ${
-  offersStr.length === 0
+  offersInfo.length === 0
     ? "No offers where created!"
     : `Offers ${color.yellow(offersStr)} successfully created!`
 }
@@ -255,7 +257,11 @@ export async function offersInfoToString([
         ).join("\n\n")}`
       : "";
 
-  return [offerInfoErrorsStr, offersInfoStr].join("\n\n");
+  return [offerInfoErrorsStr, offersInfoStr]
+    .filter((info) => {
+      return info !== "";
+    })
+    .join("\n\n");
 }
 
 async function formatOfferInfo(
@@ -284,7 +290,6 @@ async function formatOfferInfo(
       Peers: await Promise.all(
         offerIndexerInfo.peers.map(async ({ id, computeUnits }) => {
           return {
-            "Hex ID": id,
             "Peer ID": await peerIdHexStringToBase58String(id),
             "CU Count": computeUnits.length,
           };
@@ -757,9 +762,7 @@ type OfferArtifactsArgs = OffersArgs & {
   [OFFER_IDS_FLAG_NAME]: string | undefined;
 };
 
-export async function resolveCreatedOffers(
-  flags: OfferArtifactsArgs,
-): Promise<OfferNameAndId[]> {
+export async function resolveCreatedOffers(flags: OfferArtifactsArgs) {
   if (
     flags[OFFER_FLAG_NAME] !== undefined &&
     flags[OFFER_IDS_FLAG_NAME] !== undefined
@@ -781,28 +784,19 @@ export async function resolveCreatedOffers(
 
   const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
 
-  let allOffers: OfferNameAndId[];
-
   if (providerArtifactsConfig === null) {
-    const dealCliClient = await getDealCliClient();
-    const { signerOrWallet } = await getDealClient();
-
-    const offers = await dealCliClient.getOffersByProvider(
-      signerOrWallet.address,
+    return commandObj.error(
+      `${PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME} is missing. Make sure you created offers using '${CLI_NAME} provider offer-create' command.`,
     );
-
-    allOffers = offers.map(({ id }) => {
-      return { offerId: id };
-    });
-  } else {
-    const fluenceEnv = await ensureFluenceEnv();
-
-    allOffers = Object.entries(
-      providerArtifactsConfig.offers[fluenceEnv] ?? {},
-    ).map(([offerName, { id }]) => {
-      return { offerName, offerId: id };
-    });
   }
+
+  const fluenceEnv = await ensureFluenceEnv();
+
+  const allOffers = Object.entries(
+    providerArtifactsConfig.offers[fluenceEnv] ?? {},
+  ).map(([offerName, { id }]) => {
+    return { offerName, offerId: id };
+  });
 
   if (flags[OFFER_FLAG_NAME] === ALL_FLAG_VALUE) {
     return allOffers;
@@ -810,10 +804,10 @@ export async function resolveCreatedOffers(
 
   if (flags[OFFER_FLAG_NAME] === undefined) {
     return checkboxes<OfferNameAndId, never>({
-      message: `Select one or more offer names${providerArtifactsConfig === null ? "" : ` from ${providerArtifactsConfig.$getPath()}`}`,
+      message: `Select one or more offer names from ${providerArtifactsConfig.$getPath()}`,
       options: allOffers.map((offer) => {
         return {
-          name: offer.offerName === undefined ? offer.offerId : offer.offerName,
+          name: offer.offerName,
           value: offer,
         };
       }),
@@ -825,13 +819,13 @@ export async function resolveCreatedOffers(
         return true;
       },
       oneChoiceMessage(choice) {
-        return `One offer found${providerArtifactsConfig === null ? "" : ` at ${providerArtifactsConfig.$getPath()}`}: ${color.yellow(
+        return `One offer found at ${providerArtifactsConfig.$getPath()}: ${color.yellow(
           choice,
         )}. Do you want to select it`;
       },
       onNoChoices() {
         commandObj.error(
-          `You must have at least one offer ${providerArtifactsConfig === null ? `created` : `specified in ${providerArtifactsConfig.$getPath()}`}`,
+          `You must have at least one offer specified in ${providerArtifactsConfig.$getPath()}`,
         );
       },
       flagName: OFFER_FLAG_NAME,
@@ -857,7 +851,7 @@ export async function resolveCreatedOffers(
     commandObj.error(
       `Offers: ${color.yellow(
         notFoundOffers.join(", "),
-      )} are not found${providerArtifactsConfig === null ? "" : ` in 'offers' section of ${providerArtifactsConfig.$getPath()}`}`,
+      )} are not found in 'offers' section of ${providerArtifactsConfig.$getPath()}`,
     );
   }
 
@@ -876,7 +870,9 @@ export async function getOffersInfo<T extends OfferNameAndId>(
   };
 
   dbg(`Running dealCliClient.getOffers with ${jsonStringify(getOffersArg)}`);
+  startSpinner("Fetching offers info from indexer");
   const offersIndexerInfo = await dealCliClient.getOffers(getOffersArg);
+  stopSpinner();
 
   const offersInfoMap = Object.fromEntries(
     offersIndexerInfo.map((o) => {
