@@ -17,12 +17,12 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { withdrawCollateral } from "../../lib/chain/commitment.js";
+import { collateralWithdraw } from "../../lib/chain/commitment.js";
 import { CC_IDS_FLAG_NAME, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class WithdrawCollateral extends BaseCommand<
-  typeof WithdrawCollateral
+export default class CollateralWithdraw extends BaseCommand<
+  typeof CollateralWithdraw
 > {
   static override aliases = ["delegator:cw"];
   static override description = `Withdraw ${FLT_SYMBOL} collateral from capacity commitment`;
@@ -37,7 +37,7 @@ export default class WithdrawCollateral extends BaseCommand<
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(WithdrawCollateral));
-    await withdrawCollateral({ [CC_IDS_FLAG_NAME]: args.IDS });
+    const { args } = await initCli(this, await this.parse(CollateralWithdraw));
+    await collateralWithdraw({ [CC_IDS_FLAG_NAME]: args.IDS });
   }
 }

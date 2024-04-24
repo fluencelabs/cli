@@ -18,16 +18,16 @@ import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { versions } from "../../versions.js";
-import { commandObj } from "../commandObj.js";
+import { versions } from "../../../versions.js";
+import { commandObj } from "../../commandObj.js";
 import {
   ensureComputerPeerConfigs,
   ensureReadonlyProviderConfig,
-} from "../configs/project/provider.js";
+} from "../../configs/project/provider.js";
 import {
   initNewProviderArtifactsConfig,
   initReadonlyProviderArtifactsConfig,
-} from "../configs/project/providerArtifacts.js";
+} from "../../configs/project/providerArtifacts.js";
 import {
   ALL_FLAG_VALUE,
   CLI_NAME,
@@ -36,33 +36,30 @@ import {
   OFFER_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   OFFER_IDS_FLAG_NAME,
-} from "../const.js";
+} from "../../const.js";
 import {
   getDealClient,
   getDealCliClient,
   sign,
   getEventValue,
-  signBatch,
   getReadonlyDealClient,
-} from "../dealClient.js";
-import { uint8ArrayToHex } from "../helpers/typesafeStringify.js";
-import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
+} from "../../dealClient.js";
+import { bigintToStr, numToStr } from "../../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
   stringifyUnknown,
-} from "../helpers/utils.js";
-import { checkboxes } from "../prompt.js";
-import { ensureFluenceEnv } from "../resolveFluenceEnv.js";
-
+} from "../../helpers/utils.js";
+import { checkboxes } from "../../prompt.js";
+import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
   peerIdToUint8Array,
   cidHexStringToBase32,
-} from "./conversions.js";
-import { ptFormatWithSymbol, ptParse } from "./currencies.js";
-import { assertProviderIsRegistered } from "./providerInfo.js";
+} from "../conversions.js";
+import { ptFormatWithSymbol, ptParse } from "../currencies.js";
+import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
@@ -276,7 +273,6 @@ async function resolveOfferInfo({
       Peers: await Promise.all(
         offerIndexerInfo.peers.map(async ({ id, computeUnits }) => {
           return {
-            "Hex ID": id,
             "Peer ID": await peerIdHexStringToBase58String(id),
             "CU Count": computeUnits.length,
           };
@@ -297,328 +293,6 @@ async function resolveOfferInfo({
   }
 
   return { offerId };
-}
-
-const COMMON_WARN_MSG = `. Please check whether the offer exists and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`;
-
-export async function updateOffers(flags: OffersArgs) {
-  const offers = await resolveOffersFromProviderConfig(flags);
-  await assertProviderIsRegistered();
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
-  const usdc = dealClient.getUSDC();
-  const usdcAddress = await usdc.getAddress();
-
-  const [notCreatedOffers, offersToUpdate] = splitErrorsAndResults(
-    offers,
-    (offer) => {
-      const offerId = offer.offerId;
-
-      if (offerId === undefined) {
-        return { error: offer };
-      }
-
-      return { result: { ...offer, offerId } };
-    },
-  );
-
-  if (notCreatedOffers.length > 0) {
-    commandObj.error(
-      `You can't update offers that are not created yet. Not created offers: ${notCreatedOffers
-        .map(({ offerName }) => {
-          return offerName;
-        })
-        .join(
-          ", ",
-        )}. You can create them if you want using '${CLI_NAME} provider offer-create' command`,
-    );
-  }
-
-  for (const {
-    minPricePerWorkerEpochBigInt,
-    offerId,
-    effectors,
-    offerName,
-    computePeersFromProviderConfig,
-    offerInfo: { offerInfo, offerIndexerInfo } = {
-      offerInfo: undefined,
-      offerIndexerInfo: undefined,
-    },
-  } of offersToUpdate) {
-    if (offerInfo === undefined) {
-      commandObj.warn(
-        `Can't find offer ${color.yellow(
-          offerName,
-        )} info on chain${COMMON_WARN_MSG}`,
-      );
-
-      continue;
-    }
-
-    if (offerIndexerInfo === undefined) {
-      commandObj.warn(
-        `Can't find offer ${color.yellow(
-          offerName,
-        )} info using the indexer${COMMON_WARN_MSG}`,
-      );
-
-      continue;
-    }
-
-    const populatedTxs = [];
-
-    if (offerInfo.paymentToken !== usdcAddress) {
-      populatedTxs.push({
-        description: `\nchanging payment token from ${color.yellow(
-          offerInfo.paymentToken,
-        )} to ${color.yellow(usdcAddress)}`,
-        tx: [market.changePaymentToken, offerId, usdcAddress],
-      });
-    }
-
-    if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {
-      populatedTxs.push({
-        description: `\nchanging minPricePerWorker from ${color.yellow(
-          await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
-        )} to ${color.yellow(
-          await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
-        )}`,
-        tx: [
-          market.changeMinPricePerWorkerEpoch,
-          offerId,
-          minPricePerWorkerEpochBigInt,
-        ],
-      });
-    }
-
-    const offerClientInfoEffectors = await Promise.all(
-      offerIndexerInfo.effectors.map(({ cid }) => {
-        return cidHexStringToBase32(cid);
-      }),
-    );
-
-    const removedEffectors = offerClientInfoEffectors.filter((cid) => {
-      return effectors === undefined ? true : !effectors.includes(cid);
-    });
-
-    if (removedEffectors.length > 0) {
-      populatedTxs.push({
-        description: `\nRemoving effectors:\n${removedEffectors.join("\n")}`,
-        tx: [
-          market.removeEffector,
-          offerId,
-          await Promise.all(
-            removedEffectors.map((cid) => {
-              return cidStringToCIDV1Struct(cid);
-            }),
-          ),
-        ],
-      });
-    }
-
-    const addedEffectors = (effectors ?? []).filter((effector) => {
-      return !offerClientInfoEffectors.some((cid) => {
-        return cid === effector;
-      });
-    });
-
-    if (addedEffectors.length > 0) {
-      populatedTxs.push({
-        description: `\nAdding effectors:\n${addedEffectors.join("\n")}`,
-        tx: [
-          market.addEffector,
-          offerId,
-          await Promise.all(
-            addedEffectors.map((effector) => {
-              return cidStringToCIDV1Struct(effector);
-            }),
-          ),
-        ],
-      });
-    }
-
-    const peersOnChain = await Promise.all(
-      offerIndexerInfo.peers.map(async ({ id, ...rest }) => {
-        return {
-          peerIdBase58: await peerIdHexStringToBase58String(id),
-          hexPeerId: id,
-          ...rest,
-        };
-      }),
-    );
-
-    const computeUnitsToRemove = peersOnChain.flatMap(
-      ({ peerIdBase58, computeUnits }) => {
-        const alreadyRegisteredPeer = computePeersFromProviderConfig.find(
-          (p) => {
-            return p.peerIdBase58 === peerIdBase58;
-          },
-        );
-
-        if (alreadyRegisteredPeer === undefined) {
-          return [];
-        }
-
-        if (alreadyRegisteredPeer.unitIds.length < computeUnits.length) {
-          return [
-            {
-              peerIdBase58,
-              computeUnits: computeUnits
-                .slice(
-                  alreadyRegisteredPeer.unitIds.length - computeUnits.length,
-                )
-                .map(({ id }) => {
-                  return id;
-                }),
-            },
-          ];
-        }
-
-        return [];
-      },
-    );
-
-    if (computeUnitsToRemove.length > 0) {
-      populatedTxs.push(
-        ...computeUnitsToRemove.flatMap(({ peerIdBase58, computeUnits }) => {
-          return computeUnits.map((computeUnit, index) => {
-            return {
-              description:
-                index === 0
-                  ? `\nRemoving compute units from peer ${peerIdBase58}:\n${computeUnit}`
-                  : computeUnit,
-              tx: [market.removeComputeUnit, computeUnit],
-            };
-          });
-        }),
-      );
-    }
-
-    const computePeersToRemove = peersOnChain.filter(({ peerIdBase58 }) => {
-      return !computePeersFromProviderConfig.some((p) => {
-        return p.peerIdBase58 === peerIdBase58;
-      });
-    });
-
-    if (computePeersToRemove.length > 0) {
-      populatedTxs.push(
-        ...computePeersToRemove.flatMap(
-          ({ peerIdBase58, hexPeerId, computeUnits }) => {
-            return [
-              ...computeUnits.map((computeUnit, index) => {
-                return {
-                  description:
-                    index === 0
-                      ? `\nRemoving peer ${peerIdBase58} with compute units:\n${computeUnit.id}`
-                      : computeUnit.id,
-                  tx: [market.removeComputeUnit, computeUnit.id],
-                };
-              }),
-              {
-                description: "",
-                tx: [market.removeComputePeer, hexPeerId],
-              },
-            ];
-          },
-        ),
-      );
-    }
-
-    const computeUnitsToAdd = peersOnChain.flatMap(
-      ({ peerIdBase58, hexPeerId, computeUnits }) => {
-        const alreadyRegisteredPeer = computePeersFromProviderConfig.find(
-          (p) => {
-            return p.peerIdBase58 === peerIdBase58;
-          },
-        );
-
-        if (
-          alreadyRegisteredPeer === undefined ||
-          alreadyRegisteredPeer.unitIds.length <= computeUnits.length
-        ) {
-          return [];
-        }
-
-        return [
-          {
-            hexPeerId,
-            peerIdBase58: alreadyRegisteredPeer.peerIdBase58,
-            unitIds: alreadyRegisteredPeer.unitIds.slice(
-              computeUnits.length - alreadyRegisteredPeer.unitIds.length,
-            ),
-          },
-        ];
-      },
-    );
-
-    if (computeUnitsToAdd.length > 0) {
-      populatedTxs.push(
-        ...computeUnitsToAdd.map(({ hexPeerId, unitIds, peerIdBase58 }) => {
-          return {
-            description: `\nAdding compute units to peer ${peerIdBase58}:\n${unitIds
-              .map((unitId) => {
-                return uint8ArrayToHex(Buffer.from(unitId));
-              })
-              .join("\n")}`,
-            tx: [market.addComputeUnits, hexPeerId, unitIds],
-          };
-        }),
-      );
-    }
-
-    const computePeersToAdd = computePeersFromProviderConfig.filter(
-      ({ peerIdBase58 }) => {
-        return !peersOnChain.some((p) => {
-          return p.peerIdBase58 === peerIdBase58;
-        });
-      },
-    );
-
-    if (computePeersToAdd.length > 0) {
-      populatedTxs.push({
-        description: computePeersToAdd
-          .map(({ peerIdBase58, unitIds }) => {
-            return `\nAdding peer ${peerIdBase58} with compute units:\n${unitIds
-              .map((unitId) => {
-                return uint8ArrayToHex(Buffer.from(unitId));
-              })
-              .join("\n")}`;
-          })
-          .join("\n"),
-        tx: [market.addComputePeers, offerId, computePeersToAdd],
-      });
-    }
-
-    if (populatedTxs.length === 0) {
-      commandObj.logToStderr(
-        `\nNo changes found for offer ${color.yellow(
-          offerName,
-        )}. Skipping update`,
-      );
-
-      continue;
-    }
-
-    commandObj.logToStderr(
-      `\nUpdating offer ${color.yellow(offerName)} with id ${color.yellow(
-        offerId,
-      )}:\n${populatedTxs
-        .filter(({ description }) => {
-          return description !== "";
-        })
-        .map(({ description }) => {
-          return description;
-        })
-        .join("\n")}\n`,
-    );
-
-    await signBatch(
-      // @ts-expect-error TODO: don't know at this moment how to fix this error. Will solve later
-      populatedTxs.map(({ tx }) => {
-        return tx;
-      }),
-    );
-  }
 }
 
 export async function resolveOffersFromProviderConfig(
@@ -688,7 +362,9 @@ export async function resolveOffersFromProviderConfig(
   return offers;
 }
 
-type EnsureOfferConfig = Awaited<ReturnType<typeof ensureOfferConfigs>>[number];
+export type EnsureOfferConfig = Awaited<
+  ReturnType<typeof ensureOfferConfigs>
+>[number];
 
 async function ensureOfferConfigs() {
   const providerConfig = await ensureReadonlyProviderConfig();
