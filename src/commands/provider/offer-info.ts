@@ -19,7 +19,7 @@ import {
   resolveOffersFromProviderArtifactsConfig,
   getOffersInfo,
   offersInfoToString,
-} from "../../lib/chain/offer.js";
+} from "../../lib/chain/offer/offer.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS, OFFER_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
