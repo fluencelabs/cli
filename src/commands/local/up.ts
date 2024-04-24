@@ -23,7 +23,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
-import { createOffers } from "../../lib/chain/offer.js";
+import { createOffers } from "../../lib/chain/offer/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
 import {

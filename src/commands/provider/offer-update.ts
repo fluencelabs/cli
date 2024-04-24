@@ -15,7 +15,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { updateOffers } from "../../lib/chain/offer.js";
+import { updateOffers } from "../../lib/chain/offer/updateOffers.js";
 import { CHAIN_FLAGS, OFFER_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 

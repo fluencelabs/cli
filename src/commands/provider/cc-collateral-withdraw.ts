@@ -15,7 +15,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { withdrawCollateral } from "../../lib/chain/commitment.js";
+import { collateralWithdraw } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -36,6 +36,6 @@ export default class CCCollateralWithdraw extends BaseCommand<
       await this.parse(CCCollateralWithdraw),
     );
 
-    await withdrawCollateral(flags);
+    await collateralWithdraw(flags);
   }
 }

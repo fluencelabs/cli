@@ -20,7 +20,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
 import { setChainFlags, chainFlags } from "../../lib/chainFlags.js";
 import { CHAIN_FLAGS, PRIV_KEY_FLAG_NAME } from "../../lib/const.js";
-import { getDealClient, signBatch } from "../../lib/dealClient.js";
+import { getDealClient, signBatch, populateTx } from "../../lib/dealClient.js";
 import { bufferToHex } from "../../lib/helpers/typesafeStringify.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { resolveComputePeersByNames } from "../../lib/resolveComputePeersByNames.js";
@@ -68,7 +68,12 @@ export default class Proof extends BaseCommand<typeof Proof> {
 
       await signBatch(
         unitIds.map((unitId) => {
-          return [capacity.submitProof, unitId, localUnitNonce, difficulty];
+          return populateTx(
+            capacity.submitProof,
+            unitId,
+            localUnitNonce,
+            difficulty,
+          );
         }),
       );
     }
