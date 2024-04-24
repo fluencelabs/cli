@@ -36,7 +36,7 @@ import {
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import type { MarineCLI } from "./marineCli.js";
 import { projectRootDir } from "./paths.js";
-import { confirm, input } from "./prompt.js";
+import { confirm, input, checkboxes } from "./prompt.js";
 
 export async function ensureValidServiceName(
   fluenceConfig: FluenceConfig | null,
@@ -82,7 +82,7 @@ type AddServiceArg = {
   fluenceConfig: FluenceConfig;
   marineCli: MarineCLI;
   marineBuildArgs?: string | undefined;
-  interactive?: boolean;
+  isATemplateInitStep?: boolean;
 };
 
 export async function addService({
@@ -91,7 +91,7 @@ export async function addService({
   fluenceConfig,
   marineCli,
   marineBuildArgs,
-  interactive = true,
+  isATemplateInitStep = false,
 }: AddServiceArg): Promise<string> {
   let serviceName = serviceNameFromArgs;
 
@@ -155,42 +155,19 @@ export async function addService({
 
   await fluenceConfig.$commit();
 
-  if (interactive) {
-    commandObj.log(
+  if (!isATemplateInitStep) {
+    commandObj.logToStderr(
       `Added ${color.yellow(serviceName)} to ${color.yellow(
         fluenceConfig.$getPath(),
       )}`,
     );
   }
 
-  if (
-    hasDefaultDeployment(fluenceConfig) &&
-    (!interactive ||
-      (isInteractive &&
-        (await confirm({
-          message: `Do you want to add service ${color.yellow(
-            serviceName,
-          )} to a default deployment ${color.yellow(DEFAULT_DEPLOYMENT_NAME)}`,
-        }))))
-  ) {
-    const defaultDeployemnt =
-      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME];
-
-    fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] = {
-      ...defaultDeployemnt,
-      services: [...(defaultDeployemnt.services ?? []), serviceName],
-    };
-
-    await fluenceConfig.$commit();
-
-    if (interactive) {
-      commandObj.log(
-        `Added ${color.yellow(serviceName)} to ${color.yellow(
-          DEFAULT_DEPLOYMENT_NAME,
-        )}`,
-      );
-    }
-  }
+  await addServiceToDeployment({
+    fluenceConfig,
+    isATemplateInitStep,
+    serviceName,
+  });
 
   await resolveSingleServiceModuleConfigsAndBuild({
     serviceName,
@@ -211,17 +188,95 @@ export async function addService({
   return serviceName;
 }
 
-function hasDefaultDeployment(
-  fluenceConfig: FluenceConfig,
-): fluenceConfig is FluenceConfig & {
-  deployments: {
-    [DEFAULT_DEPLOYMENT_NAME]: NonNullable<
-      FluenceConfig["deployments"]
-    >[string];
-  };
-} {
-  return (
-    fluenceConfig.deployments !== undefined &&
-    DEFAULT_DEPLOYMENT_NAME in fluenceConfig.deployments
+type AddServiceToDeploymentArgs = {
+  fluenceConfig: FluenceConfig;
+  isATemplateInitStep: boolean;
+  serviceName: string;
+};
+
+async function addServiceToDeployment({
+  fluenceConfig,
+  isATemplateInitStep,
+  serviceName,
+}: AddServiceToDeploymentArgs) {
+  if (
+    fluenceConfig.deployments === undefined ||
+    Object.values(fluenceConfig.deployments).length === 0
+  ) {
+    return;
+  }
+
+  if (isATemplateInitStep) {
+    const defaultDeployment =
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME];
+
+    if (defaultDeployment === undefined) {
+      return;
+    }
+
+    fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] = {
+      ...defaultDeployment,
+      services: [...(defaultDeployment.services ?? []), serviceName],
+    };
+
+    await fluenceConfig.$commit();
+    return;
+  }
+
+  if (
+    !isInteractive ||
+    !(await confirm({
+      message: `Do you want to add service ${color.yellow(
+        serviceName,
+      )} to some of your deployments`,
+    }))
+  ) {
+    return;
+  }
+
+  const deploymentNames = await checkboxes({
+    message: "Select deployments to add spell to",
+    options: Object.keys(fluenceConfig.deployments),
+    oneChoiceMessage(deploymentName) {
+      return `Do you want to select deployment ${color.yellow(deploymentName)}`;
+    },
+    onNoChoices(): Array<string> {
+      return [];
+    },
+  });
+
+  if (deploymentNames.length === 0) {
+    commandObj.logToStderr(
+      `No deployments selected. You can add it manually later to ${fluenceConfig.$getPath()}`,
+    );
+
+    return;
+  }
+
+  deploymentNames.forEach((deploymentName) => {
+    assert(
+      fluenceConfig.deployments !== undefined,
+      "Unreachable. It's checked above that fluenceConfig.deployments is not undefined",
+    );
+
+    const deployment = fluenceConfig.deployments[deploymentName];
+
+    assert(
+      deployment !== undefined,
+      "Unreachable. deploymentName is guaranteed to exist in fluenceConfig.deployments",
+    );
+
+    fluenceConfig.deployments[deploymentName] = {
+      ...deployment,
+      services: [...(deployment.services ?? []), serviceName],
+    };
+  });
+
+  await fluenceConfig.$commit();
+
+  commandObj.log(
+    `Added ${color.yellow(serviceName)} to ${color.yellow(
+      deploymentNames.join(", "),
+    )}`,
   );
 }
