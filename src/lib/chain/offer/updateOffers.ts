@@ -37,14 +37,22 @@ import {
   type EnsureOfferConfig,
 } from "./offer.js";
 
+type PeersOnChain = {
+  computeUnits: ComputeUnit[];
+  peerIdBase58: string;
+  hexPeerId: string;
+}[];
+
+type Txs = { description?: string; tx: ReturnType<typeof populateTx> }[];
+
 export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
   const offersFoundOnChain = filterOffersFoundOnChain(offers);
   const populatedTxs = await populateUpdateOffersTxs(offersFoundOnChain);
 
-  const txsToSign = [
-    populatedTxs.flatMap(({ txsToRunBeforeOthers }) => {
-      return txsToRunBeforeOthers.map(({ tx }) => {
+  const updateOffersTxs = [
+    populatedTxs.flatMap(({ removePeersFromOffersTxs }) => {
+      return removePeersFromOffersTxs.map(({ tx }) => {
         return tx;
       });
     }),
@@ -55,7 +63,7 @@ export async function updateOffers(flags: OffersArgs) {
     }),
   ].flat();
 
-  if (txsToSign.length === 0) {
+  if (updateOffersTxs.length === 0) {
     commandObj.logToStderr("No changes found for selected offers");
     return;
   }
@@ -73,7 +81,7 @@ export async function updateOffers(flags: OffersArgs) {
   }
 
   await assertProviderIsRegistered();
-  await signBatch(txsToSign);
+  await signBatch(updateOffersTxs);
 }
 
 type OnChainOffer = Awaited<
@@ -115,14 +123,6 @@ function filterOffersFoundOnChain(offers: EnsureOfferConfig[]) {
   return offersToUpdateFoundOnChain;
 }
 
-type PeersOnChain = {
-  computeUnits: ComputeUnit[];
-  peerIdBase58: string;
-  hexPeerId: string;
-}[];
-
-type Txs = { description?: string; tx: ReturnType<typeof populateTx> }[];
-
 function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
   return Promise.all(
     offersFoundOnChain.map(async (offer) => {
@@ -144,7 +144,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         }),
       );
 
-      const txsToRunBeforeOthers = (await populatePeersToRemoveTxs(
+      const removePeersFromOffersTxs = (await populatePeersToRemoveTxs(
         offer,
         peersOnChain,
       )) satisfies Txs;
@@ -164,7 +164,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         ])
       ).flat() satisfies Txs;
 
-      return { offerName, offerId, txsToRunBeforeOthers, txs };
+      return { offerName, offerId, removePeersFromOffersTxs, txs };
     }),
   );
 }
@@ -431,8 +431,8 @@ function printOffersToUpdateInfo(
 ) {
   commandObj.logToStderr(
     `Offers to update:\n\n${populatedTxs
-      .flatMap(({ offerId, offerName, txsToRunBeforeOthers, txs }) => {
-        const allTxs = [...txsToRunBeforeOthers, ...txs];
+      .flatMap(({ offerId, offerName, removePeersFromOffersTxs, txs }) => {
+        const allTxs = [...removePeersFromOffersTxs, ...txs];
 
         if (allTxs.length === 0) {
           return [];
