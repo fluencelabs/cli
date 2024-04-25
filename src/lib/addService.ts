@@ -36,7 +36,7 @@ import {
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import type { MarineCLI } from "./marineCli.js";
 import { projectRootDir } from "./paths.js";
-import { confirm, input, checkboxes } from "./prompt.js";
+import { input, checkboxes } from "./prompt.js";
 
 export async function ensureValidServiceName(
   fluenceConfig: FluenceConfig | null,
@@ -199,14 +199,17 @@ async function addServiceToDeployment({
   isATemplateInitStep,
   serviceName,
 }: AddServiceToDeploymentArgs) {
-  if (
-    fluenceConfig.deployments === undefined ||
-    Object.values(fluenceConfig.deployments).length === 0
-  ) {
+  const deployments = Object.keys(fluenceConfig.deployments ?? {});
+
+  if (deployments.length === 0) {
     return;
   }
 
   if (isATemplateInitStep) {
+    if (fluenceConfig.deployments === undefined) {
+      return;
+    }
+
     const defaultDeployment =
       fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME];
 
@@ -223,22 +226,15 @@ async function addServiceToDeployment({
     return;
   }
 
-  if (
-    !isInteractive ||
-    !(await confirm({
-      message: `Do you want to add service ${color.yellow(
-        serviceName,
-      )} to some of your deployments`,
-    }))
-  ) {
+  if (!isInteractive) {
     return;
   }
 
   const deploymentNames = await checkboxes({
-    message: "Select deployments to add spell to",
-    options: Object.keys(fluenceConfig.deployments),
+    message: `If you want to add service ${color.yellow(serviceName)} to some of the deployments - please select them or press enter to continue`,
+    options: deployments,
     oneChoiceMessage(deploymentName) {
-      return `Do you want to select deployment ${color.yellow(deploymentName)}`;
+      return `Do you want to add service ${color.yellow(serviceName)} to deployment ${color.yellow(deploymentName)}`;
     },
     onNoChoices(): Array<string> {
       return [];
@@ -247,7 +243,7 @@ async function addServiceToDeployment({
 
   if (deploymentNames.length === 0) {
     commandObj.logToStderr(
-      `No deployments selected. You can add it manually later to ${fluenceConfig.$getPath()}`,
+      `No deployments selected. You can add it manually later at ${fluenceConfig.$getPath()}`,
     );
 
     return;
@@ -275,7 +271,7 @@ async function addServiceToDeployment({
   await fluenceConfig.$commit();
 
   commandObj.log(
-    `Added ${color.yellow(serviceName)} to ${color.yellow(
+    `Added service ${color.yellow(serviceName)} to deployments: ${color.yellow(
       deploymentNames.join(", "),
     )}`,
   );
