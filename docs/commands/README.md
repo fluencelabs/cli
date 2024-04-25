@@ -1302,8 +1302,8 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
-                                               --offer-ids. To use all of your offers: --offers all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1596,8 +1596,8 @@ USAGE
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
-                                               --offer-ids. To use all of your offers: --offers all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1626,8 +1626,8 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --offer-ids=<id-1,id-2>                      Comma-separated list of offer ids. Can't be used together with --offers
                                                flag
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
-                                               --offer-ids. To use all of your offers: --offers all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1653,8 +1653,8 @@ USAGE
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
-                                               --offer-ids. To use all of your offers: --offers all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key

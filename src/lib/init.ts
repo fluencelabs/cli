@@ -259,7 +259,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
       fluenceConfig,
       marineCli: await initMarineCli(),
       absolutePathOrUrl: absoluteServicePath,
-      interactive: false,
+      isATemplateInitStep: true,
     });
   }
 

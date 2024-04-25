@@ -31,7 +31,7 @@ import {
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { ensureSpellsDir, projectRootDir } from "../../lib/paths.js";
-import { checkboxes, confirm, input } from "../../lib/prompt.js";
+import { checkboxes, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create a new spell template";
@@ -115,23 +115,17 @@ export default class New extends BaseCommand<typeof New> {
 
     await fluenceConfig.$commit();
 
-    if (
-      !isInteractive ||
-      fluenceConfig.deployments === undefined ||
-      Object.values(fluenceConfig.deployments).length === 0 ||
-      !(await confirm({
-        message: `Do you want to add spell ${color.yellow(spellName)} to some of your deployments`,
-        default: true,
-      }))
-    ) {
+    const deployments = Object.keys(fluenceConfig.deployments ?? {});
+
+    if (!isInteractive || deployments.length === 0) {
       return;
     }
 
     const deploymentNames = await checkboxes({
-      message: "Select deployments to add spell to",
-      options: Object.keys(fluenceConfig.deployments),
+      message: `If you want to add spell ${color.yellow(spellName)} to some of the deployments - please select them or press enter to continue`,
+      options: deployments,
       oneChoiceMessage(deploymentName) {
-        return `Do you want to select deployment ${color.yellow(deploymentName)}`;
+        return `Do you want to add spell ${color.yellow(spellName)} to deployment ${color.yellow(deploymentName)}`;
       },
       onNoChoices(): Array<string> {
         return [];
@@ -140,7 +134,7 @@ export default class New extends BaseCommand<typeof New> {
 
     if (deploymentNames.length === 0) {
       commandObj.logToStderr(
-        `No deployments selected. You can add it manually later to ${fluenceConfig.$getPath()}`,
+        `No deployments selected. You can add it manually later at ${fluenceConfig.$getPath()}`,
       );
 
       return;
@@ -168,7 +162,7 @@ export default class New extends BaseCommand<typeof New> {
     await fluenceConfig.$commit();
 
     commandObj.log(
-      `Added ${color.yellow(spellName)} to deployments: ${color.yellow(
+      `Added spell ${color.yellow(spellName)} to deployments: ${color.yellow(
         deploymentNames.join(", "),
       )}`,
     );
