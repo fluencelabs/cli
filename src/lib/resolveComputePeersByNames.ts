@@ -16,7 +16,7 @@
 
 import { color } from "@oclif/color";
 
-import { resolveOffersFromProviderConfig } from "./chain/offer.js";
+import { resolveOffersFromProviderConfig } from "./chain/offer/offer.js";
 import { commandObj } from "./commandObj.js";
 import {
   ensureComputerPeerConfigs,
