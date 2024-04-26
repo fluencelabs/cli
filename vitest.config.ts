@@ -20,8 +20,8 @@ export default defineConfig({
   test: {
     testTimeout: 1000 * 60 * 5, // 5 minutes,
     // fileParallelism: false,
-    sequence: {
-      concurrent: true,
-    },
+    // sequence: {
+    //   concurrent: true,
+    // },
   },
 });
