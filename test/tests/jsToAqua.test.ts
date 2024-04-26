@@ -92,15 +92,12 @@ describe("Conversion from js to aqua", () => {
       d: makeOptional(undefined, [{ f: "5" }]),
     },
   ].forEach((valueToConvert) => {
-    test.concurrent(
-      `Expect test case to match snapshot ${JSON.stringify(valueToConvert, null, 2)}`,
-      () => {
-        expect(jsToAqua({ fileName, valueToConvert })).toMatchSnapshot();
-      },
-    );
+    test(`Expect test case to match snapshot ${JSON.stringify(valueToConvert, null, 2)}`, () => {
+      expect(jsToAqua({ fileName, valueToConvert })).toMatchSnapshot();
+    });
   });
 
-  test.concurrent(`Expect custom type to work`, () => {
+  test(`Expect custom type to work`, () => {
     expect(
       jsToAqua({
         fileName,
@@ -119,63 +116,51 @@ describe("Conversion from js to aqua", () => {
     ).toMatchSnapshot();
   });
 
-  test.concurrent("array with different element types throws an error", () => {
+  test("array with different element types throws an error", () => {
     expect(() => {
       jsToAqua({ valueToConvert: [1, "2", true], fileName });
     }).toThrowError();
   });
 
-  test.concurrent(
-    "array with the objects that contain numbers with the same element types doesn't throw an error",
-    () => {
-      expect(() => {
-        jsToAqua({ valueToConvert: [{ n: 1 }, { n: 2 }], fileName });
-      }).not.toThrowError();
-    },
-  );
+  test("array with the objects that contain numbers with the same element types doesn't throw an error", () => {
+    expect(() => {
+      jsToAqua({ valueToConvert: [{ n: 1 }, { n: 2 }], fileName });
+    }).not.toThrowError();
+  });
 
-  test.concurrent(
-    "array with the objects that contain numbers with different element types throws an error",
-    () => {
-      expect(() => {
-        jsToAqua({ valueToConvert: [{ n: -1 }, { n: 1.1 }], fileName });
-      }).toThrowError();
-    },
-  );
+  test("array with the objects that contain numbers with different element types throws an error", () => {
+    expect(() => {
+      jsToAqua({ valueToConvert: [{ n: -1 }, { n: 1.1 }], fileName });
+    }).toThrowError();
+  });
 
-  test.concurrent(
-    "array with the objects that contain numbers with different element types, but with a f64 flag doesn't throw",
-    () => {
-      expect(() => {
-        jsToAqua({
-          valueToConvert: [{ n: -1 }, { n: 1 }],
-          fileName,
-          useF64ForAllNumbers: true,
-        });
-      }).not.toThrowError();
-    },
-  );
+  test("array with the objects that contain numbers with different element types, but with a f64 flag doesn't throw", () => {
+    expect(() => {
+      jsToAqua({
+        valueToConvert: [{ n: -1 }, { n: 1 }],
+        fileName,
+        useF64ForAllNumbers: true,
+      });
+    }).not.toThrowError();
+  });
 
-  test.concurrent(
-    `object that contains fileName '${fileName}' as the top-level property to throw`,
-    () => {
-      expect(() => {
-        jsToAqua({ valueToConvert: { [fileName]: { a: 1 } }, fileName });
-      }).toThrowError();
+  test(`object that contains fileName '${fileName}' as the top-level property to throw`, () => {
+    expect(() => {
+      jsToAqua({ valueToConvert: { [fileName]: { a: 1 } }, fileName });
+    }).toThrowError();
 
-      expect(() => {
-        jsToAqua({
-          valueToConvert: { [camelCase(fileName)]: { a: 1 } },
-          fileName,
-        });
-      }).toThrowError();
+    expect(() => {
+      jsToAqua({
+        valueToConvert: { [camelCase(fileName)]: { a: 1 } },
+        fileName,
+      });
+    }).toThrowError();
 
-      expect(() => {
-        jsToAqua({
-          valueToConvert: [{ [camelCase(fileName)]: [{ a: 1 }] }],
-          fileName,
-        });
-      }).toThrowError();
-    },
-  );
+    expect(() => {
+      jsToAqua({
+        valueToConvert: [{ [camelCase(fileName)]: [{ a: 1 }] }],
+        fileName,
+      });
+    }).toThrowError();
+  });
 });
