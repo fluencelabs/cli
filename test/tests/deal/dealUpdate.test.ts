@@ -17,7 +17,7 @@
 import { cp } from "fs/promises";
 import { join } from "node:path";
 
-import { jest } from "@jest/globals";
+import { describe, test } from "vitest";
 
 import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
 import { fluence } from "../../helpers/commonWithSetupTests.js";
@@ -43,13 +43,9 @@ import {
   waitUntilRunDeployedServicesReturnsExpected,
   waitUntilShowSubnetReturnsExpected,
 } from "../../helpers/sharedSteps.js";
-import { wrappedTest } from "../../helpers/utils.js";
-
-// TODO: remove when decider is updated on nox
-jest.retryTimes(2);
 
 describe("Deal update tests", () => {
-  wrappedTest("should update deal after new spell is created", async () => {
+  test("should update deal after new spell is created", async () => {
     const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
     await initializeTemplate(cwd, "quickstart");
 
@@ -75,7 +71,7 @@ describe("Deal update tests", () => {
     assertLogsAreValid(logs);
   });
 
-  wrappedTest("should update deal after new service is created", async () => {
+  test("should update deal after new service is created", async () => {
     const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
     await initializeTemplate(cwd, "quickstart");
 
@@ -103,7 +99,7 @@ describe("Deal update tests", () => {
     assertLogsAreValid(logs);
   });
 
-  wrappedTest("should update deal after new module is created", async () => {
+  test("should update deal after new module is created", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
     await initializeTemplate(cwd, "quickstart");
 
@@ -137,7 +133,7 @@ describe("Deal update tests", () => {
     assertLogsAreValid(logs);
   });
 
-  wrappedTest("should update deal after changing a service", async () => {
+  test("should update deal after changing a service", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterChangingAService");
     await initializeTemplate(cwd, "quickstart");
 
@@ -167,7 +163,7 @@ describe("Deal update tests", () => {
     assertLogsAreValid(logs);
   });
 
-  wrappedTest("should update deal after changing a spell", async () => {
+  test("should update deal after changing a spell", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterChangingASpell");
     await initializeTemplate(cwd, "quickstart");
 

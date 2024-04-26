@@ -15,52 +15,58 @@
  */
 
 import camelCase from "lodash-es/camelCase.js";
+import { describe, expect, test } from "vitest";
 
 import {
   jsToAqua,
   jsToAquaImpl,
   makeOptional,
 } from "../../src/lib/helpers/jsToAqua.js";
-import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
+import { jsonStringify } from "../../src/lib/helpers/utils.js";
 
 const fileName = "someModule";
 
 describe("Conversion from js to aqua", () => {
   test.each`
-    js                      | value       | type         | typeDefs
-    ${"abc"}                | ${'"abc"'}  | ${"string"}  | ${undefined}
-    ${true}                 | ${"true"}   | ${"bool"}    | ${undefined}
-    ${false}                | ${"false"}  | ${"bool"}    | ${undefined}
-    ${null}                 | ${"nil"}    | ${"?u8"}     | ${undefined}
-    ${undefined}            | ${"nil"}    | ${"?u8"}     | ${undefined}
-    ${[]}                   | ${"nil"}    | ${"?u8"}     | ${undefined}
-    ${{}}                   | ${"nil"}    | ${"?u8"}     | ${undefined}
-    ${1}                    | ${"1"}      | ${"u64"}     | ${undefined}
-    ${-1}                   | ${"-1"}     | ${"i64"}     | ${undefined}
-    ${1.234}                | ${"1.234"}  | ${"f64"}     | ${undefined}
-    ${-1.234}               | ${"-1.234"} | ${"f64"}     | ${undefined}
-    ${makeOptional(1, 1)}   | ${"?[1]"}   | ${"?u64"}    | ${undefined}
-    ${makeOptional("", "")} | ${'?[""]'}  | ${"?string"} | ${undefined}
-  `(
-    "js: $js. value: $value. type: $type. typeDefs: $typeDefs",
-    ({ js, value, type, typeDefs }) => {
-      const valueToConvert: unknown = js;
+    js                      | value       | type
+    ${"abc"}                | ${'"abc"'}  | ${"string"}
+    ${true}                 | ${"true"}   | ${"bool"}
+    ${false}                | ${"false"}  | ${"bool"}
+    ${null}                 | ${"nil"}    | ${"?u8"}
+    ${undefined}            | ${"nil"}    | ${"?u8"}
+    ${[]}                   | ${"nil"}    | ${"?u8"}
+    ${{}}                   | ${"nil"}    | ${"?u8"}
+    ${1}                    | ${"1"}      | ${"u64"}
+    ${-1}                   | ${"-1"}     | ${"i64"}
+    ${1.234}                | ${"1.234"}  | ${"f64"}
+    ${-1.234}               | ${"-1.234"} | ${"f64"}
+    ${makeOptional(1, 1)}   | ${"?[1]"}   | ${"?u64"}
+    ${makeOptional("", "")} | ${'?[""]'}  | ${"?string"}
+  `("jsToAqua returns $value and $type for $js", (arg: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const { js, value, type } = arg as {
+      js: string;
+      value: string;
+      type: string;
+      typeDefs: string | undefined;
+    };
 
-      const res = jsToAquaImpl({
-        valueToConvert,
-        currentNesting: "",
-        fieldName: fileName,
-        level: "top",
-        sortedCustomTypes: [],
-        useF64ForAllNumbers: false,
-        nestingLevel: 1,
-      });
+    const valueToConvert: unknown = js;
 
-      expect(res.value).toStrictEqual(value);
-      expect(res.type).toStrictEqual(type);
-      expect(res.typeDefs).toStrictEqual(typeDefs);
-    },
-  );
+    const res = jsToAquaImpl({
+      valueToConvert,
+      currentNesting: "",
+      fieldName: fileName,
+      level: "top",
+      sortedCustomTypes: [],
+      useF64ForAllNumbers: false,
+      nestingLevel: 1,
+    });
+
+    expect(res.value).toStrictEqual(value);
+    expect(res.type).toStrictEqual(type);
+    expect(res.typeDefs).toStrictEqual(undefined);
+  });
 
   [
     1,
@@ -87,9 +93,7 @@ describe("Conversion from js to aqua", () => {
       d: makeOptional(undefined, [{ f: "5" }]),
     },
   ].forEach((valueToConvert) => {
-    test(`Expect test case to match snapshot: ${stringifyUnknown(
-      valueToConvert,
-    )}`, () => {
+    test(`Expect test case to match snapshot ${jsonStringify(valueToConvert)}`, () => {
       expect(jsToAqua({ fileName, valueToConvert })).toMatchSnapshot();
     });
   });

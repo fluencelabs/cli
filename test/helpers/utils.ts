@@ -16,7 +16,6 @@
 
 import { access, readFile, writeFile } from "node:fs/promises";
 
-import core from "@actions/core";
 import lockfile from "proper-lockfile";
 
 export const sleepSeconds = (s: number) => {
@@ -68,19 +67,4 @@ export async function lockAndProcessFile(
   } finally {
     await release?.();
   }
-}
-
-export function wrappedTest(
-  ...[name, fn, ...rest]: Parameters<(typeof test)["concurrent"]>
-) {
-  test(
-    name,
-    async (...args: Parameters<NonNullable<typeof fn>>) => {
-      core.startGroup(name);
-      // @ts-expect-error fn is never undefined here
-      await fn(...args);
-      core.endGroup();
-    },
-    ...rest,
-  );
 }

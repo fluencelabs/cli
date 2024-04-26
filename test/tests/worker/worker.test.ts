@@ -18,6 +18,8 @@ import assert from "node:assert";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { describe, expect, test } from "vitest";
+
 import {
   DEFAULT_WORKER_NAME,
   DOT_FLUENCE_DIR_NAME,

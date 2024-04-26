@@ -25,6 +25,7 @@ import {
   kras,
 } from "@fluencelabs/fluence-network-environment";
 import sortBy from "lodash-es/sortBy.js";
+import { expect } from "vitest";
 
 import { validationErrorToString } from "../../src/lib/ajvInstance.js";
 import {
