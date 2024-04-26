@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line node/shebang
 import oclif from "@oclif/core";
 
 import {

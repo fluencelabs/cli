@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 import assert from "node:assert";
 
 import { color } from "@oclif/color";

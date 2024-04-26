@@ -26,7 +26,6 @@ import { confirm } from "../../prompt.js";
 import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
-  cidHexStringToBase32,
 } from "../conversions.js";
 import { ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
@@ -140,7 +139,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
 
       const effectorsOnChain = await Promise.all(
         offerIndexerInfo.effectors.map(({ cid }) => {
-          return cidHexStringToBase32(cid);
+          return cid;
         }),
       );
 

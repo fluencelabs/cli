@@ -56,11 +56,9 @@ describe("Conversion from js to aqua", () => {
         nestingLevel: 1,
       });
 
-      /* eslint-disable @typescript-eslint/no-unsafe-member-access */
       expect(res.value).toStrictEqual(value);
       expect(res.type).toStrictEqual(type);
       expect(res.typeDefs).toStrictEqual(typeDefs);
-      /* eslint-enable @typescript-eslint/no-unsafe-member-access */
     },
   );
 

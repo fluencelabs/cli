@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { URL } from "node:url";
 /* eslint-disable no-restricted-syntax */
 
 export function numToStr(num: number): string {

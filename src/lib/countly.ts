@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable camelcase */
-
 import {
   sessionEndPromise,
   isCountlyInitialized,

@@ -388,7 +388,6 @@ export async function ensureMarineAndMreplDependencies(): Promise<void> {
   for (const [name, version] of await resolveMarineAndMreplDependencies()) {
     // Not installing dependencies in parallel
     // for cargo logs to be clearly readable
-    // eslint-disable-next-line no-await-in-loop
     await ensureMarineOrMreplDependency({ name, version });
   }
 }
