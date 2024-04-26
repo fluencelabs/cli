@@ -28,7 +28,7 @@
 * [`fluence dep uninstall PACKAGE-NAME`](#fluence-dep-uninstall-package-name)
 * [`fluence dep versions`](#fluence-dep-versions)
 * [`fluence deploy [DEPLOYMENT-NAMES]`](#fluence-deploy-deployment-names)
-* [`fluence help [COMMANDS]`](#fluence-help-commands)
+* [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence init [PATH]`](#fluence-init-path)
 * [`fluence key default [NAME]`](#fluence-key-default-name)
 * [`fluence key new [NAME]`](#fluence-key-new-name)
@@ -241,7 +241,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.0.5/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.0.16/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -859,16 +859,16 @@ EXAMPLES
 
 _See code: [src/commands/deploy.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.16.2/src/commands/deploy.ts)_
 
-## `fluence help [COMMANDS]`
+## `fluence help [COMMAND]`
 
 Display help for fluence.
 
 ```
 USAGE
-  $ fluence help [COMMANDS] [-n]
+  $ fluence help [COMMAND...] [-n]
 
 ARGUMENTS
-  COMMANDS  Command to show help for.
+  COMMAND...  Command to show help for.
 
 FLAGS
   -n, --nested-commands  Include all nested commands in the output.
@@ -877,7 +877,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.0.11/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.0.21/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -2019,5 +2019,5 @@ EXAMPLES
     $ fluence update --available
 ```
 
-_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.1.7/src/commands/update.ts)_
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.2.7/src/commands/update.ts)_
 <!-- commandsstop -->
