@@ -19,6 +19,9 @@ import { defineConfig } from "vitest/dist/config.js";
 export default defineConfig({
   test: {
     testTimeout: 1000 * 60 * 5, // 5 minutes,
-    fileParallelism: false,
+    // fileParallelism: false,
+    sequence: {
+      concurrent: true,
+    },
   },
 });
