@@ -34,39 +34,42 @@ import {
 } from "../../helpers/sharedSteps.js";
 
 describe("fluence deploy tests", () => {
-  test("should deploy deals with spell and service, resolve and run services on them", async () => {
-    const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
-    await initializeTemplate(cwd, "quickstart");
-    const pathToNewServiceDir = getServiceDirPath(cwd, MY_SERVICE_NAME);
+  test.concurrent(
+    "should deploy deals with spell and service, resolve and run services on them",
+    async () => {
+      const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
+      await initializeTemplate(cwd, "quickstart");
+      const pathToNewServiceDir = getServiceDirPath(cwd, MY_SERVICE_NAME);
 
-    const newServiceConfig = await initServiceConfig(
-      relative(cwd, pathToNewServiceDir),
-      cwd,
-    );
+      const newServiceConfig = await initServiceConfig(
+        relative(cwd, pathToNewServiceDir),
+        cwd,
+      );
 
-    assert(
-      newServiceConfig !== null,
-      `quickstart template is expected to create a service at ${pathToNewServiceDir} by default`,
-    );
+      assert(
+        newServiceConfig !== null,
+        `quickstart template is expected to create a service at ${pathToNewServiceDir} by default`,
+      );
 
-    await newServiceConfig.$commit();
+      await newServiceConfig.$commit();
 
-    await updateFluenceConfigForTest(cwd);
-    await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
+      await updateFluenceConfigForTest(cwd);
+      await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await waitUntilShowSubnetReturnsExpected(
-      cwd,
-      [MY_SERVICE_NAME],
-      [NEW_SPELL_NAME],
-    );
+      await waitUntilShowSubnetReturnsExpected(
+        cwd,
+        [MY_SERVICE_NAME],
+        [NEW_SPELL_NAME],
+      );
 
-    const logs = await fluence({
-      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
-      cwd,
-    });
+      const logs = await fluence({
+        args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+        cwd,
+      });
 
-    assertLogsAreValid(logs);
-  });
+      assertLogsAreValid(logs);
+    },
+  );
 });
