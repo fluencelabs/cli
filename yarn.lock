@@ -1282,7 +1282,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/eslintrc@npm:3.0.2, @eslint/eslintrc@npm:^3.0.2":
+"@eslint/eslintrc@npm:^3.0.2":
   version: 3.0.2
   resolution: "@eslint/eslintrc@npm:3.0.2"
   dependencies:
@@ -1351,7 +1351,6 @@ __metadata:
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@actions/core": 1.10.1
-    "@eslint/eslintrc": 3.0.2
     "@fluencelabs/air-beautify-wasm": 0.3.9
     "@fluencelabs/aqua-api": 0.14.6
     "@fluencelabs/aqua-to-js": 0.3.13
