@@ -25,6 +25,7 @@ src/lib/compiled-aqua
 src/lib/compiled-aqua-with-tracing
 src/versions
 src/aqua-dependencies
+src/public
 
 # yarn
 .pnp.*
