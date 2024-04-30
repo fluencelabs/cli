@@ -495,7 +495,7 @@ export const FLUENCE_CLIENT_FLAGS = {
   [TTL_FLAG_NAME]: Flags.integer({
     description:
       "Particle Time To Live since 'now'. After that, particle is expired and not processed.",
-    default: 15_000,
+    default: 1000 * 60 * 5, // 5 minutes
     helpValue: "<milliseconds>",
   }),
   [DIAL_TIMEOUT_FLAG_NAME]: Flags.integer({
