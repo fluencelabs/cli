@@ -92,7 +92,7 @@
     "parse-duration": "1.1.0",
     "platform": "1.3.6",
     "semver": "7.5.4",
-    "tar": "6.2.0",
+    "tar": "6.2.1",
     "xbytes": "1.8.0",
     "yaml": "2.3.4",
     "yaml-diff-patch": "2.0.0"
