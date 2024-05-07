@@ -876,7 +876,7 @@ __metadata:
     tsx: 4.7.1
     typescript: 5.3.3
     typescript-eslint: 7.4.0
-    undici: 6.6.1
+    undici: 6.11.1
     xbytes: 1.8.0
     yaml: 2.3.4
     yaml-diff-patch: 2.0.0
@@ -15864,12 +15864,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.6.1":
-  version: 6.6.1
-  resolution: "undici@npm:6.6.1"
-  dependencies:
-    "@fastify/busboy": ^2.0.0
-  checksum: 54d59f442ca6e9b89350daa9e3945039d98682a30ab6c57e983e0d920d6632040ec5777a2f00a0ac1b9e781309616c6e41ec59a776c09dcfebffa43f22c77f1e
+"undici@npm:6.11.1":
+  version: 6.11.1
+  resolution: "undici@npm:6.11.1"
+  checksum: ad46014e06dac536dc36d538b32e4f4dc36eb591a6a38bf0b1f1369ec51ca9362d823a685025e42b646d897bc991628c6db37040ed1ff7ee8d6b3d7906f9ac60
   languageName: node
   linkType: hard
 
