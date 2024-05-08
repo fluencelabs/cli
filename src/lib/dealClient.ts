@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable camelcase */
-
 import assert from "node:assert";
 import { URL } from "node:url";
 
@@ -406,7 +404,6 @@ export async function signBatch(
   return receipts;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 function methodCallToString([method, ...args]: [
   { name: string },
   ...unknown[],

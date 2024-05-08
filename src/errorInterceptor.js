@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-process-exit */
-
 import assert from "node:assert";
 
 // eslint-disable-next-line import/extensions

@@ -123,9 +123,7 @@ export default class Run extends BaseCommand<typeof Run> {
     );
 
     if (flags.quiet) {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       commandObj.log = () => {};
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       commandObj.logToStderr = () => {};
     }
 

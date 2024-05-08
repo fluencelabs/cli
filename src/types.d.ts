@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable camelcase */
 declare module "node_modules-path" {
   export = node_modules;
   declare function node_modules(): string;

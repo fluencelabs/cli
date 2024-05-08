@@ -124,8 +124,7 @@ async function downloadAndDecompress(
 
   const archivePath = join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);
-
-  const tar = (await import("tar")).default;
+  const tar = await import("tar");
 
   await tar.x({
     cwd: dirPath,

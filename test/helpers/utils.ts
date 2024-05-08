@@ -18,6 +18,7 @@ import { access, readFile, writeFile } from "node:fs/promises";
 
 import core from "@actions/core";
 import lockfile from "proper-lockfile";
+import { test } from "vitest";
 
 export const sleepSeconds = (s: number) => {
   return new Promise<void>((resolve) => {
@@ -70,17 +71,11 @@ export async function lockAndProcessFile(
   }
 }
 
-export function wrappedTest(
-  ...[name, fn, ...rest]: Parameters<(typeof test)["concurrent"]>
-) {
-  test(
-    name,
-    async (...args: Parameters<NonNullable<typeof fn>>) => {
-      core.startGroup(name);
-      // @ts-expect-error fn is never undefined here
-      await fn(...args);
-      core.endGroup();
-    },
-    ...rest,
-  );
+export function wrappedTest(name: string, fn: () => Promise<void> | void) {
+  test(name, async (...args) => {
+    core.startGroup(name);
+    // @ts-expect-error fn is never undefined here
+    await fn(...args);
+    core.endGroup();
+  });
 }

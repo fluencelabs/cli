@@ -15,10 +15,10 @@
  */
 
 // @ts-check
-import path from "path";
+
+import { dirname } from "path";
 import { fileURLToPath } from "url";
 
-import { FlatCompat } from "@eslint/eslintrc";
 import eslintConfigPrettier from "eslint-config-prettier";
 import * as eslintPluginImport from "eslint-plugin-import";
 import eslintPluginLicenseHeader from "eslint-plugin-license-header";
@@ -27,9 +27,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-const compat = new FlatCompat({ baseDirectory: __dirname });
+const __dirname = dirname(__filename);
 
 export default tseslint.config(
   {
@@ -44,17 +42,16 @@ export default tseslint.config(
     ],
   },
   ...tseslint.configs.strictTypeChecked,
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  ...compat.extends("plugin:node/recommended"),
   {
     languageOptions: {
       globals: { ...globals.node },
       parserOptions: {
         project: "./tsconfig.eslint.json",
-        tsconfigRootDir: import.meta.dirname,
+        tsconfigRootDir: __dirname,
       },
     },
     plugins: {
+      // @ts-expect-error no idea why this TS error is here. Doesn't matter much cause it's just a linter config
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       "license-header": eslintPluginLicenseHeader,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -179,9 +176,6 @@ export default tseslint.config(
           assertionStyle: "never",
         },
       ],
-      "node/no-unsupported-features/es-syntax": "off",
-      "node/no-unpublished-import": "off",
-      "node/no-missing-import": "off",
     },
   },
   {

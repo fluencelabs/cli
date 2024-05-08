@@ -1,5 +1,3 @@
-#!/usr/bin/env -S node --no-warnings
-
 /**
  * Copyright 2024 Fluence DAO
  *
@@ -16,20 +14,11 @@
  * limitations under the License.
  */
 
-import oclif from "@oclif/core";
+import { defineConfig } from "vitest/dist/config.js";
 
-import {
-  createErrorPromise,
-  setUpProcessWarningListener,
-} from "../dist/errorInterceptor.js";
-
-setUpProcessWarningListener();
-
-oclif
-  .run(process.argv.slice(2), import.meta.url)
-  .then(oclif.flush)
-  .catch(
-    /** @param {unknown} error */ (error) => {
-      return createErrorPromise(error);
-    },
-  );
+export default defineConfig({
+  test: {
+    testTimeout: 1000 * 60 * 5, // 5 minutes,
+    fileParallelism: false,
+  },
+});
