@@ -35,7 +35,7 @@ type DataStructure = [WorkersArray, ErrorArray];
 const logSchema: JSONSchemaType<Log> = {
   type: "object",
   properties: {
-    message: { type: "string", pattern: '^".*"$' },
+    message: { type: "string" },
     timestamp: { type: "integer" },
   },
   required: ["message", "timestamp"],
