@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 import assert from "node:assert";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+
+import { describe, expect, test } from "vitest";
 
 import {
   DEFAULT_WORKER_NAME,

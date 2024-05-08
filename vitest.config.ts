@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
+import { defineConfig } from "vitest/dist/config.js";
 
-import { commandObj } from "../commandObj.js";
-
-export function startSpinner(message: string) {
-  commandObj.logToStderr(`${color.yellow("#")} ${message}...`);
-}
-
-export function stopSpinner(message: string | undefined = "done") {
-  commandObj.logToStderr(message);
-}
+export default defineConfig({
+  test: {
+    testTimeout: 1000 * 60 * 5, // 5 minutes,
+    fileParallelism: false,
+  },
+});

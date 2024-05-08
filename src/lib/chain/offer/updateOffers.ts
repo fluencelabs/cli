@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import { confirm } from "../../prompt.js";
 import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
-  cidHexStringToBase32,
 } from "../conversions.js";
 import { ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
@@ -140,7 +139,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
 
       const effectorsOnChain = await Promise.all(
         offerIndexerInfo.effectors.map(({ cid }) => {
-          return cidHexStringToBase32(cid);
+          return cid;
         }),
       );
 

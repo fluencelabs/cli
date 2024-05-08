@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,8 +124,7 @@ async function downloadAndDecompress(
 
   const archivePath = join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);
-
-  const tar = (await import("tar")).default;
+  const tar = await import("tar");
 
   await tar.x({
     cwd: dirPath,

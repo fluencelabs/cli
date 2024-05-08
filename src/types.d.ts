@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable camelcase */
 declare module "node_modules-path" {
   export = node_modules;
   declare function node_modules(): string;

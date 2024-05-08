@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* eslint-disable camelcase */
 
 import assert from "node:assert";
 import { URL } from "node:url";
@@ -406,7 +404,6 @@ export async function signBatch(
   return receipts;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 function methodCallToString([method, ...args]: [
   { name: string },
   ...unknown[],

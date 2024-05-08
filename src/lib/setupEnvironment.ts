@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
 export const FLUENCE_USER_DIR = "FLUENCE_USER_DIR";
 export const CI = "CI";
-export const RUN_TESTS_IN_PARALLEL = "RUN_TESTS_IN_PARALLEL";
 
 dotenv.config();
 
@@ -80,6 +79,5 @@ const isFluenceEnvWithoutCustom = getIsStringUnion(
 
 setEnvVariable(FLUENCE_ENV, isFluenceEnvWithoutCustom, "local");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
-setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "true");
 setEnvVariable(CI, isTrueOrFalseString, "false");
 setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);

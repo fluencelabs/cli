@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,6 +208,5 @@ export const exitCli = async (): Promise<never> => {
   await haltCountly();
   // Countly doesn't let process to finish
   // So there is a need to do it explicitly
-  // eslint-disable-next-line no-process-exit
   process.exit(0);
 };

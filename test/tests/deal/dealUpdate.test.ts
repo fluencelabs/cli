@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 import { cp } from "fs/promises";
 import { join } from "node:path";
+
+import { describe } from "vitest";
 
 import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
 import { fluence } from "../../helpers/commonWithSetupTests.js";
@@ -42,9 +44,6 @@ import {
   waitUntilShowSubnetReturnsExpected,
 } from "../../helpers/sharedSteps.js";
 import { wrappedTest } from "../../helpers/utils.js";
-
-// TODO: remove when decider is updated on nox
-// jest.retryTimes(2);
 
 describe("Deal update tests", () => {
   wrappedTest("should update deal after new spell is created", async () => {

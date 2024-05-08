@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,8 +191,22 @@ await patchOclif(
 // Pack tar.gz for Windows. We need it to perform update
 await patchOclif(
   WIN_BIN_FILE_PATH,
-  "await Tarballs.build(buildConfig, { pack: false, parallel: true, platform: 'win32', tarball: flags.tarball });",
-  "await Tarballs.build(buildConfig, { pack: true, parallel: true, platform: 'win32', tarball: flags.tarball });",
+  `
+        await Tarballs.build(buildConfig, {
+            pack: false,
+            parallel: true,
+            platform: 'win32',
+            pruneLockfiles: flags['prune-lockfiles'],
+            tarball: flags.tarball,
+        })`,
+  `
+        await Tarballs.build(buildConfig, {
+            pack: true,
+            parallel: true,
+            platform: 'win32',
+            pruneLockfiles: flags['prune-lockfiles'],
+            tarball: flags.tarball,
+        })`,
 );
 
 // Set correct redirection command on Windows

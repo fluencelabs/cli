@@ -15,6 +15,10 @@ When you contribute, you have to be aware that your contribution is covered by *
 ## Guidelines for contributors
 
 -   CLI uses `yarn` as a package manager. To install yarn you need Node.js 18 installed and then run `corepack enable`. Then you run `yarn` to install all the dependencies and you need to also run `yarn before-build` before moving any further
+-   To run tests locally you need to do the following:
+    1. Install and run [Docker](https://docs.docker.com/get-docker/)
+    1. run `yarn`
+    1. run e.g. for linux: `DEBUG=fcli:*,deal-ts-clients:* CI=true yarn test-linux-x64` which will lint and check the code, build it, package it, prepare the tests and run them. For fish shell: `env DEBUG="fcli:*,deal-ts-clients:*" CI="true" yarn test-linux-x64`. `DEBUG` env variable is needed to see debug logs of Fluence CLI and deal-ts-clients lib (you can also inspect js-client logs like by adding `fluence:*`, libp2p also uses a similar system, check out their docs). `CI=true` is needed so tests look just like in CI without seeing spinners that might duplicate in the output
 -   **First** commit in your PR or PR title must use [Conventional Commits](https://www.conventionalcommits.org/) (optionally end your commit message with: `[fixes DXJ-000 DXJ-001]`. Where `DXJ-000` and `DXJ-001` are ids of the Linear issues that you were working on)
 -   To use Fluence CLI in the development mode, run: `./bin/dev.js` (types are not checked in development mode because it's faster and more convenient to work with. Use typechecking provided by your IDE during development)
 -   To use Fluence CLI in the production mode, run `yarn build` first, then run: `./bin/run.js`. If you want to make sure you are running the actual package the users will use, do `yarn pack-*` command for your platform and architecture (this is used for tests as well)
@@ -23,8 +27,5 @@ When you contribute, you have to be aware that your contribution is covered by *
 -   Avoid using `this` in commands except for inside `initCli` function. This style is easier to understand and there will be less stuff to refactor if instead of using methods on command object you simply use separate functions which can later be moved outside into a separate module for reuse in other commands
 -   Use `commandObj.error` (or `throw new CLIError`) for human readable errors. They will be reported to analytics as events. Use `throw new Error` (or `assert`) for unexpected errors. They will be reported to analytics as crashes.
 -   Don't use colors inside commands descriptions. They can't be rendered to markdown and they will not be rendered to users of the packaged Fluence CLI anyway, when they run `--help`
--   To run tests locally you need to do the following:
-    1. [Docker](https://docs.docker.com/get-docker/)
-    1. run e.g. for linux: `DEBUG=fcli:* yarn test-linux-x64` which will lint and check the code, build it, package it, prepare the tests and run them (for fish shell: `env DEBUG='fcli:*' yarn test-linux-x64`)
 -   for your convenience a dir `.f` is added to gitignore so you can generate projects in this dir for testing and development purposes
 -   To install packages from fluence npm registry that are published in CI for testing purposes - add `npmRegistryServer: https://npm.fluence.dev` to `.yarnrc.yml`. Don't forget removing that before merging your changes into the main branch. You would also need to be logged into npm account that is allowed to access fluence npm registry

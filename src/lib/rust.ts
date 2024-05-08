@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2024 Fluence DAO
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -388,7 +388,6 @@ export async function ensureMarineAndMreplDependencies(): Promise<void> {
   for (const [name, version] of await resolveMarineAndMreplDependencies()) {
     // Not installing dependencies in parallel
     // for cargo logs to be clearly readable
-    // eslint-disable-next-line no-await-in-loop
     await ensureMarineOrMreplDependency({ name, version });
   }
 }
