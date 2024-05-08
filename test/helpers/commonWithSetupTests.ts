@@ -67,7 +67,6 @@ export const fluence = async ({
       args,
       flags,
       options: { cwd },
-      printOutput: true,
       timeout,
     });
   } catch (err) {

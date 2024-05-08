@@ -56,7 +56,6 @@ import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
   peerIdToUint8Array,
-  cidHexStringToBase32,
 } from "../conversions.js";
 import { ptFormatWithSymbol, ptParse } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
@@ -265,7 +264,7 @@ async function resolveOfferInfo({
           : await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
       Effectors: await Promise.all(
         offerIndexerInfo.effectors.map(({ cid }) => {
-          return cidHexStringToBase32(cid);
+          return cid;
         }),
       ),
       "Total compute units": offerIndexerInfo.totalComputeUnits,

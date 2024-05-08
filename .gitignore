@@ -1,9 +1,13 @@
 # oclif default
+**/.DS_Store
 *-debug.log
 *-error.log
+/.idea
 /.nyc_output
 /dist
+/lib
 /tmp
+oclif.lock
 oclif.manifest.json
 .eslintcache
 

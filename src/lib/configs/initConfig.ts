@@ -93,7 +93,6 @@ const migrateConfig = async <
   let migratedConfig = config;
 
   for (const migration of migrations.slice(Number(config.version))) {
-    // eslint-disable-next-line no-await-in-loop
     migratedConfig = await migration(migratedConfig);
   }
 

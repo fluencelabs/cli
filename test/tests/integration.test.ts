@@ -19,6 +19,8 @@ import assert from "node:assert";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { describe, expect } from "vitest";
+
 import { FS_OPTIONS, PACKAGE_JSON_FILE_NAME } from "../../src/lib/const.js";
 import { fluenceEnv, NO_PROJECT_TEST_NAME } from "../helpers/constants.js";
 import { pathToTheTemplateWhereLocalEnvironmentIsSpunUp } from "../helpers/paths.js";
