@@ -241,7 +241,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.0.16/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.0.17/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -2019,5 +2019,5 @@ EXAMPLES
     $ fluence update --available
 ```
 
-_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.2.7/src/commands/update.ts)_
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.2.11/src/commands/update.ts)_
 <!-- commandsstop -->
