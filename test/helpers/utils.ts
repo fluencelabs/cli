@@ -16,7 +16,9 @@
 
 import { access, readFile, writeFile } from "node:fs/promises";
 
+import core from "@actions/core";
 import lockfile from "proper-lockfile";
+import { test } from "vitest";
 
 export const sleepSeconds = (s: number) => {
   return new Promise<void>((resolve) => {
@@ -67,4 +69,13 @@ export async function lockAndProcessFile(
   } finally {
     await release?.();
   }
+}
+
+export function wrappedTest(name: string, fn: () => Promise<void> | void) {
+  test(name, async (...args) => {
+    core.startGroup(name);
+    // @ts-expect-error fn is never undefined here
+    await fn(...args);
+    core.endGroup();
+  });
 }

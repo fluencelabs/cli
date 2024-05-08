@@ -19,7 +19,7 @@ import assert from "node:assert";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { describe, expect, test } from "vitest";
+import { describe, expect } from "vitest";
 
 import { FS_OPTIONS, PACKAGE_JSON_FILE_NAME } from "../../src/lib/const.js";
 import { fluenceEnv, NO_PROJECT_TEST_NAME } from "../helpers/constants.js";
@@ -29,16 +29,17 @@ import {
   initializeTemplate,
   runAquaFunction,
 } from "../helpers/sharedSteps.js";
+import { wrappedTest } from "../helpers/utils.js";
 
 describe("integration tests", () => {
-  test("should work with minimal template", async () => {
+  wrappedTest("should work with minimal template", async () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
     await initializeTemplate(cwd, "minimal");
 
     await runAquaFunction(cwd, "helloWorld", ["Fluence"]);
   });
 
-  test("should work without project", async () => {
+  wrappedTest("should work without project", async () => {
     const cwd = join("tmp", NO_PROJECT_TEST_NAME);
 
     await cp(
