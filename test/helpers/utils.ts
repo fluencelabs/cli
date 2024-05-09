@@ -71,10 +71,14 @@ export async function lockAndProcessFile(
   }
 }
 
-export function wrappedTest(name: string, fn: () => Promise<void> | void) {
+export function wrappedTest(
+  name: string,
+  fn: (
+    context: Parameters<NonNullable<Parameters<typeof test>[2]>>[0],
+  ) => Promise<void>,
+) {
   test(name, async (...args) => {
     core.startGroup(name);
-    // @ts-expect-error fn is never undefined here
     await fn(...args);
     core.endGroup();
   });

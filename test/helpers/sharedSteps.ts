@@ -43,6 +43,7 @@ import {
   WORKER_SPELL,
 } from "../../src/lib/const.js";
 import {
+  jsonStringify,
   LOGS_GET_ERROR_START,
   LOGS_RESOLVE_SUBNET_ERROR_START,
   setTryTimeout,
@@ -50,16 +51,12 @@ import {
 } from "../../src/lib/helpers/utils.js";
 import { addrsToNodes } from "../../src/lib/multiaddresWithoutLocal.js";
 import { getAquaMainPath } from "../../src/lib/paths.js";
-import { validateDeployedServicesAnswerSchema } from "../validators/deployedServicesAnswerValidator.js";
+import { validateDeployedServicesAnswer } from "../validators/deployedServicesAnswerValidator.js";
 import { validateSpellLogs } from "../validators/spellLogsValidator.js";
 import { validateWorkerServices } from "../validators/workerServiceValidator.js";
 
 import { fluence } from "./commonWithSetupTests.js";
-import {
-  fluenceEnv,
-  MY_SERVICE_NAME,
-  RUN_DEPLOYED_SERVICES_TIMEOUT,
-} from "./constants.js";
+import { fluenceEnv, RUN_DEPLOYED_SERVICES_TIMEOUT } from "./constants.js";
 import { RUN_DEPLOYED_SERVICES_TIMEOUT_STR } from "./constants.js";
 import {
   getInitializedTemplatePath,
@@ -152,25 +149,6 @@ export async function getServiceConfig(cwd: string, serviceName: string) {
   return serviceConfig;
 }
 
-export async function updateFluenceConfigForTest(cwd: string) {
-  const fluenceConfig = await getFluenceConfig(cwd);
-
-  assert(
-    fluenceConfig.deployments !== undefined &&
-      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
-    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
-  );
-
-  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].targetWorkers = 3;
-
-  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services = [
-    MY_SERVICE_NAME,
-  ];
-
-  await fluenceConfig.$commit();
-  return fluenceConfig;
-}
-
 export async function updateMainRs(
   cwd: string,
   moduleName: string,
@@ -233,7 +211,7 @@ export async function callRunDeployedServices(cwd: string) {
 
   const runDeployedServicesResult = JSON.parse(result);
 
-  if (!validateDeployedServicesAnswerSchema(runDeployedServicesResult)) {
+  if (!validateDeployedServicesAnswer(runDeployedServicesResult)) {
     throw new Error(
       `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array of DeployedServicesAnswer, but actual result is: ${result}`,
     );
@@ -468,7 +446,7 @@ export async function waitUntilShowSubnetReturnsExpected(
         };
       });
 
-      expect(sortedSubnet).toEqual(expected);
+      expect(jsonStringify(sortedSubnet)).toEqual(jsonStringify(expected));
     },
     (error) => {
       throw new Error(
@@ -542,11 +520,4 @@ export function assertLogsAreValid(logs: string) {
   if (logs.includes(LOGS_GET_ERROR_START)) {
     throw new Error(`Failed to get deal logs:\n\n${logs}`);
   }
-}
-
-export async function stopDefaultDeal(cwd: string) {
-  await fluence({
-    args: ["deal", "stop", DEFAULT_DEPLOYMENT_NAME],
-    cwd,
-  });
 }

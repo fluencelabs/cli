@@ -19,15 +19,15 @@ import { join } from "node:path";
 
 import { describe } from "vitest";
 
-import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
-import { fluence } from "../../helpers/commonWithSetupTests.js";
+import { DEFAULT_DEPLOYMENT_NAME } from "../../src/lib/const.js";
+import { fluence } from "../helpers/commonWithSetupTests.js";
 import {
   MY_SERVICE_NAME,
   NEW_MODULE_NAME,
   NEW_SERVICE_2_NAME,
   NEW_SPELL_NAME,
-} from "../../helpers/constants.js";
-import { TEST_AQUA_DIR_PATH } from "../../helpers/paths.js";
+} from "../helpers/constants.js";
+import { TEST_AQUA_DIR_PATH } from "../helpers/paths.js";
 import {
   assertLogsAreValid,
   build,
@@ -36,75 +36,48 @@ import {
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
   initializeTemplate,
-  updateFluenceConfigForTest,
   updateMainRs,
   updateSpellAqua,
   waitUntilAquaScriptReturnsExpected,
   waitUntilRunDeployedServicesReturnsExpected,
   waitUntilShowSubnetReturnsExpected,
-} from "../../helpers/sharedSteps.js";
-import { wrappedTest } from "../../helpers/utils.js";
+} from "../helpers/sharedSteps.js";
+import { wrappedTest } from "../helpers/utils.js";
 
-describe("Deal update tests", () => {
-  wrappedTest("should update deal after new spell is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
-    await initializeTemplate(cwd, "quickstart");
+describe("Deal tests", () => {
+  wrappedTest(
+    "should update deal after new spell and service are created",
+    async () => {
+      const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
+      await initializeTemplate(cwd, "quickstart");
 
-    await updateFluenceConfigForTest(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
+      await waitUntilShowSubnetReturnsExpected(cwd, [MY_SERVICE_NAME], []);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
+      await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
+      await build(cwd);
 
-    await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
+      await deployDealAndWaitUntilDeployed(cwd, true);
 
-    await deployDealAndWaitUntilDeployed(cwd, true);
+      await waitUntilShowSubnetReturnsExpected(
+        cwd,
+        [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
+        [NEW_SPELL_NAME],
+      );
 
-    await waitUntilShowSubnetReturnsExpected(
-      cwd,
-      [MY_SERVICE_NAME],
-      [NEW_SPELL_NAME],
-    );
+      const logs = await fluence({
+        args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+        cwd,
+      });
 
-    const logs = await fluence({
-      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
-      cwd,
-    });
-
-    assertLogsAreValid(logs);
-  });
-
-  wrappedTest("should update deal after new service is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
-    await initializeTemplate(cwd, "quickstart");
-
-    await updateFluenceConfigForTest(cwd);
-
-    await deployDealAndWaitUntilDeployed(cwd);
-
-    await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
-
-    await build(cwd);
-
-    await deployDealAndWaitUntilDeployed(cwd, true);
-
-    await waitUntilShowSubnetReturnsExpected(
-      cwd,
-      [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
-      [],
-    );
-
-    const logs = await fluence({
-      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
-      cwd,
-    });
-
-    assertLogsAreValid(logs);
-  });
+      assertLogsAreValid(logs);
+    },
+  );
 
   wrappedTest("should update deal after new module is created", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
     await initializeTemplate(cwd, "quickstart");
-
-    await updateFluenceConfigForTest(cwd);
 
     await deployDealAndWaitUntilDeployed(cwd);
 
@@ -125,20 +98,11 @@ describe("Deal update tests", () => {
       cwd,
       `Hey, fluence! I'm The New Module.`,
     );
-
-    const logs = await fluence({
-      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
-      cwd,
-    });
-
-    assertLogsAreValid(logs);
   });
 
   wrappedTest("should update deal after changing a service", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterChangingAService");
     await initializeTemplate(cwd, "quickstart");
-
-    await updateFluenceConfigForTest(cwd);
 
     await deployDealAndWaitUntilDeployed(cwd);
 
@@ -172,8 +136,6 @@ describe("Deal update tests", () => {
       join(TEST_AQUA_DIR_PATH, GET_SPELL_LOGS_AQUA_FILE_NAME),
       join(cwd, GET_SPELL_LOGS_AQUA_FILE_NAME),
     );
-
-    await updateFluenceConfigForTest(cwd);
 
     await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 

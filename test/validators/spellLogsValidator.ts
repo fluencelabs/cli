@@ -18,42 +18,41 @@ import Ajv, { type JSONSchemaType } from "ajv";
 
 import { ajvOptions } from "./ajvOptions.js";
 
-interface Log {
-  message: string;
-  timestamp: number;
-}
+type GetSpellLogsReturnType = [
+  {
+    logs: {
+      message: string;
+      timestamp: number;
+    }[];
+    worker_id: string;
+  }[],
+  string[],
+];
 
-interface Worker {
-  logs: Log[];
-  worker_id: string;
-}
-
-type WorkersArray = Worker[];
-type ErrorArray = string[];
-type DataStructure = [WorkersArray, ErrorArray];
-
-const logSchema: JSONSchemaType<Log> = {
-  type: "object",
-  properties: {
-    message: { type: "string" },
-    timestamp: { type: "integer" },
-  },
-  required: ["message", "timestamp"],
-};
-
-const workerSchema: JSONSchemaType<Worker> = {
-  type: "object",
-  properties: {
-    logs: { type: "array", items: logSchema },
-    worker_id: { type: "string" },
-  },
-  required: ["logs", "worker_id"],
-};
-
-const dataStructureSchema: JSONSchemaType<DataStructure> = {
+const getSpellLogsReturnSchema: JSONSchemaType<GetSpellLogsReturnType> = {
   type: "array",
   items: [
-    { type: "array", items: workerSchema },
+    {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          logs: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                message: { type: "string" },
+                timestamp: { type: "integer" },
+              },
+              required: ["message", "timestamp"],
+            },
+          },
+          worker_id: { type: "string" },
+        },
+        required: ["logs", "worker_id"],
+      },
+    },
     { type: "array", items: { type: "string" } },
   ],
   minItems: 2,
@@ -61,5 +60,5 @@ const dataStructureSchema: JSONSchemaType<DataStructure> = {
 };
 
 export const validateSpellLogs = new Ajv.default(ajvOptions).compile(
-  dataStructureSchema,
+  getSpellLogsReturnSchema,
 );
