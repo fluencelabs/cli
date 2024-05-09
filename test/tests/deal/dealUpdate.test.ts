@@ -47,36 +47,56 @@ import {
 import { wrappedTest } from "../helpers/utils.js";
 import { validateSpellLogs } from "../validators/spellLogsValidator.js";
 
-describe("Deal tests", () => {
-  wrappedTest(
-    "should update deal after new spell and service are created",
-    async () => {
-      const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
-      await initializeTemplate(cwd, "quickstart");
+describe("Deal update tests", () => {
+  wrappedTest("should update deal after new spell is created", async () => {
+    const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
+    await initializeTemplate(cwd, "quickstart");
 
-      await deployDealAndWaitUntilDeployed(cwd);
-      await waitUntilShowSubnetReturnsExpected(cwd, [MY_SERVICE_NAME], []);
+    await deployDealAndWaitUntilDeployed(cwd);
 
-      await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
-      await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
-      await build(cwd);
+    await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
-      await deployDealAndWaitUntilDeployed(cwd, true);
+    await deployDealAndWaitUntilDeployed(cwd, true);
 
-      await waitUntilShowSubnetReturnsExpected(
-        cwd,
-        [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
-        [NEW_SPELL_NAME],
-      );
+    await waitUntilShowSubnetReturnsExpected(
+      cwd,
+      [MY_SERVICE_NAME],
+      [NEW_SPELL_NAME],
+    );
 
-      const logs = await fluence({
-        args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
-        cwd,
-      });
+    const logs = await fluence({
+      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+      cwd,
+    });
 
-      assertLogsAreValid(logs);
-    },
-  );
+    assertLogsAreValid(logs);
+  });
+
+  wrappedTest("should update deal after new service is created", async () => {
+    const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
+    await initializeTemplate(cwd, "quickstart");
+
+    await deployDealAndWaitUntilDeployed(cwd);
+
+    await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
+
+    await build(cwd);
+
+    await deployDealAndWaitUntilDeployed(cwd, true);
+
+    await waitUntilShowSubnetReturnsExpected(
+      cwd,
+      [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
+      [],
+    );
+
+    const logs = await fluence({
+      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+      cwd,
+    });
+
+    assertLogsAreValid(logs);
+  });
 
   wrappedTest("should update deal after new module is created", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
