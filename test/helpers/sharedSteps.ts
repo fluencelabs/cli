@@ -27,7 +27,6 @@ import {
 import sortBy from "lodash-es/sortBy.js";
 import { expect } from "vitest";
 
-import { validationErrorToString } from "../../src/lib/ajvInstance.js";
 import {
   initFluenceConfigWithPath,
   initReadonlyFluenceConfigWithPath,
@@ -52,7 +51,6 @@ import {
 import { addrsToNodes } from "../../src/lib/multiaddresWithoutLocal.js";
 import { getAquaMainPath } from "../../src/lib/paths.js";
 import { validateDeployedServicesAnswer } from "../validators/deployedServicesAnswerValidator.js";
-import { validateSpellLogs } from "../validators/spellLogsValidator.js";
 import { validateWorkerServices } from "../validators/workerServiceValidator.js";
 
 import { fluence } from "./commonWithSetupTests.js";
@@ -459,43 +457,31 @@ export async function waitUntilShowSubnetReturnsExpected(
   );
 }
 
-export async function waitUntilAquaScriptReturnsExpected(
-  cwd: string,
-  spellName: string,
-  functionName: string,
-  aquaFileName: string,
-  answer: string,
-) {
+type WaitUntilAquaScriptReturnsExpectedArg = {
+  cwd: string;
+  functionName: string;
+  aquaFileName: string;
+  validation: (result: unknown) => never | void | Promise<void>;
+  args?: string[];
+};
+
+export async function waitUntilAquaScriptReturnsExpected({
+  cwd,
+  functionName,
+  aquaFileName,
+  validation,
+  args = [],
+}: WaitUntilAquaScriptReturnsExpectedArg) {
   await setTryTimeout(
     "check if aqua script returns expected result",
     async () => {
-      const result = await runAquaFunction(cwd, functionName, [spellName], {
-        i: aquaFileName,
-      });
+      const result = JSON.parse(
+        await runAquaFunction(cwd, functionName, args, {
+          i: aquaFileName,
+        }),
+      );
 
-      const spellLogs = JSON.parse(result);
-
-      if (!validateSpellLogs(spellLogs)) {
-        throw new Error(
-          `result of running ${functionName} aqua function has unexpected structure: ${await validationErrorToString(validateSpellLogs.errors)}`,
-        );
-      }
-
-      spellLogs[0].forEach((w) => {
-        assert(
-          w.logs.length > 0,
-          `Worker ${w.worker_id} doesn't have any logs`,
-        );
-
-        const lastLogMessage = w.logs[w.logs.length - 1]?.message;
-
-        assert(
-          lastLogMessage === answer,
-          `Worker ${w.worker_id} last log message is expected to be ${answer}, but it is ${lastLogMessage === undefined ? "undefined" : lastLogMessage}`,
-        );
-      });
-
-      assert(spellLogs[1].length === 0, `Errors: ${spellLogs[1].join("\n")}`);
+      await validation(result);
     },
     (error) => {
       throw new Error(

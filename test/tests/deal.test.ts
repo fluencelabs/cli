@@ -21,7 +21,9 @@ import { describe } from "vitest";
 
 import { DEFAULT_DEPLOYMENT_NAME } from "../../src/lib/const.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
+import { UPDATED_SPELL_MESSAGE } from "../helpers/constants.js";
 import {
+  GET_SPELL_LOGS_FUNCTION_NAME,
   MY_SERVICE_NAME,
   NEW_MODULE_NAME,
   NEW_SERVICE_2_NAME,
@@ -43,6 +45,7 @@ import {
   waitUntilShowSubnetReturnsExpected,
 } from "../helpers/sharedSteps.js";
 import { wrappedTest } from "../helpers/utils.js";
+import { validateSpellLogs } from "../validators/spellLogsValidator.js";
 
 describe("Deal tests", () => {
   wrappedTest(
@@ -145,13 +148,13 @@ describe("Deal tests", () => {
 
     await deployDealAndWaitUntilDeployed(cwd, true);
 
-    await waitUntilAquaScriptReturnsExpected(
+    await waitUntilAquaScriptReturnsExpected({
       cwd,
-      NEW_SPELL_NAME,
-      "getSpellLogs",
-      "getSpellLogs.aqua",
-      SPELL_MESSAGE,
-    );
+      functionName: GET_SPELL_LOGS_FUNCTION_NAME,
+      aquaFileName: "getSpellLogs.aqua",
+      validation: validateSpellLogs,
+      args: [NEW_SPELL_NAME],
+    });
 
     const logs = await fluence({
       args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
@@ -210,7 +213,6 @@ pub fn greeting(name: String) -> String {
 `;
 
 const GET_SPELL_LOGS_AQUA_FILE_NAME = "getSpellLogs.aqua";
-const SPELL_MESSAGE = '"if you see this, then the spell is working"';
 
 const UPDATED_SPELL_CONTENT = `aqua Spell
 export spell
@@ -219,7 +221,7 @@ import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
-    msg = ${SPELL_MESSAGE}
+    msg = ${UPDATED_SPELL_MESSAGE}
     str <- Debug.stringify(msg)
     Spell "spell"
     Spell.store_log(str)

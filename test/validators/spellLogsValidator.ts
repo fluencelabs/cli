@@ -16,6 +16,10 @@
 
 import Ajv, { type JSONSchemaType } from "ajv";
 
+import { validationErrorToString } from "../../src/lib/ajvInstance.js";
+import { UPDATED_SPELL_MESSAGE } from "../helpers/constants.js";
+import { GET_SPELL_LOGS_FUNCTION_NAME } from "../helpers/constants.js";
+
 import { ajvOptions } from "./ajvOptions.js";
 
 type GetSpellLogsReturnType = [
@@ -59,6 +63,40 @@ const getSpellLogsReturnSchema: JSONSchemaType<GetSpellLogsReturnType> = {
   maxItems: 2,
 };
 
-export const validateSpellLogs = new Ajv.default(ajvOptions).compile(
+const validateSpellLogsStructure = new Ajv.default(ajvOptions).compile(
   getSpellLogsReturnSchema,
 );
+
+export async function validateSpellLogs(res: unknown) {
+  if (!validateSpellLogsStructure(res)) {
+    throw new Error(
+      `result of running ${GET_SPELL_LOGS_FUNCTION_NAME} aqua function has unexpected structure: ${await validationErrorToString(validateSpellLogsStructure.errors)}`,
+    );
+  }
+
+  const [logsFromAquaScript, errorsFromAquaScript] = res;
+
+  const errors = logsFromAquaScript.flatMap((w) => {
+    if (w.logs.length === 0) {
+      return [`Worker ${w.worker_id} doesn't have any logs`];
+    }
+
+    const lastLogMessage = w.logs[w.logs.length - 1]?.message;
+
+    if (lastLogMessage !== UPDATED_SPELL_MESSAGE) {
+      return [
+        `Worker ${w.worker_id} last log message is expected to be ${UPDATED_SPELL_MESSAGE}, but it is ${lastLogMessage === undefined ? "undefined" : lastLogMessage}`,
+      ];
+    }
+
+    return [];
+  });
+
+  if (errorsFromAquaScript.length > 0) {
+    errors.push(`Aqua script returned errors: ${errors.join("\n")}`);
+  }
+
+  if (errors.length > 0) {
+    throw new Error(errors.join("\n"));
+  }
+}
