@@ -19,17 +19,17 @@ import { join } from "node:path";
 
 import { describe } from "vitest";
 
-import { DEFAULT_DEPLOYMENT_NAME } from "../../src/lib/const.js";
-import { fluence } from "../helpers/commonWithSetupTests.js";
-import { UPDATED_SPELL_MESSAGE } from "../helpers/constants.js";
+import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
+import { fluence } from "../../helpers/commonWithSetupTests.js";
+import { UPDATED_SPELL_MESSAGE } from "../../helpers/constants.js";
 import {
   GET_SPELL_LOGS_FUNCTION_NAME,
   MY_SERVICE_NAME,
   NEW_MODULE_NAME,
   NEW_SERVICE_2_NAME,
   NEW_SPELL_NAME,
-} from "../helpers/constants.js";
-import { TEST_AQUA_DIR_PATH } from "../helpers/paths.js";
+} from "../../helpers/constants.js";
+import { TEST_AQUA_DIR_PATH } from "../../helpers/paths.js";
 import {
   assertLogsAreValid,
   build,
@@ -43,9 +43,9 @@ import {
   waitUntilAquaScriptReturnsExpected,
   waitUntilRunDeployedServicesReturnsExpected,
   waitUntilShowSubnetReturnsExpected,
-} from "../helpers/sharedSteps.js";
-import { wrappedTest } from "../helpers/utils.js";
-import { validateSpellLogs } from "../validators/spellLogsValidator.js";
+} from "../../helpers/sharedSteps.js";
+import { wrappedTest } from "../../helpers/utils.js";
+import { validateSpellLogs } from "../../validators/spellLogsValidator.js";
 
 describe("Deal update tests", () => {
   wrappedTest("should update deal after new spell is created", async () => {
