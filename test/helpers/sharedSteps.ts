@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { cp, rm, writeFile } from "node:fs/promises";
 import { relative } from "node:path";
 
@@ -25,7 +24,7 @@ import {
   kras,
 } from "@fluencelabs/fluence-network-environment";
 import sortBy from "lodash-es/sortBy.js";
-import { expect } from "vitest";
+import { assert } from "vitest";
 
 import {
   initFluenceConfigWithPath,
@@ -42,7 +41,6 @@ import {
   WORKER_SPELL,
 } from "../../src/lib/const.js";
 import {
-  jsonStringify,
   LOGS_GET_ERROR_START,
   LOGS_RESOLVE_SUBNET_ERROR_START,
   setTryTimeout,
@@ -399,7 +397,7 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
         ["peerId"],
       );
 
-      expect(result).toEqual(expected);
+      assert.deepEqual(result, expected);
     },
     (error) => {
       throw new Error(
@@ -444,7 +442,7 @@ export async function waitUntilShowSubnetReturnsExpected(
         };
       });
 
-      expect(jsonStringify(sortedSubnet)).toEqual(jsonStringify(expected));
+      assert.deepEqual(sortedSubnet, expected);
     },
     (error) => {
       throw new Error(
