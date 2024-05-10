@@ -400,11 +400,11 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
       assert.deepEqual(result, expected);
     },
     (error) => {
-      throw new Error(
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
-          error,
-        )}`,
+      console.log(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}`,
       );
+
+      throw error;
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
@@ -482,11 +482,11 @@ export async function waitUntilAquaScriptReturnsExpected({
       await validation(result);
     },
     (error) => {
-      throw new Error(
-        `${functionName} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
-          error,
-        )}`,
+      console.log(
+        `${functionName} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}`,
       );
+
+      throw error;
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
