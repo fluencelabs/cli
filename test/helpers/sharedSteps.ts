@@ -445,11 +445,11 @@ export async function waitUntilShowSubnetReturnsExpected(
       assert.deepEqual(sortedSubnet, expected);
     },
     (error) => {
-      throw new Error(
-        `showSubnet() didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
-          error,
-        )}`,
+      console.log(
+        `showSubnet() didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}`,
       );
+
+      throw error;
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
