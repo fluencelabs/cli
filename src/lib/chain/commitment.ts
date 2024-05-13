@@ -30,6 +30,7 @@ import {
   OFFER_FLAG_NAME,
   CC_IDS_FLAG_NAME,
   MAX_CUS_FLAG_NAME,
+  DEFAULT_MAX_CUS,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
@@ -462,11 +463,23 @@ export async function collateralWithdraw(
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
-    for (const unitIdsBatch of chunk([...unitIds], flags[MAX_CUS_FLAG_NAME])) {
-      await sign(capacity.removeCUFromCC, commitmentId, [...unitIdsBatch]);
-    }
+    try {
+      if (unitIds.length < flags[MAX_CUS_FLAG_NAME]) {
+        await signBatch([
+          populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
+          populateTx(capacity.finishCommitment, commitmentId),
+        ])
+      } else {
+        for (const unitIdsBatch of chunk([...unitIds], flags[MAX_CUS_FLAG_NAME])) {
+          await sign(capacity.removeCUFromCC, commitmentId, [...unitIdsBatch]);
+        }
 
-    await sign(capacity.finishCommitment, commitmentId);
+        await sign(capacity.finishCommitment, commitmentId);
+      }
+    } catch (error) {
+      commandObj.warn(`If you see a problem with gas usage, try passing a lower then ${DEFAULT_MAX_CUS} number to --${MAX_CUS_FLAG_NAME} flag`)
+      throw error
+    }
 
     commandObj.logToStderr(
       `Collateral withdrawn for:\n${stringifyBasicCommitmentInfo(commitment)}`,
