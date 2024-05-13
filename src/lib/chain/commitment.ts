@@ -468,17 +468,22 @@ export async function collateralWithdraw(
         await signBatch([
           populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
           populateTx(capacity.finishCommitment, commitmentId),
-        ])
+        ]);
       } else {
-        for (const unitIdsBatch of chunk([...unitIds], flags[MAX_CUS_FLAG_NAME])) {
+        for (const unitIdsBatch of chunk(
+          [...unitIds],
+          flags[MAX_CUS_FLAG_NAME],
+        )) {
           await sign(capacity.removeCUFromCC, commitmentId, [...unitIdsBatch]);
         }
 
         await sign(capacity.finishCommitment, commitmentId);
       }
     } catch (error) {
-      commandObj.warn(`If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`)
-      throw error
+      commandObj.warn(
+        `If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`,
+      );
+      throw error;
     }
 
     commandObj.logToStderr(
