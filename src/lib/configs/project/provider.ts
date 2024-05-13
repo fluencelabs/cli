@@ -1633,6 +1633,8 @@ function resolveCCPConfigYAML(
   return mergeConfigYAMLWithRawConfig(config, computePeerCCPConfig);
 }
 
+const ranges = ["1-4", "5-8", "9-12"];
+
 function noxConfigYAMLToConfigToml(
   {
     chain: {
@@ -1686,6 +1688,12 @@ function noxConfigYAMLToConfigToml(
     tokioDetailedMetricsEnabled: metrics?.tokioDetailedMetricsEnabled,
     metricsEnabled: metrics?.enabled,
     metricsTimerResolution: metrics?.timerResolution,
+
+    // TODO: set up properly in the schema
+    nodeConfig: {
+      systemCpuCount: 1,
+      cpusRange: ranges[((config.tcpPort ?? 1) - 1) % ranges.length],
+    },
   }) as JsonMap;
 }
 
