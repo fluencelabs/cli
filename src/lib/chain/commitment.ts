@@ -483,6 +483,7 @@ export async function collateralWithdraw(
       commandObj.warn(
         `If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`,
       );
+
       throw error;
     }
 
