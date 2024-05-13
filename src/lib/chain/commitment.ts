@@ -477,7 +477,7 @@ export async function collateralWithdraw(
         await sign(capacity.finishCommitment, commitmentId);
       }
     } catch (error) {
-      commandObj.warn(`If you see a problem with gas usage, try passing a lower then ${DEFAULT_MAX_CUS} number to --${MAX_CUS_FLAG_NAME} flag`)
+      commandObj.warn(`If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`)
       throw error
     }
 
