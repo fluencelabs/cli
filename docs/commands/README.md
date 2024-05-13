@@ -658,13 +658,15 @@ Withdraw FLT collateral from capacity commitment
 
 ```
 USAGE
-  $ fluence delegator collateral-withdraw [IDS] [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence delegator collateral-withdraw [IDS] [--no-input] [--env <value>] [--priv-key <value>] [--max-cus <value>]
 
 ARGUMENTS
   IDS  Comma separated capacity commitment IDs
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --max-cus=<value>                            [default: 32] Maximum number of compute units to put in a batch when
+                                               signing a transaction
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
@@ -1265,12 +1267,14 @@ Withdraw FLT collateral from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-collateral-withdraw [--no-input] [--nox-names <value> | --cc-ids <value>] [--env <value>]
-  [--priv-key <value>]
+  $ fluence provider cc-collateral-withdraw [--no-input] [--nox-names <value> | --cc-ids <value>] [--env <value>] [--priv-key
+    <value>] [--max-cus <value>]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --max-cus=<value>                            [default: 32] Maximum number of compute units to put in a batch when
+                                               signing a transaction
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
