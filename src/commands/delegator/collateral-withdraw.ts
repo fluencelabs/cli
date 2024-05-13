@@ -18,7 +18,13 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { collateralWithdraw } from "../../lib/chain/commitment.js";
-import { CC_IDS_FLAG_NAME, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
+import {
+  CC_IDS_FLAG_NAME,
+  CHAIN_FLAGS,
+  FLT_SYMBOL,
+  MAX_CUS_FLAG,
+  MAX_CUS_FLAG_NAME,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CollateralWithdraw extends BaseCommand<
@@ -29,6 +35,7 @@ export default class CollateralWithdraw extends BaseCommand<
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
+    ...MAX_CUS_FLAG,
   };
   static override args = {
     IDS: Args.string({
@@ -37,7 +44,14 @@ export default class CollateralWithdraw extends BaseCommand<
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(CollateralWithdraw));
-    await collateralWithdraw({ [CC_IDS_FLAG_NAME]: args.IDS });
+    const { args, flags } = await initCli(
+      this,
+      await this.parse(CollateralWithdraw),
+    );
+
+    await collateralWithdraw({
+      [CC_IDS_FLAG_NAME]: args.IDS,
+      [MAX_CUS_FLAG_NAME]: flags[MAX_CUS_FLAG_NAME],
+    });
   }
 }

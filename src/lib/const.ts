@@ -523,6 +523,17 @@ export const CC_FLAGS = {
   }),
 };
 
+export const MAX_CUS_FLAG_NAME = "max-cus";
+
+export const MAX_CUS_FLAG = {
+  [MAX_CUS_FLAG_NAME]: Flags.integer({
+    description:
+      "Maximum number of compute units to put in a batch when signing a transaction",
+    default: 32,
+    min: 1,
+  }),
+};
+
 export const JSON_FLAG = {
   json: Flags.boolean({
     description: "Output JSON",

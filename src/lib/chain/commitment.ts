@@ -16,6 +16,7 @@
 
 import { type ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
+import chunk from "lodash-es/chunk.js";
 import isUndefined from "lodash-es/isUndefined.js";
 import omitBy from "lodash-es/omitBy.js";
 import parse from "parse-duration";
@@ -28,6 +29,7 @@ import {
   NOX_NAMES_FLAG_NAME,
   OFFER_FLAG_NAME,
   CC_IDS_FLAG_NAME,
+  MAX_CUS_FLAG_NAME,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
@@ -36,6 +38,7 @@ import {
   signBatch,
   populateTx,
   getReadonlyDealClient,
+  sign,
 } from "../dealClient.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import {
@@ -417,7 +420,9 @@ export async function removeCommitments(flags: CCFlags) {
   );
 }
 
-export async function collateralWithdraw(flags: CCFlags) {
+export async function collateralWithdraw(
+  flags: CCFlags & { [MAX_CUS_FLAG_NAME]: number },
+) {
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
@@ -457,10 +462,11 @@ export async function collateralWithdraw(flags: CCFlags) {
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
-    await signBatch([
-      populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
-      populateTx(capacity.finishCommitment, commitmentId),
-    ]);
+    for (const unitIdsBatch of chunk([...unitIds], flags[MAX_CUS_FLAG_NAME])) {
+      await sign(capacity.removeCUFromCC, commitmentId, [...unitIdsBatch]);
+    }
+
+    await sign(capacity.finishCommitment, commitmentId);
 
     commandObj.logToStderr(
       `Collateral withdrawn for:\n${stringifyBasicCommitmentInfo(commitment)}`,
