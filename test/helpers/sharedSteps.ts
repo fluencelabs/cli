@@ -189,7 +189,6 @@ export async function runAquaFunction(
   const flags = {
     ...otherFlags,
     f: `${functionName}(${args})`,
-    quiet: true,
   };
 
   return fluence({
