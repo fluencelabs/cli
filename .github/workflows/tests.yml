@@ -72,6 +72,7 @@ env:
   FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
   CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
   NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+  FLUENCE_LOG_DISPLAY_SPAN_LIST: true
 
 jobs:
   tests:
