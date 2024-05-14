@@ -235,14 +235,76 @@ jobs:
               }
             }
 
-      - name: Run tests
+      - name: Build and pack Fluence CLI
+        env:
+          FLUENCE_ENV: "${{ inputs.fluence-env }}"
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+          NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+        run: yarn pack-linux-x64
+
+      - name: Download Marine and Mrepl
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
           FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-        run: yarn test-linux-x64
+        run: yarn download-marine-and-mrepl
+
+      - name: Generate templates
+        env:
+          FLUENCE_ENV: "${{ inputs.fluence-env }}"
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+          CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
+          CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
+          NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+        run: yarn generate-templates
+
+      - name: Set up the environment (local up)
+        if: inputs.fluence-env == 'local'
+        env:
+          FLUENCE_ENV: "${{ inputs.fluence-env }}"
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+          CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
+          CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
+          NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+        run: yarn local-up
+
+      - name: Run deal deploy tests
+        env:
+          FLUENCE_ENV: "${{ inputs.fluence-env }}"
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+          CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
+          CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
+          NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+        run: yarn vitest-deal-deploy
+
+      - name: Run deal update tests
+        env:
+          FLUENCE_ENV: "${{ inputs.fluence-env }}"
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+          CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
+          CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
+          NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+        run: yarn vitest-deal-update
+
+      - name: Run smoke tests
+        env:
+          FLUENCE_ENV: "${{ inputs.fluence-env }}"
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+          CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
+          CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
+          NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+        run: yarn vitest-smoke
+
+      - name: Run js-to-aqua tests
+        env:
+          FLUENCE_ENV: "${{ inputs.fluence-env }}"
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+          CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
+          CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
+          NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+        run: yarn vitest-js-to-aqua
 
       - name: Dump container logs
         if: always()
