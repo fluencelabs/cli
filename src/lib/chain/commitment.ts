@@ -16,6 +16,7 @@
 
 import { type ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
+import chunk from "lodash-es/chunk.js";
 import isUndefined from "lodash-es/isUndefined.js";
 import omitBy from "lodash-es/omitBy.js";
 import parse from "parse-duration";
@@ -28,6 +29,8 @@ import {
   NOX_NAMES_FLAG_NAME,
   OFFER_FLAG_NAME,
   CC_IDS_FLAG_NAME,
+  MAX_CUS_FLAG_NAME,
+  DEFAULT_MAX_CUS,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
@@ -36,6 +39,7 @@ import {
   signBatch,
   populateTx,
   getReadonlyDealClient,
+  sign,
 } from "../dealClient.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import {
@@ -417,7 +421,9 @@ export async function removeCommitments(flags: CCFlags) {
   );
 }
 
-export async function collateralWithdraw(flags: CCFlags) {
+export async function collateralWithdraw(
+  flags: CCFlags & { [MAX_CUS_FLAG_NAME]: number },
+) {
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
@@ -457,10 +463,29 @@ export async function collateralWithdraw(flags: CCFlags) {
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
-    await signBatch([
-      populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
-      populateTx(capacity.finishCommitment, commitmentId),
-    ]);
+    try {
+      if (unitIds.length < flags[MAX_CUS_FLAG_NAME]) {
+        await signBatch([
+          populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
+          populateTx(capacity.finishCommitment, commitmentId),
+        ]);
+      } else {
+        for (const unitIdsBatch of chunk(
+          [...unitIds],
+          flags[MAX_CUS_FLAG_NAME],
+        )) {
+          await sign(capacity.removeCUFromCC, commitmentId, [...unitIdsBatch]);
+        }
+
+        await sign(capacity.finishCommitment, commitmentId);
+      }
+    } catch (error) {
+      commandObj.warn(
+        `If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`,
+      );
+
+      throw error;
+    }
 
     commandObj.logToStderr(
       `Collateral withdrawn for:\n${stringifyBasicCommitmentInfo(commitment)}`,
