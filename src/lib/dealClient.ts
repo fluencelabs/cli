@@ -305,7 +305,12 @@ export async function sign<
     (err: unknown) => {
       return !(
         err instanceof Error &&
-        ["data=null", "connection error", "connection closed"].some((msg) => {
+        [
+          "data=null",
+          "connection error",
+          "connection closed",
+          "Tendermint RPC error",
+        ].some((msg) => {
           return err.message.includes(msg);
         })
       );
