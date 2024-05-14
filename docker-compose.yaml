@@ -61,10 +61,10 @@ services:
     environment:
       LOCAL_CHAIN_BLOCK_MINING_INTERVAL: 1
     healthcheck:
-      test: "curl -s -X POST 'http://localhost:8545' -H 'Content-Type:
-        application/json' --data '{\"jsonrpc\":\"2.0\",
-        \"method\":\"eth_chainId\", \"params\":[], \"id\":1}' | jq -e '.result
-        != null'"
+      test: 'curl -s -X POST ''http://localhost:8545'' -H ''Content-Type:
+        application/json'' --data ''{"jsonrpc":"2.0",
+        "method":"eth_chainId", "params":[], "id":1}'' | jq -e ''.result
+        != null'''
       interval: 8s
       timeout: 10s
       retries: 20
