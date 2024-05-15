@@ -1694,6 +1694,7 @@ function noxConfigYAMLToConfigToml(
       systemCpuCount: 1,
       cpusRange: ranges[((config.tcpPort ?? 1) - 1) % ranges.length],
     },
+    printConfig: true,
   }) as JsonMap;
 }
 
