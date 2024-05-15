@@ -182,6 +182,7 @@
     },
     "update": {
       "s3": {
+        "host": "https://s3.eu-west-1.amazonaws.com",
         "bucket": "fcli-binaries",
         "xz": false
       }
