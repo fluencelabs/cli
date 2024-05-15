@@ -40,9 +40,7 @@ import {
   WEB_SOCKET_PORT_START,
   COMETBFT_PORT,
   FENDERMINT_PORT,
-  BLOCKSCOUT_NAME,
   POSTGRES_PORT,
-  BLOCKSCOUT_PORT,
 } from "../../const.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
@@ -69,7 +67,6 @@ type Service = {
   depends_on?: string[] | Record<string, Record<string, string>>;
   secrets?: string[];
   healthcheck?: Record<string, string | number>;
-  build?: Record<string, string | number>;
   restart?: string;
   links?: string[];
 };
@@ -240,11 +237,6 @@ async function genDockerCompose(): Promise<LatestConfig> {
           TENDERMINT_RPC_URL: `http://${COMETBFT_NAME}:${COMETBFT_PORT}`,
           TENDERMINT_WS_URL: `ws://${COMETBFT_NAME}:${COMETBFT_PORT}/websocket`,
         },
-        // build: {
-        //   context: "../",
-        //   dockerfile: "./docker/Dockerfile",
-        //   target: FENDERMINT_NAME,
-        // },
         healthcheck: {
           test: `curl -s -X POST 'http://localhost:${ETH_API_PORT}' -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0", "method":"eth_chainId", "params":[], "id":1}' | jq -e '.result != null'`,
           interval: "8s",
@@ -259,11 +251,6 @@ async function genDockerCompose(): Promise<LatestConfig> {
       },
       [FENDERMINT_NAME]: {
         image: versions[FENDERMINT_NAME],
-        // build: {
-        //   context: "../",
-        //   dockerfile: "./docker/Dockerfile",
-        //   target: FENDERMINT_NAME,
-        // },
         environment: {
           FM_NETWORK: "testnet",
           TENDERMINT_RPC_URL: `http://${COMETBFT_NAME}:${COMETBFT_PORT}`,
@@ -273,11 +260,6 @@ async function genDockerCompose(): Promise<LatestConfig> {
       },
       [COMETBFT_NAME]: {
         image: versions[COMETBFT_NAME],
-        // build: {
-        //   context: "../",
-        //   dockerfile: "./docker/Dockerfile",
-        //   target: COMETBFT_NAME,
-        // },
         environment: {
           CMT_LOG_LEVEL: "info",
           CMT_LOG_FORMAT: "plain",
@@ -292,35 +274,6 @@ async function genDockerCompose(): Promise<LatestConfig> {
           retries: 20,
         },
         depends_on: [FENDERMINT_NAME],
-      },
-      [BLOCKSCOUT_NAME]: {
-        image: "offchainlabs/blockscout:v1.0.0-c8db5b1",
-        restart: "always",
-        links: ["postgres:database"],
-        command: [
-          "/bin/sh",
-          "-c",
-          'bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()"\nnode init/install.js postgres 5432\nbin/blockscout start\n',
-        ],
-        environment: {
-          ETHEREUM_JSONRPC_VARIANT: "geth",
-          ETHEREUM_JSONRPC_HTTP_URL: `http://${ETH_API_NAME}:${ETH_API_PORT}/`,
-          ETHEREUM_JSONRPC_TRACE_URL: `http://${ETH_API_NAME}:${ETH_API_PORT}/`,
-          INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: "true",
-          DATABASE_URL: `postgresql://${POSTGRES_CONTAINER_NAME}:@${POSTGRES_CONTAINER_NAME}:${POSTGRES_PORT}/blockscout`,
-          ECTO_USE_SSL: "false",
-          NETWORK: "local",
-          PORT: BLOCKSCOUT_PORT,
-        },
-        ports: [`127.0.0.1:${BLOCKSCOUT_PORT}:${BLOCKSCOUT_PORT}`],
-        depends_on: {
-          [ETH_API_NAME]: {
-            condition: "service_healthy",
-          },
-          // [POSTGRES_CONTAINER_NAME]: {
-          //   condition: "service_healthy",
-          // },
-        },
       },
       [GRAPH_NODE_CONTAINER_NAME]: {
         image: "graphprotocol/graph-node:v0.33.0",
@@ -355,17 +308,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
       },
       [IPC_DEPLOY_SCRIPT_NAME]: {
         image: versions[IPC_DEPLOY_SCRIPT_NAME],
-        // build: {
-        //   context: "../",
-        //   dockerfile: "./docker/Dockerfile",
-        //   target: IPC_DEPLOY_SCRIPT_NAME,
-        // },
         command: ["deploy-to-ipc"],
-        volumes: [
-          "../deployments/:/app/deployments/",
-          "../out/:/app/out/",
-          "../cache/:/app/cache/",
-        ],
         environment: ["EPOCH_DURATION"],
         depends_on: {
           [ETH_API_NAME]: { condition: "service_healthy" },
