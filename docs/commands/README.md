@@ -1412,12 +1412,15 @@ Exit from deal
 
 ```
 USAGE
-  $ fluence provider deal-exit [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>] [--all]
+  $ fluence provider deal-exit [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>] [--max-cus
+    <value>] [--all]
 
 FLAGS
   --all                                        To use all deal ids that indexer is aware of for your provider address
   --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --max-cus=<value>                            [default: 32] Maximum number of compute units to put in a batch when
+                                               signing a transaction
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
