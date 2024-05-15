@@ -53,6 +53,7 @@ env:
   FORCE_COLOR: true
   AWS_REGION: "eu-west-1"
   AWS_S3_ENDPOINT: "https://s3.eu-west-1.amazonaws.com"
+  AWS_S3_FORCE_PATH_STYLE: true
 
 jobs:
   pack:
