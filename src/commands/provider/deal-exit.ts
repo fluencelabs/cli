@@ -15,21 +15,15 @@
  */
 
 import { Flags } from "@oclif/core";
-import chunk from "lodash-es/chunk.js";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { getProviderDeals } from "../../lib/chain/deals.js";
-import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
   DEAL_IDS_FLAG_NAME,
-  MAX_CUS_FLAG,
-  MAX_CUS_FLAG_NAME,
-  DEFAULT_MAX_CUS,
 } from "../../lib/const.js";
 import { getDealClient, populateTx, signBatch } from "../../lib/dealClient.js";
-import { numToStr } from "../../lib/helpers/typesafeStringify.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -41,7 +35,6 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     ...baseFlags,
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
-    ...MAX_CUS_FLAG,
     all: Flags.boolean({
       default: false,
       description:
@@ -74,25 +67,14 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
       )
     ).flat();
 
-    try {
-      for (const unitsBatch of chunk(
-        computeUnits.filter((computeUnit) => {
+    await signBatch(
+      computeUnits
+        .filter((computeUnit) => {
           return computeUnit.provider === signerOrWallet.address;
+        })
+        .map((computeUnit) => {
+          return populateTx(market.returnComputeUnitFromDeal, computeUnit.id);
         }),
-        flags[MAX_CUS_FLAG_NAME],
-      )) {
-        await signBatch(
-          unitsBatch.map((computeUnit) => {
-            return populateTx(market.returnComputeUnitFromDeal, computeUnit.id);
-          }),
-        );
-      }
-    } catch (error) {
-      commandObj.warn(
-        `If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`,
-      );
-
-      throw error;
-    }
+    );
   }
 }
