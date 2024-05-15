@@ -122,6 +122,7 @@ function genNox({
         bootstrapTcpPort === undefined
           ? "--local"
           : `--bootstraps=/dns/${bootstrapName}/tcp/${numToStr(bootstrapTcpPort)}`,
+        "--print-config",
       ],
       depends_on: {
         [IPFS_CONTAINER_NAME]: { condition: "service_healthy" },
