@@ -110,7 +110,7 @@ function genNox({
         FLUENCE_MAX_SPELL_PARTICLE_TTL: "9s",
         FLUENCE_ROOT_KEY_PAIR__PATH: `/run/secrets/${name}`,
         RUST_LOG:
-          "chain_connector=debug,run-console=trace,aquamarine::log=debug,network=trace,worker_inactive=trace",
+          "info,chain_connector=debug,runconsole=trace,aquamarine::log=debug,network=trace,worker_inactive=trace,expired=info",
       },
       command: [
         `--config=${configLocation}`,
