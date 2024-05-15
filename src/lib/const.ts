@@ -127,11 +127,17 @@ export const IPFS_PORT = "5001";
 export const GRAPH_NODE_CONTAINER_NAME = "graph-node";
 export const GRAPH_NODE_PORT = "8020";
 export const POSTGRES_CONTAINER_NAME = "postgres";
+export const POSTGRES_PORT = "5432";
 export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
-export const CHAIN_RPC_CONTAINER_NAME = "chain-rpc";
-export const CHAIN_RPC_PORT = "8545";
-export const CHAIN_DEPLOY_SCRIPT_NAME = "chain-deploy-script";
-export const SUBGRAPH_DEPLOY_SCRIPT_NAME = "subgraph-deploy-script";
+export const ETH_API_NAME = "eth-api";
+export const ETH_API_PORT = "8545";
+export const IPC_DEPLOY_SCRIPT_NAME = "ipc-deploy-script";
+export const COMETBFT_NAME = "cometbft";
+export const COMETBFT_PORT = "26657";
+export const FENDERMINT_NAME = "fendermint";
+export const FENDERMINT_PORT = "26658";
+export const BLOCKSCOUT_NAME = "blockscout";
+export const BLOCKSCOUT_PORT = "4000";
 export const TCP_PORT_START = 7771;
 export const WEB_SOCKET_PORT_START = 9991;
 export const HTTP_PORT_START = 18080;
@@ -145,19 +151,19 @@ const CHAIN_URLS_WITHOUT_LOCAL: Record<Exclude<ChainENV, "local">, string> = {
 
 export const CHAIN_URLS: Record<ChainENV, string> = {
   ...CHAIN_URLS_WITHOUT_LOCAL,
-  local: `http://127.0.0.1:${CHAIN_RPC_PORT}`,
+  local: `http://127.0.0.1:${ETH_API_PORT}`,
 };
 
 export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
   ...CHAIN_URLS_WITHOUT_LOCAL,
-  local: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
+  local: `http://${ETH_API_NAME}:${ETH_API_PORT}`,
 };
 
 export const WS_CHAIN_URLS: Record<ChainENV, string> = {
   kras: "wss://ipc.kras.fluence.dev",
   dar: "wss://ipc.dar.fluence.dev",
   stage: "wss://ipc-stage.fluence.dev",
-  local: `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
+  local: `wss://${ETH_API_NAME}:${ETH_API_PORT}`,
 };
 
 export const AQUA_EXT = "aqua";
