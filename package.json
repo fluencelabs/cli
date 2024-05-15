@@ -182,6 +182,7 @@
     },
     "update": {
       "s3": {
+        "host": "https://s3.console.aws.amazon.com/",
         "bucket": "fcli-binaries",
         "xz": false
       }
