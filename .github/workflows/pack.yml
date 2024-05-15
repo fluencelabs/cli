@@ -52,7 +52,6 @@ env:
   CI: true
   FORCE_COLOR: true
   AWS_REGION: "eu-west-1"
-  AWS_S3_ENDPOINT: "https://s3.console.aws.amazon.com/"
 
 jobs:
   pack:
