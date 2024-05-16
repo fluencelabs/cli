@@ -51,6 +51,7 @@ on:
 env:
   CI: true
   FORCE_COLOR: true
+  AWS_REGION: "eu-west-1"
 
 jobs:
   pack:
