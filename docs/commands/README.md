@@ -280,7 +280,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -302,7 +302,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -328,7 +328,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -361,7 +361,7 @@ FLAGS
   --price-per-worker-epoch=<value>             (required) Price per worker epoch
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
   --protocol-version=<value>                   Protocol version
   --target-workers=<value>                     (required) Max workers in the deal
@@ -392,7 +392,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -418,7 +418,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -484,7 +484,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -512,7 +512,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -538,7 +538,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -566,7 +566,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -640,7 +640,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -670,7 +670,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -698,7 +698,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -845,7 +845,7 @@ FLAGS
       --particle-id                                Print particle ids when running Fluence js-client
       --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
-                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156
                                                    key will be used by default
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
@@ -1017,7 +1017,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1088,7 +1088,7 @@ FLAGS
       --no-input                Don't interactively ask for any input from the user
       --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
       --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure. On
-                                local network 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                local network 0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                 will be used by default
       --quiet-pull              Pull without printing progress information
       --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local
@@ -1249,7 +1249,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1280,7 +1280,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1310,7 +1310,7 @@ FLAGS
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1338,7 +1338,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1367,7 +1367,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1394,7 +1394,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1421,7 +1421,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1446,7 +1446,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1475,7 +1475,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1501,7 +1501,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1526,7 +1526,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1554,7 +1554,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1580,7 +1580,7 @@ FLAGS
   --noxes=<value>                              Number of Compute Peers to generate when a new provider.yaml is created
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1604,7 +1604,7 @@ FLAGS
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1634,7 +1634,7 @@ FLAGS
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1661,7 +1661,7 @@ FLAGS
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1686,7 +1686,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1715,7 +1715,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1745,7 +1745,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
@@ -1770,7 +1770,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 key
                                                will be used by default
 
 DESCRIPTION
