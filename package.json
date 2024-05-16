@@ -62,7 +62,7 @@
     "@fluencelabs/air-beautify-wasm": "0.3.9",
     "@fluencelabs/aqua-api": "0.14.6",
     "@fluencelabs/aqua-to-js": "0.3.13",
-    "@fluencelabs/deal-ts-clients": "0.13.11",
+    "@fluencelabs/deal-ts-clients": "0.13.12-NET-720-9f22924-4215-2.0",
     "@fluencelabs/fluence-network-environment": "1.2.1",
     "@fluencelabs/js-client": "0.9.0",
     "@fluencelabs/npm-aqua-compiler": "0.0.3",
