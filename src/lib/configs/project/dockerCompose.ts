@@ -287,9 +287,6 @@ async function genDockerCompose(): Promise<LatestConfig> {
         depends_on: {
           [IPFS_CONTAINER_NAME]: { condition: "service_healthy" },
           [ETH_API_NAME]: { condition: "service_healthy" },
-          // [POSTGRES_CONTAINER_NAME]: {
-          //   condition: "service_healthy",
-          // },
           [IPC_DEPLOY_SCRIPT_NAME]: {
             condition: "service_completed_successfully",
           },
