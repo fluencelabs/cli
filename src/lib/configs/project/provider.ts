@@ -1633,7 +1633,7 @@ function resolveCCPConfigYAML(
   return mergeConfigYAMLWithRawConfig(config, computePeerCCPConfig);
 }
 
-const ranges = ["1-4", "5-8", "9-12"];
+const ranges = ["1-2", "3-4", "5-6"];
 
 function noxConfigYAMLToConfigToml(
   {
