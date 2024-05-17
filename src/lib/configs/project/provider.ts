@@ -1690,10 +1690,8 @@ function noxConfigYAMLToConfigToml(
     metricsTimerResolution: metrics?.timerResolution,
 
     // TODO: set up properly in the schema
-    nodeConfig: {
-      systemCpuCount: 1,
-      cpusRange: ranges[((config.tcpPort ?? 1) - 1) % ranges.length],
-    },
+    systemCpuCount: 1,
+    cpusRange: ranges[((config.tcpPort ?? 1) - 1) % ranges.length],
   }) as JsonMap;
 }
 
