@@ -107,7 +107,6 @@ function genNox({
       ],
       environment: {
         WASM_LOG: "debug",
-        FLUENCE_MAX_SPELL_PARTICLE_TTL: "9s",
         FLUENCE_ROOT_KEY_PAIR__PATH: `/run/secrets/${name}`,
         RUST_LOG:
           "info,chain_connector=debug,run-console=trace,aquamarine::log=debug,network=trace,worker_inactive=trace,expired=info,spell=debug,ipfs_effector=debug,ipfs_pure=debug,spell_event_bus=trace,system_services=debug,particle_reap=debug,aquamarine::actor=debug,aquamarine::aqua_runtime=off,aquamarine=warn,chain_listener=debug,chain-connector=debug",
