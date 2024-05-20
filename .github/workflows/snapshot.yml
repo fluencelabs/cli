@@ -134,7 +134,6 @@ jobs:
       - name: Update versions.json
         uses: ./.github/actions/replace-version
         with:
-          working-directory: apps/cli
           versions: |
             {
               "npm": {
