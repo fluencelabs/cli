@@ -19,7 +19,7 @@ import { FLUENCE_ENV } from "../../src/lib/setupEnvironment.js";
 
 export const fluenceEnv = process.env[FLUENCE_ENV];
 
-const RUN_DEPLOYED_SERVICES_TIMEOUT_MIN = 2;
+const RUN_DEPLOYED_SERVICES_TIMEOUT_MIN = 1.5;
 export const RUN_DEPLOYED_SERVICES_TIMEOUT =
   1000 * 60 * RUN_DEPLOYED_SERVICES_TIMEOUT_MIN;
 export const RUN_DEPLOYED_SERVICES_TIMEOUT_STR = `${numToStr(RUN_DEPLOYED_SERVICES_TIMEOUT_MIN)} minutes`;
@@ -30,6 +30,7 @@ export const NEW_SERVICE_2_NAME = "newService2";
 export const NEW_SPELL_NAME = "newSpell";
 export const NEW_MODULE_NAME = "newModule";
 export const NO_PROJECT_TEST_NAME = "shouldWorkWithoutProject";
+export const GET_SPELL_LOGS_FUNCTION_NAME = "getSpellLogs";
 
 export const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;
@@ -72,6 +73,9 @@ service NewService("${NEW_SERVICE_NAME}"):
 
 
 ${NEW_SERVICE_2_INTERFACE}`;
+
+export const UPDATED_SPELL_MESSAGE =
+  '"if you see this, then the spell is working"';
 
 export const composeInterfacesFileContents = (interfaces: string) => {
   return `aqua Services declares *\n\n\n${interfaces}\n`;
