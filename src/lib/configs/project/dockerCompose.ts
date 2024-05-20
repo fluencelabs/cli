@@ -107,10 +107,10 @@ function genNox({
       ],
       environment: {
         WASM_LOG: "debug",
-        FLUENCE_MAX_SPELL_PARTICLE_TTL: "9s",
+        FLUENCE_MAX_SPELL_PARTICLE_TTL: "60s",
         FLUENCE_ROOT_KEY_PAIR__PATH: `/run/secrets/${name}`,
         RUST_LOG:
-          "chain_connector=debug,run-console=trace,aquamarine::log=debug,network=trace,worker_inactive=trace",
+          "info,chain_connector=debug,run-console=trace,aquamarine::log=debug,network=trace,worker_inactive=trace,expired=info,spell=debug,ipfs_effector=debug,ipfs_pure=debug,spell_event_bus=trace,system_services=debug,particle_reap=debug,aquamarine::actor=debug,aquamarine::aqua_runtime=off,aquamarine=warn,chain_listener=debug,chain-connector=debug,execution=trace",
       },
       command: [
         `--config=${configLocation}`,
@@ -122,6 +122,7 @@ function genNox({
         bootstrapTcpPort === undefined
           ? "--local"
           : `--bootstraps=/dns/${bootstrapName}/tcp/${numToStr(bootstrapTcpPort)}`,
+        "--print-config",
       ],
       depends_on: {
         [IPFS_CONTAINER_NAME]: { condition: "service_healthy" },

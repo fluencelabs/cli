@@ -24,6 +24,7 @@ export type WorkerServices = {
   spells: string[];
   worker_id: string;
 }[];
+
 export const workerServiceSchema: JSONSchemaType<WorkerServices> = {
   type: "array",
   items: {

@@ -1633,6 +1633,8 @@ function resolveCCPConfigYAML(
   return mergeConfigYAMLWithRawConfig(config, computePeerCCPConfig);
 }
 
+// const ranges = ["1-2", "3-4", "5-6"];
+
 function noxConfigYAMLToConfigToml(
   {
     chain: {
@@ -1686,6 +1688,10 @@ function noxConfigYAMLToConfigToml(
     tokioDetailedMetricsEnabled: metrics?.tokioDetailedMetricsEnabled,
     metricsEnabled: metrics?.enabled,
     metricsTimerResolution: metrics?.timerResolution,
+
+    // TODO: set up properly in the schema
+    // systemCpuCount: 1,
+    // cpusRange: ranges[((config.tcpPort ?? 1) - 1) % ranges.length],
   }) as JsonMap;
 }
 
@@ -1757,7 +1763,7 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
     systemServices: {
       enable: ["aqua-ipfs", "decider"],
       decider: {
-        deciderPeriodSec: 10,
+        deciderPeriodSec: 60,
         workerIpfsMultiaddr:
           env === "local"
             ? NOX_IPFS_MULTIADDR

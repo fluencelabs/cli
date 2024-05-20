@@ -14,12 +14,5 @@
  * limitations under the License.
  */
 
-import { defineConfig } from "vitest/dist/config.js";
-
-export default defineConfig({
-  test: {
-    testTimeout: 1000 * 60 * 5, // 5 minutes,
-    fileParallelism: false,
-    bail: 1,
-  },
-});
+import { fluence } from "../helpers/commonWithSetupTests.js";
+await fluence({ args: ["dep", "i"] });

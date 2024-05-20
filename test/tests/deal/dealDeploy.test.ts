@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-import { join, relative } from "node:path";
+import { join } from "node:path";
 
 import { describe } from "vitest";
 
-import { initServiceConfig } from "../../../src/lib/configs/project/service.js";
 import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
 import { fluence } from "../../helpers/commonWithSetupTests.js";
 import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../../helpers/constants.js";
-import { getServiceDirPath } from "../../helpers/paths.js";
 import {
   assertLogsAreValid,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
   initializeTemplate,
-  updateFluenceConfigForTest,
   waitUntilShowSubnetReturnsExpected,
 } from "../../helpers/sharedSteps.js";
 import { wrappedTest } from "../../helpers/utils.js";
@@ -40,21 +36,7 @@ describe("fluence deploy tests", () => {
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
       await initializeTemplate(cwd, "quickstart");
-      const pathToNewServiceDir = getServiceDirPath(cwd, MY_SERVICE_NAME);
 
-      const newServiceConfig = await initServiceConfig(
-        relative(cwd, pathToNewServiceDir),
-        cwd,
-      );
-
-      assert(
-        newServiceConfig !== null,
-        `quickstart template is expected to create a service at ${pathToNewServiceDir} by default`,
-      );
-
-      await newServiceConfig.$commit();
-
-      await updateFluenceConfigForTest(cwd);
       await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
       await deployDealAndWaitUntilDeployed(cwd);

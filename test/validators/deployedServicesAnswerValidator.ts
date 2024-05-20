@@ -48,5 +48,5 @@ export const deployedServicesAnswerSchema: JSONSchemaType<DeployedServicesAnswer
     },
   };
 
-export const validateDeployedServicesAnswerSchema: Ajv.ValidateFunction<DeployedServicesAnswer> =
+export const validateDeployedServicesAnswer: Ajv.ValidateFunction<DeployedServicesAnswer> =
   new Ajv.default(ajvOptions).compile(deployedServicesAnswerSchema);

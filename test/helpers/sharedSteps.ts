@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { cp, rm, writeFile } from "node:fs/promises";
 import { relative } from "node:path";
 
@@ -25,9 +24,8 @@ import {
   kras,
 } from "@fluencelabs/fluence-network-environment";
 import sortBy from "lodash-es/sortBy.js";
-import { expect } from "vitest";
+import { assert } from "vitest";
 
-import { validationErrorToString } from "../../src/lib/ajvInstance.js";
 import {
   initFluenceConfigWithPath,
   initReadonlyFluenceConfigWithPath,
@@ -50,16 +48,11 @@ import {
 } from "../../src/lib/helpers/utils.js";
 import { addrsToNodes } from "../../src/lib/multiaddresWithoutLocal.js";
 import { getAquaMainPath } from "../../src/lib/paths.js";
-import { validateDeployedServicesAnswerSchema } from "../validators/deployedServicesAnswerValidator.js";
-import { validateSpellLogs } from "../validators/spellLogsValidator.js";
+import { validateDeployedServicesAnswer } from "../validators/deployedServicesAnswerValidator.js";
 import { validateWorkerServices } from "../validators/workerServiceValidator.js";
 
 import { fluence } from "./commonWithSetupTests.js";
-import {
-  fluenceEnv,
-  MY_SERVICE_NAME,
-  RUN_DEPLOYED_SERVICES_TIMEOUT,
-} from "./constants.js";
+import { fluenceEnv, RUN_DEPLOYED_SERVICES_TIMEOUT } from "./constants.js";
 import { RUN_DEPLOYED_SERVICES_TIMEOUT_STR } from "./constants.js";
 import {
   getInitializedTemplatePath,
@@ -152,25 +145,6 @@ export async function getServiceConfig(cwd: string, serviceName: string) {
   return serviceConfig;
 }
 
-export async function updateFluenceConfigForTest(cwd: string) {
-  const fluenceConfig = await getFluenceConfig(cwd);
-
-  assert(
-    fluenceConfig.deployments !== undefined &&
-      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
-    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
-  );
-
-  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].targetWorkers = 3;
-
-  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services = [
-    MY_SERVICE_NAME,
-  ];
-
-  await fluenceConfig.$commit();
-  return fluenceConfig;
-}
-
 export async function updateMainRs(
   cwd: string,
   moduleName: string,
@@ -215,7 +189,6 @@ export async function runAquaFunction(
   const flags = {
     ...otherFlags,
     f: `${functionName}(${args})`,
-    quiet: true,
   };
 
   return fluence({
@@ -233,7 +206,7 @@ export async function callRunDeployedServices(cwd: string) {
 
   const runDeployedServicesResult = JSON.parse(result);
 
-  if (!validateDeployedServicesAnswerSchema(runDeployedServicesResult)) {
+  if (!validateDeployedServicesAnswer(runDeployedServicesResult)) {
     throw new Error(
       `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array of DeployedServicesAnswer, but actual result is: ${result}`,
     );
@@ -423,14 +396,14 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
         ["peerId"],
       );
 
-      expect(result).toEqual(expected);
+      assert.deepEqual(result, expected);
     },
     (error) => {
-      throw new Error(
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
-          error,
-        )}`,
+      console.log(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}`,
       );
+
+      throw error;
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
@@ -468,63 +441,51 @@ export async function waitUntilShowSubnetReturnsExpected(
         };
       });
 
-      expect(sortedSubnet).toEqual(expected);
+      assert.deepEqual(sortedSubnet, expected);
     },
     (error) => {
-      throw new Error(
-        `showSubnet() didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
-          error,
-        )}`,
+      console.log(
+        `showSubnet() didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}`,
       );
+
+      throw error;
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
 }
 
-export async function waitUntilAquaScriptReturnsExpected(
-  cwd: string,
-  spellName: string,
-  functionName: string,
-  aquaFileName: string,
-  answer: string,
-) {
+type WaitUntilAquaScriptReturnsExpectedArg = {
+  cwd: string;
+  functionName: string;
+  aquaFileName: string;
+  validation: (result: unknown) => never | void | Promise<void>;
+  args?: string[];
+};
+
+export async function waitUntilAquaScriptReturnsExpected({
+  cwd,
+  functionName,
+  aquaFileName,
+  validation,
+  args = [],
+}: WaitUntilAquaScriptReturnsExpectedArg) {
   await setTryTimeout(
     "check if aqua script returns expected result",
     async () => {
-      const result = await runAquaFunction(cwd, functionName, [spellName], {
-        i: aquaFileName,
-      });
+      const result = JSON.parse(
+        await runAquaFunction(cwd, functionName, args, {
+          i: aquaFileName,
+        }),
+      );
 
-      const spellLogs = JSON.parse(result);
-
-      if (!validateSpellLogs(spellLogs)) {
-        throw new Error(
-          `result of running ${functionName} aqua function has unexpected structure: ${await validationErrorToString(validateSpellLogs.errors)}`,
-        );
-      }
-
-      spellLogs[0].forEach((w) => {
-        assert(
-          w.logs.length > 0,
-          `Worker ${w.worker_id} doesn't have any logs`,
-        );
-
-        const lastLogMessage = w.logs[w.logs.length - 1]?.message;
-
-        assert(
-          lastLogMessage === answer,
-          `Worker ${w.worker_id} last log message is expected to be ${answer}, but it is ${lastLogMessage === undefined ? "undefined" : lastLogMessage}`,
-        );
-      });
-
-      assert(spellLogs[1].length === 0, `Errors: ${spellLogs[1].join("\n")}`);
+      await validation(result);
     },
     (error) => {
-      throw new Error(
-        `${functionName} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}, error: ${stringifyUnknown(
-          error,
-        )}`,
+      console.log(
+        `${functionName} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT_STR}`,
       );
+
+      throw error;
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
@@ -542,11 +503,4 @@ export function assertLogsAreValid(logs: string) {
   if (logs.includes(LOGS_GET_ERROR_START)) {
     throw new Error(`Failed to get deal logs:\n\n${logs}`);
   }
-}
-
-export async function stopDefaultDeal(cwd: string) {
-  await fluence({
-    args: ["deal", "stop", DEFAULT_DEPLOYMENT_NAME],
-    cwd,
-  });
 }
