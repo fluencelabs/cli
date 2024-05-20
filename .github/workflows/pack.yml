@@ -148,7 +148,6 @@ jobs:
           working-directory: apps/cli
 
       - name: Pack fluence-cli
-        working-directory: apps/cli
         run: yarn pack-${{ inputs.platform }}
 
       - name: Upload fluence-cli

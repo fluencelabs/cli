@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+import { access, readdir, rm } from "node:fs/promises";
 import { arch, platform } from "node:os";
 import { join } from "node:path";
 
 import { CustomColors } from "@oclif/color";
+import { x as tar } from "tar";
 
 import { CLI_NAME } from "../../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../../src/lib/execPromise.js";
 import { flagsToArgs } from "../../src/lib/helpers/utils.js";
+import assert from "node:assert";
 
 type CliArg = {
   args?: ExecPromiseArg["args"];
@@ -30,11 +33,34 @@ type CliArg = {
   timeout?: number;
 };
 
-const pathToBinDir = join(
-  process.cwd(),
-  join("tmp", `${platform()}-${arch()}`, CLI_NAME, "bin"),
-);
+const pathToDistDir = join(process.cwd(), "dist");
+const pathToCliDir = join(pathToDistDir, CLI_NAME);
 
+try {
+  await access(pathToCliDir);
+} catch {
+  const files = await readdir(pathToDistDir);
+
+  const archiveWithCLIFileName = files.find((name) => {
+    return (
+      name.startsWith(CLI_NAME) &&
+      name.endsWith(`${platform()}-${arch()}.tar.gz`)
+    );
+  });
+
+  assert(
+    archiveWithCLIFileName !== undefined,
+    "After successful build there should be an archive with CLI in the dist directory",
+  );
+
+  await rm(pathToCliDir, { recursive: true, force: true });
+  await tar({
+    cwd: pathToDistDir,
+    file: join(pathToDistDir, archiveWithCLIFileName),
+  });
+}
+
+const pathToBinDir = join(pathToCliDir, "bin");
 const pathToCliRunJS = join(pathToBinDir, "run.js");
 const pathToNodeJS = join(pathToBinDir, "node");
 

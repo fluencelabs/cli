@@ -92,7 +92,7 @@ describe("integration tests", () => {
   test.concurrent.skip(
     "should deploy workers with spell and service, resolve, run services on them and remove them",
     async () => {
-      const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");
+      const cwd = join("test", "tmp", "shouldDeployWorkersAndRunCodeOnThem");
       await initializeTemplate(cwd, "minimal");
 
       await updateMainAqua(

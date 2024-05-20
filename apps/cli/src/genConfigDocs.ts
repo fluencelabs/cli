@@ -87,8 +87,7 @@ await Promise.all(
 await Promise.all(
   configsInfo.map(async ({ schemaPath, docFileName }) => {
     const md = await execPromise({
-      // This is a tool written in Go that is installed in CI and used for generating docs
-      command: "json-schema-docs",
+      command: "./docs/json-schema-docs",
       args: ["-schema", schemaPath],
     });
 
