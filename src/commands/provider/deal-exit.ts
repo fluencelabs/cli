@@ -44,7 +44,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(DealExit));
-    const { dealClient } = await getDealClient();
+    const { dealClient, signerOrWallet } = await getDealClient();
     const market = dealClient.getMarket();
 
     const dealIds = flags.all
@@ -68,9 +68,13 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     ).flat();
 
     await signBatch(
-      computeUnits.map((computeUnit) => {
-        return populateTx(market.returnComputeUnitFromDeal, computeUnit.id);
-      }),
+      computeUnits
+        .filter((computeUnit) => {
+          return computeUnit.provider === signerOrWallet.address;
+        })
+        .map((computeUnit) => {
+          return populateTx(market.returnComputeUnitFromDeal, computeUnit.id);
+        }),
     );
   }
 }
