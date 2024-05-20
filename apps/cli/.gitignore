@@ -20,7 +20,6 @@ oclif.manifest.json
 .idea
 .DS_Store
 .fluence
-**/node_modules
 **/target/
 .repl_history
 

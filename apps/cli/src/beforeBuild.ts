@@ -30,6 +30,8 @@ import {
 import { jsonStringify } from "./lib/helpers/utils.js";
 import { versions } from "./versions.js";
 
+const WORKSPACE_NODE_MODULES_PATH = resolve("..", "..", NODE_MODULES_DIR_NAME);
+
 const aquaDependenciesDirPath = join("src", AQUA_DEPENDENCIES_DIR_NAME);
 await mkdir(aquaDependenciesDirPath, { recursive: true });
 
@@ -125,7 +127,12 @@ await mkdir(VERSIONS_DIR_PATH, { recursive: true });
 await cp("package.json", join(VERSIONS_DIR_PATH, "cli.package.json"));
 
 await cp(
-  join(NODE_MODULES_DIR_NAME, "@fluencelabs", "js-client", "package.json"),
+  join(
+    WORKSPACE_NODE_MODULES_PATH,
+    "@fluencelabs",
+    "js-client",
+    "package.json",
+  ),
   join(VERSIONS_DIR_PATH, "js-client.package.json"),
 );
 
@@ -140,12 +147,12 @@ await compileInstallationSpellAqua();
 await compileInstallationSpellAqua(true);
 
 const BIN_FILE_PATH = join(
-  join(NODE_MODULES_DIR_NAME, "oclif", "lib", "tarballs"),
+  join(WORKSPACE_NODE_MODULES_PATH, "oclif", "lib", "tarballs"),
   "bin.js",
 );
 
 const WIN_BIN_FILE_PATH = join(
-  NODE_MODULES_DIR_NAME,
+  WORKSPACE_NODE_MODULES_PATH,
   "oclif",
   "lib",
   "commands",

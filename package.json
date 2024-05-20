@@ -1,0 +1,7 @@
+{
+  "name": "fluence-cli-monorepo",
+  "packageManager": "yarn@4.2.2",
+  "workspaces": [
+    "apps/*"
+  ]
+}
