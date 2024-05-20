@@ -167,7 +167,7 @@ jobs:
       - name: Rename archives
         run: |
           for p in linux-x64 darwin-arm64; do
-            mv apps/cli/dist/fluence-*${p}*.tar.gz ./fluence-cli-${p}.tar.gz
+            mv apps/cli/dist/fluence-*${p}*.tar.gz fluence-cli-${p}.tar.gz
           done
 
       - name: Upload linux-x64 to CI checks
