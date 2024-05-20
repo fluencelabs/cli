@@ -114,7 +114,7 @@ jobs:
           case ${{ inputs.nox-image }} in
           # if nox image is not passed from e2e read from versions.json
           'null')
-            nox="$(jq .nox src/versions.json -r)"
+            nox="$(jq .nox apps/cli/src/versions.json -r)"
           ;;
           # else set nox image to snapshot passed from e2e
           *)
@@ -130,9 +130,9 @@ jobs:
           # set deal images
           case ${{ inputs.chain-rpc-image }} in
           'null')
-            chain_rpc="$(jq '.["chain-rpc"]' src/versions.json -r)"
-            chain_deploy_script="$(jq '.["chain-deploy-script"]' src/versions.json -r)"
-            subgraph_deploy_script="$(jq '.["subgraph-deploy-script"]' src/versions.json -r)"
+            chain_rpc="$(jq '.["chain-rpc"]' apps/cli/src/versions.json -r)"
+            chain_deploy_script="$(jq '.["chain-deploy-script"]' apps/cli/src/versions.json -r)"
+            subgraph_deploy_script="$(jq '.["subgraph-deploy-script"]' apps/cli/src/versions.json -r)"
           ;;
           # else set deal images to snapshots passed from e2e
           *)
