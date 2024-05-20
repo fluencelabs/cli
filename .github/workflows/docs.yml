@@ -39,6 +39,7 @@ jobs:
         run: go install github.com/marcusolsson/json-schema-docs@latest
 
       - name: Run on each commit
+        working-directory: apps/cli
         env:
           FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
         run: yarn on-each-commit

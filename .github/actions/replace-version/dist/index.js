@@ -2816,6 +2816,8 @@ try {
 
   const versionsFilePath = (0,path__WEBPACK_IMPORTED_MODULE_2__.join)(
     process.env.GITHUB_WORKSPACE,
+    "apps",
+    "cli",
     "src",
     "versions.json",
   );
@@ -2829,7 +2831,8 @@ try {
   // Merge inputVersions into versions
   for (const category in inputVersions) {
     if (
-      !versions.hasOwnProperty(category) || inputVersions[category] === null
+      !versions.hasOwnProperty(category) ||
+      inputVersions[category] === null
     ) {
       continue;
     }
@@ -2839,7 +2842,8 @@ try {
       typeof inputCategoryValue === "string" ||
       typeof inputCategoryValue === "number"
     ) {
-      if (inputCategoryValue !== "null") { // ignore "null" strings
+      if (inputCategoryValue !== "null") {
+        // ignore "null" strings
         versions[category] = inputCategoryValue;
       }
     } else if (typeof inputCategoryValue === "object") {

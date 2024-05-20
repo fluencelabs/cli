@@ -97,6 +97,7 @@ jobs:
       - run: yarn install
 
       - name: Configure yarn to publish to private registry
+        working-directory: apps/cli
         run: |
           yarn config set npmRegistryServer "https://npm.fluence.dev"
           yarn config set npmAlwaysAuth true
@@ -109,6 +110,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
+          working-directory: apps/cli
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -117,6 +119,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
+          working-directory: apps/cli
 
       - name: Set installation-spell version
         if: inputs.installation-spell-version != 'null'
@@ -126,10 +129,12 @@ jobs:
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
           flags: "--dev"
+          working-directory: apps/cli
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
         with:
+          working-directory: apps/cli
           versions: |
             {
               "npm": {
@@ -154,14 +159,16 @@ jobs:
           id: ${{ steps.version.outputs.id }}
           package-manager: yarn npm
           flags: --tag snapshot
+          working-directory: apps/cli
 
       - name: Pack fluence-cli
         run: yarn pack-ci
+        working-directory: apps/cli
 
       - name: Rename archives
         run: |
           for p in linux-x64 darwin-arm64; do
-            mv dist/fluence-*${p}*.tar.gz fluence-cli-${p}.tar.gz
+            mv apps/cli/dist/fluence-*${p}*.tar.gz ./fluence-cli-${p}.tar.gz
           done
 
       - name: Upload linux-x64 to CI checks

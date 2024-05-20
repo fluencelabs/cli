@@ -3,7 +3,7 @@
   "release-type": "node",
   "versioning": "always-bump-patch",
   "packages": {
-    ".": {
+    "apps/cli": {
       "component": "fluence-cli"
     }
   }

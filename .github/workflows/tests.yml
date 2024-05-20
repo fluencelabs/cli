@@ -189,6 +189,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
+          working-directory: apps/cli
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -197,6 +198,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
+          working-directory: apps/cli
 
       - name: Set deal-ts-clients version
         if: inputs.deal-ts-clients-version != 'null'
@@ -205,6 +207,7 @@ jobs:
           package: "@fluencelabs/deal-ts-clients"
           version: "${{ inputs.deal-ts-clients-version }}"
           package-manager: yarn
+          working-directory: apps/cli
 
       - name: Set installation-spell version
         if: inputs.installation-spell-version != 'null'
@@ -214,6 +217,7 @@ jobs:
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
           flags: "--dev"
+          working-directory: apps/cli
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -243,6 +247,7 @@ jobs:
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
         run: yarn test-linux-x64
+        working-directory: apps/cli
 
       - name: Dump container logs
         if: always()
@@ -258,7 +263,7 @@ jobs:
 
       - name: Stop containers
         if: always()
-        working-directory: tmp/templates/quickstart
+        working-directory: apps/cli/tmp/templates/quickstart
         run: ../../linux-x64/fluence/bin/run.js local down
 
       - name: Cleanup
