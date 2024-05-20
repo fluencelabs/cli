@@ -191,6 +191,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "prettier": {},
-  "packageManager": "yarn@3.7.0"
+  "prettier": {}
 }
