@@ -13,6 +13,8 @@ env:
   CI: true
   FORCE_COLOR: true
   FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
   docs:
