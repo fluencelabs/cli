@@ -87,7 +87,7 @@ await Promise.all(
 );
 
 const JSON_SCHEMA_DOC_BINARY_NAME = "json-schema-docs";
-const docsDir = await resolve("docs");
+const docsDir = resolve("docs");
 const jsonSchemaDocBinaryPass = join(docsDir, JSON_SCHEMA_DOC_BINARY_NAME);
 await chmod(jsonSchemaDocBinaryPass, 0o755);
 core.addPath(docsDir);
