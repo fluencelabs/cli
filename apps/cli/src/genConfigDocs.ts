@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { writeFile, mkdir, readFile, access } from "node:fs/promises";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
