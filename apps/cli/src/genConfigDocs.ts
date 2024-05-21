@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { writeFile, mkdir, readFile } from "node:fs/promises";
+import { writeFile, mkdir, readFile, chmod } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
@@ -85,11 +85,13 @@ await Promise.all(
 );
 
 const jsonSchemaDocBinaryPass = resolve("docs", "json-schema-docs");
-execSync(`chmod +x ${jsonSchemaDocBinaryPass}`);
+await chmod(jsonSchemaDocBinaryPass, 0o755);
 
 await Promise.all(
   configsInfo.map(async ({ schemaPath, docFileName }) => {
-    const md = execSync(`${jsonSchemaDocBinaryPass} -schema ${schemaPath}`);
+    const md = execSync(`${jsonSchemaDocBinaryPass} -schema ${schemaPath}`, {
+      stdio: "inherit",
+    });
     await writeFile(join(DOCS_CONFIGS_DIR_PATH, docFileName), md, FS_OPTIONS);
   }),
 );
