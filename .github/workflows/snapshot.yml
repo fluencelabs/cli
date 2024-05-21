@@ -96,13 +96,6 @@ jobs:
 
       - run: yarn install
 
-      - name: Configure yarn to publish to private registry
-        working-directory: apps/cli
-        run: |
-          yarn config set npmRegistryServer "https://npm.fluence.dev"
-          yarn config set npmAlwaysAuth true
-          yarn config set npmAuthToken $NODE_AUTH_TOKEN
-
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
@@ -151,16 +144,10 @@ jobs:
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
 
-      - name: Publish snapshot
-        id: snapshot
-        uses: fluencelabs/github-actions/npm-publish-snapshot@main
-        with:
-          id: ${{ steps.version.outputs.id }}
-          package-manager: yarn npm
-          flags: --tag snapshot
-          working-directory: apps/cli
-
       - name: Pack fluence-cli
+        run: yarn pack-linux-x64
+
+      - name: Pack fluence-cli for macOS
         run: yarn pack-ci
         working-directory: apps/cli
 

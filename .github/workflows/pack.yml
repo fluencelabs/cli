@@ -137,16 +137,6 @@ jobs:
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
 
-      - name: Set version
-        if: inputs.upload-to-s3 != true
-        uses: fluencelabs/github-actions/npm-publish-snapshot@main
-        with:
-          id: ${{ steps.version.outputs.id }}
-          package-manager: yarn npm
-          flags: --tag snapshot
-          publish: false
-          working-directory: apps/cli
-
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
 

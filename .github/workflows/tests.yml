@@ -183,12 +183,6 @@ jobs:
 
       - run: yarn install
 
-      - name: Configure yarn to publish to private registry
-        run: |
-          yarn config set npmRegistryServer "https://npm.fluence.dev"
-          yarn config set npmAlwaysAuth true
-          yarn config set npmAuthToken $NODE_AUTH_TOKEN
-
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
