@@ -90,11 +90,7 @@ execSync(`chmod +x ${jsonSchemaDocBinaryPass}`);
 
 await Promise.all(
   configsInfo.map(async ({ schemaPath, docFileName }) => {
-    const md = await execPromise({
-      command: jsonSchemaDocBinaryPass,
-      args: ["-schema", schemaPath],
-    });
-
+    const md = execSync(`${jsonSchemaDocBinaryPass} -schema ${schemaPath}`);
     await writeFile(join(DOCS_CONFIGS_DIR_PATH, docFileName), md, FS_OPTIONS);
   }),
 );
