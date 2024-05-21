@@ -1,6 +1,6 @@
 {
   "name": "@fluencelabs/cli",
-  "version": "0.16.2",
+  "version": "0.16.3",
   "description": "CLI for working with Fluence network",
   "keywords": [
     "fluence",
@@ -119,7 +119,7 @@
     "globby": "14",
     "madge": "7.0.0",
     "npm-check-updates": "16.14.20",
-    "oclif": "4.10.4",
+    "oclif": "4.1.0",
     "prettier": "3.2.5",
     "proper-lockfile": "4.1.2",
     "shx": "0.3.4",

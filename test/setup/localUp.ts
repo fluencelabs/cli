@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import { defineConfig } from "vitest/dist/config.js";
+import { fluence } from "../helpers/commonWithSetupTests.js";
+import { fluenceEnv } from "../helpers/constants.js";
+import { pathToTheTemplateWhereLocalEnvironmentIsSpunUp } from "../helpers/paths.js";
 
-export default defineConfig({
-  test: {
-    testTimeout: 1000 * 60 * 5, // 5 minutes,
-    fileParallelism: false,
-    bail: 1,
-  },
-});
+if (fluenceEnv === "local") {
+  await fluence({
+    args: ["local", "up"],
+    flags: { r: true },
+    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+    timeout: 1000 * 60 * 8, // 8 minutes
+  });
+}
