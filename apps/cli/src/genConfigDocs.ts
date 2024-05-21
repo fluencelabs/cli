@@ -18,6 +18,8 @@ import assert from "node:assert";
 import { writeFile, mkdir, readFile, chmod } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
+import core from "@actions/core";
+
 import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
 import { envSchema } from "./lib/configs/project/env.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
@@ -84,14 +86,20 @@ await Promise.all(
   }),
 );
 
-const jsonSchemaDocBinaryPass = resolve("docs", "json-schema-docs");
+const JSON_SCHEMA_DOC_BINARY_NAME = "json-schema-docs";
+const docsDir = await resolve("docs");
+const jsonSchemaDocBinaryPass = join(docsDir, JSON_SCHEMA_DOC_BINARY_NAME);
 await chmod(jsonSchemaDocBinaryPass, 0o755);
+core.addPath(docsDir);
 
 await Promise.all(
   configsInfo.map(async ({ schemaPath, docFileName }) => {
-    const md = execSync(`${jsonSchemaDocBinaryPass} -schema ${schemaPath}`, {
-      stdio: "inherit",
-    });
+    const md = execSync(
+      `${JSON_SCHEMA_DOC_BINARY_NAME} -schema ${schemaPath}`,
+      {
+        stdio: "inherit",
+      },
+    );
     await writeFile(join(DOCS_CONFIGS_DIR_PATH, docFileName), md, FS_OPTIONS);
   }),
 );
