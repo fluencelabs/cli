@@ -47,7 +47,6 @@ import {
   PROVIDER_SECRETS_CONFIG_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FILE_NAME,
 } from "./lib/const.js";
-import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/utils.js";
 import CLIPackageJSON from "./versions/cli.package.json";
 import { execSync } from "node:child_process";
