@@ -12,6 +12,7 @@ concurrency:
 env:
   CI: true
   FORCE_COLOR: true
+  FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
 
 jobs:
   docs:
@@ -38,10 +39,11 @@ jobs:
       - name: Install json-schema-docs
         run: go install github.com/marcusolsson/json-schema-docs@latest
 
+      - name: Build and pack Fluence CLI
+        run: yarn pack-linux-x64
+
       - name: Run on each commit
         working-directory: apps/cli
-        env:
-          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
         run: yarn on-each-commit
 
       - name: Auto-commit

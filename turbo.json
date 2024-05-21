@@ -2,19 +2,39 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "pack-linux-x64": {
-      "outputs": ["dist/**"],
+      "outputs": [
+        "dist/**",
+        "src/aqua-dependencies/**",
+        "src/cli-aqua-dependencies/**",
+        "src/versions/**"
+      ],
       "inputs": ["bin", "src", "package.json", "tsconfig.json"]
     },
     "pack-darwin-x64": {
-      "outputs": ["dist/**"],
+      "outputs": [
+        "dist/**",
+        "src/aqua-dependencies/**",
+        "src/cli-aqua-dependencies/**",
+        "src/versions/**"
+      ],
       "inputs": ["bin", "src", "package.json", "tsconfig.json"]
     },
     "pack-darwin-arm64": {
-      "outputs": ["dist/**"],
+      "outputs": [
+        "dist/**",
+        "src/aqua-dependencies/**",
+        "src/cli-aqua-dependencies/**",
+        "src/versions/**"
+      ],
       "inputs": ["bin", "src", "package.json", "tsconfig.json"]
     },
     "pack-win32-x64": {
-      "outputs": ["dist/**"],
+      "outputs": [
+        "dist/**",
+        "src/aqua-dependencies/**",
+        "src/cli-aqua-dependencies/**",
+        "src/versions/**"
+      ],
       "inputs": ["bin", "src", "package.json", "tsconfig.json", "nsis"]
     }
   }
