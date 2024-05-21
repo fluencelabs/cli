@@ -50,6 +50,7 @@ import {
 import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/utils.js";
 import CLIPackageJSON from "./versions/cli.package.json";
+import { execSync } from "node:child_process";
 
 const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
 const DOCS_COMMANDS_PATH = join("docs", "commands", "README.md");
@@ -85,7 +86,7 @@ await Promise.all(
 );
 
 const jsonSchemaDocBinaryPass = resolve("docs", "json-schema-docs");
-await access(jsonSchemaDocBinaryPass);
+execSync(`chmod +x ${jsonSchemaDocBinaryPass}`);
 
 await Promise.all(
   configsInfo.map(async ({ schemaPath, docFileName }) => {
