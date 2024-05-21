@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert";
-import { writeFile, mkdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { writeFile, mkdir, readFile, access } from "node:fs/promises";
+import { join, resolve } from "node:path";
 
 import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
 import { envSchema } from "./lib/configs/project/env.js";
@@ -84,10 +84,14 @@ await Promise.all(
   }),
 );
 
+const jsonSchemaDocBinaryPass = resolve("docs", "json-schema-docs");
+console.log(jsonSchemaDocBinaryPass);
+await access(jsonSchemaDocBinaryPass);
+
 await Promise.all(
   configsInfo.map(async ({ schemaPath, docFileName }) => {
     const md = await execPromise({
-      command: "./docs/json-schema-docs",
+      command: jsonSchemaDocBinaryPass,
       args: ["-schema", schemaPath],
     });
 
