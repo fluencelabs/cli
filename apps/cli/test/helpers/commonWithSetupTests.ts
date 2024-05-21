@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import { access, readdir, rm } from "node:fs/promises";
 import { arch, platform } from "node:os";
 import { join } from "node:path";
@@ -24,7 +25,6 @@ import { x as tar } from "tar";
 import { CLI_NAME } from "../../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../../src/lib/execPromise.js";
 import { flagsToArgs } from "../../src/lib/helpers/utils.js";
-import assert from "node:assert";
 
 type CliArg = {
   args?: ExecPromiseArg["args"];
@@ -54,6 +54,7 @@ try {
   );
 
   await rm(pathToCliDir, { recursive: true, force: true });
+
   await tar({
     cwd: pathToDistDir,
     file: join(pathToDistDir, archiveWithCLIFileName),

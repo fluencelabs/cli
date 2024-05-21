@@ -78,6 +78,7 @@ describe("Deal update tests", () => {
       "tmp",
       "shouldUpdateDealsAfterNewServiceIsCreated",
     );
+
     await initializeTemplate(cwd, "quickstart");
 
     await deployDealAndWaitUntilDeployed(cwd);
