@@ -6,7 +6,7 @@
 /.nyc_output
 /dist
 /lib
-/tmp
+tmp
 oclif.lock
 oclif.manifest.json
 .eslintcache
