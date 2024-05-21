@@ -47,13 +47,15 @@ on:
 env:
   CI: true
   FORCE_COLOR: true
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
   snapshot:
     name: "Build snapshot"
     runs-on: builder
+
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
     outputs:
       version: ${{ steps.snapshot.outputs.version }}
@@ -145,6 +147,14 @@ jobs:
       - name: Generate snapshot version
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
 
       - name: Pack fluence-cli
         run: yarn pack-linux-x64

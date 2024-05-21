@@ -73,8 +73,6 @@ env:
   CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
   NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
   FLUENCE_LOG_DISPLAY_SPAN_LIST: true
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
   tests:
@@ -88,6 +86,10 @@ jobs:
     permissions:
       contents: write
       id-token: write
+
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
     steps:
       - name: Checkout fluence-cli
@@ -239,6 +241,14 @@ jobs:
                 "marine-rs-sdk-test": "${{ inputs.marine-rs-sdk-test-version }}"
               }
             }
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
 
       - name: Build and pack Fluence CLI
         run: yarn pack-linux-x64

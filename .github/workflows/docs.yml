@@ -13,11 +13,12 @@ env:
   CI: true
   FORCE_COLOR: true
   FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
   docs:
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     name: Generate docs
     runs-on: ubuntu-latest
     steps:
@@ -40,6 +41,14 @@ jobs:
 
       - name: Install json-schema-docs
         run: go install github.com/marcusolsson/json-schema-docs@latest
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
 
       - name: Build and pack Fluence CLI
         run: yarn pack-linux-x64
