@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.16.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.16.2...fluence-cli-v0.16.3) (2024-05-20)
+
+
+### Features
+
+* add payment token update for offers [fixes DXJ-768] ([#899](https://github.com/fluencelabs/cli/issues/899)) ([01a4038](https://github.com/fluencelabs/cli/commit/01a40386b5831ad9d37f1ddcbd1b11f269a89106))
+* allow adding spell to any deployment, improve validation [fixes DXJ-762] ([#909](https://github.com/fluencelabs/cli/issues/909)) ([b21f064](https://github.com/fluencelabs/cli/commit/b21f0640773108370c3e8864689c7832613d6cd3))
+* allow selecting a deployment when creating a new service [fixes DXJ-776] ([#914](https://github.com/fluencelabs/cli/issues/914)) ([7605eae](https://github.com/fluencelabs/cli/commit/7605eae0960a2b446433b205035cd124f43168e9))
+* chunk CUs when withdrawing collateral, add retry for Tendermint RPC error ([#929](https://github.com/fluencelabs/cli/issues/929)) ([d0520c1](https://github.com/fluencelabs/cli/commit/d0520c1079f331ed69d99ea281159c122b095cee))
+* decrease retry timeouts [fixes DXJ-764] ([#892](https://github.com/fluencelabs/cli/issues/892)) ([f741245](https://github.com/fluencelabs/cli/commit/f741245156ca5c55d6b57f97974e67bec25f87c7))
+* improve offer-update logs [fixes DXJ-760] ([#910](https://github.com/fluencelabs/cli/issues/910)) ([e7f20d5](https://github.com/fluencelabs/cli/commit/e7f20d56d529d1e85fc2ea63ec14319fcdb1734e))
+* make it possible to move noxes from one offer to another, improve tx batch types [fixes DXJ-759] ([#913](https://github.com/fluencelabs/cli/issues/913)) ([8192990](https://github.com/fluencelabs/cli/commit/8192990fa612cfab109202cc8d182adf099d8fc0))
+* retry indexer client on local network ([#911](https://github.com/fluencelabs/cli/issues/911)) ([0c37a46](https://github.com/fluencelabs/cli/commit/0c37a46662ba249ed3d4026f0bd50763539abc5e))
+* set maxPriorityFeePerGas to 0 for all transactions [fixes DXJ-769] ([#902](https://github.com/fluencelabs/cli/issues/902)) ([c92a6c9](https://github.com/fluencelabs/cli/commit/c92a6c968c0624161786abffc6cec13289eafd91))
+* temporarily retry some of the flaky tests ([#904](https://github.com/fluencelabs/cli/issues/904)) ([c6a5d80](https://github.com/fluencelabs/cli/commit/c6a5d8050915c7f6875558bd30ae82c733304c7c))
+* test improvements ([#923](https://github.com/fluencelabs/cli/issues/923)) ([516644f](https://github.com/fluencelabs/cli/commit/516644fdbc0f71acd8cf731391d15af15fb3a38c))
+* up deal repo 0.13.9 ([#901](https://github.com/fluencelabs/cli/issues/901)) ([1b7718b](https://github.com/fluencelabs/cli/commit/1b7718b10617bab413aa93a877e0c8f6ec2f5b61))
+* update all dependencies ([#917](https://github.com/fluencelabs/cli/issues/917)) ([0e9f42c](https://github.com/fluencelabs/cli/commit/0e9f42caa5ac714ba188c05e3c3854317a867e54))
+* update copyright ([#919](https://github.com/fluencelabs/cli/issues/919)) ([b3a7016](https://github.com/fluencelabs/cli/commit/b3a70164bacd20e2f0ed7b7d8816c3e1e21ffb9a))
+
+
+### Bug Fixes
+
+* --cc-ids flag not working [fixes DXJ-765] ([#896](https://github.com/fluencelabs/cli/issues/896)) ([c6f33a3](https://github.com/fluencelabs/cli/commit/c6f33a3d12bfe89b0c45afe2753cabdf0a7fe1ea))
+* don't interactively ask for the env in `fluence default peers` command when env is provided as an arg [fixes DXJ-775] ([#907](https://github.com/fluencelabs/cli/issues/907)) ([26ca66b](https://github.com/fluencelabs/cli/commit/26ca66bd9a85b4f239be2011b159b5de6ed2d9da))
+* filter provider's CUs when exiting from deals. Add CU batching [fixes DXJ-778] ([#931](https://github.com/fluencelabs/cli/issues/931)) ([93acfc1](https://github.com/fluencelabs/cli/commit/93acfc11b10e11eef7eab74d85c331f78b4a9fc0))
+* remove duplicate data definitions when services use the same module with some struct [fixes DXJ-751] ([#898](https://github.com/fluencelabs/cli/issues/898)) ([c810588](https://github.com/fluencelabs/cli/commit/c810588a30c338aef17f4d58d00c0fd6f94bd394))
+* support rename in deal repo ([#900](https://github.com/fluencelabs/cli/issues/900)) ([540225f](https://github.com/fluencelabs/cli/commit/540225f21157b9b64e745169e358d0e7d4d6a69c))
+* use readonly chain client where currently possible [fixes DXJ-750] ([#894](https://github.com/fluencelabs/cli/issues/894)) ([652d2dd](https://github.com/fluencelabs/cli/commit/652d2dd173ce296b23f674170050525918155929))
+
 ## [0.16.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.16.1...fluence-cli-v0.16.2) (2024-04-04)
 
 
