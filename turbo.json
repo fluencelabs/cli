@@ -6,6 +6,8 @@
         "dist/**",
         "src/aqua-dependencies/**",
         "src/cli-aqua-dependencies/**",
+        "src/lib/compiled-aqua/**",
+        "src/lib/compiled-aqua-with-tracing/**",
         "src/versions/**"
       ],
       "inputs": ["bin", "src", "package.json", "tsconfig.json"]
@@ -15,6 +17,8 @@
         "dist/**",
         "src/aqua-dependencies/**",
         "src/cli-aqua-dependencies/**",
+        "src/lib/compiled-aqua/**",
+        "src/lib/compiled-aqua-with-tracing/**",
         "src/versions/**"
       ],
       "inputs": ["bin", "src", "package.json", "tsconfig.json"]
@@ -24,6 +28,8 @@
         "dist/**",
         "src/aqua-dependencies/**",
         "src/cli-aqua-dependencies/**",
+        "src/lib/compiled-aqua/**",
+        "src/lib/compiled-aqua-with-tracing/**",
         "src/versions/**"
       ],
       "inputs": ["bin", "src", "package.json", "tsconfig.json"]
@@ -33,6 +39,8 @@
         "dist/**",
         "src/aqua-dependencies/**",
         "src/cli-aqua-dependencies/**",
+        "src/lib/compiled-aqua/**",
+        "src/lib/compiled-aqua-with-tracing/**",
         "src/versions/**"
       ],
       "inputs": ["bin", "src", "package.json", "tsconfig.json", "nsis"]
