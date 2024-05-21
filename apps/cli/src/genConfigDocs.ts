@@ -15,10 +15,8 @@
  */
 
 import assert from "node:assert";
-import { writeFile, mkdir, readFile, chmod } from "node:fs/promises";
-import { join, resolve } from "node:path";
-
-import core from "@actions/core";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
 import { envSchema } from "./lib/configs/project/env.js";
@@ -49,9 +47,9 @@ import {
   PROVIDER_SECRETS_CONFIG_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FILE_NAME,
 } from "./lib/const.js";
+import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/utils.js";
 import CLIPackageJSON from "./versions/cli.package.json";
-import { execSync } from "node:child_process";
 
 const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
 const DOCS_COMMANDS_PATH = join("docs", "commands", "README.md");
@@ -86,20 +84,14 @@ await Promise.all(
   }),
 );
 
-const JSON_SCHEMA_DOC_BINARY_NAME = "json-schema-docs";
-const docsDir = resolve("docs");
-const jsonSchemaDocBinaryPass = join(docsDir, JSON_SCHEMA_DOC_BINARY_NAME);
-await chmod(jsonSchemaDocBinaryPass, 0o755);
-core.addPath(docsDir);
-
 await Promise.all(
   configsInfo.map(async ({ schemaPath, docFileName }) => {
-    const md = execSync(
-      `${JSON_SCHEMA_DOC_BINARY_NAME} -schema ${schemaPath}`,
-      {
-        stdio: "inherit",
-      },
-    );
+    const md = await execPromise({
+      // This is a tool written in Go that is installed in CI and used for generating docs
+      command: "json-schema-docs",
+      args: ["-schema", schemaPath],
+    });
+
     await writeFile(join(DOCS_CONFIGS_DIR_PATH, docFileName), md, FS_OPTIONS);
   }),
 );
