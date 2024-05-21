@@ -73,6 +73,8 @@ env:
   CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
   NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
   FLUENCE_LOG_DISPLAY_SPAN_LIST: true
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
   tests:
@@ -246,7 +248,6 @@ jobs:
 
       - name: Build and pack Fluence CLI
         run: yarn pack-linux-x64
-        working-directory: apps/cli
 
       - name: Download Marine and Mrepl
         run: yarn download-marine-and-mrepl
