@@ -85,7 +85,6 @@ await Promise.all(
 );
 
 const jsonSchemaDocBinaryPass = resolve("docs", "json-schema-docs");
-console.log(jsonSchemaDocBinaryPass);
 await access(jsonSchemaDocBinaryPass);
 
 await Promise.all(
