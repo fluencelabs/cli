@@ -160,7 +160,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Pack Fluence CLI for Linux
+      - name: Pack Fluence CLI for Linux and macOS
         run: yarn pack-ci
 
       - name: Rename archives
