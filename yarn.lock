@@ -4992,21 +4992,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cli-aqua-dependencies@workspace:packages/cli-aqua-dependencies":
-  version: 0.0.0-use.local
-  resolution: "cli-aqua-dependencies@workspace:packages/cli-aqua-dependencies"
-  dependencies:
-    "@fluencelabs/aqua-api": "npm:0.14.6"
-    "@fluencelabs/aqua-to-js": "npm:0.3.13"
-    "@fluencelabs/npm-aqua-compiler": "npm:0.0.3"
-    "@tsconfig/node18": "npm:^18"
-    "@tsconfig/strictest": "npm:^2.0.5"
-    "@types/node": "npm:^18"
-    tsx: "npm:^4.10.5"
-    typescript: "npm:^5.4.5"
-  languageName: unknown
-  linkType: soft
-
 "cli-boxes@npm:^3.0.0":
   version: 3.0.0
   resolution: "cli-boxes@npm:3.0.0"
