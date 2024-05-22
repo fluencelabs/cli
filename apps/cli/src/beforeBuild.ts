@@ -143,5 +143,7 @@ await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH, {
   recursive: true,
 });
 
-await compileInstallationSpellAqua();
-await compileInstallationSpellAqua(true);
+await Promise.all([
+  compileInstallationSpellAqua(),
+  compileInstallationSpellAqua(true),
+]);
