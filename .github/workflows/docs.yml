@@ -54,8 +54,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Build Fluence CLI
-        run: yarn build-cli
+      - name: Pack Fluence CLI for Linux
+        run: yarn pack-linux-x64
 
       - name: Run on each commit
         working-directory: apps/cli
