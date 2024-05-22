@@ -35,6 +35,14 @@ const WIN_BIN_FILE_PATH = join(
   "win.js",
 );
 
+const NODE_DOWNLOAD_FILE_PATH = join(
+  WORKSPACE_NODE_MODULES_PATH,
+  "oclif",
+  "lib",
+  "tarballs",
+  "node.js",
+);
+
 async function patchOclif(fileName: string, search: string, insert: string) {
   try {
     const binFileContent = await readFile(fileName, FS_OPTIONS);
@@ -85,15 +93,15 @@ await patchOclif(
 );
 
 await patchOclif(
-  "",
-  `        await retry(download, {
-    factor: 1,
-    maxTimeout: RETRY_TIMEOUT_MS,
-    minTimeout: RETRY_TIMEOUT_MS,
-    onRetry(_e, attempt) {
-        (0, log_1.log)(\`retrying node download (attempt \${attempt})\`);
-    },
-    retries: 3,
-});`,
-  "        await download()",
+  NODE_DOWNLOAD_FILE_PATH,
+  `await retry(download, {
+            factor: 1,
+            maxTimeout: RETRY_TIMEOUT_MS,
+            minTimeout: RETRY_TIMEOUT_MS,
+            onRetry(_e, attempt) {
+                (0, log_1.log)(${"`retrying node download (attempt ${attempt})`"});
+            },
+            retries: 3,
+        });`,
+  "await download()",
 );
