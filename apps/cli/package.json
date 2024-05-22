@@ -24,12 +24,11 @@
   ],
   "scripts": {
     "before-build": "npm i --prefix './src/cli-aqua-dependencies' && node --loader ts-node/esm --no-warnings src/beforeBuild.ts && npm i --prefix './src/aqua-dependencies'",
-    "build": "shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies",
+    "build-cli": "shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "prettier": "prettier --write .",
     "postpack": "shx rm -f oclif.manifest.json",
-    "prepack": "yarn before-build && yarn build",
     "vitest-deal-deploy": "vitest run dealDeploy.test.ts",
     "vitest-deal-update": "vitest run dealUpdate.test.ts",
     "vitest-smoke": "vitest run smoke.test.ts",

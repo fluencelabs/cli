@@ -36,6 +36,10 @@ jobs:
 
       - run: yarn install
 
+      - name: Patch oclif
+        run: yarn patch-colif
+        working-directory: scripts
+
       - name: Setup golang
         uses: actions/setup-go@v5
 
@@ -51,7 +55,10 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Prepare Fluence CLI for packing
-        run: yarn prepack
+        run: yarn before-build
+
+      - name: Build Fluence CLI
+        run: yarn build-cli
 
       - name: Run on each commit
         working-directory: apps/cli

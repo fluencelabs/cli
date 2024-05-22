@@ -2,10 +2,12 @@
   "name": "fluence-cli-monorepo",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "scripts"
   ],
   "scripts": {
-    "prepack": "turbo run prepack --cache-dir=.turbo",
+    "before-build": "turbo run before-build --cache-dir=.turbo",
+    "build-cli": "turbo run build-cli --cache-dir=.turbo",
     "pack-linux-x64": "turbo run pack-linux-x64 --cache-dir=.turbo",
     "pack-darwin-x64": "turbo run pack-darwin-x64 --cache-dir=.turbo",
     "pack-darwin-arm64": "turbo run pack-darwin-arm64 --cache-dir=.turbo",

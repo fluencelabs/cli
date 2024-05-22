@@ -102,6 +102,10 @@ jobs:
 
       - run: yarn install
 
+      - name: Patch oclif
+        run: yarn patch-colif
+        working-directory: scripts
+
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
@@ -150,7 +154,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Prepare fluence-cli for packing
-        run: yarn prepack
+        run: yarn before-build
 
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}

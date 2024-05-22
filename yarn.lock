@@ -2978,6 +2978,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tsconfig/node18@npm:^18":
+  version: 18.2.4
+  resolution: "@tsconfig/node18@npm:18.2.4"
+  checksum: 10c0/cdfd17f212660374eb2765cd5907b2252e43cfa2623cd52307a49f004327ef49bbe7d53c78b0aca57f33e9a5cb0d7d2eb5ded9be1235e6212f65c9f0699322b6
+  languageName: node
+  linkType: hard
+
+"@tsconfig/strictest@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "@tsconfig/strictest@npm:2.0.5"
+  checksum: 10c0/cfc86da2d57f7b4b0827701b132c37a4974284e5c40649656c0e474866dfd8a69f57c6718230d8a8139967e2a95438586b8224c13ab0ff9d3a43eda771c50cc4
+  languageName: node
+  linkType: hard
+
 "@tufjs/canonical-json@npm:1.0.0":
   version: 1.0.0
   resolution: "@tufjs/canonical-json@npm:1.0.0"
@@ -4978,6 +4992,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cli-aqua-dependencies@workspace:packages/cli-aqua-dependencies":
+  version: 0.0.0-use.local
+  resolution: "cli-aqua-dependencies@workspace:packages/cli-aqua-dependencies"
+  dependencies:
+    "@fluencelabs/aqua-api": "npm:0.14.6"
+    "@fluencelabs/aqua-to-js": "npm:0.3.13"
+    "@fluencelabs/npm-aqua-compiler": "npm:0.0.3"
+    "@tsconfig/node18": "npm:^18"
+    "@tsconfig/strictest": "npm:^2.0.5"
+    "@types/node": "npm:^18"
+    tsx: "npm:^4.10.5"
+    typescript: "npm:^5.4.5"
+  languageName: unknown
+  linkType: soft
+
 "cli-boxes@npm:^3.0.0":
   version: 3.0.0
   resolution: "cli-boxes@npm:3.0.0"
@@ -5003,6 +5032,18 @@ __metadata:
   checksum: 10c0/92a2f98ff9037d09be3dfe1f0d749664797fb674bf388375a2207a1203b69d41847abf16434203e0089212479e47a358b13a0222ab9fccfe8e2644a7ccebd111
   languageName: node
   linkType: hard
+
+"cli-monorepo-scripts@workspace:scripts":
+  version: 0.0.0-use.local
+  resolution: "cli-monorepo-scripts@workspace:scripts"
+  dependencies:
+    "@tsconfig/node18": "npm:^18"
+    "@tsconfig/strictest": "npm:^2.0.5"
+    "@types/node": "npm:^18"
+    tsx: "npm:^4.10.5"
+    typescript: "npm:^5.4.5"
+  languageName: unknown
+  linkType: soft
 
 "cli-progress@npm:^3.12.0":
   version: 3.12.0
@@ -7158,7 +7199,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-tsconfig@npm:^4.7.3":
+"get-tsconfig@npm:^4.7.3, get-tsconfig@npm:^4.7.5":
   version: 4.7.5
   resolution: "get-tsconfig@npm:4.7.5"
   dependencies:
@@ -13959,6 +14000,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tsx@npm:^4.10.5":
+  version: 4.10.5
+  resolution: "tsx@npm:4.10.5"
+  dependencies:
+    esbuild: "npm:~0.20.2"
+    fsevents: "npm:~2.3.3"
+    get-tsconfig: "npm:^4.7.5"
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    tsx: dist/cli.mjs
+  checksum: 10c0/a9ca576417c52010b12b7ab14023c1dfee458220bf4c11d528f9d462ce739c0a10aff967c5b28092032fc56a5639f043d798bfb00df469e3b263e93ab2c963b1
+  languageName: node
+  linkType: hard
+
 "tuf-js@npm:^1.1.7":
   version: 1.1.7
   resolution: "tuf-js@npm:1.1.7"
@@ -14196,7 +14253,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.4.5, typescript@npm:^5.0.4, typescript@npm:^5.4.4":
+"typescript@npm:5.4.5, typescript@npm:^5.0.4, typescript@npm:^5.4.4, typescript@npm:^5.4.5":
   version: 5.4.5
   resolution: "typescript@npm:5.4.5"
   bin:
@@ -14206,7 +14263,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.0.4#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.4.4#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.0.4#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.4.4#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.4.5#optional!builtin<compat/typescript>":
   version: 5.4.5
   resolution: "typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"
   bin:
