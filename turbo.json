@@ -19,22 +19,22 @@
     "pack-linux-x64": {
       "outputs": ["dist/**"],
       "inputs": ["bin", "src", "package.json", "tsconfig.json"],
-      "dependsOn": ["before-build"]
+      "dependsOn": ["build-cli"]
     },
     "pack-darwin-x64": {
       "outputs": ["dist/**"],
       "inputs": ["bin", "src", "package.json", "tsconfig.json"],
-      "dependsOn": ["before-build"]
+      "dependsOn": ["build-cli"]
     },
     "pack-darwin-arm64": {
       "outputs": ["dist/**"],
       "inputs": ["bin", "src", "package.json", "tsconfig.json"],
-      "dependsOn": ["before-build"]
+      "dependsOn": ["build-cli"]
     },
     "pack-win32-x64": {
       "outputs": ["dist/**"],
       "inputs": ["bin", "src", "package.json", "tsconfig.json", "nsis"],
-      "dependsOn": ["before-build"]
+      "dependsOn": ["build-cli"]
     }
   }
 }

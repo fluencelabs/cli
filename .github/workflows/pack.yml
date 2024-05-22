@@ -153,9 +153,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Prepare fluence-cli for packing
-        run: yarn before-build
-
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
 

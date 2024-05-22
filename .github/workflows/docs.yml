@@ -54,9 +54,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Prepare Fluence CLI for packing
-        run: yarn before-build
-
       - name: Build Fluence CLI
         run: yarn build-cli
 
