@@ -163,6 +163,10 @@ jobs:
       - name: Pack Fluence CLI for Linux
         run: yarn pack-linux-x64
 
+      - name: Clean Dist
+        run: yarn clean-dist
+        working-directory: apps/cli
+
       - name: Pack Fluence CLI for macOS
         run: yarn pack-darwin-arm64
 
