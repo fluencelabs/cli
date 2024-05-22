@@ -28,7 +28,6 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "prettier": "prettier --write .",
-    "find-dead-code": "ts-prune",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "yarn before-build && yarn build",
     "vitest-deal-deploy": "vitest run dealDeploy.test.ts",
@@ -57,6 +56,7 @@
     "on-each-commit": "yarn check && cd docs/commands && oclif readme --no-aliases && yarn gen-config-docs",
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && tsx ./src/genConfigDocs.ts",
     "unused-exports": "ts-unused-exports tsconfig.json",
+    "find-dead-code": "ts-prune",
     "ncu": "ncu -x ethers -x @types/node -x @walletconnect/universal-provider -u && ncu -f '@fluencelabs/*' --target newest -u"
   },
   "dependencies": {
