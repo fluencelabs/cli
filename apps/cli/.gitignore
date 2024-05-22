@@ -9,6 +9,8 @@
 oclif.lock
 oclif.manifest.json
 .eslintcache
+# tmp
+# !tmp/cache
 
 # for ease of development
 /schemas
