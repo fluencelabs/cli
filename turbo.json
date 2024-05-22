@@ -16,6 +16,11 @@
       "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
       "dependsOn": ["before-build"]
     },
+    "pack-ci": {
+      "outputs": ["dist/**"],
+      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
+      "dependsOn": ["build-cli"]
+    },
     "pack-linux-x64": {
       "outputs": ["dist/**"],
       "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],

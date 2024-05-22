@@ -39,6 +39,7 @@
     "pack-darwin-x64": "oclif pack tarballs -t 'darwin-x64' --no-xz",
     "pack-darwin-arm64": "oclif pack tarballs -t 'darwin-arm64' --no-xz",
     "pack-win32-x64": "oclif pack win -t 'win32-x64'",
+    "pack-ci": "oclif pack tarballs -t 'linux-x64,darwin-arm64' --no-xz",
     "upload-linux-x64": "oclif upload tarballs -t 'linux-x64' --no-xz",
     "upload-darwin-x64": "oclif upload tarballs -t 'darwin-x64' --no-xz",
     "upload-darwin-arm64": "oclif upload tarballs -t 'darwin-arm64' --no-xz",
