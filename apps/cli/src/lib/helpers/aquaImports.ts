@@ -61,22 +61,9 @@ export async function getAquaImports({
   return gatherImportsFromNpm({
     npmProjectDirPath:
       fluenceConfig === null
-        ? await npmProjectDirPath()
+        ? builtInAquaDependenciesDirPath
         : await ensureFluenceAquaDependenciesPath(),
     globalImports,
     aquaToCompileDirPath: projectRootDir,
   });
-}
-
-async function npmProjectDirPath() {
-  const packageJSONPath = await recursivelyFindFile(
-    PACKAGE_JSON_FILE_NAME,
-    cwd(),
-  );
-
-  if (packageJSONPath === null) {
-    return builtInAquaDependenciesDirPath;
-  }
-
-  return dirname(packageJSONPath);
 }

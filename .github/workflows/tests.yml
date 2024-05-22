@@ -250,7 +250,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Build and pack Fluence CLI
+      - name: Prepare Fluence CLI for packing
+        run: yarn prepack
+
+      - name: Pack Fluence CLI for Linux
         run: yarn pack-linux-x64
 
       - name: Download Marine and Mrepl

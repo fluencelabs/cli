@@ -5,6 +5,7 @@
     "apps/*"
   ],
   "scripts": {
+    "prepack": "turbo run prepack --cache-dir=.turbo",
     "pack-linux-x64": "turbo run pack-linux-x64 --cache-dir=.turbo",
     "pack-darwin-x64": "turbo run pack-darwin-x64 --cache-dir=.turbo",
     "pack-darwin-arm64": "turbo run pack-darwin-arm64 --cache-dir=.turbo",
