@@ -11,7 +11,8 @@
     "pack-linux-x64": "turbo run pack-linux-x64 --cache-dir=.turbo",
     "pack-darwin-x64": "turbo run pack-darwin-x64 --cache-dir=.turbo",
     "pack-darwin-arm64": "turbo run pack-darwin-arm64 --cache-dir=.turbo",
-    "pack-win32-x64": "turbo run pack-win32-x64 --cache-dir=.turbo"
+    "pack-win32-x64": "turbo run pack-win32-x64 --cache-dir=.turbo",
+    "pack-ci": "turbo run pack-ci --cache-dir=.turbo"
   },
   "devDependencies": {
     "turbo": "^1.12.4"
