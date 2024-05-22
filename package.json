@@ -18,6 +18,6 @@
   },
   "packageManager": "yarn@4.2.2",
   "engines": {
-    "node": ">=18"
+    "node": "18.20.3"
   }
 }
