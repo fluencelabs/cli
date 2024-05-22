@@ -37,7 +37,7 @@ jobs:
       - run: yarn install
 
       - name: Patch oclif
-        run: yarn patch-colif
+        run: yarn patch-oclif
         working-directory: scripts
 
       - name: Setup golang
