@@ -300,7 +300,7 @@ jobs:
 
       - name: Stop containers
         if: always()
-        working-directory: apps/cli/tmp/templates/quickstart
+        working-directory: apps/cli/test/tmp/templates/quickstart
         run: ../../../../dist/fluence/bin/node --no-warnings ../../../../dist/fluence/bin/run.js local down -v
 
       - name: Cleanup
