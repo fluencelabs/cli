@@ -91,17 +91,3 @@ await patchOclif(
   '"%~dp0\\\\..\\\\client\\\\bin\\\\node.exe" "%~dp0\\\\..\\\\client\\\\${additionalCLI ? `${additionalCLI}\\\\bin\\\\run` : \'bin\\\\run\'}" %*',
   '"%~dp0\\\\..\\\\client\\\\bin\\\\fluence.cmd" %*',
 );
-
-await patchOclif(
-  NODE_DOWNLOAD_FILE_PATH,
-  `await retry(download, {
-            factor: 1,
-            maxTimeout: RETRY_TIMEOUT_MS,
-            minTimeout: RETRY_TIMEOUT_MS,
-            onRetry(_e, attempt) {
-                (0, log_1.log)(${"`retrying node download (attempt ${attempt})`"});
-            },
-            retries: 3,
-        });`,
-  "await download()",
-);
