@@ -1763,7 +1763,7 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
     systemServices: {
       enable: ["aqua-ipfs", "decider"],
       decider: {
-        deciderPeriodSec: 60,
+        deciderPeriodSec: 30,
         workerIpfsMultiaddr:
           env === "local"
             ? NOX_IPFS_MULTIADDR
