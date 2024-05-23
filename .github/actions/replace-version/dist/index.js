@@ -2866,7 +2866,7 @@ try {
     }
   }
 
-  const newVersionsJSONString = JSON.stringify(versions, null, 2);
+  const newVersionsJSONString = `${JSON.stringify(versions, null, 2)}\n`;
 
   // Save updated versions.json
   (0,fs__WEBPACK_IMPORTED_MODULE_1__.writeFileSync)(versionsFilePath, newVersionsJSONString);
