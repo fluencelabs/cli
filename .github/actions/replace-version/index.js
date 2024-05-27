@@ -15,7 +15,6 @@ try {
 
   const versionsFilePath = join(
     process.env.GITHUB_WORKSPACE,
-    "apps",
     "cli",
     "src",
     "versions.json",
