@@ -1,0 +1,16 @@
+{
+  "name": "cli-monorepo-scripts",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "patch-oclif": "tsx src/patchOclif.ts"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18",
+    "@tsconfig/strictest": "^2.0.5",
+    "@types/node": "^18",
+    "tsx": "^4.10.5",
+    "typescript": "^5.4.5"
+  }
+}

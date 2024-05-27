@@ -25,6 +25,7 @@ import {
 
 export const TEST_AQUA_DIR_PATH = join("test", "_resources", "aqua");
 export const pathToTheTemplateWhereLocalEnvironmentIsSpunUp = join(
+  "test",
   "tmp",
   "templates",
   "quickstart",
@@ -63,5 +64,5 @@ export function getSpellDirPath(cwd: string, spellName: string) {
 }
 
 export const getInitializedTemplatePath = (template: Template) => {
-  return join("tmp", "templates", template);
+  return join("test", "tmp", "templates", template);
 };
