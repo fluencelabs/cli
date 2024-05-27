@@ -30,7 +30,7 @@ import {
 import { jsonStringify } from "./lib/helpers/utils.js";
 import { versions } from "./versions.js";
 
-const WORKSPACE_NODE_MODULES_PATH = resolve("..", "..", NODE_MODULES_DIR_NAME);
+const WORKSPACE_NODE_MODULES_PATH = resolve("..", NODE_MODULES_DIR_NAME);
 
 const aquaDependenciesDirPath = join("src", AQUA_DEPENDENCIES_DIR_NAME);
 await mkdir(aquaDependenciesDirPath, { recursive: true });
