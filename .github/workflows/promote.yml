@@ -45,14 +45,20 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "18.20.3"
           registry-url: "https://npm.fluence.dev"
           cache: "yarn"
 
       - run: yarn install
 
+      - name: Patch oclif
+        run: yarn patch-oclif
+        working-directory: scripts
+
       - name: Promote fluence-cli
+        working-directory: cli
         run: yarn oclif promote -t linux-x64,darwin-x64,darwin-arm64 --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
       - name: Promote fluence-cli windows
+        working-directory: cli
         run: yarn oclif promote -t win32-64 --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes

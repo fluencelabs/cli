@@ -34,7 +34,7 @@ describe("fluence deploy tests", () => {
   wrappedTest(
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {
-      const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
+      const cwd = join("test", "tmp", "shouldDeployDealsAndRunCodeOnThem");
       await initializeTemplate(cwd, "quickstart");
 
       await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);

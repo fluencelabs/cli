@@ -87,6 +87,10 @@ jobs:
       contents: write
       id-token: write
 
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
     steps:
       - name: Checkout fluence-cli
         uses: actions/checkout@v4
@@ -119,7 +123,7 @@ jobs:
           case ${{ inputs.nox-image }} in
           # if nox image is not passed from e2e read from versions.json
           'null')
-            nox="$(jq .nox src/versions.json -r)"
+            nox="$(jq .nox cli/src/versions.json -r)"
           ;;
           # else set nox image to snapshot passed from e2e
           *)
@@ -135,9 +139,9 @@ jobs:
           # set deal images
           case ${{ inputs.chain-rpc-image }} in
           'null')
-            chain_rpc="$(jq '.["chain-rpc"]' src/versions.json -r)"
-            chain_deploy_script="$(jq '.["chain-deploy-script"]' src/versions.json -r)"
-            subgraph_deploy_script="$(jq '.["subgraph-deploy-script"]' src/versions.json -r)"
+            chain_rpc="$(jq '.["chain-rpc"]' cli/src/versions.json -r)"
+            chain_deploy_script="$(jq '.["chain-deploy-script"]' cli/src/versions.json -r)"
+            subgraph_deploy_script="$(jq '.["subgraph-deploy-script"]' cli/src/versions.json -r)"
           ;;
           # else set deal images to snapshots passed from e2e
           *)
@@ -175,17 +179,15 @@ jobs:
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "18.20.3"
           registry-url: "https://npm.fluence.dev"
           cache: "yarn"
 
       - run: yarn install
 
-      - name: Configure yarn to publish to private registry
-        run: |
-          yarn config set npmRegistryServer "https://npm.fluence.dev"
-          yarn config set npmAlwaysAuth true
-          yarn config set npmAuthToken $NODE_AUTH_TOKEN
+      - name: Patch oclif
+        run: yarn patch-oclif
+        working-directory: scripts
 
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
@@ -194,6 +196,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
+          working-directory: cli
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -202,6 +205,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
+          working-directory: cli
 
       - name: Set deal-ts-clients version
         if: inputs.deal-ts-clients-version != 'null'
@@ -210,6 +214,7 @@ jobs:
           package: "@fluencelabs/deal-ts-clients"
           version: "${{ inputs.deal-ts-clients-version }}"
           package-manager: yarn
+          working-directory: cli
 
       - name: Set installation-spell version
         if: inputs.installation-spell-version != 'null'
@@ -219,6 +224,7 @@ jobs:
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
           flags: "--dev"
+          working-directory: cli
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -240,30 +246,45 @@ jobs:
               }
             }
 
-      - name: Build and pack Fluence CLI
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Pack Fluence CLI for Linux
         run: yarn pack-linux-x64
 
       - name: Download Marine and Mrepl
         run: yarn download-marine-and-mrepl
+        working-directory: cli
 
       - name: Generate templates
         run: yarn generate-templates
+        working-directory: cli
 
       - name: Set up the environment (local up)
         if: inputs.fluence-env == 'local'
         run: yarn local-up
+        working-directory: cli
 
       - name: Run deal deploy tests
         run: yarn vitest-deal-deploy
+        working-directory: cli
 
       - name: Run deal update tests
         run: yarn vitest-deal-update
+        working-directory: cli
 
       - name: Run smoke tests
         run: yarn vitest-smoke
+        working-directory: cli
 
       - name: Run js-to-aqua tests
         run: yarn vitest-js-to-aqua
+        working-directory: cli
 
       - name: Dump container logs
         if: always()
@@ -279,8 +300,8 @@ jobs:
 
       - name: Stop containers
         if: always()
-        working-directory: tmp/templates/quickstart
-        run: ../../linux-x64/fluence/bin/run.js local down
+        working-directory: cli/test/tmp/templates/quickstart
+        run: ../../../../dist/fluence/bin/node --no-warnings ../../../../dist/fluence/bin/run.js local down -v
 
       - name: Cleanup
         if: always()

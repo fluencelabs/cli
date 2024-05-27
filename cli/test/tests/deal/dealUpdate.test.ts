@@ -49,7 +49,7 @@ import { validateSpellLogs } from "../../validators/spellLogsValidator.js";
 
 describe("Deal update tests", () => {
   wrappedTest("should update deal after new spell is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
+    const cwd = join("test", "tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
     await initializeTemplate(cwd, "quickstart");
 
     await deployDealAndWaitUntilDeployed(cwd);
@@ -73,7 +73,12 @@ describe("Deal update tests", () => {
   });
 
   wrappedTest("should update deal after new service is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
+    const cwd = join(
+      "test",
+      "tmp",
+      "shouldUpdateDealsAfterNewServiceIsCreated",
+    );
+
     await initializeTemplate(cwd, "quickstart");
 
     await deployDealAndWaitUntilDeployed(cwd);
@@ -99,7 +104,7 @@ describe("Deal update tests", () => {
   });
 
   wrappedTest("should update deal after new module is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
+    const cwd = join("test", "tmp", "shouldUpdateDealAfterNewModuleIsCreated");
     await initializeTemplate(cwd, "quickstart");
 
     await deployDealAndWaitUntilDeployed(cwd);
@@ -124,7 +129,7 @@ describe("Deal update tests", () => {
   });
 
   wrappedTest("should update deal after changing a service", async () => {
-    const cwd = join("tmp", "shouldUpdateDealAfterChangingAService");
+    const cwd = join("test", "tmp", "shouldUpdateDealAfterChangingAService");
     await initializeTemplate(cwd, "quickstart");
 
     await deployDealAndWaitUntilDeployed(cwd);
@@ -152,7 +157,7 @@ describe("Deal update tests", () => {
   });
 
   wrappedTest("should update deal after changing a spell", async () => {
-    const cwd = join("tmp", "shouldUpdateDealAfterChangingASpell");
+    const cwd = join("test", "tmp", "shouldUpdateDealAfterChangingASpell");
     await initializeTemplate(cwd, "quickstart");
 
     await cp(

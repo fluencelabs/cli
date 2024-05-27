@@ -12,9 +12,13 @@ concurrency:
 env:
   CI: true
   FORCE_COLOR: true
+  FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
 
 jobs:
   docs:
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     name: Generate docs
     runs-on: ubuntu-latest
     steps:
@@ -26,11 +30,15 @@ jobs:
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "18.20.3"
           registry-url: "https://npm.fluence.dev"
           cache: "yarn"
 
       - run: yarn install
+
+      - name: Patch oclif
+        run: yarn patch-oclif
+        working-directory: scripts
 
       - name: Setup golang
         uses: actions/setup-go@v5
@@ -38,9 +46,19 @@ jobs:
       - name: Install json-schema-docs
         run: go install github.com/marcusolsson/json-schema-docs@latest
 
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Pack Fluence CLI for Linux
+        run: yarn pack-linux-x64
+
       - name: Run on each commit
-        env:
-          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+        working-directory: cli
         run: yarn on-each-commit
 
       - name: Auto-commit
