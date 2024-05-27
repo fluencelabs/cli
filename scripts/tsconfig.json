@@ -1,0 +1,7 @@
+{
+  "extends": ["@tsconfig/strictest/tsconfig", "@tsconfig/node18/tsconfig"],
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "src"
+  }
+}

@@ -33,14 +33,14 @@ import { wrappedTest } from "../helpers/utils.js";
 
 describe("integration tests", () => {
   wrappedTest("should work with minimal template", async () => {
-    const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
+    const cwd = join("test", "tmp", "shouldWorkWithMinimalTemplate");
     await initializeTemplate(cwd, "minimal");
 
     await runAquaFunction(cwd, "helloWorld", ["Fluence"]);
   });
 
   wrappedTest("should work without project", async () => {
-    const cwd = join("tmp", NO_PROJECT_TEST_NAME);
+    const cwd = join("test", "tmp", NO_PROJECT_TEST_NAME);
 
     await cp(
       join("test", "_resources", "aqua", "smoke.aqua"),
