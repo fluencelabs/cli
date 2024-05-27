@@ -1,6 +1,6 @@
 name: Replace version
 description: |
-  Replace version in apps/cli/src/versions.json
+  Replace version in cli/src/versions.json
 
 inputs:
   versions:

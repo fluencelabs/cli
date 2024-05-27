@@ -58,7 +58,7 @@ jobs:
         run: yarn pack-linux-x64
 
       - name: Run on each commit
-        working-directory: apps/cli
+        working-directory: cli
         run: yarn on-each-commit
 
       - name: Auto-commit

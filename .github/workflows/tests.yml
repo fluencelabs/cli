@@ -123,7 +123,7 @@ jobs:
           case ${{ inputs.nox-image }} in
           # if nox image is not passed from e2e read from versions.json
           'null')
-            nox="$(jq .nox apps/cli/src/versions.json -r)"
+            nox="$(jq .nox cli/src/versions.json -r)"
           ;;
           # else set nox image to snapshot passed from e2e
           *)
@@ -139,9 +139,9 @@ jobs:
           # set deal images
           case ${{ inputs.chain-rpc-image }} in
           'null')
-            chain_rpc="$(jq '.["chain-rpc"]' apps/cli/src/versions.json -r)"
-            chain_deploy_script="$(jq '.["chain-deploy-script"]' apps/cli/src/versions.json -r)"
-            subgraph_deploy_script="$(jq '.["subgraph-deploy-script"]' apps/cli/src/versions.json -r)"
+            chain_rpc="$(jq '.["chain-rpc"]' cli/src/versions.json -r)"
+            chain_deploy_script="$(jq '.["chain-deploy-script"]' cli/src/versions.json -r)"
+            subgraph_deploy_script="$(jq '.["subgraph-deploy-script"]' cli/src/versions.json -r)"
           ;;
           # else set deal images to snapshots passed from e2e
           *)
@@ -196,7 +196,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
-          working-directory: apps/cli
+          working-directory: cli
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -205,7 +205,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
-          working-directory: apps/cli
+          working-directory: cli
 
       - name: Set deal-ts-clients version
         if: inputs.deal-ts-clients-version != 'null'
@@ -214,7 +214,7 @@ jobs:
           package: "@fluencelabs/deal-ts-clients"
           version: "${{ inputs.deal-ts-clients-version }}"
           package-manager: yarn
-          working-directory: apps/cli
+          working-directory: cli
 
       - name: Set installation-spell version
         if: inputs.installation-spell-version != 'null'
@@ -224,7 +224,7 @@ jobs:
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
           flags: "--dev"
-          working-directory: apps/cli
+          working-directory: cli
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -259,32 +259,32 @@ jobs:
 
       - name: Download Marine and Mrepl
         run: yarn download-marine-and-mrepl
-        working-directory: apps/cli
+        working-directory: cli
 
       - name: Generate templates
         run: yarn generate-templates
-        working-directory: apps/cli
+        working-directory: cli
 
       - name: Set up the environment (local up)
         if: inputs.fluence-env == 'local'
         run: yarn local-up
-        working-directory: apps/cli
+        working-directory: cli
 
       - name: Run deal deploy tests
         run: yarn vitest-deal-deploy
-        working-directory: apps/cli
+        working-directory: cli
 
       - name: Run deal update tests
         run: yarn vitest-deal-update
-        working-directory: apps/cli
+        working-directory: cli
 
       - name: Run smoke tests
         run: yarn vitest-smoke
-        working-directory: apps/cli
+        working-directory: cli
 
       - name: Run js-to-aqua tests
         run: yarn vitest-js-to-aqua
-        working-directory: apps/cli
+        working-directory: cli
 
       - name: Dump container logs
         if: always()
@@ -300,7 +300,7 @@ jobs:
 
       - name: Stop containers
         if: always()
-        working-directory: apps/cli/test/tmp/templates/quickstart
+        working-directory: cli/test/tmp/templates/quickstart
         run: ../../../../dist/fluence/bin/node --no-warnings ../../../../dist/fluence/bin/run.js local down -v
 
       - name: Cleanup

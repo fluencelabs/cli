@@ -111,7 +111,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
-          working-directory: apps/cli
+          working-directory: cli
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -120,7 +120,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
-          working-directory: apps/cli
+          working-directory: cli
 
       - name: Set installation-spell version
         if: inputs.installation-spell-version != 'null'
@@ -130,7 +130,7 @@ jobs:
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
           flags: "--dev"
-          working-directory: apps/cli
+          working-directory: cli
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -166,7 +166,7 @@ jobs:
       - name: Rename archives
         run: |
           for p in linux-x64 darwin-arm64; do
-            mv apps/cli/dist/fluence-*${p}*.tar.gz fluence-cli-${p}.tar.gz
+            mv cli/dist/fluence-*${p}*.tar.gz fluence-cli-${p}.tar.gz
           done
 
       - name: Upload linux-x64 to CI checks

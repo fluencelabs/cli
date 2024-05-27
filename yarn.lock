@@ -428,9 +428,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/cli@workspace:apps/cli":
+"@fluencelabs/cli@workspace:cli":
   version: 0.0.0-use.local
-  resolution: "@fluencelabs/cli@workspace:apps/cli"
+  resolution: "@fluencelabs/cli@workspace:cli"
   dependencies:
     "@actions/core": "npm:1.10.1"
     "@fluencelabs/air-beautify-wasm": "npm:0.3.9"

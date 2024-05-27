@@ -2,7 +2,7 @@
   "name": "fluence-cli-monorepo",
   "private": true,
   "workspaces": [
-    "apps/*",
+    "cli",
     "scripts"
   ],
   "scripts": {
