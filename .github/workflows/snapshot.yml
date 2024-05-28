@@ -98,6 +98,12 @@ jobs:
           registry-url: "https://npm.fluence.dev"
           cache: "yarn"
 
+      - name: Configure yarn to publish to private registry
+        run: |
+          yarn config set npmRegistryServer "https://npm.fluence.dev"
+          yarn config set npmAlwaysAuth true
+          yarn config set npmAuthToken $NODE_AUTH_TOKEN
+
       - run: yarn install
 
       - name: Patch oclif
