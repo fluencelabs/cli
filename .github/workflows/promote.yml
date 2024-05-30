@@ -51,10 +51,6 @@ jobs:
 
       - run: yarn install
 
-      - name: Patch oclif
-        run: yarn patch-oclif
-        working-directory: scripts
-
       - name: Promote fluence-cli
         working-directory: cli
         run: yarn oclif promote -t linux-x64,darwin-x64,darwin-arm64 --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes

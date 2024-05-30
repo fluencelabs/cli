@@ -107,6 +107,7 @@
   },
   "devDependencies": {
     "@actions/core": "1.10.1",
+    "@fluencelabs/oclif": "4.1.0",
     "@total-typescript/ts-reset": "0.5.1",
     "@tsconfig/node18-strictest-esm": "1.0.1",
     "@types/debug": "4.1.12",
@@ -127,7 +128,6 @@
     "globby": "14",
     "madge": "7.0.0",
     "npm-check-updates": "16.14.20",
-    "oclif": "npm:4.1.0",
     "prettier": "3.2.5",
     "proper-lockfile": "4.1.2",
     "shx": "0.3.4",
