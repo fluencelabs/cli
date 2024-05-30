@@ -57,4 +57,4 @@ jobs:
 
       - name: Promote fluence-cli windows
         working-directory: cli
-        run: yarn oclif promote -t win32-64 --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes
+        run: yarn oclif promote -t win32-x64 --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes
