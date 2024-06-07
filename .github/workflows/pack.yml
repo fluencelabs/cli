@@ -153,10 +153,10 @@ jobs:
         run: yarn pack-${{ inputs.platform }}
 
       - name: Rename archive
-        run: mv cli/dist/fluence-*${{ inputs.platform }}*.tar.gz 'cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}.tar.gz'
+        run: mv cli/dist/fluence-*${{ inputs.platform }}*.tar.gz "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}.tar.gz"
 
       - name: Rename buildmanifest
-        run: mv cli/dist/fluence-*${{ inputs.platform }}*-buildmanifest 'cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}-buildmanifest'
+        run: mv cli/dist/fluence-*${{ inputs.platform }}*-buildmanifest "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}-buildmanifest"
 
       - name: Upload fluence-cli
         if: inputs.upload-to-s3 == true
