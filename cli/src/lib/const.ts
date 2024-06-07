@@ -29,6 +29,7 @@ import {
   CHAIN_URLS_WITHOUT_LOCAL,
   type ChainENV,
   CHAIN_RPC_PORT,
+  LOCAL_NET_DEFAULT_WALLET_KEY,
 } from "@repo/common";
 import camelCase from "lodash-es/camelCase.js";
 import upperFirst from "lodash-es/upperFirst.js";
@@ -414,7 +415,7 @@ export const PRIV_KEY_FLAG_NAME = "priv-key";
 
 export const PRIV_KEY_FLAG = {
   [PRIV_KEY_FLAG_NAME]: Flags.string({
-    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure`,
+    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local env ${LOCAL_NET_DEFAULT_WALLET_KEY} is used by default`,
     helpValue: "<private-key>",
   }),
 };

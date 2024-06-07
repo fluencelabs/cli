@@ -26,7 +26,11 @@ import type {
   StateMutability,
 } from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.d.ts";
 import { color } from "@oclif/color";
-import { CHAIN_URLS, type TransactionPayload } from "@repo/common";
+import {
+  CHAIN_URLS,
+  type TransactionPayload,
+  LOCAL_NET_DEFAULT_WALLET_KEY,
+} from "@repo/common";
 import type {
   TransactionRequest,
   LogDescription,
@@ -73,7 +77,12 @@ let dealClient: DealClient | undefined = undefined;
 let dealClientPrivKey: string | undefined = undefined;
 
 export async function getDealClient() {
-  const privKey = chainFlags[PRIV_KEY_FLAG_NAME];
+  const privKey =
+    chainFlags[PRIV_KEY_FLAG_NAME] === undefined &&
+    (await ensureChainEnv()) === "local" &&
+    !isInteractive
+      ? LOCAL_NET_DEFAULT_WALLET_KEY
+      : chainFlags[PRIV_KEY_FLAG_NAME];
 
   if (
     providerOrWallet === undefined ||
