@@ -152,6 +152,12 @@ jobs:
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
 
+      - name: List files in cli/dist
+        run: ls -l cli/dist
+
+      - name: Check for specific file
+        run: ls -l cli/dist/fluence-*darwin-arm64*.tar.gz
+
       - name: Rename archive
         run: mv "cli/dist/fluence-*${{ inputs.platform }}*.tar.gz" "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}.tar.gz"
 
