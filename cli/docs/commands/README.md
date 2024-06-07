@@ -279,9 +279,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Show contract addresses for the fluence environment and accounts for the local environment
@@ -301,9 +299,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Send garbage proof for testing purposes
@@ -327,9 +323,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Change app id in the deal
@@ -360,9 +354,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --price-per-worker-epoch=<value>             (required) Price per worker epoch
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
   --protocol-version=<value>                   Protocol version
   --target-workers=<value>                     (required) Max workers in the deal
   --whitelist=<value>                          Comma-separated list of whitelisted providers
@@ -391,9 +383,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Deposit do the deal
@@ -417,9 +407,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Get info about the deal
@@ -483,9 +471,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Stop the deal
@@ -511,9 +497,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Withdraw tokens from the deal
@@ -537,9 +521,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Add missing workers to the deal
@@ -565,9 +547,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Remove unit from the deal
@@ -639,9 +619,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Add FLT collateral to capacity commitment
@@ -669,9 +647,7 @@ FLAGS
                                                signing a transaction
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Withdraw FLT collateral from capacity commitment
@@ -697,9 +673,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Withdraw FLT rewards from capacity commitment
@@ -844,9 +818,7 @@ FLAGS
       --off-aqua-logs                              Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                Print particle ids when running Fluence js-client
       --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags
-                                                   is unsecure. On local network
-                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   key will be used by default
+                                                   is unsecure
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
@@ -1016,9 +988,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Init docker-compose.yaml according to provider.yaml
@@ -1073,7 +1043,7 @@ _See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/fl
 
 ## `fluence local up`
 
-Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in provider.yaml config
+Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in provider.yaml config using default wallet key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
 ```
 USAGE
@@ -1087,16 +1057,14 @@ FLAGS
       --flags=<--flag arg>      Space separated flags to pass to `docker compose`
       --no-input                Don't interactively ask for any input from the user
       --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
-      --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure. On
-                                local network 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                will be used by default
+      --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
       --quiet-pull              Pull without printing progress information
       --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local
                                 peers
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in
-  provider.yaml config
+  provider.yaml config using default wallet key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
 EXAMPLES
   $ fluence local up
@@ -1248,9 +1216,7 @@ FLAGS
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Add FLT collateral to capacity commitment to activate it
@@ -1279,9 +1245,7 @@ FLAGS
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Withdraw FLT collateral from capacity commitments
@@ -1309,9 +1273,7 @@ FLAGS
   --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Create Capacity commitment
@@ -1337,9 +1299,7 @@ FLAGS
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Get info about capacity commitments
@@ -1366,9 +1326,7 @@ FLAGS
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Remove Capacity commitment. You can remove it only BEFORE you activated it by depositing collateral
@@ -1393,9 +1351,7 @@ FLAGS
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Withdraw FLT rewards from capacity commitments
@@ -1420,9 +1376,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Exit from deal
@@ -1445,9 +1399,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   List all deals
@@ -1474,9 +1426,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Deal rewards info
@@ -1500,9 +1450,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Withdraw USDC rewards from deals
@@ -1525,9 +1473,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
@@ -1553,9 +1499,7 @@ FLAGS
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Print nox signing wallets and peer ids
@@ -1579,9 +1523,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --noxes=<value>                              Number of Compute Peers to generate when a new provider.yaml is created
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Init provider config. Creates a provider.yaml file
@@ -1603,9 +1545,7 @@ FLAGS
   --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Create offers. You have to be registered as a provider to do that
@@ -1633,9 +1573,7 @@ FLAGS
   --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Get info about offers
@@ -1660,9 +1598,7 @@ FLAGS
   --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Update offers
@@ -1685,9 +1621,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Register as a provider
@@ -1714,9 +1648,7 @@ FLAGS
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Distribute FLT tokens to noxes
@@ -1744,9 +1676,7 @@ FLAGS
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Withdraw FLT tokens from noxes
@@ -1769,9 +1699,7 @@ FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
+                                               unsecure
 
 DESCRIPTION
   Update provider info
