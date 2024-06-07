@@ -415,7 +415,7 @@ export const PRIV_KEY_FLAG_NAME = "priv-key";
 
 export const PRIV_KEY_FLAG = {
   [PRIV_KEY_FLAG_NAME]: Flags.string({
-    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local env ${LOCAL_NET_DEFAULT_WALLET_KEY} is used by default`,
+    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local env ${LOCAL_NET_DEFAULT_WALLET_KEY} is used by default when CLI is used in non-interactive mode`,
     helpValue: "<private-key>",
   }),
 };
