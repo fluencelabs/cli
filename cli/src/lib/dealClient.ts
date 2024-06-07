@@ -198,16 +198,21 @@ export async function sendRawTransaction(
   dbg(`sending raw transaction: ${debugInfo}`);
 
   const { providerOrWallet } = await getDealClient();
-  const sendTransaction = providerOrWallet.sendTransaction;
 
   let txHash: string;
   let txReceipt: TransactionReceipt | null;
 
-  if (sendTransaction !== undefined) {
+  if (providerOrWallet.sendTransaction !== undefined) {
     const { tx, res } = await setTryTimeout(
       `executing ${color.yellow("sendTransaction")}`,
       async function executingContractMethod() {
-        const tx = await sendTransaction(transactionRequest);
+        const tx = await providerOrWallet.sendTransaction?.(transactionRequest);
+
+        assert(
+          tx !== undefined,
+          "Unreachable. we checked sendTransaction exists",
+        );
+
         const res = await tx.wait();
         return { tx, res };
       },
