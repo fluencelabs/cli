@@ -20,6 +20,7 @@ import { isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "url";
 
 import { color } from "@oclif/color";
+import { jsonStringify } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "./ajvInstance.js";
@@ -28,11 +29,7 @@ import type { FluenceConfig } from "./configs/project/fluence.js";
 import { AQUA_DEPENDENCIES_DIR_NAME, FS_OPTIONS } from "./const.js";
 import { type ExecPromiseArg, execPromise } from "./execPromise.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import {
-  jsonStringify,
-  removeProperties,
-  stringifyUnknown,
-} from "./helpers/utils.js";
+import { removeProperties, stringifyUnknown } from "./helpers/utils.js";
 import {
   getFluenceAquaDependenciesPackageJsonPath,
   ensureFluenceAquaDependenciesPath,

@@ -36,10 +36,6 @@ jobs:
 
       - run: yarn install
 
-      - name: Patch oclif
-        run: yarn patch-oclif
-        working-directory: scripts
-
       - name: Setup golang
         uses: actions/setup-go@v5
 
@@ -54,12 +50,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Pack Fluence CLI for Linux
-        run: yarn pack-linux-x64
-
       - name: Run on each commit
-        working-directory: cli
         run: yarn on-each-commit
+
+      - name: Format
+        run: yarn format
 
       - name: Auto-commit
         uses: stefanzweifel/git-auto-commit-action@v5

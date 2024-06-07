@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { jsonStringify } from "./helpers/utils.js";
+import { jsonStringify } from "@repo/common";
 
 /**
  * Makes all properties in the object to be NOT readonly
@@ -86,26 +86,4 @@ export function assertHasKey<K extends string>(
       message ?? `missing key '${key}' in ${jsonStringify(unknown)}`,
     );
   }
-}
-
-/**
- * Returns a type guard (https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates)
- * that you can use to find out if unknown is a string union
- * @example
- * const isABC = getIsStringUnion(['a', 'b', 'c'])
- *
- * if (isABC(unknown)) {
- *   unknown // 'a' | 'b' | 'c'
- * }
- * @param array ReadonlyArray\<T extends string\>
- * @returns (unknown: unknown) => unknown is Array\<T\>[number]
- */
-export function getIsStringUnion<T extends string>(
-  array: ReadonlyArray<T>,
-): (unknown: unknown) => unknown is Array<T>[number] {
-  return (unknown: unknown): unknown is Array<T>[number] => {
-    return array.some((v): boolean => {
-      return v === unknown;
-    });
-  };
 }

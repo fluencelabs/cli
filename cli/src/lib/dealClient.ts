@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert";
-import { URL } from "node:url";
 
 import type {
   DealClient,
@@ -27,32 +26,27 @@ import type {
   StateMutability,
 } from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.d.ts";
 import { color } from "@oclif/color";
-import type { ethers, LogDescription } from "ethers";
-import type { TransactionRequest } from "ethers";
+import { CHAIN_URLS, type TransactionPayload } from "@repo/common";
+import type {
+  TransactionRequest,
+  LogDescription,
+  Provider,
+  Signer,
+  Wallet,
+  ContractTransaction,
+  TransactionReceipt,
+} from "ethers";
 import chunk from "lodash-es/chunk.js";
 
-import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
-import { getChainId } from "./chain/chainId.js";
 import { chainFlags } from "./chainFlags.js";
-import { commandObj } from "./commandObj.js";
-import {
-  CHAIN_URLS,
-  CLI_CONNECTOR_URL,
-  WC_PROJECT_ID,
-  WC_METADATA,
-  CLI_NAME_FULL,
-  PRIV_KEY_FLAG_NAME,
-} from "./const.js";
+import { commandObj, isInteractive } from "./commandObj.js";
+import { CLI_NAME_FULL, PRIV_KEY_FLAG_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
-import { numToStr, urlToStr } from "./helpers/typesafeStringify.js";
 import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
+import { createTransaction, getAddressFromConnector } from "./server.js";
 
-const WC_QUERY_PARAM_NAME = "wc";
-const RELAY_QUERY_PARAM_NAME = "relay-protocol";
-const KEY_QUERY_PARAM_NAME = "symKey";
-
-let provider: ethers.Provider | undefined = undefined;
+let provider: Provider | undefined = undefined;
 let readonlyDealClient: DealClient | undefined = undefined;
 
 export async function getReadonlyDealClient() {
@@ -70,8 +64,7 @@ export async function getReadonlyDealClient() {
   };
 }
 
-let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
-  undefined;
+let providerOrWallet: Provider | Wallet | undefined = undefined;
 
 let dealClient: DealClient | undefined = undefined;
 
@@ -80,28 +73,31 @@ let dealClient: DealClient | undefined = undefined;
 let dealClientPrivKey: string | undefined = undefined;
 
 export async function getDealClient() {
-  const chainEnv = await ensureChainEnv();
-
-  const privKey =
-    chainFlags[PRIV_KEY_FLAG_NAME] ??
-    // use default wallet key for local network
-    (chainEnv === "local" ? LOCAL_NET_DEFAULT_WALLET_KEY : undefined);
+  const privKey = chainFlags[PRIV_KEY_FLAG_NAME];
 
   if (
-    signerOrWallet === undefined ||
+    providerOrWallet === undefined ||
     dealClient === undefined ||
     dealClientPrivKey !== privKey
   ) {
     dealClientPrivKey = privKey;
 
-    signerOrWallet = await (privKey === undefined
-      ? getWalletConnectProvider()
+    providerOrWallet = await (privKey === undefined
+      ? ensureProvider()
       : getWallet(privKey));
 
-    dealClient = await createDealClient(signerOrWallet);
+    dealClient = await createDealClient(providerOrWallet);
   }
 
-  return { dealClient, signerOrWallet };
+  return { dealClient, providerOrWallet };
+}
+
+export async function getSignerAddress() {
+  const { providerOrWallet } = await getDealClient();
+
+  return "address" in providerOrWallet
+    ? providerOrWallet.address
+    : await getAddressFromConnector();
 }
 
 let dealMatcherClient: DealMatcherClient | undefined = undefined;
@@ -149,9 +145,7 @@ export async function getDealCliClient() {
   return dealCliClient;
 }
 
-async function createDealClient(
-  signerOrProvider: ethers.Provider | ethers.Signer,
-) {
+async function createDealClient(signerOrProvider: Provider | Signer) {
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
   const chainEnv = await ensureChainEnv();
   const client = new DealClient(signerOrProvider, chainEnv);
@@ -174,7 +168,7 @@ async function createDealClient(
   return client;
 }
 
-export async function ensureProvider(): Promise<ethers.Provider> {
+export async function ensureProvider(): Promise<Provider> {
   if (provider === undefined) {
     const { ethers } = await import("ethers");
     const chainEnv = await ensureChainEnv();
@@ -184,67 +178,7 @@ export async function ensureProvider(): Promise<ethers.Provider> {
   return provider;
 }
 
-async function getWalletConnectProvider() {
-  const { UniversalProvider } = await import(
-    "@walletconnect/universal-provider"
-  );
-
-  const provider = await UniversalProvider.init({
-    projectId: WC_PROJECT_ID,
-    metadata: WC_METADATA,
-  });
-
-  provider.on("display_uri", (uri: string) => {
-    const connectionStringUrl = new URL(uri);
-    const wc = connectionStringUrl.pathname;
-
-    const bridge = connectionStringUrl.searchParams.get(RELAY_QUERY_PARAM_NAME);
-
-    assert(typeof bridge === "string");
-    const key = connectionStringUrl.searchParams.get(KEY_QUERY_PARAM_NAME);
-    assert(typeof key === "string");
-    const url = new URL(CLI_CONNECTOR_URL);
-    url.searchParams.set(WC_QUERY_PARAM_NAME, wc);
-    url.searchParams.set(RELAY_QUERY_PARAM_NAME, bridge);
-    url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
-
-    commandObj.logToStderr(
-      `To continue, please connect your wallet using metamask by opening the following url:\n\n${urlToStr(url)}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`,
-    );
-  });
-
-  const chainEnv = await ensureChainEnv();
-  const chainId = await getChainId();
-
-  const session = await provider.connect({
-    namespaces: {
-      eip155: {
-        methods: [
-          "eth_sendTransaction",
-          "eth_signTransaction",
-          "eth_sign",
-          "personal_sign",
-          "eth_signTypedData",
-        ],
-        chains: [`eip155:${numToStr(chainId)}`],
-        events: ["chainChanged", "accountsChanged"],
-        rpcMap: { [chainId]: CHAIN_URLS[chainEnv] },
-      },
-    },
-  });
-
-  const walletAddress =
-    session?.namespaces["eip155"]?.accounts[0]?.split(":")[2];
-
-  if (walletAddress === undefined) {
-    throw new Error("Wallet address is not defined");
-  }
-
-  const { ethers } = await import("ethers");
-  return new ethers.BrowserProvider(provider).getSigner();
-}
-
-async function getWallet(privKey: string): Promise<ethers.Wallet> {
+async function getWallet(privKey: string): Promise<Wallet> {
   const { ethers } = await import("ethers");
   return new ethers.Wallet(privKey, await ensureProvider());
 }
@@ -253,14 +187,102 @@ const DEFAULT_OVERRIDES: TransactionRequest = {
   maxPriorityFeePerGas: 0,
 };
 
-export async function sign<
+export async function sendRawTransaction(
+  transactionRequest: TransactionRequest,
+) {
+  const debugInfo = methodCallToString([
+    { name: "sendTransaction" },
+    transactionRequest,
+  ]);
+
+  dbg(`sending raw transaction: ${debugInfo}`);
+
+  const { providerOrWallet } = await getDealClient();
+  const sendTransaction = providerOrWallet.sendTransaction;
+
+  let txHash: string;
+  let txReceipt: TransactionReceipt | null;
+
+  if (sendTransaction !== undefined) {
+    const { tx, res } = await setTryTimeout(
+      `executing ${color.yellow("sendTransaction")}`,
+      async function executingContractMethod() {
+        const tx = await sendTransaction(transactionRequest);
+        const res = await tx.wait();
+        return { tx, res };
+      },
+      (err) => {
+        throw err;
+      },
+      1000 * 5, // 5 seconds
+      1000,
+      (err: unknown) => {
+        return !(
+          err instanceof Error &&
+          [
+            "data=null",
+            "connection error",
+            "connection closed",
+            "Tendermint RPC error",
+          ].some((msg) => {
+            return err.message.includes(msg);
+          })
+        );
+      },
+    );
+
+    txHash = tx.hash;
+    txReceipt = res;
+  } else {
+    if (!isInteractive) {
+      commandObj.error(
+        `Please provide ${color.yellow(`--${PRIV_KEY_FLAG_NAME}`)} flag so you can sign transaction non-interactively`,
+      );
+    }
+
+    ({ txHash } = await createTransaction((): Promise<TransactionPayload> => {
+      return Promise.resolve<TransactionPayload>({
+        debugInfo,
+        name: "sendTransaction",
+        transactionData: transactionRequest,
+      });
+    }));
+
+    const { providerOrWallet } = await getDealClient();
+    const provider = providerOrWallet.provider;
+    assert(provider !== null, "Unreachable. Provider is null");
+    txReceipt = await provider.getTransactionReceipt(txHash);
+  }
+
+  assert(
+    txReceipt !== null,
+    `wasn't able to find transaction receipt for 'sendTransaction'`,
+  );
+
+  assert(
+    txReceipt.status === 1,
+    `'sendTransaction' transaction failed with status 1`,
+  );
+
+  commandObj.logToStderr(
+    `${color.yellow("sendTransaction")} transaction ${color.yellow(
+      txHash,
+    )} was mined successfully`,
+  );
+
+  return txReceipt;
+}
+
+async function doSign<
   A extends Array<unknown> = Array<unknown>,
   R = unknown,
   S extends Exclude<StateMutability, "view"> = "payable",
 >(
-  method: TypedContractMethod<A, R, S>,
-  ...originalArgs: Parameters<TypedContractMethod<A, R, S>>
+  getTransaction: () => Promise<
+    [TypedContractMethod<A, R, S>, ...Parameters<TypedContractMethod<A, R, S>>]
+  >,
 ) {
+  const [method, ...originalArgs] = await getTransaction();
   const overrides = originalArgs[originalArgs.length - 1];
 
   const hasOverrides =
@@ -272,88 +294,149 @@ export async function sign<
     ? [...originalArgs.slice(0, -1), { ...DEFAULT_OVERRIDES, ...overrides }]
     : [...originalArgs, DEFAULT_OVERRIDES];
 
-  if (
-    chainFlags[PRIV_KEY_FLAG_NAME] === undefined &&
-    (await ensureChainEnv()) !== "local"
-  ) {
-    commandObj.logToStderr(
-      `Confirm ${color.yellow(method.name)} transaction in your wallet...`,
-    );
-  }
+  const debugInfo =
+    method.name === "multicall"
+      ? batchTxMessage ??
+        (() => {
+          throw new Error(
+            "Unreachable. batchTxMessage is supposed to be set up when creating multicall",
+          );
+        })()
+      : methodCallToString([method, ...args]);
 
-  if (method.name !== "multicall") {
-    const debugInfo = `calling contract method: ${methodCallToString([
-      method,
-      ...args,
-    ])}`;
-
-    dbg(debugInfo);
-  }
-
-  const { tx, res } = await setTryTimeout(
-    `execute ${color.yellow(method.name)} blockchain method`,
-    async function executingContractMethod() {
-      const tx = await method(...args);
-      const res = await tx.wait();
-      return { tx, res };
-    },
-    (err) => {
-      throw err;
-    },
-    1000 * 5, // 5 seconds
-    1000,
-    (err: unknown) => {
-      return !(
-        err instanceof Error &&
-        [
-          "data=null",
-          "connection error",
-          "connection closed",
-          "Tendermint RPC error",
-        ].some((msg) => {
-          return err.message.includes(msg);
-        })
-      );
-    },
+  dbg(
+    method.name === "multicall"
+      ? `${color.yellow("MULTICALL START")}:\n${debugInfo}\n${color.yellow("MULTICALL END")}`
+      : `calling contract method: ${debugInfo}`,
   );
 
-  assert(res !== null, `'${method.name}' transaction hash is not defined`);
-  assert(res.status === 1, `'${method.name}' transaction failed with status 1`);
+  let txHash: string;
+  let txReceipt: TransactionReceipt | null;
+
+  if (typeof chainFlags[PRIV_KEY_FLAG_NAME] === "string") {
+    const { tx, res } = await setTryTimeout(
+      `executing ${color.yellow(method.name)} contract method`,
+      async function executingContractMethod() {
+        const tx = await method(...args);
+        const res = await tx.wait();
+        return { tx, res };
+      },
+      (err) => {
+        throw err;
+      },
+      1000 * 5, // 5 seconds
+      1000,
+      (err: unknown) => {
+        return !(
+          err instanceof Error &&
+          [
+            "data=null",
+            "connection error",
+            "connection closed",
+            "Tendermint RPC error",
+          ].some((msg) => {
+            return err.message.includes(msg);
+          })
+        );
+      },
+    );
+
+    txHash = tx.hash;
+    txReceipt = res;
+  } else {
+    if (!isInteractive) {
+      commandObj.error(
+        `Please provide ${color.yellow(`--${PRIV_KEY_FLAG_NAME}`)} flag so you can sign transaction non-interactively`,
+      );
+    }
+
+    ({ txHash } = await createTransaction(
+      async (): Promise<TransactionPayload> => {
+        const [method, ...originalArgs] = await getTransaction();
+
+        // @ts-expect-error this probably impossible to type correctly with current TypeScript compiler
+        const args: Parameters<TypedContractMethod<A, R, S>> = hasOverrides
+          ? [
+              ...originalArgs.slice(0, -1),
+              { ...DEFAULT_OVERRIDES, ...overrides },
+            ]
+          : [...originalArgs, DEFAULT_OVERRIDES];
+
+        return {
+          debugInfo,
+          name: method.name,
+          transactionData: await method.populateTransaction(...args),
+        };
+      },
+    ));
+
+    const { providerOrWallet } = await getDealClient();
+    const provider = providerOrWallet.provider;
+    assert(provider !== null, "Unreachable. Provider is null");
+    txReceipt = await provider.getTransactionReceipt(txHash);
+  }
+
+  assert(
+    txReceipt !== null,
+    `wasn't able to find transaction receipt for '${method.name}'`,
+  );
+
+  assert(
+    txReceipt.status === 1,
+    `'${method.name}' transaction failed with status 1`,
+  );
 
   commandObj.logToStderr(
     `${color.yellow(method.name)} transaction ${color.yellow(
-      tx.hash,
+      txHash,
     )} was mined successfully`,
   );
 
-  return res;
+  return txReceipt;
+}
+
+export async function sign<
+  A extends Array<unknown> = Array<unknown>,
+  R = unknown,
+  S extends Exclude<StateMutability, "view"> = "payable",
+>(
+  method: TypedContractMethod<A, R, S>,
+  ...originalArgs: Parameters<TypedContractMethod<A, R, S>>
+) {
+  return doSign(() => {
+    return Promise.resolve([method, ...originalArgs] as const);
+  });
 }
 
 export function populateTx<T extends unknown[]>(
   method: {
-    populateTransaction: (...args: T) => Promise<ethers.ContractTransaction>;
+    populateTransaction: (...args: T) => Promise<ContractTransaction>;
     name: string;
   },
   ...args: T
 ): {
-  populated: Promise<ethers.ContractTransaction>;
+  populate: () => Promise<ContractTransaction>;
   debugInfo: [{ name: string }, ...unknown[]];
 } {
   return {
-    populated: method.populateTransaction(...args),
+    populate: () => {
+      return method.populateTransaction(...args);
+    },
     debugInfo: [method, ...args],
   };
 }
 
 const BATCH_SIZE = 10;
 
+let batchTxMessage: string | undefined;
+
 export async function signBatch(
   populatedTxsWithDebugInfo: Array<ReturnType<typeof populateTx>>,
 ) {
   const populatedTxsWithDebugInfoResolved = await Promise.all(
-    populatedTxsWithDebugInfo.map(async ({ populated, debugInfo }) => {
+    populatedTxsWithDebugInfo.map(async ({ populate, debugInfo }) => {
       return {
-        populated: await populated,
+        populated: await populate(),
         debugInfo,
       };
     }),
@@ -377,32 +460,31 @@ export async function signBatch(
     throw new Error("All transactions must be to the same address");
   }
 
-  const populatedTxsChunked = chunk(
-    populatedTxsWithDebugInfoResolved,
-    BATCH_SIZE,
-  );
+  const populatedTxsChunked = chunk(populatedTxsWithDebugInfo, BATCH_SIZE);
 
   const { Multicall__factory } = await import("@fluencelabs/deal-ts-clients");
-  const { signerOrWallet } = await getDealClient();
-  const { multicall } = Multicall__factory.connect(firstAddr, signerOrWallet);
+  const { providerOrWallet } = await getDealClient();
+  const { multicall } = Multicall__factory.connect(firstAddr, providerOrWallet);
   const receipts = [];
 
   for (const txs of populatedTxsChunked) {
-    dbg(
-      `${color.yellow("MULTICALL START")}:\n${txs
-        .map(({ debugInfo }) => {
-          return methodCallToString(debugInfo);
-        })
-        .join("\n")}\n${color.yellow("MULTICALL END")}`,
-    );
+    batchTxMessage = txs
+      .map(({ debugInfo }) => {
+        return methodCallToString(debugInfo);
+      })
+      .join("\n");
 
     receipts.push(
-      await sign(
-        multicall,
-        txs.map(({ populated: { data } }) => {
-          return data;
-        }),
-      ),
+      await doSign(async () => {
+        return [
+          multicall,
+          await Promise.all(
+            txs.map(async ({ populate }) => {
+              return (await populate()).data;
+            }),
+          ),
+        ];
+      }),
     );
   }
 
@@ -426,7 +508,7 @@ type Contract<T> = {
 };
 
 type GetEventValueArgs<T extends string, U extends Contract<T>> = {
-  txReceipt: ethers.TransactionReceipt;
+  txReceipt: TransactionReceipt;
   contract: U;
   eventName: T;
   value: string;
@@ -460,7 +542,7 @@ export function getEventValue<T extends string, U extends Contract<T>>({
 }
 
 type GetEventValueFromReceiptsArgs<T extends string, U extends Contract<T>> = {
-  txReceipts: ethers.TransactionReceipt[];
+  txReceipts: TransactionReceipt[];
   contract: U;
   eventName: T;
   value: string;

@@ -102,10 +102,6 @@ jobs:
 
       - run: yarn install
 
-      - name: Patch oclif
-        run: yarn patch-oclif
-        working-directory: scripts
-
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
@@ -155,6 +151,12 @@ jobs:
 
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
+
+      - name: Rename archive
+        run: mv cli/dist/fluence-*${{ inputs.platform }}*.tar.gz cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}.tar.gz
+
+      - name: Rename buildmanifest
+        run: mv cli/dist/fluence-*${{ inputs.platform }}*-buildmanifest cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}-buildmanifest
 
       - name: Upload fluence-cli
         if: inputs.upload-to-s3 == true

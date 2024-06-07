@@ -20,6 +20,7 @@ import { join, resolve } from "node:path";
 import { compileFromPath } from "@fluencelabs/aqua-api";
 import aquaToJs from "@fluencelabs/aqua-to-js";
 import { gatherImportsFromNpm } from "@fluencelabs/npm-aqua-compiler";
+import { jsonStringify } from "@repo/common";
 
 import {
   AQUA_DEPENDENCIES_DIR_NAME,
@@ -27,7 +28,6 @@ import {
   FS_OPTIONS,
   NODE_MODULES_DIR_NAME,
 } from "./lib/const.js";
-import { jsonStringify } from "./lib/helpers/utils.js";
 import { versions } from "./versions.js";
 
 const WORKSPACE_NODE_MODULES_PATH = resolve("..", NODE_MODULES_DIR_NAME);

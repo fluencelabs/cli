@@ -1,24 +1,28 @@
 {
   "name": "fluence-cli-monorepo",
   "private": true,
+  "type": "module",
   "workspaces": [
     "cli",
-    "scripts"
+    "packages/*"
   ],
   "scripts": {
-    "before-build": "turbo run before-build --cache-dir=.turbo",
-    "build-cli": "turbo run build-cli --cache-dir=.turbo",
+    "build": "turbo run build --cache-dir=.turbo",
+    "on-each-commit": "turbo run on-each-commit --cache-dir=.turbo",
     "pack-linux-x64": "turbo run pack-linux-x64 --cache-dir=.turbo",
     "pack-darwin-x64": "turbo run pack-darwin-x64 --cache-dir=.turbo",
     "pack-darwin-arm64": "turbo run pack-darwin-arm64 --cache-dir=.turbo",
     "pack-win32-x64": "turbo run pack-win32-x64 --cache-dir=.turbo",
-    "pack-ci": "turbo run pack-ci --cache-dir=.turbo"
+    "pack-ci": "turbo run pack-ci --cache-dir=.turbo",
+    "format": "prettier --write \"**/*.{ts,js,tsx}\""
   },
   "devDependencies": {
-    "turbo": "^1.12.4"
+    "prettier": "3.2.5",
+    "turbo": "1.13.3"
   },
   "packageManager": "yarn@4.2.2",
   "engines": {
     "node": "18.20.3"
-  }
+  },
+  "prettier": {}
 }
