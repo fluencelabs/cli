@@ -183,6 +183,12 @@ jobs:
           registry-url: "https://npm.fluence.dev"
           cache: "yarn"
 
+      - name: Configure yarn to publish to private registry
+        run: |
+          yarn config set npmRegistryServer "https://npm.fluence.dev"
+          yarn config set npmAlwaysAuth true
+          yarn config set npmAuthToken $NODE_AUTH_TOKEN
+
       - run: yarn install
 
       - name: Set js-client version
@@ -293,12 +299,3 @@ jobs:
             -X POST \
             -H "Content-Type: application/json" \
             --data '{"id":0,"jsonrpc":"2.0","method":"anvil_dumpState","params":[]}'
-
-      - name: Stop containers
-        if: always()
-        working-directory: cli/test/tmp/templates/quickstart
-        run: ../../../../dist/fluence/bin/node --no-warnings ../../../../dist/fluence/bin/run.js local down -v
-
-      - name: Cleanup
-        if: always()
-        run: rm -rf tmp ~/.fluence
