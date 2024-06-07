@@ -16,6 +16,7 @@ html {
   font-size: 18px;
   min-height: 100%;
   font-family: sans-serif;
+  padding-top: 10vh;
 }
 
 body {

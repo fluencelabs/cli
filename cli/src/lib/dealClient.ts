@@ -324,10 +324,12 @@ async function doSign<
       : `calling contract method: ${debugInfo}`,
   );
 
+  const { providerOrWallet } = await getDealClient();
+
   let txHash: string;
   let txReceipt: TransactionReceipt | null;
 
-  if (typeof chainFlags[PRIV_KEY_FLAG_NAME] === "string") {
+  if (providerOrWallet.sendTransaction !== undefined) {
     const { tx, res } = await setTryTimeout(
       `executing ${color.yellow(method.name)} contract method`,
       async function executingContractMethod() {
