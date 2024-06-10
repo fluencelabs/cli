@@ -18,6 +18,7 @@ import { rm } from "node:fs/promises";
 import { join } from "node:path";
 
 import { Flags } from "@oclif/core";
+import { LOCAL_NET_DEFAULT_WALLET_KEY } from "@repo/common";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
@@ -25,6 +26,7 @@ import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
+import { setChainFlags } from "../../lib/chainFlags.js";
 import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
 import {
   initNewReadonlyDockerComposeConfig,
@@ -44,6 +46,7 @@ import {
   PRIV_KEY_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
+  PRIV_KEY_FLAG_NAME,
 } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
@@ -51,7 +54,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Up extends BaseCommand<typeof Up> {
-  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using all the offers from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} config`;
+  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using all the offers from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} config using default wallet key ${LOCAL_NET_DEFAULT_WALLET_KEY}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -96,6 +99,11 @@ export default class Up extends BaseCommand<typeof Up> {
       this,
       await this.parse(Up),
     );
+
+    setChainFlags({
+      env: "local",
+      [PRIV_KEY_FLAG_NAME]: LOCAL_NET_DEFAULT_WALLET_KEY,
+    });
 
     if (flags.reset) {
       const dirPath = dockerComposeDirPath();

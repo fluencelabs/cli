@@ -18,11 +18,12 @@ import { AssertionError } from "node:assert";
 
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
+import { jsonStringify } from "@repo/common";
 
 import { commandObj } from "../commandObj.js";
 import { dbg } from "../dbg.js";
 
-import { bigintToStr, numToStr } from "./typesafeStringify.js";
+import { numToStr } from "./typesafeStringify.js";
 
 export function commaSepStrToArr(commaSepStr: string) {
   return commaSepStr.split(",").map((s) => {
@@ -47,24 +48,6 @@ function comment(commentToken: string) {
 
 export const jsComment = comment("//");
 export const aquaComment = comment("--");
-
-export function jsonStringify(unknown: unknown): string {
-  return JSON.stringify(
-    unknown,
-    (_key, value: unknown) => {
-      if (value instanceof Uint8Array) {
-        return `Uint8Array<${JSON.stringify([...value])}>`;
-      }
-
-      if (typeof value === "bigint") {
-        return bigintToStr(value);
-      }
-
-      return value;
-    },
-    2,
-  );
-}
 
 /**
  * Used for error stringification cause one can throw anything in js (not only errors)

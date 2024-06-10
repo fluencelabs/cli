@@ -16,10 +16,8 @@
 
 import { isAbsolute } from "node:path";
 
+import { CHAIN_ENV, getIsUnion } from "@repo/common";
 import dotenv from "dotenv";
-
-import { type ChainENV, FLUENCE_ENVS } from "./const.js";
-import { getIsStringUnion } from "./typeHelpers.js";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
@@ -71,13 +69,7 @@ const isAbsolutePath = (v: unknown): v is string => {
   return typeof v === "string" && isAbsolute(v);
 };
 
-const isFluenceEnvWithoutCustom = getIsStringUnion(
-  FLUENCE_ENVS.filter((e): e is ChainENV => {
-    return e !== "custom";
-  }),
-);
-
-setEnvVariable(FLUENCE_ENV, isFluenceEnvWithoutCustom, "local");
+setEnvVariable(FLUENCE_ENV, getIsUnion(CHAIN_ENV), "local");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
 setEnvVariable(CI, isTrueOrFalseString, "false");
 setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);

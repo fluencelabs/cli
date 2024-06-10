@@ -1,7 +1,6 @@
 {
   "extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
   "compilerOptions": {
-    "declaration": true,
     "importHelpers": true,
     "outDir": "dist",
     "rootDir": "src",

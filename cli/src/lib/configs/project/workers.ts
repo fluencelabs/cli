@@ -16,6 +16,11 @@
 
 import { join } from "path";
 
+import {
+  CHAIN_ENV,
+  type ChainENV,
+  DEFAULT_PUBLIC_FLUENCE_ENV,
+} from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
 
@@ -25,13 +30,10 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   WORKERS_CONFIG_FILE_NAME,
   CLI_NAME,
-  type ChainENV,
-  CHAIN_ENV,
   DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_WORKER_NAME,
   type FluenceEnv,
   FLUENCE_ENVS,
-  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "../../const.js";
 import { getFluenceDir } from "../../paths.js";
 import { fluenceEnvPrompt } from "../../resolveFluenceEnv.js";

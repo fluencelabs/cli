@@ -19,6 +19,7 @@ import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { color } from "@oclif/color";
+import { DEFAULT_PUBLIC_FLUENCE_ENV } from "@repo/common";
 import cloneDeep from "lodash-es/cloneDeep.js";
 import merge from "lodash-es/merge.js";
 import sum from "lodash-es/sum.js";
@@ -69,7 +70,6 @@ import {
   MIN_MEMORY_PER_MODULE_STR,
   DEPLOYMENT_NAMES_ARG_NAME,
   MODULE_CONFIG_FULL_FILE_NAME,
-  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import {

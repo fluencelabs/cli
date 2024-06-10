@@ -1,40 +1,47 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
-    "before-build": {
+    "build": {
       "outputs": [
+        "dist/**",
         "src/aqua-dependencies/**",
         "src/cli-aqua-dependencies/**",
         "src/lib/compiled-aqua/**",
         "src/lib/compiled-aqua-with-tracing/**",
         "src/versions/**"
       ],
-      "inputs": ["src/**", "package.json", "tsconfig.json"]
-    },
-    "build-cli": {
-      "outputs": ["dist/**"],
       "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["before-build"]
+      "dependsOn": ["^build"]
+    },
+    "on-each-commit": {
+      "inputs": [
+        "bin/**",
+        "src/**",
+        "package.json",
+        "tsconfig.json",
+        "eslint.config.js"
+      ],
+      "dependsOn": ["^build", "build"]
     },
     "pack-ci": {
       "outputs": ["dist/**"],
       "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build-cli"]
+      "dependsOn": ["build"]
     },
     "pack-linux-x64": {
       "outputs": ["dist/**"],
       "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build-cli"]
+      "dependsOn": ["build"]
     },
     "pack-darwin-x64": {
       "outputs": ["dist/**"],
       "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build-cli"]
+      "dependsOn": ["build"]
     },
     "pack-darwin-arm64": {
       "outputs": ["dist/**"],
       "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build-cli"]
+      "dependsOn": ["build"]
     },
     "pack-win32-x64": {
       "outputs": ["dist/**"],
@@ -45,7 +52,7 @@
         "tsconfig.json",
         "nsis/**"
       ],
-      "dependsOn": ["build-cli"]
+      "dependsOn": ["build"]
     }
   }
 }

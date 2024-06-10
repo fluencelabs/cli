@@ -15,9 +15,9 @@
  */
 
 import { color } from "@oclif/color";
+import { BLOCK_SCOUT_URLS } from "@repo/common";
 
 import { commandObj } from "../commandObj.js";
-import { type ChainENV } from "../const.js";
 import { type DealNameAndId } from "../deal.js";
 import { getReadonlyDealClient } from "../dealClient.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
@@ -25,12 +25,6 @@ import { bigintToStr } from "../helpers/typesafeStringify.js";
 
 import { peerIdHexStringToBase58String } from "./conversions.js";
 import { ptFormatWithSymbol } from "./currencies.js";
-
-const blockScoutUrls: Record<Exclude<ChainENV, "local">, string> = {
-  kras: "https://blockscout.kras.fluence.dev/address/",
-  dar: "https://blockscout.dar.fluence.dev/address/",
-  stage: "https://blockscout-stage.fluence.dev/address/",
-};
 
 export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   const { readonlyDealClient } = await getReadonlyDealClient();
@@ -41,7 +35,7 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   const { DealStatus } = await import("@fluencelabs/deal-ts-clients");
 
   if (env !== "local") {
-    commandObj.log(`Deal: ${blockScoutUrls[env]}${dealId}`);
+    commandObj.log(`Deal: ${BLOCK_SCOUT_URLS[env]}address/${dealId}`);
   }
 
   commandObj.log(`DealID: "${dealId}"`);

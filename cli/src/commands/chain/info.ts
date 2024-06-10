@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import { jsonStringify, LOCAL_NET_DEFAULT_ACCOUNTS } from "@repo/common";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { LOCAL_NET_DEFAULT_ACCOUNTS } from "../../lib/accounts.js";
 import { getChainId } from "../../lib/chain/chainId.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
 import { ensureChainEnv } from "../../lib/ensureChainNetwork.js";
-import { jsonStringify } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Info extends BaseCommand<typeof Info> {

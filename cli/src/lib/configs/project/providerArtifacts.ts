@@ -16,6 +16,7 @@
 
 import { join } from "path";
 
+import { DEFAULT_PUBLIC_FLUENCE_ENV } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
@@ -24,7 +25,6 @@ import {
   PROVIDER_ARTIFACTS_CONFIG_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
-  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "../../const.js";
 import {
   ensureProviderArtifactsConfigPath,

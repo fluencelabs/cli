@@ -22,6 +22,7 @@ import type { CompileFuncCallFromPathArgs } from "@fluencelabs/aqua-api";
 import type { js2aqua } from "@fluencelabs/js-client";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
+import { jsonStringify } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
@@ -48,7 +49,7 @@ import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   INPUT_FLAG_EXPLANATION,
 } from "../lib/const.js";
-import { jsonStringify, splitErrorsAndResults } from "../lib/helpers/utils.js";
+import { splitErrorsAndResults } from "../lib/helpers/utils.js";
 import { disconnectFluenceClient, initFluenceClient } from "../lib/jsClient.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { projectRootDir } from "../lib/paths.js";

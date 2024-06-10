@@ -18,6 +18,8 @@ import assert from "node:assert";
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { jsonStringify } from "@repo/common";
+
 import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
 import { envSchema } from "./lib/configs/project/env.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
@@ -48,7 +50,6 @@ import {
   PROVIDER_ARTIFACTS_CONFIG_FILE_NAME,
 } from "./lib/const.js";
 import { execPromise } from "./lib/execPromise.js";
-import { jsonStringify } from "./lib/helpers/utils.js";
 import CLIPackageJSON from "./versions/cli.package.json";
 
 const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
