@@ -1,203 +1,28 @@
 {
-  "name": "@fluencelabs/cli",
-  "version": "0.16.3",
-  "description": "CLI for working with Fluence network",
-  "keywords": [
-    "fluence",
-    "oclif"
-  ],
-  "homepage": "https://github.com/fluencelabs/cli",
-  "bugs": "https://github.com/fluencelabs/cli/issues",
-  "repository": "fluencelabs/cli",
-  "license": "Apache-2.0",
-  "author": "Fluence Labs",
+  "name": "fluence-cli-monorepo",
+  "private": true,
   "type": "module",
-  "exports": "./lib/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "fluence": "./bin/run.js"
-  },
-  "files": [
-    "/bin",
-    "/dist",
-    "/oclif.manifest.json"
+  "workspaces": [
+    "cli",
+    "packages/*"
   ],
   "scripts": {
-    "before-build": "npm i --prefix './src/cli-aqua-dependencies' && node --loader ts-node/esm --no-warnings src/beforeBuild.ts && npm i --prefix './src/aqua-dependencies'",
-    "build": "shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies",
-    "lint": "eslint .",
-    "lint-fix": "eslint . --fix",
-    "prettier": "prettier --write .",
-    "find-dead-code": "ts-prune",
-    "postpack": "shx rm -f oclif.manifest.json",
-    "before-pack": "yarn clean && yarn before-build",
-    "prepack": "yarn before-pack && yarn build",
-    "vitest-deal-deploy": "vitest run dealDeploy.test.ts",
-    "vitest-deal-update": "vitest run dealUpdate.test.ts",
-    "vitest-smoke": "vitest run smoke.test.ts",
-    "vitest-js-to-aqua": "vitest run jsToAqua.test.ts",
-    "vitest": "yarn vitest-deal-deploy && yarn vitest-deal-update && yarn vitest-integration && yarn vitest-js-to-aqua",
-    "clean": "shx rm -rf tmp && shx rm -rf dist",
-    "pack-linux-x64": "yarn before-pack && oclif pack tarballs -t 'linux-x64' --no-xz",
-    "pack-darwin-x64": "yarn before-pack && oclif pack tarballs -t 'darwin-x64' --no-xz",
-    "pack-darwin-arm64": "yarn before-pack && oclif pack tarballs -t 'darwin-arm64' --no-xz",
-    "pack-win32-x64": "yarn before-pack && oclif pack win --targets 'win32-x64'",
-    "pack": "yarn before-pack && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64,win32-x64' --no-xz",
-    "pack-ci": "yarn before-pack && oclif pack tarballs -t 'linux-x64,darwin-arm64' --no-xz",
-    "upload-linux-x64": "oclif upload tarballs -t 'linux-x64' --no-xz",
-    "upload-darwin-x64": "oclif upload tarballs -t 'darwin-x64' --no-xz",
-    "upload-darwin-arm64": "oclif upload tarballs -t 'darwin-arm64' --no-xz",
-    "upload-win32-x64": "oclif upload tarballs -t 'win32-x64' --no-xz && oclif upload win --targets 'win32-x64'",
-    "test-linux-x64": "yarn pack-linux-x64 && yarn test",
-    "test-darwin-x64": "yarn pack-darwin-x64 && yarn test",
-    "test-darwin-arm64": "yarn pack-darwin-arm64 && yarn test",
-    "test-win32-x64": "yarn pack-win32-x64 && yarn test",
-    "download-marine-and-mrepl": "node --loader ts-node/esm --no-warnings ./test/setup/downloadMarineAndMrepl.ts",
-    "generate-templates": "node --loader ts-node/esm --no-warnings ./test/setup/generateTemplates.ts",
-    "local-up": "node --loader ts-node/esm --no-warnings ./test/setup/localUp.ts",
-    "test": "yarn download-marine-and-mrepl && yarn generate-templates && yarn local-up && yarn vitest",
-    "check": "yarn before-build && yarn build && yarn lint-fix && yarn prettier && yarn circular",
-    "circular": "madge --circular ./dist",
-    "on-each-commit": "yarn check && cd docs/commands && oclif readme --no-aliases && yarn gen-config-docs",
-    "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && tsx ./src/genConfigDocs.ts",
-    "unused-exports": "ts-unused-exports tsconfig.json",
-    "ncu": "ncu -x ethers -x @types/node -x @walletconnect/universal-provider -u && ncu -f '@fluencelabs/*' --target newest -u",
-    "oclif-pack": "yarn before-pack && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64' --no-xz",
-    "oclif-upload": "oclif upload tarballs -t 'linux-x64,darwin-x64,darwin-arm64'"
-  },
-  "dependencies": {
-    "@fluencelabs/air-beautify-wasm": "0.3.9",
-    "@fluencelabs/aqua-api": "0.14.6",
-    "@fluencelabs/aqua-to-js": "0.3.13",
-    "@fluencelabs/deal-ts-clients": "0.13.11",
-    "@fluencelabs/fluence-network-environment": "1.2.1",
-    "@fluencelabs/js-client": "0.9.0",
-    "@fluencelabs/npm-aqua-compiler": "0.0.3",
-    "@iarna/toml": "2.2.5",
-    "@mswjs/interceptors": "0.29.1",
-    "@multiformats/multiaddr": "12.2.1",
-    "@oclif/color": "1.0.13",
-    "@oclif/core": "3.26.6",
-    "@oclif/plugin-autocomplete": "3.0.17",
-    "@oclif/plugin-help": "6.0.21",
-    "@oclif/plugin-not-found": "3.1.8",
-    "@oclif/plugin-update": "4.2.11",
-    "@walletconnect/universal-provider": "2.4.7",
-    "ajv": "8.13.0",
-    "chokidar": "3.6.0",
-    "countly-sdk-nodejs": "22.6.0",
-    "debug": "4.3.4",
-    "dotenv": "16.4.5",
-    "ethers": "6.7.1",
-    "filenamify": "6.0.0",
-    "inquirer": "9.2.20",
-    "ipfs-http-client": "60.0.1",
-    "lodash-es": "4.17.21",
-    "lokijs": "1.5.12",
-    "multiformats": "13.1.0",
-    "node_modules-path": "2.0.7",
-    "npm": "10.7.0",
-    "parse-duration": "1.1.0",
-    "platform": "1.3.6",
-    "semver": "7.6.1",
-    "tar": "7.1.0",
-    "xbytes": "1.9.1",
-    "yaml": "2.4.2",
-    "yaml-diff-patch": "2.0.0"
+    "build": "turbo run build --cache-dir=.turbo",
+    "on-each-commit": "turbo run on-each-commit --cache-dir=.turbo",
+    "pack-linux-x64": "turbo run pack-linux-x64 --cache-dir=.turbo",
+    "pack-darwin-x64": "turbo run pack-darwin-x64 --cache-dir=.turbo",
+    "pack-darwin-arm64": "turbo run pack-darwin-arm64 --cache-dir=.turbo",
+    "pack-win32-x64": "turbo run pack-win32-x64 --cache-dir=.turbo",
+    "pack-ci": "turbo run pack-ci --cache-dir=.turbo",
+    "format": "prettier --write \"**/*.{ts,js,tsx}\""
   },
   "devDependencies": {
-    "@actions/core": "1.10.1",
-    "@total-typescript/ts-reset": "0.5.1",
-    "@tsconfig/node18-strictest-esm": "1.0.1",
-    "@types/debug": "4.1.12",
-    "@types/iarna__toml": "2.0.5",
-    "@types/inquirer": "9.0.7",
-    "@types/lodash-es": "4.17.12",
-    "@types/node": "^18",
-    "@types/platform": "1.3.6",
-    "@types/proper-lockfile": "4.1.4",
-    "@types/semver": "7.5.8",
-    "@types/tar": "6.1.13",
-    "eslint": "9.2.0",
-    "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-import": "2.29.1",
-    "eslint-plugin-license-header": "0.6.1",
-    "eslint-plugin-unused-imports": "3.2.0",
-    "globals": "15.1.0",
-    "globby": "14",
-    "madge": "7.0.0",
-    "npm-check-updates": "16.14.20",
-    "oclif": "npm:4.1.0",
     "prettier": "3.2.5",
-    "proper-lockfile": "4.1.2",
-    "shx": "0.3.4",
-    "ts-node": "10.9.2",
-    "ts-prune": "0.10.3",
-    "ts-unused-exports": "10.0.1",
-    "tslib": "2.6.2",
-    "tsx": "4.9.3",
-    "typescript": "5.4.5",
-    "typescript-eslint": "7.8.0",
-    "undici": "6.16.0",
-    "vitest": "1.6.0"
+    "turbo": "1.13.3"
   },
-  "oclif": {
-    "bin": "fluence",
-    "commands": "./dist/commands",
-    "dirname": "fluence",
-    "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-not-found",
-      "@oclif/plugin-autocomplete",
-      "@oclif/plugin-update"
-    ],
-    "topicSeparator": " ",
-    "topics": {
-      "aqua": {
-        "description": "Set of convenience commands for converting JSON and YAML into Aqua object literal syntax"
-      },
-      "deal": {
-        "description": "Manage deals"
-      },
-      "default": {
-        "description": "Manage and display default CLI configurations"
-      },
-      "dep": {
-        "description": "Manage project's dependencies"
-      },
-      "key": {
-        "description": "Manage secret keys, that define peer-ids of both nox and js-client (including the one inside this CLI itself)"
-      },
-      "local": {
-        "description": "Manage local fluence environment using docker-compose"
-      },
-      "module": {
-        "description": "Manage project's service modules"
-      },
-      "provider": {
-        "description": "Set of commands to be used by providers or you can use them to manage your local environment"
-      },
-      "service": {
-        "description": "Manage project's services"
-      },
-      "spell": {
-        "description": "Manage project's spells"
-      },
-      "delegator": {
-        "description": "Commands that are useful for delegators"
-      }
-    },
-    "update": {
-      "s3": {
-        "bucket": "fcli-binaries",
-        "xz": false
-      }
-    },
-    "nsisCustomization": "./nsis/custom-installer.nsi"
-  },
+  "packageManager": "yarn@4.2.2",
   "engines": {
-    "node": ">=18.0.0"
+    "node": "18.20.3"
   },
-  "prettier": {},
-  "packageManager": "yarn@3.7.0"
+  "prettier": {}
 }
