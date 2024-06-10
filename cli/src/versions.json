@@ -10,8 +10,8 @@
     "@fluencelabs/spell": "0.7.6"
   },
   "cargo": {
-    "marine": "0.19.7",
-    "mrepl": "0.30.1",
+    "marine": "0.20.1",
+    "mrepl": "0.31.0",
     "marine-rs-sdk": "0.14.0",
     "marine-rs-sdk-test": "0.16.1"
   }
