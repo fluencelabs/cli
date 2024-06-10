@@ -46,6 +46,7 @@ import {
   splitErrorsAndResults,
   stringifyUnknown,
   commaSepStrToArr,
+  jsonStringify,
 } from "../helpers/utils.js";
 import { input } from "../prompt.js";
 import {
@@ -625,6 +626,10 @@ export async function printCommitmentsInfo(flags: CCFlags) {
       )
     ).join("\n\n"),
   );
+}
+
+export async function printCommitmentsInfoJSON(flags: CCFlags) {
+  commandObj.log(jsonStringify(await getCommitmentsInfo(flags)));
 }
 
 export async function getCommitmentInfoString(

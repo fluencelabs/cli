@@ -1328,11 +1328,13 @@ Get info about capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids <value>]
+  $ fluence provider cc-info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids
+    <value>] [--json]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --json                                       Output JSON
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
