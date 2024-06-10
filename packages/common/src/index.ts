@@ -45,7 +45,7 @@ export const isChainEnv = getIsUnion(CHAIN_ENV);
 export const CHAIN_URLS_WITHOUT_LOCAL = {
   kras: "https://ipc.kras.fluence.dev",
   dar: "https://ipc.dar.fluence.dev",
-  stage: "https://ipc-stage.fluence.dev",
+  stage: "https://ipc.stage.fluence.dev",
 } as const satisfies Record<Exclude<ChainENV, "local">, string>;
 
 export const CHAIN_URLS = {
@@ -56,7 +56,7 @@ export const CHAIN_URLS = {
 export const BLOCK_SCOUT_URLS = {
   kras: "https://blockscout.kras.fluence.dev/",
   dar: "https://blockscout.dar.fluence.dev/",
-  stage: "https://blockscout-stage.fluence.dev/",
+  stage: "https://blockscout.stage.fluence.dev/",
 } as const satisfies Record<Exclude<ChainENV, "local">, string>;
 
 export type TransactionPayload = {
