@@ -88,7 +88,7 @@
     "countly-sdk-nodejs": "22.6.0",
     "debug": "4.3.4",
     "dotenv": "16.4.5",
-    "ethers": "6.7.1",
+    "ethers": "6.13.0",
     "filenamify": "6.0.0",
     "inquirer": "9.2.20",
     "ipfs-http-client": "60.0.1",
