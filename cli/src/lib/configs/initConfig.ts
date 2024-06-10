@@ -19,12 +19,13 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
 
 import { color } from "@oclif/color";
+import { jsonStringify } from "@repo/common";
 import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
 
 import { validationErrorToString } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
-import { jsonStringify, removeProperties } from "../helpers/utils.js";
+import { removeProperties } from "../helpers/utils.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 

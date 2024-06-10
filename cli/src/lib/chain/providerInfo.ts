@@ -17,7 +17,7 @@
 import { commandObj } from "../commandObj.js";
 import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
 import { CLI_NAME } from "../const.js";
-import { getDealClient, sign } from "../dealClient.js";
+import { getDealClient, sign, getSignerAddress } from "../dealClient.js";
 
 import { cidStringToCIDV1Struct } from "./conversions.js";
 
@@ -26,12 +26,10 @@ const CURRENTLY_UNUSED_CID =
 
 export async function registerProvider() {
   const providerConfig = await ensureReadonlyProviderConfig();
-  const { dealClient, signerOrWallet } = await getDealClient();
+  const { dealClient } = await getDealClient();
+  const signerAddress = await getSignerAddress();
   const market = dealClient.getMarket();
-
-  const initialProviderInfo = await market.getProviderInfo(
-    signerOrWallet.address,
-  );
+  const initialProviderInfo = await market.getProviderInfo(signerAddress);
 
   if (initialProviderInfo.name.length > 0) {
     commandObj.error(
@@ -45,7 +43,7 @@ export async function registerProvider() {
     await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),
   );
 
-  const providerInfo = await market.getProviderInfo(signerOrWallet.address);
+  const providerInfo = await market.getProviderInfo(signerAddress);
 
   if (providerInfo.name.length === 0) {
     commandObj.error(
@@ -58,18 +56,16 @@ Provider successfully registered!
 
 Provider name: ${providerInfo.name}
 
-Provider address: ${signerOrWallet.address}
+Provider address: ${signerAddress}
 `);
 }
 
 export async function updateProvider() {
   const providerConfig = await ensureReadonlyProviderConfig();
-  const { dealClient, signerOrWallet } = await getDealClient();
+  const { dealClient } = await getDealClient();
+  const signerAddress = await getSignerAddress();
   const market = dealClient.getMarket();
-
-  const initialProviderInfo = await market.getProviderInfo(
-    signerOrWallet.address,
-  );
+  const initialProviderInfo = await market.getProviderInfo(signerAddress);
 
   if (initialProviderInfo.name.length === 0) {
     commandObj.error(
@@ -83,7 +79,7 @@ export async function updateProvider() {
     await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),
   );
 
-  const providerInfo = await market.getProviderInfo(signerOrWallet.address);
+  const providerInfo = await market.getProviderInfo(signerAddress);
 
   if (providerInfo.name.length === 0) {
     commandObj.error(
@@ -96,17 +92,16 @@ Provider successfully updated!
 
 Provider name: ${providerInfo.name}
 
-Provider address: ${signerOrWallet.address}
+Provider address: ${signerAddress}
 `);
 }
 
 export async function assertProviderIsRegistered() {
-  const { dealClient, signerOrWallet } = await getDealClient();
+  const { dealClient } = await getDealClient();
+  const signerAddress = await getSignerAddress();
   const market = dealClient.getMarket();
 
-  const initialProviderInfo = await market.getProviderInfo(
-    signerOrWallet.address,
-  );
+  const initialProviderInfo = await market.getProviderInfo(signerAddress);
 
   if (initialProviderInfo.name.length === 0) {
     commandObj.error(

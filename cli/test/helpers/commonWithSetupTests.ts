@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { access, readdir, rm } from "node:fs/promises";
+import { readdir, rm } from "node:fs/promises";
 import { arch, platform } from "node:os";
 import { join } from "node:path";
 
@@ -36,30 +36,25 @@ type CliArg = {
 const pathToDistDir = join(process.cwd(), "dist");
 const pathToCliDir = join(pathToDistDir, CLI_NAME);
 
-try {
-  await access(pathToCliDir);
-} catch {
-  const files = await readdir(pathToDistDir);
+const files = await readdir(pathToDistDir);
 
-  const archiveWithCLIFileName = files.find((name) => {
-    return (
-      name.startsWith(CLI_NAME) &&
-      name.endsWith(`${platform()}-${arch()}.tar.gz`)
-    );
-  });
-
-  assert(
-    archiveWithCLIFileName !== undefined,
-    "After successful build there should be an archive with CLI in the dist directory",
+const archiveWithCLIFileName = files.find((name) => {
+  return (
+    name.startsWith(CLI_NAME) && name.endsWith(`${platform()}-${arch()}.tar.gz`)
   );
+});
 
-  await rm(pathToCliDir, { recursive: true, force: true });
+assert(
+  archiveWithCLIFileName !== undefined,
+  "After successful build there should be an archive with CLI in the dist directory",
+);
 
-  await tar({
-    cwd: pathToDistDir,
-    file: join(pathToDistDir, archiveWithCLIFileName),
-  });
-}
+await rm(pathToCliDir, { recursive: true, force: true });
+
+await tar({
+  cwd: pathToDistDir,
+  file: join(pathToDistDir, archiveWithCLIFileName),
+});
 
 const pathToBinDir = join(pathToCliDir, "bin");
 const pathToCliRunJS = join(pathToBinDir, "run.js");

@@ -36,13 +36,15 @@ export async function depositToDeal(
   const parsedAmount = await ptParse(amount);
   const deals = await getDeals(flagsAndArgs);
   const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
-  const { dealClient, signerOrWallet } = await getDealClient();
+
+  const { dealClient, providerOrWallet } = await getDealClient();
 
   for (const { dealName, dealId } of deals) {
     const deal = dealClient.getDeal(dealId);
 
     await sign(
-      ERC20__factory.connect(await deal.paymentToken(), signerOrWallet).approve,
+      ERC20__factory.connect(await deal.paymentToken(), providerOrWallet)
+        .approve,
       await deal.getAddress(),
       parsedAmount,
     );

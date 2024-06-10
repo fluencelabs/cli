@@ -17,6 +17,7 @@
 import assert from "assert";
 import { join, relative } from "path";
 
+import { CHAIN_RPC_PORT } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -24,7 +25,6 @@ import { versions } from "../../../versions.js";
 import {
   CHAIN_DEPLOY_SCRIPT_NAME,
   CHAIN_RPC_CONTAINER_NAME,
-  CHAIN_RPC_PORT,
   CONFIGS_DIR_NAME,
   DOCKER_COMPOSE_FILE_NAME,
   GRAPH_NODE_CONTAINER_NAME,

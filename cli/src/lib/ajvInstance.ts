@@ -15,10 +15,10 @@
  */
 
 import { color } from "@oclif/color";
+import { jsonStringify } from "@repo/common";
 import Ajv from "ajv";
 
 import { numToStr } from "./helpers/typesafeStringify.js";
-import { jsonStringify } from "./helpers/utils.js";
 
 export const ajv = new Ajv.default({
   allowUnionTypes: true,

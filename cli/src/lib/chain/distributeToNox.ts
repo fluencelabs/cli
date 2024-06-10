@@ -17,7 +17,6 @@
 import assert from "assert";
 
 import { color } from "@oclif/color";
-import { ethers } from "ethers";
 
 import { setChainFlags, chainFlags } from "../chainFlags.js";
 import { commandObj } from "../commandObj.js";
@@ -28,7 +27,11 @@ import {
   PRIV_KEY_FLAG_NAME,
   MAX_TOKEN_AMOUNT_KEYWORD,
 } from "../const.js";
-import { getDealClient } from "../dealClient.js";
+import {
+  getDealClient,
+  sendRawTransaction,
+  getSignerAddress,
+} from "../dealClient.js";
 import { input } from "../prompt.js";
 import { resolveComputePeersByNames } from "../resolveComputePeersByNames.js";
 
@@ -40,7 +43,6 @@ export async function distributeToNox(flags: {
   [OFFER_FLAG_NAME]?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
-  const { signerOrWallet } = await getDealClient();
 
   const amount =
     flags.amount ??
@@ -52,17 +54,15 @@ export async function distributeToNox(flags: {
   const formattedAmount = color.yellow(await fltFormatWithSymbol(parsedAmount));
 
   for (const computePeer of computePeers) {
-    const txResponse = await signerOrWallet.sendTransaction({
+    const txReceipt = await sendRawTransaction({
       to: computePeer.walletAddress,
       value: parsedAmount,
     });
 
-    const tx = await txResponse.wait();
-
     commandObj.logToStderr(
       `Successfully distributed ${formattedAmount} to ${color.yellow(
         computePeer.name,
-      )} with tx hash: ${color.yellow(tx?.hash)}`,
+      )} with tx hash: ${color.yellow(txReceipt.hash)}`,
     );
   }
 }
@@ -72,8 +72,6 @@ export async function withdrawFromNox(flags: {
   [NOX_NAMES_FLAG_NAME]?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
-  const { signerOrWallet } = await getDealClient();
-  const providerWalletAddress = await signerOrWallet.getAddress();
 
   const amount =
     flags.amount ??
@@ -108,41 +106,33 @@ export async function withdrawFromNox(flags: {
       [PRIV_KEY_FLAG_NAME]: walletKey,
     });
 
-    const { signerOrWallet } = await getDealClient();
-
-    const { amountBigInt, txResponse } =
+    const { amountBigInt, txReceipt } =
       amount === MAX_TOKEN_AMOUNT_KEYWORD
-        ? await withdrawMaxAmount(signerOrWallet, providerWalletAddress)
-        : await withdrawSpecificAmount(
-            await fltParse(amount),
-            signerOrWallet,
-            providerWalletAddress,
-          );
+        ? await withdrawMaxAmount()
+        : await withdrawSpecificAmount(await fltParse(amount));
 
     const formattedAmount = color.yellow(
       await fltFormatWithSymbol(amountBigInt),
     );
 
-    const tx = await txResponse.wait();
-
     commandObj.logToStderr(
       `Successfully withdrawn ${formattedAmount} from ${color.yellow(
         name,
-      )} with tx hash: ${color.yellow(tx?.hash)}`,
+      )} with tx hash: ${color.yellow(txReceipt.hash)}`,
     );
   }
 }
 
-async function withdrawMaxAmount(
-  signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet,
-  providerWalletAddress: string,
-) {
-  const gasLimit = await signerOrWallet.estimateGas({
-    to: await signerOrWallet.getAddress(),
+async function withdrawMaxAmount() {
+  const { providerOrWallet } = await getDealClient();
+  const signerAddress = await getSignerAddress();
+
+  const gasLimit = await providerOrWallet.estimateGas({
+    to: signerAddress,
     value: 0n,
   });
 
-  const provider = signerOrWallet.provider;
+  const provider = providerOrWallet.provider;
   assert(provider !== null, "Unreachable. We ensure provider is not null");
   const gasPrice = await provider.getFeeData();
 
@@ -158,15 +148,12 @@ async function withdrawMaxAmount(
   const feeAmount =
     (gasPrice.maxFeePerGas + gasPrice.maxPriorityFeePerGas) * gasLimit;
 
-  const totalBalance = await provider.getBalance(
-    await signerOrWallet.getAddress(),
-  );
-
+  const totalBalance = await provider.getBalance(signerAddress);
   const amountBigInt = totalBalance - feeAmount;
 
   return {
-    txResponse: await signerOrWallet.sendTransaction({
-      to: providerWalletAddress,
+    txReceipt: await sendRawTransaction({
+      to: signerAddress,
       value: amountBigInt,
       gasLimit: gasLimit,
       maxFeePerGas: gasPrice.maxFeePerGas,
@@ -176,14 +163,10 @@ async function withdrawMaxAmount(
   };
 }
 
-async function withdrawSpecificAmount(
-  amountBigInt: bigint,
-  signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet,
-  providerWalletAddress: string,
-) {
+async function withdrawSpecificAmount(amountBigInt: bigint) {
   return {
-    txResponse: await signerOrWallet.sendTransaction({
-      to: providerWalletAddress,
+    txReceipt: await sendRawTransaction({
+      to: await getSignerAddress(),
       value: amountBigInt,
     }),
     amountBigInt,

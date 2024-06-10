@@ -21,6 +21,7 @@ import { sep as posixSep } from "node:path/posix";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
+import { jsonStringify } from "@repo/common";
 
 import {
   initNewFluenceConfig,
@@ -84,7 +85,6 @@ import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
-import { jsonStringify } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { updateRelaysJSON } from "./multiaddres.js";
 import { copyDefaultDependencies } from "./npm.js";

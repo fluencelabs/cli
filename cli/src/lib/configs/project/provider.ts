@@ -19,6 +19,7 @@ import { join } from "path";
 
 import { type JsonMap, parse } from "@iarna/toml";
 import { color } from "@oclif/color";
+import { type ChainENV, jsonStringify } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 import { isUndefined, mapValues, omitBy } from "lodash-es";
 import cloneDeep from "lodash-es/cloneDeep.js";
@@ -62,14 +63,13 @@ import {
   PT_SYMBOL,
   DEFAULT_CURL_EFFECTOR_CID,
   CHAIN_URLS_FOR_CONTAINERS,
-  type ChainENV,
   CLI_NAME,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
 import { boolToStr, numToStr } from "../../helpers/typesafeStringify.js";
-import { jsonStringify, splitErrorsAndResults } from "../../helpers/utils.js";
+import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
   type ValidationResult,
   validateCIDs,
