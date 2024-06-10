@@ -20,6 +20,11 @@ import { isAbsolute, join, relative } from "node:path";
 
 import type { CompileFromPathArgs } from "@fluencelabs/aqua-api";
 import { color } from "@oclif/color";
+import {
+  CHAIN_ENV,
+  DEFAULT_PUBLIC_FLUENCE_ENV,
+  type ChainENV,
+} from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -35,8 +40,6 @@ import {
   AUTO_GENERATED,
   CLI_NAME,
   CLI_NAME_FULL,
-  CHAIN_ENV,
-  type ChainENV,
   DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_IPFS_ADDRESS,
   DEFAULT_MARINE_BUILD_ARGS,
@@ -57,7 +60,6 @@ import {
   type AquaLogLevel,
   PT_SYMBOL,
   COMPILE_AQUA_PROPERTY_NAME,
-  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "../../const.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";

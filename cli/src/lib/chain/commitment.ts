@@ -16,6 +16,7 @@
 
 import { type ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
+import { jsonStringify } from "@repo/common";
 import chunk from "lodash-es/chunk.js";
 import isUndefined from "lodash-es/isUndefined.js";
 import omitBy from "lodash-es/omitBy.js";
@@ -46,7 +47,6 @@ import {
   splitErrorsAndResults,
   stringifyUnknown,
   commaSepStrToArr,
-  jsonStringify,
 } from "../helpers/utils.js";
 import { input } from "../prompt.js";
 import {

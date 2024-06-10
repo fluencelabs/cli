@@ -15,6 +15,7 @@
  */
 
 import { Args } from "@oclif/core";
+import { jsonStringify } from "@repo/common";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -28,7 +29,6 @@ import {
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
-import { jsonStringify } from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,

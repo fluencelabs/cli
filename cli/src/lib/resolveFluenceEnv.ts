@@ -15,6 +15,7 @@
  */
 
 import { color } from "@oclif/color";
+import { DEFAULT_PUBLIC_FLUENCE_ENV } from "@repo/common";
 
 import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
@@ -24,7 +25,6 @@ import {
   FLUENCE_ENVS,
   isFluenceEnv,
   type FluenceEnv,
-  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "./const.js";
 import { list } from "./prompt.js";
 
@@ -61,7 +61,7 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
 }
 
 export async function fluenceEnvPrompt(
-  message = "Select Fluence Environment to use by default with this project",
+  message = "Select Fluence Environment to use",
   defaultVal: FluenceEnv = DEFAULT_PUBLIC_FLUENCE_ENV,
 ): Promise<FluenceEnv> {
   return list({

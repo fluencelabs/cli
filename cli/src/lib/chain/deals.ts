@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { getDealCliClient, getDealClient } from "../dealClient.js";
+import { getDealCliClient, getSignerAddress } from "../dealClient.js";
 
 export async function getProviderDeals() {
   const dealCliClient = await getDealCliClient();
-  const { signerOrWallet } = await getDealClient();
-  return dealCliClient.getDealsByProvider(signerOrWallet.address);
+  const signerAddress = await getSignerAddress();
+  return dealCliClient.getDealsByProvider(signerAddress);
 }

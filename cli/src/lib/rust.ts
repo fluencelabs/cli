@@ -20,6 +20,7 @@ import { arch, homedir, platform } from "node:os";
 import { join } from "node:path";
 
 import { color } from "@oclif/color";
+import { jsonStringify } from "@repo/common";
 
 import { versions } from "../versions.js";
 
@@ -35,7 +36,6 @@ import { findEntryInPATH, prependEntryToPATH } from "./env.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { jsonStringify } from "./helpers/utils.js";
 import { isExactVersion } from "./helpers/validations.js";
 import {
   ensureUserFluenceCargoDir,

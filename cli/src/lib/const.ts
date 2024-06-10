@@ -23,13 +23,19 @@ import type {
   OutputFlags,
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
+import {
+  getIsUnion,
+  CHAIN_ENV,
+  CHAIN_URLS_WITHOUT_LOCAL,
+  type ChainENV,
+  CHAIN_RPC_PORT,
+  LOCAL_NET_DEFAULT_WALLET_KEY,
+} from "@repo/common";
 import camelCase from "lodash-es/camelCase.js";
 import upperFirst from "lodash-es/upperFirst.js";
 import xbytes from "xbytes";
 
-import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
 import { aquaComment } from "./helpers/utils.js";
-import { getIsStringUnion } from "./typeHelpers.js";
 
 export const CLI_NAME = "fluence";
 export const CLI_NAME_FULL = "Fluence CLI";
@@ -96,19 +102,6 @@ export const U32_MAX = 4_294_967_295;
 
 export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
 
-export const DEFAULT_PUBLIC_FLUENCE_ENV = "dar";
-export const PUBLIC_FLUENCE_ENV = [
-  DEFAULT_PUBLIC_FLUENCE_ENV,
-  "kras",
-  "stage",
-] as const;
-export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
-export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
-
-export const CHAIN_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
-export type ChainENV = (typeof CHAIN_ENV)[number];
-export const isChainEnv = getIsStringUnion(CHAIN_ENV);
-
 export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
 export const WC_PROJECT_ID = "70c1c5ed2a23e7383313de1044ddce7e";
 export const WC_METADATA = {
@@ -120,7 +113,7 @@ export const WC_METADATA = {
 
 export const FLUENCE_ENVS = [...CHAIN_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
-export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
+export const isFluenceEnv = getIsUnion(FLUENCE_ENVS);
 
 export const IPFS_CONTAINER_NAME = "ipfs";
 export const IPFS_PORT = "5001";
@@ -129,24 +122,12 @@ export const GRAPH_NODE_PORT = "8020";
 export const POSTGRES_CONTAINER_NAME = "postgres";
 export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
 export const CHAIN_RPC_CONTAINER_NAME = "chain-rpc";
-export const CHAIN_RPC_PORT = "8545";
 export const CHAIN_DEPLOY_SCRIPT_NAME = "chain-deploy-script";
 export const SUBGRAPH_DEPLOY_SCRIPT_NAME = "subgraph-deploy-script";
 export const TCP_PORT_START = 7771;
 export const WEB_SOCKET_PORT_START = 9991;
 export const HTTP_PORT_START = 18080;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
-
-const CHAIN_URLS_WITHOUT_LOCAL: Record<Exclude<ChainENV, "local">, string> = {
-  kras: "https://ipc.kras.fluence.dev",
-  dar: "https://ipc.dar.fluence.dev",
-  stage: "https://ipc-stage.fluence.dev",
-};
-
-export const CHAIN_URLS: Record<ChainENV, string> = {
-  ...CHAIN_URLS_WITHOUT_LOCAL,
-  local: `http://127.0.0.1:${CHAIN_RPC_PORT}`,
-};
 
 export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
   ...CHAIN_URLS_WITHOUT_LOCAL,
@@ -156,7 +137,7 @@ export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
 export const WS_CHAIN_URLS: Record<ChainENV, string> = {
   kras: "wss://ipc.kras.fluence.dev",
   dar: "wss://ipc.dar.fluence.dev",
-  stage: "wss://ipc-stage.fluence.dev",
+  stage: "wss://ipc.stage.fluence.dev",
   local: `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
 };
 
@@ -169,6 +150,7 @@ export const YML_EXT = "yml";
 export const WASM_EXT = "wasm";
 export const TOML_EXT = "toml";
 
+export const CLI_CONNECTOR_DIR_NAME = "cli-connector";
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
 export const AQUA_DEPENDENCIES_DIR_NAME = "aqua-dependencies";
 export const SERVICE_CONFIGS_DIR_NAME = "service-configs";
@@ -352,7 +334,7 @@ export const AQUA_LOG_LEVELS = [
 ] as const;
 
 export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
-export const isAquaLogLevel = getIsStringUnion(AQUA_LOG_LEVELS);
+export const isAquaLogLevel = getIsUnion(AQUA_LOG_LEVELS);
 
 export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
   ", ",
@@ -433,7 +415,7 @@ export const PRIV_KEY_FLAG_NAME = "priv-key";
 
 export const PRIV_KEY_FLAG = {
   [PRIV_KEY_FLAG_NAME]: Flags.string({
-    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local network ${LOCAL_NET_DEFAULT_WALLET_KEY} key will be used by default`,
+    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local env ${LOCAL_NET_DEFAULT_WALLET_KEY} is used by default when CLI is used in non-interactive mode`,
     helpValue: "<private-key>",
   }),
 };
@@ -561,7 +543,7 @@ export type ModuleType = (typeof MODULE_TYPES)[number];
 
 export const TEMPLATES = ["quickstart", "minimal", "ts", "js"] as const;
 export type Template = (typeof TEMPLATES)[number];
-export const isTemplate = getIsStringUnion(TEMPLATES);
+export const isTemplate = getIsUnion(TEMPLATES);
 
 export const PACKAGE_NAME = "PACKAGE-NAME";
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME = `${PACKAGE_NAME} | PACKAGE-NAME@VERSION`;
@@ -597,7 +579,7 @@ export const marineAndMreplDependencies = [
 ] as const;
 
 export type MarineOrMrepl = (typeof marineAndMreplDependencies)[number];
-export const isMarineOrMrepl = getIsStringUnion(marineAndMreplDependencies);
+export const isMarineOrMrepl = getIsUnion(marineAndMreplDependencies);
 
 export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,

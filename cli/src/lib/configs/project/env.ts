@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DEFAULT_PUBLIC_FLUENCE_ENV } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 
 import {
@@ -22,7 +23,6 @@ import {
   FLUENCE_ENVS,
   TOP_LEVEL_SCHEMA_ID,
   type FluenceEnv,
-  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "../../const.js";
 import { getFluenceDir } from "../../paths.js";
 import {

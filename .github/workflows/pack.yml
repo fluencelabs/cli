@@ -99,12 +99,9 @@ jobs:
         with:
           node-version: "18.20.3"
           registry-url: "https://npm.fluence.dev"
+          cache: "yarn"
 
       - run: yarn install
-
-      - name: Patch oclif
-        run: yarn patch-oclif
-        working-directory: scripts
 
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
@@ -155,6 +152,14 @@ jobs:
 
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
+
+      - name: Rename archive
+        run: mv cli/dist/fluence-*${{ inputs.platform }}*.tar.gz "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}.tar.gz"
+        continue-on-error: true
+
+      - name: Rename buildmanifest
+        run: mv cli/dist/fluence-*${{ inputs.platform }}*-buildmanifest "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}-buildmanifest"
+        continue-on-error: true
 
       - name: Upload fluence-cli
         if: inputs.upload-to-s3 == true

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { CHAIN_IDS } from "@repo/common";
+
 import { ensureChainEnv } from "../ensureChainNetwork.js";
 
-export async function getChainId(): Promise<number> {
+export async function getChainId() {
   const chainEnv = await ensureChainEnv();
-  const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const { chainId } = DealClient.getContractAddresses(chainEnv);
-  return chainId;
+  return CHAIN_IDS[chainEnv];
 }

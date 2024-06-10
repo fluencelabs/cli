@@ -23,7 +23,12 @@ import {
   DEAL_IDS_FLAG,
   DEAL_IDS_FLAG_NAME,
 } from "../../lib/const.js";
-import { getDealClient, populateTx, signBatch } from "../../lib/dealClient.js";
+import {
+  getDealClient,
+  getSignerAddress,
+  populateTx,
+  signBatch,
+} from "../../lib/dealClient.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -44,7 +49,8 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(DealExit));
-    const { dealClient, signerOrWallet } = await getDealClient();
+    const { dealClient } = await getDealClient();
+    const signerAddress = await getSignerAddress();
     const market = dealClient.getMarket();
 
     const dealIds = flags.all
@@ -70,7 +76,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     await signBatch(
       computeUnits
         .filter((computeUnit) => {
-          return computeUnit.provider === signerOrWallet.address;
+          return computeUnit.provider.toLowerCase() === signerAddress;
         })
         .map((computeUnit) => {
           return populateTx(market.returnComputeUnitFromDeal, computeUnit.id);

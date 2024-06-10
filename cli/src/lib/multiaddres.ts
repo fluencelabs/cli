@@ -20,6 +20,7 @@ import { isAbsolute, join, resolve } from "node:path";
 
 import { type Node as AddrAndPeerId } from "@fluencelabs/fluence-network-environment";
 import { color } from "@oclif/color";
+import { jsonStringify } from "@repo/common";
 import sample from "lodash-es/sample.js";
 
 import { commandObj } from "./commandObj.js";
@@ -28,7 +29,7 @@ import { initFluenceConfig } from "./configs/project/fluence.js";
 import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
 import { FLUENCE_ENVS, type FluenceEnv } from "./const.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
-import { jsonStringify, splitErrorsAndResults } from "./helpers/utils.js";
+import { splitErrorsAndResults } from "./helpers/utils.js";
 import {
   getPeerId,
   resolveAddrsAndPeerIdsWithoutLocal,

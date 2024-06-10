@@ -15,10 +15,11 @@
  */
 
 import { color } from "@oclif/color";
+import type { ChainENV } from "@repo/common";
 
 import { commandObj } from "./commandObj.js";
 import { initReadonlyFluenceConfig } from "./configs/project/fluence.js";
-import { type ChainENV, CLI_NAME, ENV_FLAG_NAME } from "./const.js";
+import { CLI_NAME, ENV_FLAG_NAME } from "./const.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 let env: ChainENV | undefined = undefined;

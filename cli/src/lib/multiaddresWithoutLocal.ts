@@ -22,10 +22,11 @@ import {
 } from "@fluencelabs/fluence-network-environment";
 import { multiaddr } from "@multiformats/multiaddr";
 import { color } from "@oclif/color";
+import { CHAIN_ENV, type PublicFluenceEnv } from "@repo/common";
 
 import { commandObj } from "./commandObj.js";
 import { initFluenceConfig } from "./configs/project/fluence.js";
-import { CHAIN_ENV, type PublicFluenceEnv, type FluenceEnv } from "./const.js";
+import type { FluenceEnv } from "./const.js";
 import { commaSepStrToArr, stringifyUnknown } from "./helpers/utils.js";
 import { input, list } from "./prompt.js";
 

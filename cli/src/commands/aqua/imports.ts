@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import { jsonStringify } from "@repo/common";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { getAquaImports } from "../../lib/helpers/aquaImports.js";
-import { jsonStringify } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Json extends BaseCommand<typeof Json> {

@@ -15,13 +15,14 @@
  */
 
 import { color } from "@oclif/color";
+import { jsonStringify } from "@repo/common";
 
 import type {
   get_logs,
   get_logs_deal,
 } from "../compiled-aqua/installation-spell/cli.js";
 
-import { LOGS_GET_ERROR_START, jsonStringify } from "./utils.js";
+import { LOGS_GET_ERROR_START } from "./utils.js";
 
 type FormatAquaLogsType =
   | Awaited<ReturnType<typeof get_logs>>[number]
