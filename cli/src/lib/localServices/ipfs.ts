@@ -20,7 +20,7 @@ import type { IPFSHTTPClient } from "ipfs-http-client";
 
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS } from "../const.js";
-import { stringifyUnknown } from "../helpers/utils.js";
+import { setTryTimeout, stringifyUnknown } from "../helpers/utils.js";
 
 // !IMPORTANT for some reason when in tsconfig.json "moduleResolution" is set to "nodenext" - "ipfs-http-client" types all become "any"
 // so when working with this module - remove "nodenext" from "moduleResolution" so you can make sure types are correct
@@ -57,7 +57,17 @@ const upload = async (
     // eslint-disable-next-line no-restricted-syntax
     const cidString = cid.toString();
 
-    await ipfsClient.pin.add(cidString);
+    await setTryTimeout(
+      "Trying to upload to IPFS",
+      async () => {
+        await ipfsClient.pin.add(cidString);
+      },
+      (err) => {
+        throw err;
+      },
+      5000,
+    );
+
     log(`did pin ${cidString} to ${multiaddr}`);
 
     try {
