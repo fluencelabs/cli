@@ -348,9 +348,9 @@ async function determineDealState(
     (await confirm({
       message: `You previously deployed ${color.yellow(
         workerName,
-      )}, but this deal is already ended. Do you want to create a new deal and overwrite the old one? (at ${workersConfig.$getPath()})\nPlease keep this deal id ${
-        createdDeal.dealIdOriginal
-      } to withdraw the money from it after state overwrite`,
+      )}, but this deal is already ended (at ${workersConfig.$getPath()})\n\nPlease keep this deal id ${color.yellow(
+        createdDeal.dealIdOriginal,
+      )} to withdraw the money from it after state overwrite\n\nDo you want to create a new deal and overwrite the old one`,
       default: true,
     }))
   ) {
