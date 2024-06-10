@@ -76,7 +76,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     await signBatch(
       computeUnits
         .filter((computeUnit) => {
-          return computeUnit.provider === signerAddress;
+          return computeUnit.provider.toLowerCase() === signerAddress;
         })
         .map((computeUnit) => {
           return populateTx(market.returnComputeUnitFromDeal, computeUnit.id);

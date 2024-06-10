@@ -104,9 +104,11 @@ export async function getDealClient() {
 export async function getSignerAddress() {
   const { providerOrWallet } = await getDealClient();
 
-  return "address" in providerOrWallet
-    ? providerOrWallet.address
-    : await getAddressFromConnector();
+  return (
+    "address" in providerOrWallet
+      ? providerOrWallet.address
+      : await getAddressFromConnector()
+  ).toLowerCase();
 }
 
 let dealMatcherClient: DealMatcherClient | undefined = undefined;
