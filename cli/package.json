@@ -127,7 +127,7 @@
     "globby": "14",
     "madge": "7.0.0",
     "npm-check-updates": "16.14.20",
-    "oclif": "npm:4.1.0",
+    "oclif": "npm:oclif@4.13.5",
     "prettier": "3.2.5",
     "proper-lockfile": "4.1.2",
     "shx": "0.3.4",
