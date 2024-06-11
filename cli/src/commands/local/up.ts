@@ -18,9 +18,9 @@ import { rm } from "node:fs/promises";
 import { join } from "node:path";
 
 import { Flags } from "@oclif/core";
-import { LOCAL_NET_DEFAULT_WALLET_KEY } from "@repo/common";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { LOCAL_NET_DEFAULT_WALLET_KEY } from "../../common.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";

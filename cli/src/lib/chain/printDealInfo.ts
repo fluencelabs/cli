@@ -15,8 +15,8 @@
  */
 
 import { color } from "@oclif/color";
-import { BLOCK_SCOUT_URLS } from "@repo/common";
 
+import { BLOCK_SCOUT_URLS } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { type DealNameAndId } from "../deal.js";
 import { getReadonlyDealClient } from "../dealClient.js";

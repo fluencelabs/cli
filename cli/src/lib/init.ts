@@ -21,8 +21,8 @@ import { sep as posixSep } from "node:path/posix";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
-import { jsonStringify } from "@repo/common";
 
+import { jsonStringify } from "../common.js";
 import {
   initNewFluenceConfig,
   type FluenceConfig,

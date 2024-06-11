@@ -103,6 +103,9 @@ jobs:
 
       - run: yarn install
 
+      - run: yarn install
+        working-directory: cli
+
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
@@ -150,16 +153,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
+      - name: Build
+        run: yarn build
+
+      - name: Build CLI
+        run: yarn build
+        working-directory: cli
+
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
-
-      - name: Rename archive
-        run: mv cli/dist/fluence-*${{ inputs.platform }}*.tar.gz "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}.tar.gz"
-        continue-on-error: true
-
-      - name: Rename buildmanifest
-        run: mv cli/dist/fluence-*${{ inputs.platform }}*-buildmanifest "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-${{ inputs.platform }}-buildmanifest"
-        continue-on-error: true
+        working-directory: cli
 
       - name: Upload fluence-cli
         if: inputs.upload-to-s3 == true

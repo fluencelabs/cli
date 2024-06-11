@@ -23,6 +23,10 @@ import type {
   OutputFlags,
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
+import camelCase from "lodash-es/camelCase.js";
+import upperFirst from "lodash-es/upperFirst.js";
+import xbytes from "xbytes";
+
 import {
   getIsUnion,
   CHAIN_ENV,
@@ -30,10 +34,7 @@ import {
   type ChainENV,
   CHAIN_RPC_PORT,
   LOCAL_NET_DEFAULT_WALLET_KEY,
-} from "@repo/common";
-import camelCase from "lodash-es/camelCase.js";
-import upperFirst from "lodash-es/upperFirst.js";
-import xbytes from "xbytes";
+} from "../common.js";
 
 import { aquaComment } from "./helpers/utils.js";
 

@@ -15,8 +15,9 @@
  */
 
 import { color } from "@oclif/color";
-import { jsonStringify } from "@repo/common";
 import Ajv from "ajv";
+
+import { jsonStringify } from "../common.js";
 
 import { numToStr } from "./helpers/typesafeStringify.js";
 

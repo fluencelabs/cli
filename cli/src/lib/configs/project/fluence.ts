@@ -20,14 +20,14 @@ import { isAbsolute, join, relative } from "node:path";
 
 import type { CompileFromPathArgs } from "@fluencelabs/aqua-api";
 import { color } from "@oclif/color";
+import type { JSONSchemaType } from "ajv";
+import { yamlDiffPatch } from "yaml-diff-patch";
+
 import {
   CHAIN_ENV,
   DEFAULT_PUBLIC_FLUENCE_ENV,
   type ChainENV,
-} from "@repo/common";
-import type { JSONSchemaType } from "ajv";
-import { yamlDiffPatch } from "yaml-diff-patch";
-
+} from "../../../common.js";
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";

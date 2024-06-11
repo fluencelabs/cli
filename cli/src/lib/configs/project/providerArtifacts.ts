@@ -16,9 +16,9 @@
 
 import { join } from "path";
 
-import { DEFAULT_PUBLIC_FLUENCE_ENV } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 
+import { DEFAULT_PUBLIC_FLUENCE_ENV } from "../../../common.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   TOP_LEVEL_SCHEMA_ID,

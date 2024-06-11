@@ -102,9 +102,9 @@ Compile aqua defined in 'compileAqua' property of fluence.yaml. If --input flag 
 
 ```
 USAGE
-  $ fluence aqua [-n <value>] [--no-input] [-w] [-o <value>] [--air | --js] [--import <value>] [-i
-    <value>] [--const <value>] [--log-level-compiler <value>] [--no-relay] [--no-xor] [--tracing] [--no-empty-response]
-    [--dry]
+  $ fluence aqua [-n <value>] [--no-input] [-w] [-o <path>] [--air | --js] [--import <path>...] [-i
+    <path>] [--const <NAME=value>...] [--log-level-compiler <level>] [--no-relay] [--no-xor] [--tracing]
+    [--no-empty-response] [--dry]
 
 FLAGS
   -i, --input=<path>                Path to an aqua file or a directory that contains your aqua files
@@ -159,7 +159,7 @@ Infers aqua types for an arbitrary json file, generates valid aqua code with a f
 
 ```
 USAGE
-  $ fluence aqua json [INPUT] [OUTPUT] [--no-input] [--f64] [--types <value>]
+  $ fluence aqua json [INPUT] [OUTPUT] [--no-input] [--f64] [--types <path>]
 
 ARGUMENTS
   INPUT   Path to json file
@@ -187,7 +187,7 @@ Infers aqua types for an arbitrary yaml file, generates valid aqua code with a f
 
 ```
 USAGE
-  $ fluence aqua yml [INPUT] [OUTPUT] [--no-input] [--f64] [--types <value>]
+  $ fluence aqua yml [INPUT] [OUTPUT] [--no-input] [--f64] [--types <path>]
 
 ARGUMENTS
   INPUT   Path to yaml file
@@ -249,7 +249,8 @@ Build all application services, described in fluence.yaml and generate aqua inte
 
 ```
 USAGE
-  $ fluence build [--no-input] [--marine--args <value>] [--import <value>] [--env <value>]
+  $ fluence build [--no-input] [--marine-build-args <--flag arg>] [--import <path>...] [--env <dar | kras |
+    stage | local | custom>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -273,7 +274,7 @@ Show contract addresses for the fluence environment and accounts for the local e
 
 ```
 USAGE
-  $ fluence chain info [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence chain info [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -295,7 +296,7 @@ Send garbage proof for testing purposes
 
 ```
 USAGE
-  $ fluence chain proof [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence chain proof [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -317,7 +318,8 @@ Change app id in the deal
 
 ```
 USAGE
-  $ fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID] [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID] [--no-input] [--env <dar | kras | stage | local | custom>]
+    [--priv-key <private-key>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -345,8 +347,8 @@ Create your deal with the specified parameters
 USAGE
   $ fluence deal create --app-cid <value> --collateral-per-worker <value> --min-workers <value> --target-workers
     <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> [--no-input] [--initial-balance <value>]
-    [--effectors <value>] [--whitelist <value> | --blacklist <value>] [--protocol-version <value>] [--env <value>]
-    [--priv-key <value>]
+    [--effectors <value>] [--whitelist <value> | --blacklist <value>] [--protocol-version <value>] [--env <dar | kras |
+    stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --app-cid=<value>                            (required) CID of the application that will be deployed
@@ -379,8 +381,8 @@ Deposit do the deal
 
 ```
 USAGE
-  $ fluence deal deposit [AMOUNT] [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids
-    <value>]
+  $ fluence deal deposit [AMOUNT] [DEPLOYMENT-NAMES] [--no-input] [--env <dar | kras | stage | local | custom>]
+    [--priv-key <private-key>] [--deal-ids <id-1,id-2>]
 
 ARGUMENTS
   AMOUNT            Amount of USDC tokens to deposit
@@ -407,7 +409,8 @@ Get info about the deal
 
 ```
 USAGE
-  $ fluence deal info [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
+  $ fluence deal info [DEPLOYMENT-NAMES] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>] [--deal-ids <id-1,id-2>]
 
 ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
@@ -433,9 +436,9 @@ Get logs from deployed workers for deals listed in workers.yaml
 
 ```
 USAGE
-  $ fluence deal logs [DEPLOYMENT-NAMES] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
-    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--tracing] [--deal-ids <value>] [--spell
-    <value>]
+  $ fluence deal logs [DEPLOYMENT-NAMES] [--no-input] [-k <name>] [--relay <multiaddress>] [--ttl
+    <milliseconds>] [--dial-timeout <milliseconds>] [--particle-id] [--env <dar | kras | stage | local | custom>]
+    [--off-aqua-logs] [--tracing] [--deal-ids <id-1,id-2>] [--spell <spell-name>]
 
 ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
@@ -473,7 +476,8 @@ Stop the deal
 
 ```
 USAGE
-  $ fluence deal stop [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
+  $ fluence deal stop [DEPLOYMENT-NAMES] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>] [--deal-ids <id-1,id-2>]
 
 ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
@@ -499,8 +503,8 @@ Withdraw tokens from the deal
 
 ```
 USAGE
-  $ fluence deal withdraw [AMOUNT] [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids
-    <value>]
+  $ fluence deal withdraw [AMOUNT] [DEPLOYMENT-NAMES] [--no-input] [--env <dar | kras | stage | local | custom>]
+    [--priv-key <private-key>] [--deal-ids <id-1,id-2>]
 
 ARGUMENTS
   AMOUNT            Amount of USDC tokens to withdraw
@@ -527,7 +531,8 @@ Add missing workers to the deal
 
 ```
 USAGE
-  $ fluence deal workers-add [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
+  $ fluence deal workers-add [DEPLOYMENT-NAMES] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>] [--deal-ids <id-1,id-2>]
 
 ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
@@ -556,7 +561,8 @@ Remove unit from the deal
 
 ```
 USAGE
-  $ fluence deal workers-remove [UNIT-IDS] [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence deal workers-remove [UNIT-IDS] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>]
 
 ARGUMENTS
   UNIT-IDS  Comma-separated compute unit ids. You can get them using 'fluence deal info' command
@@ -630,7 +636,8 @@ Add FLT collateral to capacity commitment
 
 ```
 USAGE
-  $ fluence delegator collateral-add [IDS] [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence delegator collateral-add [IDS] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>]
 
 ARGUMENTS
   IDS  Comma separated capacity commitment IDs
@@ -658,7 +665,8 @@ Withdraw FLT collateral from capacity commitment
 
 ```
 USAGE
-  $ fluence delegator collateral-withdraw [IDS] [--no-input] [--env <value>] [--priv-key <value>] [--max-cus <value>]
+  $ fluence delegator collateral-withdraw [IDS] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>] [--max-cus <value>]
 
 ARGUMENTS
   IDS  Comma separated capacity commitment IDs
@@ -688,7 +696,8 @@ Withdraw FLT rewards from capacity commitment
 
 ```
 USAGE
-  $ fluence delegator reward-withdraw [IDS] [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence delegator reward-withdraw [IDS] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>]
 
 ARGUMENTS
   IDS  Comma separated capacity commitment IDs
@@ -818,9 +827,10 @@ Deploy according to 'deployments' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deploy [DEPLOYMENT-NAMES] [--no-input] [--off-aqua-logs] [--env <value>] [--priv-key <value>]
-    [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>]
-    [--no-build] [--tracing] [--marine-build-args <value>] [-u]
+  $ fluence deploy [DEPLOYMENT-NAMES] [--no-input] [--off-aqua-logs] [--env <dar | kras | stage | local |
+    custom>] [--priv-key <private-key>] [-k <name>] [--relay <multiaddress>] [--ttl <milliseconds>] [--dial-timeout
+    <milliseconds>] [--particle-id] [--import <path>...] [--no-build] [--tracing] [--marine-build-args <--flag arg>]
+    [-u]
 
 ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
@@ -887,7 +897,8 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [--no-input] [-t <value>] [--env <value>] [--noxes <value>]
+  $ fluence init [PATH] [--no-input] [-t <value>] [--env <dar | kras | stage | local | custom>] [--noxes
+    <value>]
 
 ARGUMENTS
   PATH  Project path
@@ -987,7 +998,7 @@ Stop currently running docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local down [--no-input] [-v] [--flags <value>]
+  $ fluence local down [--no-input] [-v] [--flags <--flag arg>]
 
 FLAGS
   -v, --volumes             Remove named volumes declared in the "volumes" section of the Compose file and anonymous
@@ -1010,7 +1021,7 @@ Init docker-compose.yaml according to provider.yaml
 
 ```
 USAGE
-  $ fluence local init [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence local init [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1035,7 +1046,7 @@ Display docker-compose.yaml logs
 
 ```
 USAGE
-  $ fluence local logs [--no-input] [--flags <value>]
+  $ fluence local logs [--no-input] [--flags <--flag arg>]
 
 FLAGS
   --flags=<--flag arg>  Space separated flags to pass to `docker compose`
@@ -1056,7 +1067,7 @@ List containers using docker compose
 
 ```
 USAGE
-  $ fluence local ps [--no-input] [--flags <value>]
+  $ fluence local ps [--no-input] [--flags <--flag arg>]
 
 FLAGS
   --flags=<--flag arg>  Space separated flags to pass to `docker compose`
@@ -1077,8 +1088,8 @@ Run docker-compose.yaml using docker compose and set up provider using all the o
 
 ```
 USAGE
-  $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <value>] [--quiet-pull]
-    [-d] [--build] [--flags <value>] [-r]
+  $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <private-key>]
+    [--quiet-pull] [-d] [--build] [--flags <--flag arg>] [-r]
 
 FLAGS
   -d, --detach                  Detached mode: Run containers in the background
@@ -1110,7 +1121,7 @@ Add module to service.yaml
 
 ```
 USAGE
-  $ fluence module add [PATH | URL] [--no-input] [--name <value>] [--service <value>]
+  $ fluence module add [PATH | URL] [--no-input] [--name <name>] [--service <name | path>]
 
 ARGUMENTS
   PATH | URL  Path to a module or url to .tar.gz archive
@@ -1136,7 +1147,7 @@ Build module
 
 ```
 USAGE
-  $ fluence module build [PATH] [--no-input] [--marine-build-args <value>]
+  $ fluence module build [PATH] [--no-input] [--marine-build-args <--flag arg>]
 
 ARGUMENTS
   PATH  Path to a module
@@ -1161,7 +1172,7 @@ Create new marine module template
 
 ```
 USAGE
-  $ fluence module new [NAME] [--no-input] [--path <value>] [--service <value>]
+  $ fluence module new [NAME] [--no-input] [--path <path>] [--service <name | relative_path>]
 
 ARGUMENTS
   NAME  Module name
@@ -1186,7 +1197,7 @@ Pack module into tar.gz archive
 
 ```
 USAGE
-  $ fluence module pack [PATH] [--no-input] [--marine-build-args <value>] [-d <value>] [-b <value>]
+  $ fluence module pack [PATH] [--no-input] [--marine-build-args <--flag arg>] [-d <value>] [-b <value>]
 
 ARGUMENTS
   PATH  Path to a module
@@ -1214,7 +1225,7 @@ Remove module from service.yaml
 
 ```
 USAGE
-  $ fluence module remove [NAME | PATH | URL] [--no-input] [--service <value>]
+  $ fluence module remove [NAME | PATH | URL] [--no-input] [--service <name | path>]
 
 ARGUMENTS
   NAME | PATH | URL  Module name from service.yaml, path to a module or url to .tar.gz archive
@@ -1238,8 +1249,8 @@ Add FLT collateral to capacity commitment to activate it
 
 ```
 USAGE
-  $ fluence provider cc-activate [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids
-  <value>]
+  $ fluence provider cc-activate [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--nox-names <nox-1,nox-2> | --cc-ids <value>]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
@@ -1267,8 +1278,8 @@ Withdraw FLT collateral from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-collateral-withdraw [--no-input] [--nox-names <value> | --cc-ids <value>] [--env <value>] [--priv-key
-    <value>] [--max-cus <value>]
+  $ fluence provider cc-collateral-withdraw [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--env <dar | kras | stage |
+    local | custom>] [--priv-key <private-key>] [--max-cus <value>]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
@@ -1298,8 +1309,8 @@ Create Capacity commitment
 
 ```
 USAGE
-  $ fluence provider cc-create [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>] [--offers
-  <value>]
+  $ fluence provider cc-create [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--nox-names <nox-1,nox-2>] [--offers <offer-1,offer-2>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1328,8 +1339,8 @@ Get info about capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids
-    <value>] [--json]
+  $ fluence provider cc-info [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--json]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
@@ -1358,8 +1369,8 @@ Remove Capacity commitment. You can remove it only BEFORE you activated it by de
 
 ```
 USAGE
-  $ fluence provider cc-remove [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids
-  <value>]
+  $ fluence provider cc-remove [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--nox-names <nox-1,nox-2> | --cc-ids <value>]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
@@ -1387,7 +1398,8 @@ Withdraw FLT rewards from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-rewards-withdraw [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider cc-rewards-withdraw [--no-input] [--nox-names <nox-1,nox-2>] [--env <dar | kras | stage | local | custom>]
+    [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1414,7 +1426,8 @@ Exit from deal
 
 ```
 USAGE
-  $ fluence provider deal-exit [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>] [--all]
+  $ fluence provider deal-exit [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--deal-ids <id-1,id-2>] [--all]
 
 FLAGS
   --all                                        To use all deal ids that indexer is aware of for your provider address
@@ -1441,7 +1454,7 @@ List all deals
 
 ```
 USAGE
-  $ fluence provider deal-list [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence provider deal-list [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1466,7 +1479,8 @@ Deal rewards info
 
 ```
 USAGE
-  $ fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <dar | kras | stage | local | custom>]
+    [--priv-key <private-key>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -1495,7 +1509,8 @@ Withdraw USDC rewards from deals
 
 ```
 USAGE
-  $ fluence provider deal-rewards-withdraw [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
+  $ fluence provider deal-rewards-withdraw [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--deal-ids <id-1,id-2>]
 
 FLAGS
   --deal-ids=<id-1,id-2>                       Comma-separated deal ids
@@ -1521,7 +1536,7 @@ Generate Config.toml files according to provider.yaml and secrets according to p
 
 ```
 USAGE
-  $ fluence provider gen [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence provider gen [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1546,7 +1561,8 @@ Print nox signing wallets and peer ids
 
 ```
 USAGE
-  $ fluence provider info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>] [--json]
+  $ fluence provider info [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--nox-names <nox-1,nox-2>] [--json]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1574,7 +1590,8 @@ Init provider config. Creates a provider.yaml file
 
 ```
 USAGE
-  $ fluence provider init [--no-input] [--noxes <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider init [--no-input] [--noxes <value>] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1597,7 +1614,8 @@ Create offers. You have to be registered as a provider to do that
 
 ```
 USAGE
-  $ fluence provider offer-create [--no-input] [--env <value>] [--priv-key <value>] [--offers <value>]
+  $ fluence provider offer-create [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--offers <offer-1,offer-2>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1624,8 +1642,8 @@ Get info about offers
 
 ```
 USAGE
-  $ fluence provider offer-info [--no-input] [--offers <value> | --offer-ids <value>] [--env <value>] [--priv-key
-  <value>]
+  $ fluence provider offer-info [--no-input] [--offers <offer-1,offer-2> | --offer-ids <id-1,id-2>] [--env <dar | kras |
+    stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1654,7 +1672,8 @@ Update offers
 
 ```
 USAGE
-  $ fluence provider offer-update [--no-input] [--offers <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider offer-update [--no-input] [--offers <offer-1,offer-2>] [--env <dar | kras | stage | local | custom>]
+    [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1681,7 +1700,7 @@ Register as a provider
 
 ```
 USAGE
-  $ fluence provider register [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence provider register [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1706,8 +1725,8 @@ Distribute FLT tokens to noxes
 
 ```
 USAGE
-  $ fluence provider tokens-distribute [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>] [--amount
-  <value>]
+  $ fluence provider tokens-distribute [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--nox-names <nox-1,nox-2>] [--amount <value>]
 
 FLAGS
   --amount=<value>                             Amount of FLT tokens to distribute to noxes
@@ -1735,8 +1754,8 @@ Withdraw FLT tokens from noxes
 
 ```
 USAGE
-  $ fluence provider tokens-withdraw [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>] [--amount
-  <value>]
+  $ fluence provider tokens-withdraw [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
+    [--nox-names <nox-1,nox-2>] [--amount <value>]
 
 FLAGS
   --amount=<value>                             Amount of FLT tokens to withdraw from noxes. Use --amount max to withdraw
@@ -1765,7 +1784,7 @@ Update provider info
 
 ```
 USAGE
-  $ fluence provider update [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence provider update [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1790,10 +1809,10 @@ Run the first aqua function CLI is able to find and compile among all aqua files
 
 ```
 USAGE
-  $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--quiet] [-f <value>] [--print-air |
-    -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env
-    <value>] [--import <value>] [-i <value>] [--const <value>] [--log-level-compiler <value>] [--no-relay] [--no-xor]
-    [--tracing] [--no-empty-response]
+  $ fluence run [--no-input] [--data <json>] [--data-path <path>] [--quiet] [-f <function-call>]
+    [--print-air | -b] [--off-aqua-logs] [-k <name>] [--relay <multiaddress>] [--ttl <milliseconds>] [--dial-timeout
+    <milliseconds>] [--particle-id] [--env <dar | kras | stage | local | custom>] [--import <path>...] [-i <path>]
+    [--const <NAME=value>...] [--log-level-compiler <level>] [--no-relay] [--no-xor] [--tracing] [--no-empty-response]
 
 FLAGS
   -b, --print-beautified-air                       Prints beautified AIR code instead of function execution
@@ -1848,7 +1867,7 @@ Add service to fluence.yaml
 
 ```
 USAGE
-  $ fluence service add [PATH | URL] [--no-input] [--name <value>] [--marine-build-args <value>]
+  $ fluence service add [PATH | URL] [--no-input] [--name <name>] [--marine-build-args <--flag arg>]
 
 ARGUMENTS
   PATH | URL  Path to a service or url to .tar.gz archive
@@ -1875,7 +1894,7 @@ Create new marine service template
 
 ```
 USAGE
-  $ fluence service new [NAME] [--no-input] [--path <value>]
+  $ fluence service new [NAME] [--no-input] [--path <path>]
 
 ARGUMENTS
   NAME  Unique service name (must start with a lowercase letter and contain only letters, numbers, and underscores)
@@ -1922,7 +1941,7 @@ Open service inside repl (downloads and builds modules if necessary)
 
 ```
 USAGE
-  $ fluence service repl [NAME | PATH | URL] [--no-input] [--marine-build-args <value>]
+  $ fluence service repl [NAME | PATH | URL] [--no-input] [--marine-build-args <--flag arg>]
 
 ARGUMENTS
   NAME | PATH | URL  Service name from fluence.yaml, path to a service or url to .tar.gz archive
@@ -1947,7 +1966,7 @@ Check spells aqua is able to compile without any errors
 
 ```
 USAGE
-  $ fluence spell build [SPELL-NAMES] [--no-input] [--import <value>]
+  $ fluence spell build [SPELL-NAMES] [--no-input] [--import <path>...]
 
 ARGUMENTS
   SPELL-NAMES  Comma separated names of spells to build. Example: "spell1,spell2" (by default all spells from 'spells'
@@ -1972,7 +1991,7 @@ Create a new spell template
 
 ```
 USAGE
-  $ fluence spell new [NAME] [--no-input] [--path <value>]
+  $ fluence spell new [NAME] [--no-input] [--path <path>]
 
 ARGUMENTS
   NAME  Spell name

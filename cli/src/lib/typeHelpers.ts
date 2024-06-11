@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { jsonStringify } from "@repo/common";
+import { jsonStringify } from "../common.js";
 
 /**
  * Makes all properties in the object to be NOT readonly

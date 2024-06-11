@@ -22,7 +22,8 @@ import {
 } from "@fluencelabs/fluence-network-environment";
 import { multiaddr } from "@multiformats/multiaddr";
 import { color } from "@oclif/color";
-import { CHAIN_ENV, type PublicFluenceEnv } from "@repo/common";
+
+import { CHAIN_ENV, type PublicFluenceEnv } from "../common.js";
 
 import { commandObj } from "./commandObj.js";
 import { initFluenceConfig } from "./configs/project/fluence.js";

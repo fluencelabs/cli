@@ -15,8 +15,8 @@
  */
 
 import { color } from "@oclif/color";
-import { jsonStringify } from "@repo/common";
 
+import { jsonStringify } from "../../common.js";
 import type {
   get_logs,
   get_logs_deal,

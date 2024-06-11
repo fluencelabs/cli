@@ -19,7 +19,6 @@ import { join } from "path";
 
 import { type JsonMap, parse } from "@iarna/toml";
 import { color } from "@oclif/color";
-import { type ChainENV, jsonStringify } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 import { isUndefined, mapValues, omitBy } from "lodash-es";
 import cloneDeep from "lodash-es/cloneDeep.js";
@@ -30,6 +29,7 @@ import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
+import { type ChainENV, jsonStringify } from "../../../common.js";
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import { getChainId } from "../../chain/chainId.js";

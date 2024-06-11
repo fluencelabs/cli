@@ -15,9 +15,9 @@
  */
 
 import { Args } from "@oclif/core";
-import { jsonStringify } from "@repo/common";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { jsonStringify } from "../../common.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import {

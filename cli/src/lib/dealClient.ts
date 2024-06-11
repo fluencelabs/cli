@@ -26,11 +26,6 @@ import type {
   StateMutability,
 } from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.d.ts";
 import { color } from "@oclif/color";
-import {
-  CHAIN_URLS,
-  type TransactionPayload,
-  LOCAL_NET_DEFAULT_WALLET_KEY,
-} from "@repo/common";
 import type {
   TransactionRequest,
   LogDescription,
@@ -41,6 +36,12 @@ import type {
   TransactionReceipt,
 } from "ethers";
 import chunk from "lodash-es/chunk.js";
+
+import {
+  CHAIN_URLS,
+  type TransactionPayload,
+  LOCAL_NET_DEFAULT_WALLET_KEY,
+} from "../common.js";
 
 import { chainFlags } from "./chainFlags.js";
 import { commandObj, isInteractive } from "./commandObj.js";

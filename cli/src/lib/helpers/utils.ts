@@ -18,8 +18,8 @@ import { AssertionError } from "node:assert";
 
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
-import { jsonStringify } from "@repo/common";
 
+import { jsonStringify } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { dbg } from "../dbg.js";
 

@@ -16,14 +16,14 @@
 
 import { join } from "path";
 
+import type { JSONSchemaType } from "ajv";
+import isEmpty from "lodash-es/isEmpty.js";
+
 import {
   CHAIN_ENV,
   type ChainENV,
   DEFAULT_PUBLIC_FLUENCE_ENV,
-} from "@repo/common";
-import type { JSONSchemaType } from "ajv";
-import isEmpty from "lodash-es/isEmpty.js";
-
+} from "../../../common.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   WORKERS_CONFIG_FULL_FILE_NAME,

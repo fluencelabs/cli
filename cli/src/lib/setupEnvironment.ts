@@ -16,8 +16,9 @@
 
 import { isAbsolute } from "node:path";
 
-import { CHAIN_ENV, getIsUnion } from "@repo/common";
 import dotenv from "dotenv";
+
+import { CHAIN_ENV, getIsUnion } from "../common.js";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
