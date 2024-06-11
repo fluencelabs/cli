@@ -24,7 +24,7 @@
   ],
   "scripts": {
     "before-build": "npm i --prefix \"./src/cli-aqua-dependencies\" && tsx src/beforeBuild.ts && npm i --prefix \"./src/aqua-dependencies\"",
-    "build": "yarn before-build && shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies",
+    "build": "yarn before-build && shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies && shx cp -r ../packages/cli-connector/dist ./dist/cli-connector",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "find-dead-code": "ts-prune",
