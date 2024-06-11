@@ -36,6 +36,9 @@ jobs:
 
       - run: yarn install
 
+      - run: yarn install
+        working-directory: cli
+
       - name: Setup golang
         uses: actions/setup-go@v5
 
@@ -52,6 +55,10 @@ jobs:
 
       - name: Run on each commit
         run: yarn on-each-commit
+
+      - name: Run on each commit CLI
+        run: yarn on-each-commit
+        working-directory: cli
 
       - name: Format
         run: yarn format

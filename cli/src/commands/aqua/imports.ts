@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { jsonStringify } from "@repo/common";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { jsonStringify } from "../../common.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { getAquaImports } from "../../lib/helpers/aquaImports.js";
 import { initCli } from "../../lib/lifeCycle.js";

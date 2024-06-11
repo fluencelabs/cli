@@ -16,8 +16,7 @@
 
 import assert from "node:assert";
 
-import { LOCAL_NET_DEFAULT_ACCOUNTS, type Account } from "@repo/common";
-
+import { LOCAL_NET_DEFAULT_ACCOUNTS, type Account } from "../../src/common.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 
 import { lockAndProcessFile } from "./utils.js";

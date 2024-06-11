@@ -15,7 +15,8 @@
  */
 
 import { color } from "@oclif/color";
-import { DEFAULT_PUBLIC_FLUENCE_ENV } from "@repo/common";
+
+import { DEFAULT_PUBLIC_FLUENCE_ENV } from "../common.js";
 
 import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";

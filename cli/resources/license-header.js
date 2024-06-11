@@ -13,11 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { CHAIN_IDS } from "../../common.js";
-import { ensureChainEnv } from "../ensureChainNetwork.js";
-
-export async function getChainId() {
-  const chainEnv = await ensureChainEnv();
-  return CHAIN_IDS[chainEnv];
-}

@@ -20,25 +20,18 @@ import { join, resolve } from "node:path";
 import { compileFromPath } from "@fluencelabs/aqua-api";
 import aquaToJs from "@fluencelabs/aqua-to-js";
 import { gatherImportsFromNpm } from "@fluencelabs/npm-aqua-compiler";
-import { jsonStringify } from "@repo/common";
 
-import {
-  AQUA_DEPENDENCIES_DIR_NAME,
-  AQUA_EXT,
-  FS_OPTIONS,
-  NODE_MODULES_DIR_NAME,
-} from "./lib/const.js";
 import { versions } from "./versions.js";
 
-const WORKSPACE_NODE_MODULES_PATH = resolve("..", NODE_MODULES_DIR_NAME);
+const WORKSPACE_NODE_MODULES_PATH = resolve(".", "node_modules");
 
-const aquaDependenciesDirPath = join("src", AQUA_DEPENDENCIES_DIR_NAME);
+const aquaDependenciesDirPath = join("src", "aqua-dependencies");
 await mkdir(aquaDependenciesDirPath, { recursive: true });
 
 await writeFile(
   join(aquaDependenciesDirPath, "package.json"),
-  jsonStringify({ dependencies: versions.npm }),
-  FS_OPTIONS,
+  JSON.stringify({ dependencies: versions.npm }, null, 2),
+  "utf-8",
 );
 
 const VERSIONS_DIR_PATH = join("src", "versions");
@@ -66,7 +59,7 @@ const CLI_AQUA_DEPENDENCIES_DIR_PATH = resolve(
 
 const INSTALLATION_SPELL_DIR_PATH = join(
   CLI_AQUA_DEPENDENCIES_DIR_PATH,
-  NODE_MODULES_DIR_NAME,
+  "node_modules",
   "@fluencelabs",
   "installation-spell",
 );
@@ -87,7 +80,7 @@ async function compileInstallationSpellAqua(tracing = false) {
     ["upload", "cli", "deal_spell", "files", "deploy"].map(async (fileName) => {
       const filePath = join(
         INSTALLATION_SPELL_AQUA_DIR_PATH,
-        `${fileName}.${AQUA_EXT}`,
+        `${fileName}.aqua`,
       );
 
       const compilationResult = await compileFromPath({
@@ -116,7 +109,7 @@ async function compileInstallationSpellAqua(tracing = false) {
           `${fileName}.ts`,
         ),
         sources,
-        FS_OPTIONS,
+        "utf-8",
       );
     }),
   );
@@ -134,6 +127,11 @@ await cp(
     "package.json",
   ),
   join(VERSIONS_DIR_PATH, "js-client.package.json"),
+);
+
+await cp(
+  resolve("..", "packages", "common", "src", "index.ts"),
+  resolve(".", "src", "common.ts"),
 );
 
 await rm(COMPILED_AQUA_PATH, { recursive: true, force: true });

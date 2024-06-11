@@ -20,8 +20,8 @@ import { arch, homedir, platform } from "node:os";
 import { join } from "node:path";
 
 import { color } from "@oclif/color";
-import { jsonStringify } from "@repo/common";
 
+import { jsonStringify } from "../common.js";
 import { versions } from "../versions.js";
 
 import { commandObj } from "./commandObj.js";

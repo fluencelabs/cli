@@ -17,10 +17,10 @@
 import assert from "assert";
 import { join, relative } from "path";
 
-import { CHAIN_RPC_PORT } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { CHAIN_RPC_PORT } from "../../../common.js";
 import { versions } from "../../../versions.js";
 import {
   CHAIN_DEPLOY_SCRIPT_NAME,

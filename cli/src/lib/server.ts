@@ -18,6 +18,8 @@ import { access } from "fs/promises";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
+import express from "express";
+
 import {
   jsonStringify,
   jsonReviver,
@@ -27,8 +29,7 @@ import {
   type ConnectorToCLIMessageTransactionSuccess,
   type ConnectorToCLIMessageAddress,
   type ConnectorToCLIMessageSendTransaction,
-} from "@repo/common";
-import express from "express";
+} from "../common.js";
 
 import { getChainId } from "./chain/chainId.js";
 import { commandObj } from "./commandObj.js";

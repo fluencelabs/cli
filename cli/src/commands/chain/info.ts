@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { jsonStringify, LOCAL_NET_DEFAULT_ACCOUNTS } from "@repo/common";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { jsonStringify, LOCAL_NET_DEFAULT_ACCOUNTS } from "../../common.js";
 import { getChainId } from "../../lib/chain/chainId.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";

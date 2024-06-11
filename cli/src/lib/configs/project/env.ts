@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { DEFAULT_PUBLIC_FLUENCE_ENV } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 
+import { DEFAULT_PUBLIC_FLUENCE_ENV } from "../../../common.js";
 import {
   ENV_CONFIG_FILE_NAME,
   ENV_CONFIG_FULL_FILE_NAME,

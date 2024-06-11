@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { jsonStringify } from "@repo/common";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { jsonStringify } from "../../common.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { NOX_NAMES_FLAG, CHAIN_FLAGS, JSON_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";

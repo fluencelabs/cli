@@ -16,13 +16,13 @@
 
 import { type ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
-import { jsonStringify } from "@repo/common";
 import chunk from "lodash-es/chunk.js";
 import isUndefined from "lodash-es/isUndefined.js";
 import omitBy from "lodash-es/omitBy.js";
 import parse from "parse-duration";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { jsonStringify } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { initReadonlyProviderConfig } from "../configs/project/provider.js";
 import {

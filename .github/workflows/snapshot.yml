@@ -106,6 +106,9 @@ jobs:
 
       - run: yarn install
 
+      - run: yarn install
+        working-directory: cli
+
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
@@ -162,24 +165,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
+      - name: Build
+        run: yarn build
+
+      - name: Build CLI
+        run: yarn build
+        working-directory: cli
+
       - name: Pack Fluence CLI for Linux and macOS
         run: yarn pack-ci
-
-      - name: Rename linux-x64 archive
-        run: mv cli/dist/fluence-*linux-x64*.tar.gz "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-linux-x64.tar.gz"
-        continue-on-error: true
-
-      - name: Rename linux-x64 buildmanifest
-        run: mv cli/dist/fluence-*linux-x64*-buildmanifest "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-linux-x64-buildmanifest"
-        continue-on-error: true
-
-      - name: Rename darwin-arm64 archive
-        run: mv cli/dist/fluence-*darwin-arm64*.tar.gz "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-darwin-arm64.tar.gz"
-        continue-on-error: true
-
-      - name: Rename darwin-arm64 buildmanifest
-        run: mv cli/dist/fluence-*darwin-arm64*-buildmanifest "cli/dist/fluence-v$(jq .[] -r .github/release-please/manifest.json)-$(git rev-parse --short HEAD)-darwin-arm64-buildmanifest"
-        continue-on-error: true
+        working-directory: cli
 
       - name: Upload linux-x64 to CI checks
         uses: actions/upload-artifact@v4
