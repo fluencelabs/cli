@@ -38,6 +38,7 @@ import { downloadFile } from "./helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { isExactVersion } from "./helpers/validations.js";
 import {
+  projectRootDir,
   ensureUserFluenceCargoDir,
   ensureUserFluenceTmpCargoDir,
 } from "./paths.js";
@@ -163,6 +164,9 @@ const hasRequiredRustToolchain = async (): Promise<boolean> => {
   const toolChainList = await execPromise({
     command: RUSTUP,
     args: ["toolchain", "list"],
+    options: {
+      cwd: projectRootDir,
+    },
   });
 
   const hasRequiredRustToolchain = toolChainList.includes(
@@ -176,6 +180,9 @@ const hasRequiredRustToolchain = async (): Promise<boolean> => {
     await execPromise({
       command: RUSTUP,
       args: ["override", "set", versions["rust-toolchain"]],
+      options: {
+        cwd: projectRootDir,
+      },
     });
   }
 
