@@ -1,9 +1,0 @@
-dist
-docs
-node_modules
-tmp
-.fluence
-package-lock.json
-src/lib/compiled-aqua
-CHANGELOG.md
-.github/workflows

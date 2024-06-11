@@ -1,0 +1,10 @@
+{
+  "bootstrap-sha": "ea46c1efd19f8ac3330a0dd845df272b3c53c9a6",
+  "release-type": "node",
+  "versioning": "always-bump-patch",
+  "packages": {
+    "cli": {
+      "component": "fluence-cli"
+    }
+  }
+}
