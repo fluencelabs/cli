@@ -737,7 +737,7 @@ __metadata:
     tsx: "npm:4.9.3"
     typescript: "npm:5.4.5"
     typescript-eslint: "npm:7.8.0"
-    undici: "npm:6.16.0"
+    undici: "npm:6.18.2"
     vitest: "npm:1.6.0"
     xbytes: "npm:1.9.1"
     yaml: "npm:2.4.2"
@@ -17477,10 +17477,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.16.0":
-  version: 6.16.0
-  resolution: "undici@npm:6.16.0"
-  checksum: 10c0/7d8bbb45bc2ab8b63da9d05af5cbe730bd83ffd93f94ec3c2bddde91e635af7c3e181b6355e882bff9de36e54b9a09a534cc5a2d49e8ec271932df49fab265e4
+"undici@npm:6.18.2":
+  version: 6.18.2
+  resolution: "undici@npm:6.18.2"
+  checksum: 10c0/271df2f77f873e0df41fa92c4a1685ce1089372801e7a260ba62d79c8a03f5ebc4b35dbed36bbd653928bcac1d2150ecbe276388c86bfb8c9708e3780846a304
   languageName: node
   linkType: hard
 
