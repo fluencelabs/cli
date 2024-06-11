@@ -17,12 +17,10 @@
     "on-each-commit": "yarn lint-fix"
   },
   "dependencies": {
-    "@fluencelabs/deal-ts-clients": "0.13.11"
+    "@total-typescript/ts-reset": "0.5.1"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
-    "@tanstack/react-query": "5.0.5",
-    "@total-typescript/ts-reset": "0.5.1",
     "@tsconfig/strictest": "2.0.5",
     "eslint": "9.3.0",
     "ethers": "6.7.1",
