@@ -114,7 +114,7 @@
     "globby": "14",
     "madge": "7.0.0",
     "npm-check-updates": "16.14.20",
-    "oclif": "patch:oclif@npm%3A4.1.0#~/.yarn/patches/oclif-npm-4.1.0-9d1cce6fed.patch",
+    "oclif": "patch:oclif@patch%3Aoclif@npm%253A4.1.0%23~/.yarn/patches/oclif-npm-4.1.0-9d1cce6fed.patch%3A%3Aversion=4.1.0&hash=3a113c#~/.yarn/patches/oclif-patch-1555645d74.patch",
     "proper-lockfile": "4.1.2",
     "shx": "0.3.4",
     "ts-node": "10.9.2",

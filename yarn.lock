@@ -723,7 +723,7 @@ __metadata:
     node_modules-path: "npm:2.0.7"
     npm: "npm:10.7.0"
     npm-check-updates: "npm:16.14.20"
-    oclif: "patch:oclif@npm%3A4.1.0#~/.yarn/patches/oclif-npm-4.1.0-9d1cce6fed.patch"
+    oclif: "patch:oclif@patch%3Aoclif@npm%253A4.1.0%23~/.yarn/patches/oclif-npm-4.1.0-9d1cce6fed.patch%3A%3Aversion=4.1.0&hash=3a113c#~/.yarn/patches/oclif-patch-1555645d74.patch"
     parse-duration: "npm:1.1.0"
     platform: "npm:1.3.6"
     proper-lockfile: "npm:4.1.2"
@@ -13475,7 +13475,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@patch:oclif@npm%3A4.1.0#~/.yarn/patches/oclif-npm-4.1.0-9d1cce6fed.patch":
+"oclif@patch:oclif@npm%3A4.1.0#~/.yarn/patches/oclif-npm-4.1.0-9d1cce6fed.patch::version=4.1.0&hash=3a113c":
   version: 4.1.0
   resolution: "oclif@patch:oclif@npm%3A4.1.0#~/.yarn/patches/oclif-npm-4.1.0-9d1cce6fed.patch::version=4.1.0&hash=3a113c"
   dependencies:
@@ -13500,6 +13500,34 @@ __metadata:
   bin:
     oclif: bin/run.js
   checksum: 10c0/314cd7358f15d97dca1bb41b7e1f337778a9d2780f0e3bd8f0d364b06a5c68af77bd6079a585ac59a8aadc2e6b60a92daf0ab106ab89dd28c2673bd82b72ac6b
+  languageName: node
+  linkType: hard
+
+"oclif@patch:oclif@patch%3Aoclif@npm%253A4.1.0%23~/.yarn/patches/oclif-npm-4.1.0-9d1cce6fed.patch%3A%3Aversion=4.1.0&hash=3a113c#~/.yarn/patches/oclif-patch-1555645d74.patch":
+  version: 4.1.0
+  resolution: "oclif@patch:oclif@patch%3Aoclif@npm%253A4.1.0%23~/.yarn/patches/oclif-npm-4.1.0-9d1cce6fed.patch%3A%3Aversion=4.1.0&hash=3a113c#~/.yarn/patches/oclif-patch-1555645d74.patch::version=4.1.0&hash=9e4ebd"
+  dependencies:
+    "@oclif/core": "npm:^3.0.4"
+    "@oclif/plugin-help": "npm:^5.2.14"
+    "@oclif/plugin-not-found": "npm:^2.3.32"
+    "@oclif/plugin-warn-if-update-available": "npm:^3.0.0"
+    async-retry: "npm:^1.3.3"
+    aws-sdk: "npm:^2.1231.0"
+    change-case: "npm:^4"
+    debug: "npm:^4.3.3"
+    eslint-plugin-perfectionist: "npm:^2.1.0"
+    find-yarn-workspace-root: "npm:^2.0.0"
+    fs-extra: "npm:^8.1"
+    github-slugger: "npm:^1.5.0"
+    got: "npm:^11"
+    lodash.template: "npm:^4.5.0"
+    normalize-package-data: "npm:^3.0.3"
+    semver: "npm:^7.3.8"
+    yeoman-environment: "npm:^3.15.1"
+    yeoman-generator: "npm:^5.8.0"
+  bin:
+    oclif: bin/run.js
+  checksum: 10c0/e0012a1a072d31b4999f7d7b7b593d6f9a34dce2fce51bc45c598d3af65de23251e58d8c4a8eb6ddd678bb0c96c959f8c7a327021f9ba458c7dcbfc2e3508246
   languageName: node
   linkType: hard
 

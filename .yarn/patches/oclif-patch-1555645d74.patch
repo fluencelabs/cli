@@ -1,0 +1,13 @@
+diff --git a/lib/tarballs/build.js b/lib/tarballs/build.js
+index ab9d6d41a470597b0a6eec2c557b34e34df3a1ff..7d7687ced321782b8040449c5335cddf3e98240b 100644
+--- a/lib/tarballs/build.js
++++ b/lib/tarballs/build.js
+@@ -54,7 +54,7 @@ async function build(c, options = {}) {
+     const addDependencies = async () => {
+         const yarnRoot = findYarnWorkspaceRoot(c.root) || c.root;
+         if ((0, node_fs_1.existsSync)(path.join(yarnRoot, 'yarn.lock'))) {
+-            await (0, fs_extra_1.copy)(path.join(yarnRoot, 'yarn.lock'), path.join(c.workspace(), 'yarn.lock'));
++            await (0, promises_1.writeFile)(path.join(c.workspace(), 'yarn.lock'), '');
+             const { stdout } = await exec('yarn -v');
+             const yarnVersion = stdout.charAt(0);
+             if (yarnVersion === '1') {
