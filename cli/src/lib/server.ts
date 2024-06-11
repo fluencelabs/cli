@@ -115,10 +115,7 @@ async function resolveCliConnectorPath() {
     const packedCliConnectorPath = resolve(
       __dirname,
       "..",
-      "..",
-      "packages",
       CLI_CONNECTOR_DIR_NAME,
-      "dist",
     );
 
     try {
