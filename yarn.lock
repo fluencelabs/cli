@@ -3121,7 +3121,7 @@ __metadata:
     typescript: "npm:5.2.2"
     typescript-eslint: "npm:7.8.0"
     viem: "npm:^2.9.29"
-    vite: "npm:4.4.9"
+    vite: "npm:4.5.3"
     wagmi: "npm:^2.7.0"
   languageName: unknown
   linkType: soft
@@ -18002,9 +18002,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:4.4.9":
-  version: 4.4.9
-  resolution: "vite@npm:4.4.9"
+"vite@npm:4.5.3":
+  version: 4.5.3
+  resolution: "vite@npm:4.5.3"
   dependencies:
     esbuild: "npm:^0.18.10"
     fsevents: "npm:~2.3.2"
@@ -18038,7 +18038,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/80dbc632fd75b5866567c8fd605115c9d5718654dbf173f509cfd55c53f39dfbee24f62660e57fd5b11eb93f469a65abdbe6bae880ec8392bb70a5d0d7b6e6a9
+  checksum: 10c0/caeb1eecc0a8e0865782899e2f83d2993a9816562badc1c8291316d80d49b82f12038abd8cb8b8c627b6f369f58dfb25972ef4517d5e6e1b6e1bf7ee5b63a8a6
   languageName: node
   linkType: hard
 
