@@ -16,7 +16,6 @@
 
 import assert from "node:assert";
 
- 
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
