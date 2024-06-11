@@ -22,7 +22,7 @@ const BASE_58_PREFIX = "z";
 export async function peerIdToUint8Array(peerId: string) {
   const [{ digest }, { base58btc }] = await Promise.all([
     import("multiformats"),
-    // eslint-disable-next-line import/extensions
+     
     import("multiformats/bases/base58"),
   ]);
 
@@ -33,7 +33,7 @@ export async function peerIdToUint8Array(peerId: string) {
 
 export async function peerIdHexStringToBase58String(peerIdHex: string) {
   const [{ base58btc }] = await Promise.all([
-    // eslint-disable-next-line import/extensions
+     
     import("multiformats/bases/base58"),
   ]);
 
@@ -57,7 +57,7 @@ export async function cidStringToCIDV1Struct(
 }
 
 export async function cidHexStringToBase32(cidHex: string): Promise<string> {
-  // eslint-disable-next-line import/extensions
+   
   const { base32 } = await import("multiformats/bases/base32");
   return base32.encode(new Uint8Array(Buffer.from(cidHex, "hex")));
 }

@@ -19,9 +19,9 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
 
 import { color } from "@oclif/color";
-import { jsonStringify } from "@repo/common";
 import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
 
+import { jsonStringify } from "../../common.js";
 import { validationErrorToString } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";

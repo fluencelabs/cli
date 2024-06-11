@@ -20,8 +20,9 @@ import { isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "url";
 
 import { color } from "@oclif/color";
-import { jsonStringify } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
+
+import { jsonStringify } from "../common.js";
 
 import { ajv } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";

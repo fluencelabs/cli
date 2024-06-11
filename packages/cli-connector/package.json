@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.0.6",
+    "@repo/common": "*",
     "@tanstack/react-query": "5.0.5",
     "buffer": "^6.0.3",
     "react": "^18.2.25",
@@ -21,7 +22,6 @@
     "wagmi": "^2.7.0"
   },
   "devDependencies": {
-    "@repo/common": "*",
     "@repo/eslint-config": "*",
     "@total-typescript/ts-reset": "0.5.1",
     "@tsconfig/strictest": "2.0.5",

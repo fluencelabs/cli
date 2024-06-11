@@ -22,10 +22,10 @@ import type { CompileFuncCallFromPathArgs } from "@fluencelabs/aqua-api";
 import type { js2aqua } from "@fluencelabs/js-client";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
-import { jsonStringify } from "@repo/common";
 import type { JSONSchemaType } from "ajv";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
+import { jsonStringify } from "../common.js";
 import { validationErrorToString, ajv } from "../lib/ajvInstance.js";
 import {
   resolveAquaConfig,

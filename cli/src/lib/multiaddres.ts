@@ -20,8 +20,9 @@ import { isAbsolute, join, resolve } from "node:path";
 
 import { type Node as AddrAndPeerId } from "@fluencelabs/fluence-network-environment";
 import { color } from "@oclif/color";
-import { jsonStringify } from "@repo/common";
 import sample from "lodash-es/sample.js";
+
+import { jsonStringify } from "../common.js";
 
 import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";

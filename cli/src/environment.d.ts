@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { ChainENV } from "@repo/common";
-
 import {
   DEBUG_COUNTLY,
   FLUENCE_ENV,
   FLUENCE_USER_DIR,
   CI,
 } from "../src/lib/setupEnvironment.js";
+
+import { ChainENV } from "./common.js";
 
 declare global {
   namespace NodeJS {

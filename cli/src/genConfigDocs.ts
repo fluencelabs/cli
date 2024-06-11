@@ -18,8 +18,7 @@ import assert from "node:assert";
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { jsonStringify } from "@repo/common";
-
+import { jsonStringify } from "./common.js";
 import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
 import { envSchema } from "./lib/configs/project/env.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";

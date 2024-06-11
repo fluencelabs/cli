@@ -19,12 +19,13 @@ import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { color } from "@oclif/color";
-import { DEFAULT_PUBLIC_FLUENCE_ENV } from "@repo/common";
 import cloneDeep from "lodash-es/cloneDeep.js";
 import merge from "lodash-es/merge.js";
 import sum from "lodash-es/sum.js";
 import xbytes from "xbytes";
 import { yamlDiffPatch } from "yaml-diff-patch";
+
+import { DEFAULT_PUBLIC_FLUENCE_ENV } from "../common.js";
 
 import { importAquaCompiler } from "./aqua.js";
 import { buildModules } from "./buildModules.js";

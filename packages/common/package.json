@@ -1,10 +1,12 @@
 {
   "name": "@repo/common",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -16,12 +18,7 @@
     "lint-fix": "eslint . --fix",
     "on-each-commit": "yarn lint-fix"
   },
-  "dependencies": {
-    "@fluencelabs/deal-ts-clients": "0.13.11"
-  },
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@tanstack/react-query": "5.0.5",
     "@total-typescript/ts-reset": "0.5.1",
     "@tsconfig/strictest": "2.0.5",
     "eslint": "9.3.0",

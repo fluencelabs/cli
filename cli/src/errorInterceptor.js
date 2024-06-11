@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 
-// eslint-disable-next-line import/extensions
+ 
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
