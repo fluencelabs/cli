@@ -56,6 +56,10 @@ jobs:
       - name: Run on each commit
         run: yarn on-each-commit
 
+      - name: Run CLI before-build
+        run: yarn before-build
+        working-directory: cli
+
       - name: Run on each commit CLI
         run: yarn on-each-commit
         working-directory: cli
