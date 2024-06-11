@@ -15,6 +15,7 @@
     "@rainbow-me/rainbowkit": "^2.0.6",
     "@repo/common": "*",
     "@tanstack/react-query": "5.0.5",
+    "@total-typescript/ts-reset": "0.5.1",
     "buffer": "^6.0.3",
     "react": "^18.2.25",
     "react-dom": "^18.2.25",
@@ -23,7 +24,6 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
-    "@total-typescript/ts-reset": "0.5.1",
     "@tsconfig/strictest": "2.0.5",
     "@tsconfig/vite-react": "3.0.2",
     "@types/react": "^18.2.25",

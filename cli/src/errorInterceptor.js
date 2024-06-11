@@ -222,7 +222,7 @@ export function setUpProcessWarningListener() {
       // so we have to rely on the text of the error message
       (warning.stack ?? "").includes("Cannot find")
     ) {
-      throw new Error(warning.stack);
+      throw warning;
     }
 
     const isWarnMsgToIgnore = WARN_MSGS_TO_IGNORE.some((msg) => {
