@@ -426,6 +426,7 @@ export async function collateralWithdraw(
   flags: CCFlags & { [MAX_CUS_FLAG_NAME]: number },
 ) {
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
+  const { ethers } = await import("ethers");
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
     await getCommitmentsInfo(flags),
@@ -463,6 +464,38 @@ export async function collateralWithdraw(
     const { commitmentId } = commitment;
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
+
+    const units = await Promise.all(
+      unitIds.map(async (unitId) => {
+        return {
+          unitId,
+          unitInfo: await market.getComputeUnit(unitId),
+        };
+      }),
+    );
+
+    const unitsWithDeals = units.filter((unit) => {
+      return unit.unitInfo.deal !== ethers.ZeroAddress;
+    });
+
+    const returnComputeUnitFromDealTxs = unitsWithDeals.map((unit) => {
+      return populateTx(market.returnComputeUnitFromDeal, unit.unitId);
+    });
+
+    try {
+      await signBatch(returnComputeUnitFromDealTxs);
+    } catch (e) {
+      commandObj.warn(
+        `Wasn't able to return compute units from deals for ${stringifyBasicCommitmentInfo(commitment)}. Most likely the reason is you must wait until the provider exits from the following deals:\n${unitsWithDeals
+          .map(({ unitInfo }) => {
+            return unitInfo.deal;
+          })
+          .join("\n")}`,
+      );
+
+      dbg(stringifyUnknown(e));
+      continue;
+    }
 
     try {
       if (unitIds.length < flags[MAX_CUS_FLAG_NAME]) {
