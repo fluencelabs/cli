@@ -57,7 +57,7 @@
     "@fluencelabs/air-beautify-wasm": "0.3.9",
     "@fluencelabs/aqua-api": "0.14.10",
     "@fluencelabs/aqua-to-js": "0.3.13",
-    "@fluencelabs/deal-ts-clients": "0.13.11",
+    "@fluencelabs/deal-ts-clients": "0.14.0",
     "@fluencelabs/fluence-network-environment": "1.2.1",
     "@fluencelabs/js-client": "0.9.0",
     "@fluencelabs/npm-aqua-compiler": "0.0.3",
@@ -70,6 +70,7 @@
     "@oclif/plugin-help": "6.0.21",
     "@oclif/plugin-not-found": "3.1.8",
     "@oclif/plugin-update": "4.2.11",
+    "@total-typescript/ts-reset": "0.5.1",
     "ajv": "8.13.0",
     "chokidar": "3.6.0",
     "countly-sdk-nodejs": "22.6.0",
@@ -91,7 +92,6 @@
     "tar": "7.1.0",
     "xbytes": "1.9.1",
     "yaml": "2.4.2",
-    "@total-typescript/ts-reset": "0.5.1",
     "yaml-diff-patch": "2.0.0"
   },
   "devDependencies": {
