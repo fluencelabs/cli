@@ -281,7 +281,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -303,7 +303,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -330,7 +330,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -363,7 +363,7 @@ FLAGS
   --price-per-worker-epoch=<value>             (required) Price per worker epoch
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
   --protocol-version=<value>                   Protocol version
   --target-workers=<value>                     (required) Max workers in the deal
@@ -394,7 +394,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -421,7 +421,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -488,7 +488,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -516,7 +516,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -543,7 +543,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -572,7 +572,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -647,7 +647,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -678,7 +678,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -707,7 +707,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -855,7 +855,7 @@ FLAGS
       --particle-id                                Print particle ids when running Fluence js-client
       --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local env
-                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                                   0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                    used by default when CLI is used in non-interactive mode
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
@@ -1028,7 +1028,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1084,7 +1084,7 @@ _See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/fl
 
 ## `fluence local up`
 
-Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in provider.yaml config using default wallet key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in provider.yaml config using default wallet key 0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156
 
 ```
 USAGE
@@ -1099,7 +1099,7 @@ FLAGS
       --no-input                Don't interactively ask for any input from the user
       --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
       --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure. On
-                                local env 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used by
+                                local env 0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is used by
                                 default when CLI is used in non-interactive mode
       --quiet-pull              Pull without printing progress information
       --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local
@@ -1107,7 +1107,7 @@ FLAGS
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in
-  provider.yaml config using default wallet key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+  provider.yaml config using default wallet key 0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156
 
 EXAMPLES
   $ fluence local up
@@ -1260,7 +1260,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1291,7 +1291,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1321,7 +1321,7 @@ FLAGS
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1351,7 +1351,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1380,7 +1380,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1409,7 +1409,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1437,7 +1437,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1462,7 +1462,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1492,7 +1492,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1519,7 +1519,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1544,7 +1544,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1573,7 +1573,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1600,7 +1600,7 @@ FLAGS
   --noxes=<value>                              Number of Compute Peers to generate when a new provider.yaml is created
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1625,7 +1625,7 @@ FLAGS
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1655,7 +1655,7 @@ FLAGS
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1683,7 +1683,7 @@ FLAGS
                                                all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1708,7 +1708,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1737,7 +1737,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1767,7 +1767,7 @@ FLAGS
                                                noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
@@ -1792,7 +1792,7 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               0x2d37ee7f23fe2d916d57857b095426b54fed24840c3f61097c8fe547f3659156 is
                                                used by default when CLI is used in non-interactive mode
 
 DESCRIPTION
