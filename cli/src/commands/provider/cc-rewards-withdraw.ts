@@ -16,7 +16,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { collateralRewardWithdraw } from "../../lib/chain/commitment.js";
-import { CHAIN_FLAGS, NOX_NAMES_FLAG, FLT_SYMBOL } from "../../lib/const.js";
+import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CCRewardsWithdraw extends BaseCommand<
@@ -26,7 +26,7 @@ export default class CCRewardsWithdraw extends BaseCommand<
   static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitments`;
   static override flags = {
     ...baseFlags,
-    ...NOX_NAMES_FLAG,
+    ...CC_FLAGS,
     ...CHAIN_FLAGS,
   };
 
