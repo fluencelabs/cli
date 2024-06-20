@@ -36,6 +36,7 @@ import {
   IPFS_PORT,
   POSTGRES_CONTAINER_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
+  SUBGRAPH_DEPLOY_SCRIPT_NAME,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
   COMETBFT_PORT,
@@ -303,6 +304,14 @@ async function genDockerCompose(): Promise<LatestConfig> {
           ETHEREUM_REORG_THRESHOLD: 1,
           ETHEREUM_ANCESTOR_COUNT: 1,
         },
+      },
+      [SUBGRAPH_DEPLOY_SCRIPT_NAME]: {
+        image: versions[SUBGRAPH_DEPLOY_SCRIPT_NAME],
+        environment: {
+          GRAPHNODE_ADMIN_URL_LOCAL: `http://${GRAPH_NODE_CONTAINER_NAME}:${GRAPH_NODE_PORT}`,
+          IPFS_URL: `http://${IPFS_CONTAINER_NAME}:${IPFS_PORT}`,
+        },
+        depends_on: [GRAPH_NODE_CONTAINER_NAME],
       },
       [IPC_DEPLOY_SCRIPT_NAME]: {
         image: versions[IPC_DEPLOY_SCRIPT_NAME],

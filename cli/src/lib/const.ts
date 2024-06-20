@@ -129,6 +129,7 @@ export const COMETBFT_NAME = "cometbft";
 export const COMETBFT_PORT = "26657";
 export const FENDERMINT_NAME = "fendermint";
 export const FENDERMINT_PORT = "26658";
+export const SUBGRAPH_DEPLOY_SCRIPT_NAME = "subgraph-deploy-script";
 export const TCP_PORT_START = 7771;
 export const WEB_SOCKET_PORT_START = 9991;
 export const HTTP_PORT_START = 18080;

@@ -4,6 +4,7 @@
   "fendermint": "docker.fluence.dev/fendermint-local:NET-720-5475288-4647-1",
   "ipc-deploy-script": "docker.fluence.dev/ipc-deploy-script:NET-720-5475288-4647-1",
   "cometbft": "docker.fluence.dev/cometbft:NET-720-5475288-4647-1",
+  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:NET-720-5475288-4647-1",
   "rust-toolchain": "nightly-2024-06-10-x86_64",
   "npm": {
     "@fluencelabs/aqua-lib": "0.9.1",
