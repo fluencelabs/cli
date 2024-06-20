@@ -47,7 +47,7 @@
     "generate-templates": "node --loader ts-node/esm --no-warnings ./test/setup/generateTemplates.ts",
     "local-up": "node --loader ts-node/esm --no-warnings ./test/setup/localUp.ts",
     "test": "yarn download-marine-and-mrepl && yarn generate-templates && yarn local-up && yarn vitest",
-    "circular": "madge --circular ./dist",
+    "circular": "madge --circular ./dist --exclude cli-connector",
     "on-each-commit": "yarn build && yarn lint-fix && yarn circular && cd docs/commands && oclif readme --no-aliases && yarn gen-config-docs",
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && tsx ./src/genConfigDocs.ts",
     "unused-exports": "ts-unused-exports tsconfig.json",
