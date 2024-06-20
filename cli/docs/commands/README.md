@@ -1398,10 +1398,11 @@ Withdraw FLT rewards from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-rewards-withdraw [--no-input] [--nox-names <nox-1,nox-2>] [--env <dar | kras | stage | local | custom>]
-    [--priv-key <private-key>]
+  $ fluence provider cc-rewards-withdraw [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--env <dar | kras | stage |
+    local | custom>] [--priv-key <private-key>]
 
 FLAGS
+  --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
