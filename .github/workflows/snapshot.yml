@@ -53,6 +53,10 @@ jobs:
     name: "Build snapshot"
     runs-on: builder
 
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
     outputs:
       version: ${{ steps.snapshot.outputs.version }}
 
@@ -90,17 +94,20 @@ jobs:
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "18.20.3"
           registry-url: "https://npm.fluence.dev"
           cache: "yarn"
-
-      - run: yarn install
 
       - name: Configure yarn to publish to private registry
         run: |
           yarn config set npmRegistryServer "https://npm.fluence.dev"
           yarn config set npmAlwaysAuth true
           yarn config set npmAuthToken $NODE_AUTH_TOKEN
+
+      - run: yarn install
+
+      - run: yarn install
+        working-directory: cli
 
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
@@ -109,6 +116,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
+          working-directory: cli
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -117,6 +125,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
+          working-directory: cli
 
       - name: Set installation-spell version
         if: inputs.installation-spell-version != 'null'
@@ -126,6 +135,7 @@ jobs:
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
           flags: "--dev"
+          working-directory: cli
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -147,22 +157,24 @@ jobs:
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
 
-      - name: Publish snapshot
-        id: snapshot
-        uses: fluencelabs/github-actions/npm-publish-snapshot@main
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
         with:
-          id: ${{ steps.version.outputs.id }}
-          package-manager: yarn npm
-          flags: --tag snapshot
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
 
-      - name: Pack fluence-cli
+      - name: Build
+        run: yarn build
+
+      - name: Build CLI
+        run: yarn build
+        working-directory: cli
+
+      - name: Pack Fluence CLI for Linux and macOS
         run: yarn pack-ci
-
-      - name: Rename archives
-        run: |
-          for p in linux-x64 darwin-arm64; do
-            mv dist/fluence-*${p}*.tar.gz fluence-cli-${p}.tar.gz
-          done
+        working-directory: cli
 
       - name: Upload linux-x64 to CI checks
         uses: actions/upload-artifact@v4
