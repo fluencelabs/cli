@@ -2,12 +2,13 @@
   "name": "fluence-cli-monorepo",
   "private": true,
   "type": "module",
+  "license": "AGPL-3.0",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "build": "turbo run build --cache-dir=.turbo",
-    "on-each-commit": "turbo run on-each-commit --cache-dir=.turbo",
+    "on-each-commit": "turbo run on-each-commit --cache-dir=.turbo --no-cache",
     "format": "prettier --write \"**/*.{ts,js,tsx}\""
   },
   "devDependencies": {

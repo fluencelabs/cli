@@ -9,7 +9,7 @@
   "homepage": "https://github.com/fluencelabs/cli",
   "bugs": "https://github.com/fluencelabs/cli/issues",
   "repository": "fluencelabs/cli",
-  "license": "Apache-2.0",
+  "license": "AGPL-3.0",
   "author": "Fluence Labs",
   "type": "module",
   "exports": "./lib/index.js",
