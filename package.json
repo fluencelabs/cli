@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "turbo run build --cache-dir=.turbo",
-    "on-each-commit": "turbo run on-each-commit --cache-dir=.turbo --no-cache",
+    "on-each-commit": "turbo run on-each-commit --cache-dir=.turbo",
     "format": "prettier --write \"**/*.{ts,js,tsx}\""
   },
   "devDependencies": {
