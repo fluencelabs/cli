@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.17.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.16.3...fluence-cli-v0.17.0) (2024-06-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* update rust toolchain and fix toolchain override ([#959](https://github.com/fluencelabs/cli/issues/959))
+
+### Features
+
+* add json flag for provider cc-info ([#955](https://github.com/fluencelabs/cli/issues/955)) ([5887b5f](https://github.com/fluencelabs/cli/commit/5887b5f68084601988e6d886c28ef86cfdd88e5c))
+* improve redeploy message ([#945](https://github.com/fluencelabs/cli/issues/945)) ([a5469d3](https://github.com/fluencelabs/cli/commit/a5469d34eb783e447efca20392d31f51bbe0b70b))
+* local connector, linter, formatter, CI cache fix [fixes DXJ-409] ([#953](https://github.com/fluencelabs/cli/issues/953)) ([1282089](https://github.com/fluencelabs/cli/commit/1282089d7be6313a6bd5f8cb52c3ccaab0ee5134))
+* set up monorepo ([#943](https://github.com/fluencelabs/cli/issues/943)) ([10ab8e1](https://github.com/fluencelabs/cli/commit/10ab8e14b87b9673f1fa4563a6b2eb2854b300c0))
+* update marine 0.20.1, mrepl 0.31.0 ([#954](https://github.com/fluencelabs/cli/issues/954)) ([f7e0e0a](https://github.com/fluencelabs/cli/commit/f7e0e0a0bab59913aafa9b95628217aeefa93ba3))
+* update nox 0.25.0 ([#951](https://github.com/fluencelabs/cli/issues/951)) ([b896cdd](https://github.com/fluencelabs/cli/commit/b896cddc2f630dddef3b55dc2a1b8818aa3180d0))
+
+
+### Bug Fixes
+
+* add cc-ids flag to provider cc-rewards-withdraw ([#970](https://github.com/fluencelabs/cli/issues/970)) ([1563e64](https://github.com/fluencelabs/cli/commit/1563e64ecb83b426e7f01401a6779c37d51adb88))
+* cli-connector not found ([#965](https://github.com/fluencelabs/cli/issues/965)) ([748fcb3](https://github.com/fluencelabs/cli/commit/748fcb33dbe1f8e6297da48a6dc559c01259c6f9))
+* remove cli from monorepo ([#964](https://github.com/fluencelabs/cli/issues/964)) ([5521b54](https://github.com/fluencelabs/cli/commit/5521b5460b4406fd82391324fda7ef4341d88246))
+* update rust toolchain and fix toolchain override ([#959](https://github.com/fluencelabs/cli/issues/959)) ([7ed61b9](https://github.com/fluencelabs/cli/commit/7ed61b95dc6ea65e52b90dadffedb8f383ba3bdd))
+
 ## [0.16.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.16.2...fluence-cli-v0.16.3) (2024-05-20)
 
 
