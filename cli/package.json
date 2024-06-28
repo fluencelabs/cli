@@ -1,6 +1,6 @@
 {
   "name": "@fluencelabs/cli",
-  "version": "0.16.3",
+  "version": "0.17.0",
   "description": "CLI for working with Fluence network",
   "keywords": [
     "fluence",
@@ -9,7 +9,7 @@
   "homepage": "https://github.com/fluencelabs/cli",
   "bugs": "https://github.com/fluencelabs/cli/issues",
   "repository": "fluencelabs/cli",
-  "license": "Apache-2.0",
+  "license": "AGPL-3.0",
   "author": "Fluence Labs",
   "type": "module",
   "exports": "./lib/index.js",
@@ -47,7 +47,7 @@
     "generate-templates": "node --loader ts-node/esm --no-warnings ./test/setup/generateTemplates.ts",
     "local-up": "node --loader ts-node/esm --no-warnings ./test/setup/localUp.ts",
     "test": "yarn download-marine-and-mrepl && yarn generate-templates && yarn local-up && yarn vitest",
-    "circular": "madge --circular ./dist",
+    "circular": "madge --circular ./dist --exclude cli-connector",
     "on-each-commit": "yarn build && yarn lint-fix && yarn circular && cd docs/commands && oclif readme --no-aliases && yarn gen-config-docs",
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && tsx ./src/genConfigDocs.ts",
     "unused-exports": "ts-unused-exports tsconfig.json",
