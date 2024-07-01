@@ -20,7 +20,7 @@ import type { TransactionRequest } from "ethers";
 
 export const CHAIN_IDS = {
   dar: 2358716091832359,
-  stage: 3521768853336688,
+  stage: 2182032320410279,
   kras: 1622562509754216,
   local: 31337,
 } as const satisfies Record<ChainENV, number>;
