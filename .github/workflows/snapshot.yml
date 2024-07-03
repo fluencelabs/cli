@@ -39,10 +39,6 @@ on:
         description: "@fluencelabs/installation-spell version"
         type: string
         default: "null"
-    outputs:
-      version:
-        description: "@fluencelabs/cli version"
-        value: ${{ jobs.snapshot.outputs.version }}
 
 env:
   CI: true
