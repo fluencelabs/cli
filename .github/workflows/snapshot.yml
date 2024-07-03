@@ -57,9 +57,6 @@ jobs:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
-    outputs:
-      version: ${{ steps.snapshot.outputs.version }}
-
     permissions:
       contents: read
       id-token: write
