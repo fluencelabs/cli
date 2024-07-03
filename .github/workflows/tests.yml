@@ -77,11 +77,8 @@ env:
 jobs:
   tests:
     name: "Run tests"
-    runs-on: builder
+    runs-on: linux-amd64-m-xlarge
     timeout-minutes: 60
-
-    outputs:
-      version: "${{ steps.snapshot.outputs.version }}"
 
     permissions:
       contents: write

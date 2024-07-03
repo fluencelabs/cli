@@ -51,7 +51,7 @@ env:
 jobs:
   snapshot:
     name: "Build snapshot"
-    runs-on: builder
+    runs-on: linux-amd64-m-xlarge
 
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
