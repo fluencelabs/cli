@@ -77,7 +77,7 @@ env:
 jobs:
   tests:
     name: "Run tests"
-    runs-on: linux-amd64-m-xlarge
+    runs-on: linux-amd64-m-2xlarge
     timeout-minutes: 60
 
     permissions:
