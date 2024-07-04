@@ -8,7 +8,6 @@
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
 * [`fluence chain info`](#fluence-chain-info)
-* [`fluence chain proof`](#fluence-chain-proof)
 * [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
 * [`fluence deal create`](#fluence-deal-create)
 * [`fluence deal deposit [AMOUNT] [DEPLOYMENT-NAMES]`](#fluence-deal-deposit-amount-deployment-names)
@@ -289,28 +288,6 @@ DESCRIPTION
 ```
 
 _See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/chain/info.ts)_
-
-## `fluence chain proof`
-
-Send garbage proof for testing purposes
-
-```
-USAGE
-  $ fluence chain proof [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
-
-FLAGS
-  --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                                   Don't interactively ask for any input from the user
-  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local env
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
-                                               used by default when CLI is used in non-interactive mode
-
-DESCRIPTION
-  Send garbage proof for testing purposes
-```
-
-_See code: [src/commands/chain/proof.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/chain/proof.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
