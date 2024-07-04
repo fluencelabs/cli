@@ -62,7 +62,7 @@ export default class New extends BaseCommand<typeof New> {
     );
 
     const pathToModuleDir = join(absoluteServicePath, serviceName);
-    await generateNewModule(pathToModuleDir);
+    await generateNewModule(pathToModuleDir, serviceName);
 
     await initNewReadonlyServiceConfig(
       absoluteServicePath,
