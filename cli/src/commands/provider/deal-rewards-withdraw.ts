@@ -74,7 +74,11 @@ export default class DealRewardsWithdraw extends BaseCommand<
       }, 0n);
 
       for (const { id } of computeUnits) {
-        await sign(deal.withdrawRewards, id);
+        await sign(
+          `Withdrawing rewards for compute unit ${id}`,
+          deal.withdrawRewards,
+          id,
+        );
       }
 
       commandObj.logToStderr(

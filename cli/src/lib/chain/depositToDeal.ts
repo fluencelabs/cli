@@ -42,19 +42,25 @@ export async function depositToDeal(
 
   for (const { dealName, dealId } of deals) {
     const deal = dealClient.getDeal(dealId);
+    const tokensString = await ptFormatWithSymbol(parsedAmount);
 
     await sign(
+      `Approve ${tokensString} tokens to be deposited to the deal ${dealName}`,
       ERC20__factory.connect(await deal.paymentToken(), providerOrWallet)
         .approve,
       await deal.getAddress(),
       parsedAmount,
     );
 
-    await sign(deal.deposit, parsedAmount);
+    await sign(
+      `Deposit ${tokensString} to the deal ${dealName} (${dealId})`,
+      deal.deposit,
+      parsedAmount,
+    );
 
     commandObj.log(
       `${color.yellow(
-        await ptFormatWithSymbol(parsedAmount),
+        tokensString,
       )} tokens were deposited to the deal ${color.yellow(dealName)}`,
     );
   }

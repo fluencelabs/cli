@@ -179,7 +179,7 @@ export function App() {
         </details>
       )}
       {transactionPayload !== null && isConnected && (
-        <h1>{transactionPayload.name}</h1>
+        <h1>{transactionPayload.title}</h1>
       )}
       <ConnectButton
         chainStatus={{

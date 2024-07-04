@@ -144,6 +144,7 @@ export async function createOffers(flags: OffersArgs) {
     } = offer;
 
     const txReceipt = await sign(
+      `Register offer: ${offerName}`,
       market.registerMarketOffer,
       minPricePerWorkerEpochBigInt,
       usdcAddress,

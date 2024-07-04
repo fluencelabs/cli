@@ -81,7 +81,15 @@ export async function updateOffers(flags: OffersArgs) {
   }
 
   await assertProviderIsRegistered();
-  await signBatch(updateOffersTxs);
+
+  await signBatch(
+    `Updating offers:\n\n${populatedTxs
+      .map(({ offerName, offerId }) => {
+        return `${offerName} (${offerId})`;
+      })
+      .join("\n")}`,
+    updateOffersTxs,
+  );
 }
 
 type OnChainOffer = Awaited<
