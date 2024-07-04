@@ -39,10 +39,6 @@ on:
         description: "@fluencelabs/installation-spell version"
         type: string
         default: "null"
-    outputs:
-      version:
-        description: "@fluencelabs/cli version"
-        value: ${{ jobs.snapshot.outputs.version }}
 
 env:
   CI: true
@@ -51,14 +47,11 @@ env:
 jobs:
   snapshot:
     name: "Build snapshot"
-    runs-on: builder
+    runs-on: linux-amd64-m-xlarge
 
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-
-    outputs:
-      version: ${{ steps.snapshot.outputs.version }}
 
     permissions:
       contents: read
