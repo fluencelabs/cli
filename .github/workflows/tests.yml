@@ -77,11 +77,8 @@ env:
 jobs:
   tests:
     name: "Run tests"
-    runs-on: builder
+    runs-on: linux-amd64-c-2xlarge
     timeout-minutes: 60
-
-    outputs:
-      version: "${{ steps.snapshot.outputs.version }}"
 
     permissions:
       contents: write
@@ -191,6 +188,9 @@ jobs:
 
       - run: yarn install
 
+      - run: yarn install
+        working-directory: cli
+
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
@@ -256,8 +256,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
+      - name: Build
+        run: yarn build
+
+      - name: Build CLI
+        run: yarn build
+        working-directory: cli
+
       - name: Pack Fluence CLI for Linux
         run: yarn pack-linux-x64
+        working-directory: cli
 
       - name: Download Marine and Mrepl
         run: yarn download-marine-and-mrepl
@@ -293,7 +301,7 @@ jobs:
         uses: jwalton/gh-docker-logs@v2
 
       - name: Dump anvil state
-        if: always()
+        if: contains(github.event.pull_request.labels.*.name, 'dump-anvil') && failure()
         run: |
           curl http://localhost:8545 \
             -X POST \

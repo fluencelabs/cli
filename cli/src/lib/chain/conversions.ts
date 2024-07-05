@@ -1,17 +1,18 @@
 /**
- * Copyright 2024 Fluence DAO
+ * Fluence CLI
+ * Copyright (C) 2024 Fluence DAO
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 import type { CIDV1Struct } from "@fluencelabs/deal-ts-clients/dist/typechain-types/Config.js";
@@ -22,7 +23,7 @@ const BASE_58_PREFIX = "z";
 export async function peerIdToUint8Array(peerId: string) {
   const [{ digest }, { base58btc }] = await Promise.all([
     import("multiformats"),
-    // eslint-disable-next-line import/extensions
+
     import("multiformats/bases/base58"),
   ]);
 
@@ -33,7 +34,6 @@ export async function peerIdToUint8Array(peerId: string) {
 
 export async function peerIdHexStringToBase58String(peerIdHex: string) {
   const [{ base58btc }] = await Promise.all([
-    // eslint-disable-next-line import/extensions
     import("multiformats/bases/base58"),
   ]);
 
@@ -57,7 +57,6 @@ export async function cidStringToCIDV1Struct(
 }
 
 export async function cidHexStringToBase32(cidHex: string): Promise<string> {
-  // eslint-disable-next-line import/extensions
   const { base32 } = await import("multiformats/bases/base32");
   return base32.encode(new Uint8Array(Buffer.from(cidHex, "hex")));
 }

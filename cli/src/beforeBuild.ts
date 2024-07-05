@@ -1,17 +1,18 @@
 /**
- * Copyright 2024 Fluence DAO
+ * Fluence CLI
+ * Copyright (C) 2024 Fluence DAO
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 import { cp, mkdir, rm, writeFile } from "node:fs/promises";
@@ -20,25 +21,18 @@ import { join, resolve } from "node:path";
 import { compileFromPath } from "@fluencelabs/aqua-api";
 import aquaToJs from "@fluencelabs/aqua-to-js";
 import { gatherImportsFromNpm } from "@fluencelabs/npm-aqua-compiler";
-import { jsonStringify } from "@repo/common";
 
-import {
-  AQUA_DEPENDENCIES_DIR_NAME,
-  AQUA_EXT,
-  FS_OPTIONS,
-  NODE_MODULES_DIR_NAME,
-} from "./lib/const.js";
 import { versions } from "./versions.js";
 
-const WORKSPACE_NODE_MODULES_PATH = resolve("..", NODE_MODULES_DIR_NAME);
+const WORKSPACE_NODE_MODULES_PATH = resolve(".", "node_modules");
 
-const aquaDependenciesDirPath = join("src", AQUA_DEPENDENCIES_DIR_NAME);
+const aquaDependenciesDirPath = join("src", "aqua-dependencies");
 await mkdir(aquaDependenciesDirPath, { recursive: true });
 
 await writeFile(
   join(aquaDependenciesDirPath, "package.json"),
-  jsonStringify({ dependencies: versions.npm }),
-  FS_OPTIONS,
+  JSON.stringify({ dependencies: versions.npm }, null, 2),
+  "utf-8",
 );
 
 const VERSIONS_DIR_PATH = join("src", "versions");
@@ -66,7 +60,7 @@ const CLI_AQUA_DEPENDENCIES_DIR_PATH = resolve(
 
 const INSTALLATION_SPELL_DIR_PATH = join(
   CLI_AQUA_DEPENDENCIES_DIR_PATH,
-  NODE_MODULES_DIR_NAME,
+  "node_modules",
   "@fluencelabs",
   "installation-spell",
 );
@@ -87,7 +81,7 @@ async function compileInstallationSpellAqua(tracing = false) {
     ["upload", "cli", "deal_spell", "files", "deploy"].map(async (fileName) => {
       const filePath = join(
         INSTALLATION_SPELL_AQUA_DIR_PATH,
-        `${fileName}.${AQUA_EXT}`,
+        `${fileName}.aqua`,
       );
 
       const compilationResult = await compileFromPath({
@@ -116,7 +110,7 @@ async function compileInstallationSpellAqua(tracing = false) {
           `${fileName}.ts`,
         ),
         sources,
-        FS_OPTIONS,
+        "utf-8",
       );
     }),
   );
@@ -134,6 +128,11 @@ await cp(
     "package.json",
   ),
   join(VERSIONS_DIR_PATH, "js-client.package.json"),
+);
+
+await cp(
+  resolve("..", "packages", "common", "src", "index.ts"),
+  resolve(".", "src", "common.ts"),
 );
 
 await rm(COMPILED_AQUA_PATH, { recursive: true, force: true });

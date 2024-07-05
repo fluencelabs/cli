@@ -1,5 +1,6 @@
 {
   "name": "@repo/eslint-config",
+  "license": "AGPL-3.0",
   "type": "module",
   "version": "0.0.0",
   "private": true,

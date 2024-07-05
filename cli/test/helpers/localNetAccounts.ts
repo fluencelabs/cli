@@ -1,23 +1,23 @@
 /**
- * Copyright 2024 Fluence DAO
+ * Fluence CLI
+ * Copyright (C) 2024 Fluence DAO
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 import assert from "node:assert";
 
-import { LOCAL_NET_DEFAULT_ACCOUNTS, type Account } from "@repo/common";
-
+import { LOCAL_NET_DEFAULT_ACCOUNTS, type Account } from "../../src/common.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 
 import { lockAndProcessFile } from "./utils.js";
