@@ -48,7 +48,7 @@ import {
   type ConfigValidateFunction,
 } from "../initConfig.js";
 
-import type { FluenceConfigReadonly } from "./fluence.js";
+import { initFluenceConfig } from "./fluence.js";
 import {
   type OverridableModuleProperties,
   overridableModuleProperties,
@@ -193,12 +193,13 @@ export const initServiceConfig = async (
   )();
 };
 
-export const ensureServiceConfig = async (
+export async function ensureServiceConfig(
   nameOrPathOrUrl: string,
-  maybeFluenceConfig: FluenceConfigReadonly | null,
-): Promise<ServiceConfig> => {
+): Promise<ServiceConfig> {
+  const fluenceConfig = await initFluenceConfig();
+
   const maybeServicePathFromFluenceConfig =
-    maybeFluenceConfig?.services?.[nameOrPathOrUrl]?.get;
+    fluenceConfig?.services?.[nameOrPathOrUrl]?.get;
 
   const serviceOrServiceDirPathOrUrl =
     maybeServicePathFromFluenceConfig ?? nameOrPathOrUrl;
@@ -217,7 +218,7 @@ export const ensureServiceConfig = async (
   }
 
   return serviceConfig;
-};
+}
 
 export const initReadonlyServiceConfig = async (
   configOrConfigDirPathOrUrl: string,

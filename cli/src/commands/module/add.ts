@@ -108,7 +108,6 @@ export default class Add extends BaseCommand<typeof Add> {
 
     const serviceConfig = await ensureServiceConfig(
       serviceOrServiceDirPathOrUrl,
-      maybeFluenceConfig,
     );
 
     const validateModuleName = (name: string): true | string => {

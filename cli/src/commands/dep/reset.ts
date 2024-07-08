@@ -40,11 +40,15 @@ export default class Reset extends BaseCommand<typeof Reset> {
     }
 
     if (maybeFluenceConfig.mreplVersion !== undefined) {
-      maybeFluenceConfig.mreplVersion = versions.cargo.mrepl;
+      delete maybeFluenceConfig.mreplVersion;
     }
 
     if (maybeFluenceConfig.marineVersion !== undefined) {
-      maybeFluenceConfig.marineVersion = versions.cargo.marine;
+      delete maybeFluenceConfig.marineVersion;
+    }
+
+    if (maybeFluenceConfig.rustToolchain !== undefined) {
+      delete maybeFluenceConfig.rustToolchain;
     }
 
     await maybeFluenceConfig.$commit();

@@ -26,7 +26,10 @@ import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveMarineAndMreplDependencies } from "../../lib/rust.js";
+import {
+  getRustToolchainToUse,
+  resolveMarineAndMreplDependencies,
+} from "../../lib/rust.js";
 import CLIPackageJSON from "../../versions/cli.package.json" assert { type: "json" };
 import JSClientPackageJSON from "../../versions/js-client.package.json" assert { type: "json" };
 import { versions } from "../../versions.js";
@@ -63,6 +66,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
               marine: versions.cargo.marine,
               mrepl: versions.cargo.mrepl,
             },
+            "default rust toolchain": versions["rust-toolchain"],
           },
         ),
       );
@@ -81,7 +85,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
         {
           [`${CLI_NAME_FULL} version`]: commandObj.config.version,
           "nox version": versions["nox"],
-          "rust toolchain": versions["rust-toolchain"],
+          "rust toolchain": await getRustToolchainToUse(),
           [depInstallCommandExplanation]:
             maybeFluenceConfig === null
               ? versions.npm

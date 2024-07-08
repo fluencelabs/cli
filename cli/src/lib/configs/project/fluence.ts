@@ -908,6 +908,7 @@ delete configSchemaV7ObjPropertiesWithoutDeals.deals;
 type ConfigV8 = Omit<ConfigV7, "deals" | "version"> & {
   version: 8;
   deployments?: ConfigV7["deals"];
+  rustToolchain?: string;
 };
 
 const configSchemaV8Obj = {
@@ -925,6 +926,11 @@ const configSchemaV8Obj = {
       properties: {
         deploymentName: configSchemaV7Obj.properties.deals.properties.dealName,
       },
+    },
+    rustToolchain: {
+      type: "string",
+      description: `Rust toolchain to use for building the project. By default ${versions["rust-toolchain"]} is used`,
+      nullable: true,
     },
   },
 } as const satisfies JSONSchemaType<ConfigV8>;

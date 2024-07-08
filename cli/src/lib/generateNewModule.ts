@@ -16,7 +16,7 @@
  */
 
 import { mkdir, writeFile } from "node:fs/promises";
-import { basename, join } from "node:path";
+import { basename, join, relative } from "node:path";
 
 import { versions } from "../versions.js";
 
@@ -26,10 +26,12 @@ import {
   MARINE_RS_SDK_CARGO_DEPENDENCY,
   MARINE_RS_SDK_TEST_CARGO_DEPENDENCY,
 } from "./const.js";
+import { getServiceConfigTomlPath } from "./helpers/serviceConfigToml.js";
 
-export const generateNewModule = async (
+export async function generateNewModule(
   pathToModuleDir: string,
-): Promise<void> => {
+  serviceName: string | undefined,
+): Promise<void> {
   await mkdir(pathToModuleDir, { recursive: true });
   const name = basename(pathToModuleDir);
   const newModuleSrcDirPath = join(pathToModuleDir, "src");
@@ -37,7 +39,7 @@ export const generateNewModule = async (
 
   await writeFile(
     join(newModuleSrcDirPath, "main.rs"),
-    MAIN_RS_CONTENT,
+    await getMainRsContent(newModuleSrcDirPath, serviceName),
     FS_OPTIONS,
   );
 
@@ -48,9 +50,13 @@ export const generateNewModule = async (
   );
 
   await initNewReadonlyModuleConfig(pathToModuleDir, name);
-};
+}
 
-const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
+async function getMainRsContent(
+  newModuleSrcDirPath: string,
+  serviceName: string | undefined,
+) {
+  return `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;
 use marine_rs_sdk::module_manifest;
 
@@ -61,8 +67,40 @@ pub fn main() {}
 #[marine]
 pub fn greeting(name: String) -> String {
     format!("Hi, {}", name)
-}
+}${await getTestExample(newModuleSrcDirPath, serviceName)}
 `;
+}
+
+async function getTestExample(
+  newModuleSrcDirPath: string,
+  serviceName: string | undefined,
+) {
+  if (serviceName === undefined) {
+    return "";
+  }
+
+  const serviceConfigTomlPath = await getServiceConfigTomlPath(serviceName);
+  const relativePath = relative(newModuleSrcDirPath, serviceConfigTomlPath);
+
+  return `
+
+#[cfg(test)]
+mod tests {
+    use marine_rs_sdk_test::marine_test;
+
+    #[marine_test(config_path = "${relativePath}")]
+    fn empty_string(greeting: marine_test_env::myService::ModuleInterface) {
+        let actual = greeting.greeting(String::new());
+        assert_eq!(actual, "Hi, ");
+    }
+
+    #[marine_test(config_path = "${relativePath}")]
+    fn non_empty_string(greeting: marine_test_env::myService::ModuleInterface) {
+        let actual = greeting.greeting("name".to_string());
+        assert_eq!(actual, "Hi, name");
+    }
+}`;
+}
 
 const getCargoTomlContent = (name: string): string => {
   return `[package]

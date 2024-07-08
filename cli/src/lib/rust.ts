@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { rm, mkdir, rename } from "fs/promises";
+import { rm, mkdir, rename, writeFile } from "fs/promises";
 import { access } from "node:fs/promises";
 import { arch, homedir, platform } from "node:os";
 import { join } from "node:path";
@@ -28,8 +28,9 @@ import { versions } from "../versions.js";
 import { commandObj } from "./commandObj.js";
 import { initFluenceConfig } from "./configs/project/fluence.js";
 import {
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  FS_OPTIONS,
   RUST_WASM32_WASI_TARGET,
-  isMarineOrMrepl,
   type MarineOrMrepl,
 } from "./const.js";
 import { addCountlyLog } from "./countly.js";
@@ -37,7 +38,7 @@ import { findEntryInPATH, prependEntryToPATH } from "./env.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { isExactVersion } from "./helpers/validations.js";
+import { stringifyUnknown } from "./helpers/utils.js";
 import {
   projectRootDir,
   ensureUserFluenceCargoDir,
@@ -47,7 +48,7 @@ import {
 const CARGO = "cargo";
 const RUSTUP = "rustup";
 
-const ensureRust = async (): Promise<void> => {
+async function ensureRust(): Promise<void> {
   if (!(await isRustInstalled())) {
     if (commandObj.config.windows) {
       commandObj.error(
@@ -83,20 +84,20 @@ const ensureRust = async (): Promise<void> => {
   }
 
   if (!(await hasRequiredRustToolchain())) {
+    const toolchainToUse = await getRustToolchainToUse();
+
     await execPromise({
       command: RUSTUP,
-      args: ["install", versions["rust-toolchain"]],
+      args: ["install", toolchainToUse],
       spinnerMessage: `Installing ${color.yellow(
-        versions["rust-toolchain"],
+        toolchainToUse,
       )} rust toolchain`,
       printOutput: true,
     });
 
     if (!(await hasRequiredRustToolchain())) {
       commandObj.error(
-        `Not able to install ${color.yellow(
-          versions["rust-toolchain"],
-        )} rust toolchain`,
+        `Not able to install ${color.yellow(toolchainToUse)} rust toolchain`,
       );
     }
   }
@@ -119,7 +120,7 @@ const ensureRust = async (): Promise<void> => {
       );
     }
   }
-};
+}
 
 async function isRustInstalled(): Promise<boolean> {
   if (await isRustInstalledCheck()) {
@@ -151,44 +152,74 @@ async function isRustInstalledCheck() {
     ]);
 
     return true;
-  } catch {
+  } catch (e) {
+    commandObj.warn(stringifyUnknown(e));
     return false;
   }
 }
 
-const regExpRecommendedToolchain = new RegExp(
-  `^${versions["rust-toolchain"]}.*\\(override\\)$`,
-  "gm",
-);
+export async function getRustToolchainToUse() {
+  return (
+    (await initFluenceConfig())?.rustToolchain ?? versions["rust-toolchain"]
+  );
+}
 
-const hasRequiredRustToolchain = async (): Promise<boolean> => {
+async function hasRequiredRustToolchain(): Promise<boolean> {
+  try {
+    await execPromise({
+      command: RUSTUP,
+      args: ["override", "unset"],
+      options: { cwd: projectRootDir },
+    });
+  } catch {}
+
+  const toolchainToUse = await getRustToolchainToUse();
+
+  await writeFile(
+    join(projectRootDir, "rust-toolchain.toml"),
+    `[toolchain]
+channel = "${toolchainToUse}"
+targets = [
+  "x86_64-unknown-linux-gnu",
+  "x86_64-unknown-linux-musl",
+  "x86_64-apple-darwin",
+  "wasm32-wasi",
+  "wasm32-unknown-unknown",
+]`,
+    FS_OPTIONS,
+  );
+
   const toolChainList = await execPromise({
     command: RUSTUP,
     args: ["toolchain", "list"],
-    options: {
-      cwd: projectRootDir,
-    },
+    options: { cwd: projectRootDir },
   });
 
-  const hasRequiredRustToolchain = toolChainList.includes(
-    versions["rust-toolchain"],
-  );
+  const hasRequiredRustToolchain = toolChainList.includes(toolchainToUse);
 
   if (
     hasRequiredRustToolchain &&
-    !regExpRecommendedToolchain.test(toolChainList)
+    !new RegExp(`^${toolchainToUse}.*\\(override\\)$`, "gm").test(toolChainList)
   ) {
-    await execPromise({
-      command: RUSTUP,
-      args: ["override", "set", versions["rust-toolchain"]],
-      options: {
-        cwd: projectRootDir,
-      },
-    });
+    if (toolchainToUse === versions["rust-toolchain"]) {
+      commandObj.warn(
+        `Default rust toolchain ${toolchainToUse} is installed but not set as default. Make sure there is no RUSTUP_TOOLCHAIN variable or directory override set`,
+      );
+    } else {
+      commandObj.warn(
+        `Rust toolchain from ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${toolchainToUse} is installed but not set as default. Make sure there is no RUSTUP_TOOLCHAIN variable or directory override set`,
+      );
+    }
+  } else if (toolchainToUse === versions["rust-toolchain"]) {
+    commandObj.log(`Using default ${toolchainToUse} rust toolchain`);
+  } else {
+    commandObj.log(
+      `Using ${toolchainToUse} rust toolchain from ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+    );
   }
 
   return hasRequiredRustToolchain;
-};
+}
 
 const hasRequiredRustTarget = async (): Promise<boolean> => {
   return (
@@ -199,28 +230,7 @@ const hasRequiredRustTarget = async (): Promise<boolean> => {
   ).includes(RUST_WASM32_WASI_TARGET);
 };
 
-async function getLatestVersionOfCargoDependency(
-  name: string,
-): Promise<string> {
-  await ensureRust();
-
-  return (
-    (
-      await execPromise({
-        command: CARGO,
-        args: ["search", name, "--limit", "1"],
-      })
-    ).split('"')[1] ??
-    commandObj.error(
-      `Not able to find the latest version of ${color.yellow(
-        name,
-      )}. Please make sure ${color.yellow(name)} is spelled correctly`,
-    )
-  ).trim();
-}
-
 type InstallCargoDependencyArg = {
-  toolchain: string | undefined;
   name: string;
   version: string;
   dependencyTmpDirPath: string;
@@ -228,21 +238,14 @@ type InstallCargoDependencyArg = {
 };
 
 async function installCargoDependency({
-  toolchain,
   name,
   version,
   dependencyDirPath,
   dependencyTmpDirPath,
 }: InstallCargoDependencyArg) {
-  await ensureRust();
-
   await execPromise({
     command: CARGO,
-    args: [
-      ...(typeof toolchain === "string" ? [`+${toolchain}`] : []),
-      "install",
-      name,
-    ],
+    args: [`+${await getRustToolchainToUse()}`, "install", name],
     flags: {
       version,
       root: dependencyTmpDirPath,
@@ -333,23 +336,14 @@ async function tryDownloadingBinary({
 type CargoDependencyArg = {
   name: MarineOrMrepl;
   version?: string | undefined;
-  toolchain?: string | undefined;
 };
 
 export async function ensureMarineOrMreplDependency({
   name,
-  version: versionFromArgs,
-  toolchain: toolchainFromArgs,
 }: CargoDependencyArg): Promise<string> {
-  const version =
-    (await resolveVersionToInstall({
-      name,
-      version: versionFromArgs,
-    })) ?? (await getLatestVersionOfCargoDependency(name));
-
-  const toolchain =
-    toolchainFromArgs ??
-    (name in versions.cargo ? versions["rust-toolchain"] : undefined);
+  await ensureRust();
+  const fluenceConfig = await initFluenceConfig();
+  const version = fluenceConfig?.[`${name}Version`] ?? versions.cargo[name];
 
   const { dependencyDirPath, dependencyTmpDirPath } =
     await resolveDependencyDirPathAndTmpPath({ name, version });
@@ -368,12 +362,10 @@ export async function ensureMarineOrMreplDependency({
       dependencyTmpDirPath,
       name,
       version,
-      toolchain,
     });
   }
 
   const hasInstalledNotDefaultVersion = version !== versions.cargo[name];
-  const fluenceConfig = await initFluenceConfig();
 
   const hasInstalledDefaultVersionButPreviouslyNotDefaultVersionWasUsed =
     fluenceConfig?.[`${name}Version`] !== undefined &&
@@ -398,25 +390,6 @@ export async function ensureMarineAndMreplDependencies(): Promise<void> {
     // for cargo logs to be clearly readable
     await ensureMarineOrMreplDependency({ name, version });
   }
-}
-
-type ResolveVersionArg = {
-  name: string;
-  version: string | undefined;
-};
-
-async function resolveVersionToInstall({
-  name,
-  version,
-}: ResolveVersionArg): Promise<string | undefined> {
-  if (typeof version === "string") {
-    return (await isExactVersion(version)) ? version : undefined;
-  }
-
-  const fluenceConfig = await initFluenceConfig();
-  return isMarineOrMrepl(name)
-    ? fluenceConfig?.[`${name}Version`] ?? versions.cargo[name]
-    : undefined;
 }
 
 export async function resolveMarineAndMreplDependencies() {
@@ -457,7 +430,6 @@ type HandleInstallationArg = {
   dependencyTmpDirPath: string;
   name: string;
   version: string;
-  toolchain: string | undefined;
 };
 
 export async function installUsingCargo({
@@ -465,7 +437,6 @@ export async function installUsingCargo({
   dependencyTmpDirPath,
   name,
   version,
-  toolchain,
 }: HandleInstallationArg): Promise<void> {
   try {
     // if dependency is already installed it will be there
@@ -478,7 +449,6 @@ export async function installUsingCargo({
       dependencyDirPath,
       dependencyTmpDirPath,
       name,
-      toolchain,
       version,
     });
 
