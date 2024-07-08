@@ -93,7 +93,6 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     const serviceConfig = await ensureServiceConfig(
       serviceOrServiceDirPathOrUrl,
-      maybeFluenceConfig,
     );
 
     const nameOrPathOrUrl =

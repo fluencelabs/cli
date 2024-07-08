@@ -51,12 +51,7 @@ export async function genServiceConfigToml(
   serviceOverridesFromFluenceYaml: OverridableServiceProperties | undefined,
   allServiceModuleConfigs: Array<ModuleConfigReadonly>,
 ) {
-  const serviceConfigsDir = await ensureFluenceServiceConfigsDir();
-
-  const serviceConfigTomlPath = join(
-    serviceConfigsDir,
-    `${serviceName}${SERVICE_CONFIG_TOML_POSTFIX}`,
-  );
+  const serviceConfigTomlPath = await getServiceConfigTomlPath(serviceName);
 
   const serviceConfigToml = await createServiceConfigToml(
     serviceName,
@@ -74,6 +69,14 @@ export async function genServiceConfigToml(
   );
 
   return serviceConfigTomlPath;
+}
+
+export async function getServiceConfigTomlPath(serviceName: string) {
+  const serviceConfigsDir = await ensureFluenceServiceConfigsDir();
+  return join(
+    serviceConfigsDir,
+    `${serviceName}${SERVICE_CONFIG_TOML_POSTFIX}`,
+  );
 }
 
 async function createServiceConfigToml(
