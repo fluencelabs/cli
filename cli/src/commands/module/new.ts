@@ -73,7 +73,15 @@ export default class New extends BaseCommand<typeof New> {
 
     const pathToModulesDir = flags.path ?? (await ensureModulesDir());
     const pathToModuleDir = join(pathToModulesDir, moduleName);
-    await generateNewModule(pathToModuleDir);
+
+    const serviceName =
+      flags.service === undefined
+        ? undefined
+        : maybeFluenceConfig?.services?.[flags.service] === undefined
+          ? undefined
+          : flags.service;
+
+    await generateNewModule(pathToModuleDir, serviceName);
 
     commandObj.log(
       `Successfully generated template for new module at ${color.yellow(
@@ -91,10 +99,7 @@ export default class New extends BaseCommand<typeof New> {
       );
     }
 
-    const serviceConfig = await ensureServiceConfig(
-      flags.service,
-      maybeFluenceConfig,
-    );
+    const serviceConfig = await ensureServiceConfig(flags.service);
 
     serviceConfig.modules[moduleName] = {
       get: relative(serviceConfig.$getDirPath(), pathToModuleDir),

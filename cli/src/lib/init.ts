@@ -247,7 +247,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     const serviceName = "myService";
     const absoluteServicePath = join(await ensureServicesDir(), serviceName);
     const pathToModuleDir = join(absoluteServicePath, serviceName);
-    await generateNewModule(pathToModuleDir);
+    await generateNewModule(pathToModuleDir, serviceName);
 
     await initNewReadonlyServiceConfig(
       absoluteServicePath,
