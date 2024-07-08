@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "prettier": "3.2.5",
-    "turbo": "1.13.3"
+    "turbo": "1.13.4"
   },
   "packageManager": "yarn@4.2.2",
   "engines": {
