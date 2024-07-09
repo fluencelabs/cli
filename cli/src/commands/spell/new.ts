@@ -163,8 +163,8 @@ export default class New extends BaseCommand<typeof New> {
     await fluenceConfig.$commit();
 
     commandObj.log(
-      `Added spell ${color.yellow(spellName)} to deployments: ${color.yellow(
-        deploymentNames.join(", "),
+      `Added spell ${color.yellow(spellName)} to deployments:\n${color.yellow(
+        deploymentNames.join("\n"),
       )}`,
     );
   }

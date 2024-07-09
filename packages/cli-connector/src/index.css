@@ -27,6 +27,13 @@ body {
   flex-grow: 1;
 }
 
+h1 {
+  font-size: 20px;
+  white-space: pre;
+  max-width: 100%;
+  overflow: auto;
+}
+
 #root {
   display: flex;
   width: 100%;

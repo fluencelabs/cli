@@ -55,10 +55,13 @@ export async function distributeToNox(flags: {
   const formattedAmount = color.yellow(await fltFormatWithSymbol(parsedAmount));
 
   for (const computePeer of computePeers) {
-    const txReceipt = await sendRawTransaction({
-      to: computePeer.walletAddress,
-      value: parsedAmount,
-    });
+    const txReceipt = await sendRawTransaction(
+      `Distribute ${await fltFormatWithSymbol(parsedAmount)} to ${computePeer.name} (${computePeer.walletAddress})`,
+      {
+        to: computePeer.walletAddress,
+        value: parsedAmount,
+      },
+    );
 
     commandObj.logToStderr(
       `Successfully distributed ${formattedAmount} to ${color.yellow(
@@ -153,23 +156,27 @@ async function withdrawMaxAmount() {
   const amountBigInt = totalBalance - feeAmount;
 
   return {
-    txReceipt: await sendRawTransaction({
-      to: signerAddress,
-      value: amountBigInt,
-      gasLimit: gasLimit,
-      maxFeePerGas: gasPrice.maxFeePerGas,
-      maxPriorityFeePerGas: gasPrice.maxPriorityFeePerGas,
-    }),
+    txReceipt: await sendRawTransaction(
+      `Withdraw max amount of ${await fltFormatWithSymbol(amountBigInt)} to ${signerAddress}`,
+      {
+        to: signerAddress,
+        value: amountBigInt,
+        gasLimit: gasLimit,
+        maxFeePerGas: gasPrice.maxFeePerGas,
+        maxPriorityFeePerGas: gasPrice.maxPriorityFeePerGas,
+      },
+    ),
     amountBigInt,
   };
 }
 
 async function withdrawSpecificAmount(amountBigInt: bigint) {
+  const to = await getSignerAddress();
   return {
-    txReceipt: await sendRawTransaction({
-      to: await getSignerAddress(),
-      value: amountBigInt,
-    }),
+    txReceipt: await sendRawTransaction(
+      `Withdraw ${await fltFormatWithSymbol(amountBigInt)} to ${to}`,
+      { to, value: amountBigInt },
+    ),
     amountBigInt,
   };
 }

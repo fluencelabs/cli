@@ -201,6 +201,7 @@ const DEFAULT_OVERRIDES: TransactionRequest = {
 };
 
 export async function sendRawTransaction(
+  title: string,
   transactionRequest: TransactionRequest,
 ) {
   const debugInfo = methodCallToString([
@@ -217,7 +218,7 @@ export async function sendRawTransaction(
 
   if (providerOrWallet.sendTransaction !== undefined) {
     const { tx, res } = await setTryTimeout(
-      `executing ${color.yellow("sendTransaction")}`,
+      `executing ${color.yellow(title)}`,
       async function executingContractMethod() {
         const tx = await providerOrWallet.sendTransaction?.(transactionRequest);
 
@@ -260,6 +261,7 @@ export async function sendRawTransaction(
 
     ({ txHash } = await createTransaction((): Promise<TransactionPayload> => {
       return Promise.resolve<TransactionPayload>({
+        title,
         debugInfo,
         name: "sendTransaction",
         transactionData: transactionRequest,
@@ -297,10 +299,14 @@ async function doSign<
   S extends Exclude<StateMutability, "view"> = "payable",
 >(
   getTransaction: () => Promise<
-    [TypedContractMethod<A, R, S>, ...Parameters<TypedContractMethod<A, R, S>>]
+    [
+      string,
+      TypedContractMethod<A, R, S>,
+      ...Parameters<TypedContractMethod<A, R, S>>,
+    ]
   >,
 ) {
-  const [method, ...originalArgs] = await getTransaction();
+  const [title, method, ...originalArgs] = await getTransaction();
   const overrides = originalArgs[originalArgs.length - 1];
 
   const hasOverrides =
@@ -335,7 +341,7 @@ async function doSign<
 
   if (providerOrWallet.sendTransaction !== undefined) {
     const { tx, res } = await setTryTimeout(
-      `executing ${color.yellow(method.name)} contract method`,
+      `executing ${color.yellow(title)} contract method`,
       async function executingContractMethod() {
         const tx = await method(...args);
         const res = await tx.wait();
@@ -372,7 +378,7 @@ async function doSign<
 
     ({ txHash } = await createTransaction(
       async (): Promise<TransactionPayload> => {
-        const [method, ...originalArgs] = await getTransaction();
+        const [title, method, ...originalArgs] = await getTransaction();
 
         // @ts-expect-error this probably impossible to type correctly with current TypeScript compiler
         const args: Parameters<TypedContractMethod<A, R, S>> = hasOverrides
@@ -383,6 +389,7 @@ async function doSign<
           : [...originalArgs, DEFAULT_OVERRIDES];
 
         return {
+          title,
           debugInfo,
           name: method.name,
           transactionData: await method.populateTransaction(...args),
@@ -420,11 +427,12 @@ export async function sign<
   R = unknown,
   S extends Exclude<StateMutability, "view"> = "payable",
 >(
+  title: string,
   method: TypedContractMethod<A, R, S>,
   ...originalArgs: Parameters<TypedContractMethod<A, R, S>>
 ) {
   return doSign(() => {
-    return Promise.resolve([method, ...originalArgs] as const);
+    return Promise.resolve([title, method, ...originalArgs] as const);
   });
 }
 
@@ -451,6 +459,7 @@ const BATCH_SIZE = 10;
 let batchTxMessage: string | undefined;
 
 export async function signBatch(
+  title: string,
   populatedTxsWithDebugInfo: Array<ReturnType<typeof populateTx>>,
 ) {
   const populatedTxsWithDebugInfoResolved = await Promise.all(
@@ -497,6 +506,7 @@ export async function signBatch(
     receipts.push(
       await doSign(async () => {
         return [
+          title,
           multicall,
           await Promise.all(
             txs.map(async ({ populate }) => {

@@ -61,6 +61,7 @@ export const BLOCK_SCOUT_URLS = {
 } as const satisfies Record<Exclude<ChainENV, "local">, string>;
 
 export type TransactionPayload = {
+  title: string;
   name: string;
   debugInfo: string;
   transactionData: TransactionRequest;

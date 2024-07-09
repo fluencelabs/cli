@@ -287,7 +287,14 @@ export async function createCommitments(flags: {
   let createCommitmentsTxReceipts;
 
   try {
-    createCommitmentsTxReceipts = await signBatch(createCommitmentsTxs);
+    createCommitmentsTxReceipts = await signBatch(
+      `Create commitments for the following noxes:\n\n${computePeers
+        .map(({ name, peerId }) => {
+          return `Nox: ${name}\nPeerId: ${peerId}`;
+        })
+        .join("\n\n")}`,
+      createCommitmentsTxs,
+    );
   } catch (e) {
     const errorString = stringifyUnknown(e);
 
@@ -409,6 +416,11 @@ export async function removeCommitments(flags: CCFlags) {
   }
 
   await signBatch(
+    `Remove the following commitments:\n\n${commitments
+      .map((commitment) => {
+        return stringifyBasicCommitmentInfo(commitment);
+      })
+      .join("\n\n")}`,
     commitments.map(({ commitmentId }) => {
       return populateTx(capacity.removeCommitment, commitmentId);
     }),
@@ -467,19 +479,31 @@ export async function collateralWithdraw(
 
     try {
       if (unitIds.length < flags[MAX_CUS_FLAG_NAME]) {
-        await signBatch([
-          populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
-          populateTx(capacity.finishCommitment, commitmentId),
-        ]);
+        await signBatch(
+          `Remove the following compute units from capacity commitments:\n\n${[...unitIds].join("\n")}\n\nand finish commitment ${commitmentId}`,
+          [
+            populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
+            populateTx(capacity.finishCommitment, commitmentId),
+          ],
+        );
       } else {
         for (const unitIdsBatch of chunk(
           [...unitIds],
           flags[MAX_CUS_FLAG_NAME],
         )) {
-          await sign(capacity.removeCUFromCC, commitmentId, [...unitIdsBatch]);
+          await sign(
+            `Remove the following compute units from capacity commitments:\n\n${[...unitIdsBatch].join("\n")}`,
+            capacity.removeCUFromCC,
+            commitmentId,
+            [...unitIdsBatch],
+          );
         }
 
-        await sign(capacity.finishCommitment, commitmentId);
+        await sign(
+          `Finish capacity commitment ${commitmentId}`,
+          capacity.finishCommitment,
+          commitmentId,
+        );
       }
     } catch (error) {
       commandObj.warn(
@@ -502,6 +526,11 @@ export async function collateralRewardWithdraw(flags: CCFlags) {
 
   // TODO: add logs here
   await signBatch(
+    `Withdraw rewards for commitments:\n\n${commitments
+      .map(({ commitmentId }) => {
+        return commitmentId;
+      })
+      .join("\n")}`,
     commitments.map(({ commitmentId }) => {
       return populateTx(capacity.withdrawReward, commitmentId);
     }),

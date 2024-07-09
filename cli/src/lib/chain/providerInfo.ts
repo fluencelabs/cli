@@ -39,6 +39,7 @@ export async function registerProvider() {
   }
 
   await sign(
+    `Register provider with the name: ${providerConfig.providerName}`,
     market.setProviderInfo,
     providerConfig.providerName,
     await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),
@@ -75,6 +76,7 @@ export async function updateProvider() {
   }
 
   await sign(
+    `Update provider name to ${providerConfig.providerName}`,
     market.setProviderInfo,
     providerConfig.providerName,
     await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),

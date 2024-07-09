@@ -75,6 +75,11 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     ).flat();
 
     await signBatch(
+      `Remove the following compute units from deals:\n\n${computeUnits
+        .map(({ id }) => {
+          return id;
+        })
+        .join("\n")}`,
       computeUnits
         .filter((computeUnit) => {
           return computeUnit.provider.toLowerCase() === signerAddress;
