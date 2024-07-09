@@ -114,12 +114,14 @@ export async function dealCreate({
   const dealFactory = dealClient.getDealFactory();
 
   await sign(
+    `Approve ${await ptFormatWithSymbol(initialBalanceBigInt)} to be deposited to the deal`,
     usdc.approve,
     await dealFactory.getAddress(),
     initialBalanceBigInt,
   );
 
   const deployDealTxReceipt = await sign(
+    `Create deal with appCID: ${appCID}`,
     dealFactory.deployDeal,
     await cidStringToCIDV1Struct(appCID),
     await usdc.getAddress(),
@@ -184,7 +186,12 @@ type DealUpdateArg = {
 export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
   const { dealClient } = await getDealClient();
   const deal = dealClient.getDeal(dealAddress);
-  await sign(deal.setAppCID, await cidStringToCIDV1Struct(appCID));
+
+  await sign(
+    `Update deal with new appCID: ${appCID}`,
+    deal.setAppCID,
+    await cidStringToCIDV1Struct(appCID),
+  );
 }
 
 export async function match(dealAddress: string) {
@@ -221,6 +228,7 @@ export async function match(dealAddress: string) {
   const market = dealClient.getMarket();
 
   const matchDealTxReceipt = await sign(
+    `Match deal ${dealAddress} with offers:\n\n${matchedOffers.offers.join("\n")}`,
     market.matchDeal,
     dealAddress,
     matchedOffers.offers,

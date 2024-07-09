@@ -66,7 +66,12 @@ export default class Withdraw extends BaseCommand<typeof Withdraw> {
 
     for (const { dealId, dealName } of deals) {
       const deal = dealClient.getDeal(dealId);
-      await sign(deal.withdraw, parsedAmount);
+
+      await sign(
+        `Withdraw ${await ptFormatWithSymbol(parsedAmount)} tokens from the deal ${dealName}`,
+        deal.withdraw,
+        parsedAmount,
+      );
 
       commandObj.logToStderr(
         `${formattedAmount} tokens were withdrawn from the deal ${color.yellow(

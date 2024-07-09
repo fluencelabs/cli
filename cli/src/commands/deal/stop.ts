@@ -47,7 +47,7 @@ export default class Stop extends BaseCommand<typeof Stop> {
 
     for (const { dealId, dealName } of deals) {
       const deal = dealClient.getDeal(dealId);
-      await sign(deal.stop);
+      await sign(`Stop the deal ${dealName} (${dealId})`, deal.stop);
       commandObj.logToStderr(`Stopped deal: ${color.yellow(dealName)}`);
     }
   }
