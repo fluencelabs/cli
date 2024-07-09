@@ -381,7 +381,7 @@ export function getReadonlyConfigInitFunction<
       }
       // If config file doesn't exist, create it with default config and schema path comment
 
-      const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/cli/tree/main/docs/configs/${name.replace(
+      const documentationLinkComment = `# Documentation for CLI v${commandObj.config.version}: https://github.com/fluencelabs/cli/tree/fluence-cli-v${commandObj.config.version}/cli/docs/configs/${name.replace(
         `.${YAML_EXT}`,
         "",
       )}.md`;
