@@ -16,7 +16,7 @@
  */
 
 import assert from "node:assert";
-import { readdir, rm } from "node:fs/promises";
+import { access, readdir } from "node:fs/promises";
 import { arch, platform } from "node:os";
 import { join } from "node:path";
 
@@ -50,12 +50,14 @@ assert(
   "After successful build there should be an archive with CLI in the dist directory",
 );
 
-await rm(pathToCliDir, { recursive: true, force: true });
-
-await tar({
-  cwd: pathToDistDir,
-  file: join(pathToDistDir, archiveWithCLIFileName),
-});
+try {
+  await access(pathToCliDir);
+} catch {
+  await tar({
+    cwd: pathToDistDir,
+    file: join(pathToDistDir, archiveWithCLIFileName),
+  });
+}
 
 const pathToBinDir = join(pathToCliDir, "bin");
 const pathToCliRunJS = join(pathToBinDir, "run.js");

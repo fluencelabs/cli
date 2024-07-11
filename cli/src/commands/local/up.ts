@@ -85,6 +85,18 @@ export default class Up extends BaseCommand<typeof Up> {
       default: true,
       char: "r",
     }),
+    wait: Flags.boolean({
+      description:
+        "Wait for services to be running|healthy. Implies detached mode.",
+      allowNo: true,
+      default: true,
+    }),
+    "set-up": Flags.boolean({
+      description:
+        "Set up provider, offer, commitments and deposit collateral, so there is an active offer on the network",
+      allowNo: true,
+      default: true,
+    }),
   };
 
   async run(): Promise<void> {
@@ -158,12 +170,17 @@ export default class Up extends BaseCommand<typeof Up> {
         "quiet-pull": flags["quiet-pull"],
         d: flags.detach,
         build: flags.build,
+        wait: flags.wait,
       },
       printOutput: true,
       options: {
         cwd: dockerComposeConfig.$getDirPath(),
       },
     });
+
+    if (!flags["set-up"]) {
+      return;
+    }
 
     const allOffers = { [OFFER_FLAG_NAME]: ALL_FLAG_VALUE };
     await distributeToNox({ ...flags, ...allOffers, amount: "10" });

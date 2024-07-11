@@ -147,6 +147,8 @@ export function App() {
     return <h1>Return to your terminal in order to continue</h1>;
   }
 
+  const isSendTxButtonEnabled = !isPending && !isLoading && !isSuccess;
+
   return (
     <>
       {isConnected && <p>Chain: {chain.name}</p>}
@@ -192,9 +194,9 @@ export function App() {
           {transactionPayload !== null && (
             <button
               type="button"
-              className="sendTransactionButton"
+              className={`sendTransactionButton${isSendTxButtonEnabled ? "" : " sendTransactionButton_disabled"}`}
               onClick={() => {
-                if (!isPending && !isLoading && !isSuccess) {
+                if (isSendTxButtonEnabled) {
                   respond({ tag: "sendTransaction" });
                 }
               }}

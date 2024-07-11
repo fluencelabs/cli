@@ -26,17 +26,18 @@ const CURRENTLY_UNUSED_CID =
   "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku";
 
 export async function registerProvider() {
-  const providerConfig = await ensureReadonlyProviderConfig();
-  const { dealClient } = await getDealClient();
-  const signerAddress = await getSignerAddress();
-  const market = dealClient.getMarket();
-  const initialProviderInfo = await market.getProviderInfo(signerAddress);
+  const initialProviderInfo = await getProviderInfo();
 
   if (initialProviderInfo.name.length > 0) {
     commandObj.error(
       `Provider is already registered with name: ${initialProviderInfo.name}. If you want to update the provider info, use '${CLI_NAME} provider update' command`,
     );
   }
+
+  const providerConfig = await ensureReadonlyProviderConfig();
+  const { dealClient } = await getDealClient();
+  const signerAddress = await getSignerAddress();
+  const market = dealClient.getMarket();
 
   await sign(
     `Register provider with the name: ${providerConfig.providerName}`,
@@ -45,7 +46,7 @@ export async function registerProvider() {
     await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),
   );
 
-  const providerInfo = await market.getProviderInfo(signerAddress);
+  const providerInfo = await getProviderInfo();
 
   if (providerInfo.name.length === 0) {
     commandObj.error(
@@ -63,17 +64,18 @@ Provider address: ${signerAddress}
 }
 
 export async function updateProvider() {
-  const providerConfig = await ensureReadonlyProviderConfig();
-  const { dealClient } = await getDealClient();
-  const signerAddress = await getSignerAddress();
-  const market = dealClient.getMarket();
-  const initialProviderInfo = await market.getProviderInfo(signerAddress);
+  const initialProviderInfo = await getProviderInfo();
 
   if (initialProviderInfo.name.length === 0) {
     commandObj.error(
       `Provider is not registered yet. Please use '${CLI_NAME} provider register' command to register a new provider first`,
     );
   }
+
+  const providerConfig = await ensureReadonlyProviderConfig();
+  const { dealClient } = await getDealClient();
+  const signerAddress = await getSignerAddress();
+  const market = dealClient.getMarket();
 
   await sign(
     `Update provider name to ${providerConfig.providerName}`,
@@ -82,7 +84,7 @@ export async function updateProvider() {
     await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),
   );
 
-  const providerInfo = await market.getProviderInfo(signerAddress);
+  const providerInfo = await getProviderInfo();
 
   if (providerInfo.name.length === 0) {
     commandObj.error(
@@ -99,16 +101,21 @@ Provider address: ${signerAddress}
 `);
 }
 
-export async function assertProviderIsRegistered() {
+export async function getProviderInfo() {
   const { dealClient } = await getDealClient();
   const signerAddress = await getSignerAddress();
   const market = dealClient.getMarket();
+  return market.getProviderInfo(signerAddress);
+}
 
-  const initialProviderInfo = await market.getProviderInfo(signerAddress);
+export async function assertProviderIsRegistered() {
+  const providerInfo = await getProviderInfo();
 
-  if (initialProviderInfo.name.length === 0) {
+  if (providerInfo.name.length === 0) {
     commandObj.error(
       `You have to register as a provider first. Use '${CLI_NAME} provider register' command for that`,
     );
   }
+
+  return providerInfo;
 }

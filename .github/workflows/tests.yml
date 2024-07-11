@@ -296,6 +296,10 @@ jobs:
         run: yarn vitest-js-to-aqua
         working-directory: cli
 
+      - name: Run provider tests
+        run: yarn vitest-provider
+        working-directory: cli
+
       - name: Dump container logs
         if: always()
         uses: jwalton/gh-docker-logs@v2

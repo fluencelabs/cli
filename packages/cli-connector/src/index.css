@@ -74,6 +74,11 @@ summary {
   font-size: inherit;
 }
 
+.sendTransactionButton_disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
 .error {
   max-width: 100%;
   overflow: auto;

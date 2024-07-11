@@ -17,7 +17,12 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
-import { CC_FLAGS, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
+import {
+  CC_FLAGS,
+  CHAIN_FLAGS,
+  FLT_SYMBOL,
+  OFFER_FLAG,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
@@ -27,6 +32,7 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
     ...baseFlags,
     ...CHAIN_FLAGS,
     ...CC_FLAGS,
+    ...OFFER_FLAG,
   };
 
   async run(): Promise<void> {

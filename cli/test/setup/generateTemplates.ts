@@ -15,8 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cp } from "fs/promises";
-import { access } from "node:fs/promises";
+import { cp, rm } from "fs/promises";
 import { join } from "path";
 
 import {
@@ -53,9 +52,9 @@ const secretsConfigPath = join(
 );
 
 await Promise.all(
-  [...restTemplatePaths, join(TMP_DIR_NAME, NO_PROJECT_TEST_NAME)].map(
+  [...restTemplatePaths, join(TMP_DIR_NAME, NO_PROJECT_TEST_NAME)].flatMap(
     (path) => {
-      return Promise.all([
+      return [
         cp(secretsPath, join(path, DOT_FLUENCE_DIR_NAME, SECRETS_DIR_NAME), {
           force: true,
           recursive: true,
@@ -72,22 +71,19 @@ await Promise.all(
             recursive: true,
           },
         ),
-      ]);
+      ];
     },
   ),
 );
 
 async function initFirstTime(template: Template) {
   const templatePath = getInitializedTemplatePath(template);
+  await rm(templatePath, { force: true, recursive: true });
 
-  try {
-    await access(templatePath);
-  } catch {
-    await fluence({
-      args: ["init", templatePath],
-      flags: { template, env: fluenceEnv, "no-input": true },
-    });
-  }
+  await fluence({
+    args: ["init", templatePath],
+    flags: { template, env: fluenceEnv, "no-input": true },
+  });
 
   return templatePath;
 }

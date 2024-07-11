@@ -93,6 +93,7 @@ import {
   type InitializedReadonlyConfig,
   type Migrations,
   type ConfigValidateFunction,
+  getConfigInitFunction,
 } from "../initConfig.js";
 
 import { initNewEnvConfig } from "./env.js";
@@ -1527,6 +1528,15 @@ export async function ensureReadonlyProviderConfig() {
   }
 
   return providerConfig;
+}
+
+export async function initProviderConfigWithPath(path: string) {
+  return getConfigInitFunction({
+    ...initConfigOptions,
+    getConfigOrConfigDirPath: () => {
+      return path;
+    },
+  })();
 }
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV1;
