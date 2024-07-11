@@ -1066,7 +1066,7 @@ Run docker-compose.yaml using docker compose and set up provider using all the o
 ```
 USAGE
   $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <private-key>]
-    [--quiet-pull] [-d] [--build] [--flags <--flag arg>] [-r]
+    [--quiet-pull] [-d] [--build] [--flags <--flag arg>] [-r] [--wait] [--set-up]
 
 FLAGS
   -d, --detach                  Detached mode: Run containers in the background
@@ -1079,8 +1079,11 @@ FLAGS
                                 local env 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used by
                                 default when CLI is used in non-interactive mode
       --quiet-pull              Pull without printing progress information
+      --[no-]set-up             Set up provider, offer, commitments and deposit collateral, so there is an active offer
+                                on the network
       --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local
                                 peers
+      --[no-]wait               Wait for services to be running|healthy. Implies detached mode.
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in
@@ -1227,7 +1230,7 @@ Add FLT collateral to capacity commitment to activate it
 ```
 USAGE
   $ fluence provider cc-activate [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2> | --cc-ids <value>]
+    [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
@@ -1235,6 +1238,8 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
@@ -1704,7 +1709,7 @@ Distribute FLT tokens to noxes
 ```
 USAGE
   $ fluence provider tokens-distribute [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2>] [--amount <value>]
+    [--nox-names <nox-1,nox-2>] [--offers <offer-1,offer-2>] [--amount <value>]
 
 FLAGS
   --amount=<value>                             Amount of FLT tokens to distribute to noxes
@@ -1712,6 +1717,8 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
