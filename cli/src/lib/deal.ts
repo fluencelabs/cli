@@ -21,7 +21,10 @@ import { color } from "@oclif/color";
 
 import { versions } from "../versions.js";
 
-import { cidStringToCIDV1Struct } from "./chain/conversions.js";
+import {
+  cidStringToCIDV1Struct,
+  peerIdToUint8Array,
+} from "./chain/conversions.js";
 import { ptFormatWithSymbol, ptParse } from "./chain/currencies.js";
 import { commandObj } from "./commandObj.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
@@ -153,6 +156,81 @@ export async function dealCreate({
 
   assert(typeof dealId === "string", "dealId is not a string");
   return dealId;
+}
+
+export async function createAndMatchDealsWithAllCUsOfPeerIds({
+  peerIdsFromFlags,
+  ...dealCreateArgs
+}: Parameters<typeof dealCreate>[0] & { peerIdsFromFlags: string }) {
+  const peerIds = commaSepStrToArr(peerIdsFromFlags);
+  const { dealClient } = await getDealClient();
+  const market = dealClient.getMarket();
+  const { ZeroAddress } = await import("ethers");
+
+  const offersWithCUs = await Promise.all(
+    peerIds.map(async (peerId) => {
+      const peerIdUint8Array = await peerIdToUint8Array(peerId);
+
+      const computeUnits = (
+        await Promise.all(
+          [...(await market.getComputeUnitIds(peerIdUint8Array))].map(
+            async (unitId) => {
+              const info = await market.getComputeUnit(unitId);
+              return { unitId, deal: info.deal };
+            },
+          ),
+        )
+      )
+        .filter(({ deal }) => {
+          return deal === ZeroAddress;
+        })
+        .map(({ unitId }) => {
+          return unitId;
+        });
+
+      return {
+        computeUnits,
+        offerId: (await market.getComputePeer(peerIdUint8Array)).offerId,
+        peerId,
+      };
+    }),
+  );
+
+  for (const { computeUnits, offerId, peerId } of offersWithCUs) {
+    for (const unitId of computeUnits) {
+      const dealAddress = await dealCreate({
+        ...dealCreateArgs,
+        maxWorkersPerProvider: 1,
+        targetWorkers: 1,
+        minWorkers: 1,
+      });
+
+      try {
+        const matchDealTxReceipt = await sign(
+          `Match deal ${dealAddress} with CU ${unitId} from offer ${offerId}`,
+          market.matchDeal,
+          dealAddress,
+          [offerId],
+          [[unitId]],
+        );
+
+        const pats = getEventValues({
+          contract: market,
+          txReceipt: matchDealTxReceipt,
+          eventName: "ComputeUnitMatched",
+          value: "unitId",
+        });
+
+        dbg(`got pats: ${stringifyUnknown(pats)}`);
+
+        commandObj.logToStderr(
+          `CU ${color.yellow(unitId)} of peer ${peerId} joined the deal ${dealAddress}`,
+        );
+      } catch (e) {
+        commandObj.warn(stringifyUnknown(e));
+      }
+    }
+  }
 }
 
 async function getDefaultInitialBalance(
