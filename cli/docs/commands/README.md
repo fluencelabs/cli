@@ -807,7 +807,7 @@ USAGE
   $ fluence deploy [DEPLOYMENT-NAMES] [--no-input] [--off-aqua-logs] [--env <dar | kras | stage | local |
     custom>] [--priv-key <private-key>] [-k <name>] [--relay <multiaddress>] [--ttl <milliseconds>] [--dial-timeout
     <milliseconds>] [--particle-id] [--import <path>...] [--no-build] [--tracing] [--marine-build-args <--flag arg>]
-    [-u]
+    [-u] [--peer-ids <value>]
 
 ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
@@ -830,6 +830,8 @@ FLAGS
       --no-input                                   Don't interactively ask for any input from the user
       --off-aqua-logs                              Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                Print particle ids when running Fluence js-client
+      --peer-ids=<value>                           Comma separated list of peer ids to deploy to. Creates one deal per
+                                                   each free CU of the peer. Skips off-chain matching
       --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local env
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
