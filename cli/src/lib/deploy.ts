@@ -50,6 +50,7 @@ import {
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
+import { createAndMatchDealsWithAllCUsOfPeerIds } from "./deal.js";
 import { getReadonlyDealClient } from "./dealClient.js";
 import { stringifyUnknown } from "./helpers/utils.js";
 import { disconnectFluenceClient, initFluenceClient } from "./jsClient.js";
@@ -74,6 +75,10 @@ export const DEPLOY_FLAGS = {
     char: "u",
     description: "Update your previous deployment",
     default: false,
+  }),
+  "peer-ids": Flags.string({
+    description:
+      "Comma separated list of peer ids to deploy to. Creates one deal per each free CU of the peer. Skips off-chain matching",
   }),
 };
 
@@ -210,7 +215,26 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       );
     }
 
-    if (dealState === "notCreated") {
+    const dealCreateArgs = {
+      appCID,
+      minWorkers,
+      targetWorkers,
+      maxWorkersPerProvider,
+      pricePerWorkerEpoch,
+      effectors,
+      deploymentName,
+      initialBalance: deal.initialBalance,
+      whitelist: deal.whitelist,
+      blacklist: deal.blacklist,
+      protocolVersion: deal.protocolVersion,
+    } as const;
+
+    // if peer-ids flag is used we create a deal for each CU of the peer
+    if (dealState === "notCreated" && flags["peer-ids"] !== undefined) {
+      dealState = "notMatched";
+    }
+
+    if (dealState === "notCreated" && flags["peer-ids"] === undefined) {
       if (flags.update) {
         commandObj.logToStderr(
           `\nSkipping ${color.yellow(
@@ -225,19 +249,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
         `\nCreating ${color.yellow(deploymentName)} deal\n`,
       );
 
-      const dealIdOriginal = await dealCreate({
-        appCID,
-        minWorkers,
-        targetWorkers,
-        maxWorkersPerProvider,
-        pricePerWorkerEpoch,
-        effectors,
-        deploymentName,
-        initialBalance: deal.initialBalance,
-        whitelist: deal.whitelist,
-        blacklist: deal.blacklist,
-        protocolVersion: deal.protocolVersion,
-      });
+      const dealIdOriginal = await dealCreate(dealCreateArgs);
 
       if (workersConfig.deals === undefined) {
         workersConfig.deals = {};
@@ -274,25 +286,32 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       );
     }
 
-    assert(
-      createdDeal !== undefined,
-      "Unreachable. createdDeal can't be undefined",
-    );
-
     if (dealState === "notMatched") {
       try {
-        await match(createdDeal.dealIdOriginal);
-        createdDeal.matched = true;
-        await workersConfig.$commit();
-        dealState = "matched";
+        if (flags["peer-ids"] !== undefined) {
+          await createAndMatchDealsWithAllCUsOfPeerIds({
+            ...dealCreateArgs,
+            peerIdsFromFlags: flags["peer-ids"],
+          });
+        } else {
+          assert(
+            createdDeal !== undefined,
+            "Unreachable. createdDeal can't be undefined",
+          );
 
-        commandObj.logToStderr(
-          `\n${color.yellow(
-            deploymentName,
-          )} deal matched. Deal id: ${color.yellow(
-            createdDeal.dealIdOriginal,
-          )}\n`,
-        );
+          await match(createdDeal.dealIdOriginal);
+          createdDeal.matched = true;
+          await workersConfig.$commit();
+          dealState = "matched";
+
+          commandObj.logToStderr(
+            `\n${color.yellow(
+              deploymentName,
+            )} deal matched. Deal id: ${color.yellow(
+              createdDeal.dealIdOriginal,
+            )}\n`,
+          );
+        }
       } catch (e) {
         commandObj.logToStderr(
           `Was not able to match deal for deployment ${color.yellow(
@@ -302,10 +321,12 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       }
     }
 
-    await printDealInfo({
-      dealId: createdDeal.dealIdOriginal,
-      dealName: deploymentName,
-    });
+    if (createdDeal !== undefined) {
+      await printDealInfo({
+        dealId: createdDeal.dealIdOriginal,
+        dealName: deploymentName,
+      });
+    }
   }
 
   dbg("start creating aqua files with worker info");
