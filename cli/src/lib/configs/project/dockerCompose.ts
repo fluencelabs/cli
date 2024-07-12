@@ -279,6 +279,13 @@ async function genDockerCompose(): Promise<LatestConfig> {
           ETHEREUM_REORG_THRESHOLD: 1,
           ETHEREUM_ANCESTOR_COUNT: 1,
         },
+        healthcheck: {
+          test: `timeout 10s bash -c ':> /dev/tcp/127.0.0.1/8000' || exit 1`,
+          interval: "40s",
+          timeout: "30s",
+          retries: 3,
+          start_period: "60s",
+        },
       },
       [SUBGRAPH_DEPLOY_SCRIPT_NAME]: {
         image: versions[SUBGRAPH_DEPLOY_SCRIPT_NAME],

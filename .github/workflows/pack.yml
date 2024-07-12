@@ -57,7 +57,7 @@ env:
 jobs:
   pack:
     name: "Pack fluence-cli"
-    runs-on: linux-amd64-m-xlarge
+    runs-on: builder
 
     permissions:
       contents: write
