@@ -164,6 +164,7 @@ export async function ensureProvider(): Promise<Provider> {
   if (provider === undefined) {
     const { ethers } = await import("ethers");
     const chainEnv = await ensureChainEnv();
+    dbg(`Chain RPC ${CHAIN_URLS[chainEnv]}`);
     provider = new ethers.JsonRpcProvider(CHAIN_URLS[chainEnv]);
   }
 
