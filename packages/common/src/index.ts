@@ -46,7 +46,7 @@ export const isChainEnv = getIsUnion(CHAIN_ENV);
 export const CHAIN_URLS_WITHOUT_LOCAL = {
   kras: "https://ipc.kras.fluence.dev",
   dar: "https://ipc.dar.fluence.dev",
-  stage: "https://rpc-123420000220.raas-testnet.gelato.digital/",
+  stage: "https://rpc-123420000220.raas-testnet.gelato.digital",
 } as const satisfies Record<Exclude<ChainENV, "local">, string>;
 
 export const CHAIN_URLS = {
