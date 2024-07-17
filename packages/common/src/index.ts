@@ -20,7 +20,7 @@ import type { TransactionRequest } from "ethers";
 
 export const CHAIN_IDS = {
   dar: 2358716091832359,
-  stage: 2182032320410279,
+  stage: 123420000220,
   kras: 1622562509754216,
   local: 31337,
 } as const satisfies Record<ChainENV, number>;
@@ -46,7 +46,7 @@ export const isChainEnv = getIsUnion(CHAIN_ENV);
 export const CHAIN_URLS_WITHOUT_LOCAL = {
   kras: "https://ipc.kras.fluence.dev",
   dar: "https://ipc.dar.fluence.dev",
-  stage: "https://ipc.stage.fluence.dev",
+  stage: "https://rpc-123420000220.raas-testnet.gelato.digital",
 } as const satisfies Record<Exclude<ChainENV, "local">, string>;
 
 export const CHAIN_URLS = {
