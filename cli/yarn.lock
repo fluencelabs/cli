@@ -436,7 +436,7 @@ __metadata:
     "@fluencelabs/air-beautify-wasm": "npm:0.3.9"
     "@fluencelabs/aqua-api": "npm:0.14.10"
     "@fluencelabs/aqua-to-js": "npm:0.3.13"
-    "@fluencelabs/deal-ts-clients": "npm:0.14.3"
+    "@fluencelabs/deal-ts-clients": "npm:0.15.0"
     "@fluencelabs/fluence-network-environment": "npm:1.2.1"
     "@fluencelabs/js-client": "npm:0.9.0"
     "@fluencelabs/npm-aqua-compiler": "npm:0.0.3"
@@ -508,9 +508,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-ts-clients@npm:0.14.3":
-  version: 0.14.3
-  resolution: "@fluencelabs/deal-ts-clients@npm:0.14.3"
+"@fluencelabs/deal-ts-clients@npm:0.15.0":
+  version: 0.15.0
+  resolution: "@fluencelabs/deal-ts-clients@npm:0.15.0"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.2.0"
     debug: "npm:^4.3.4"
@@ -522,7 +522,7 @@ __metadata:
     graphql-tag: "npm:^2.12.6"
     ipfs-http-client: "npm:^60.0.1"
     multiformats: "npm:^13.0.1"
-  checksum: 10c0/3a2033de44dd56c086b67003c9822354dc28859f1384268eb6f6aaacfc4a1c150229d27515e5fe70671b20a8dae89ddb4ea333dc05918aead35352f8fd3ab79f
+  checksum: 10c0/7f1a5e2f35c6cba535183e215a83cdf29e9c83392efcbc9334ea51adf90e4369c99237052733ce2320e197ef63422bf585c1ad501536e43633709c812245c592
   languageName: node
   linkType: hard
 
