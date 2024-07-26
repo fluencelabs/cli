@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.17.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.17.0...fluence-cli-v0.17.1) (2024-07-26)
+
+
+### Features
+
+* add health check to graph-node ([#981](https://github.com/fluencelabs/cli/issues/981)) ([b43b913](https://github.com/fluencelabs/cli/commit/b43b9131230a62503be89e58431a30f2ee40c7d0))
+* add human-readable messages to the CLI connector ([#976](https://github.com/fluencelabs/cli/issues/976)) ([e1fdfa2](https://github.com/fluencelabs/cli/commit/e1fdfa28c6fe11e1912d1692202e5a91a8e5a456))
+* allow deploying to all CU of peer ids [BRND-13] ([#982](https://github.com/fluencelabs/cli/issues/982)) ([5406252](https://github.com/fluencelabs/cli/commit/54062523324d200bbb7ad2662a6e565501574de0))
+* bump deal-ts-clients 0.14.0 ([#969](https://github.com/fluencelabs/cli/issues/969)) ([2a5f6f2](https://github.com/fluencelabs/cli/commit/2a5f6f27b2aaf282041f3e64e753f7944fc06f38))
+* use rust-toolchain.toml ([#975](https://github.com/fluencelabs/cli/issues/975)) ([4f43ec6](https://github.com/fluencelabs/cli/commit/4f43ec66fc8f5f2ec4b7f7e62d1a85f25b694059))
+
+
+### Bug Fixes
+
+* **deps:** deal-ts-clients 0.15.1, diamond on Dar ([#987](https://github.com/fluencelabs/cli/issues/987)) ([d49a48c](https://github.com/fluencelabs/cli/commit/d49a48c65a0668d2b17900516f298931f5b90291))
+* **deps:** ts-clients 0.15.0, diamond on stage ([#986](https://github.com/fluencelabs/cli/issues/986)) ([38ec5c7](https://github.com/fluencelabs/cli/commit/38ec5c7d0505d5b05f789a1d079d565470d666d4))
+* documentation links in configs ([#977](https://github.com/fluencelabs/cli/issues/977)) ([dc18d0c](https://github.com/fluencelabs/cli/commit/dc18d0cc016f7c72e9b2c5446534de2faf2e2cd1))
+
 ## [0.17.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.16.3...fluence-cli-v0.17.0) (2024-06-20)
 
 
