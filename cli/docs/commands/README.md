@@ -93,7 +93,7 @@ ALIASES
   $ fluence air b
 ```
 
-_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/air/beautify.ts)_
+_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/air/beautify.ts)_
 
 ## `fluence aqua`
 
@@ -133,7 +133,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/aqua.ts)_
+_See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/aqua.ts)_
 
 ## `fluence aqua imports`
 
@@ -150,7 +150,7 @@ DESCRIPTION
   Returns a list of aqua imports that CLI produces
 ```
 
-_See code: [src/commands/aqua/imports.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/aqua/imports.ts)_
+_See code: [src/commands/aqua/imports.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/aqua/imports.ts)_
 
 ## `fluence aqua json [INPUT] [OUTPUT]`
 
@@ -178,7 +178,7 @@ DESCRIPTION
   what they translate into
 ```
 
-_See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/aqua/json.ts)_
+_See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/aqua/json.ts)_
 
 ## `fluence aqua yml [INPUT] [OUTPUT]`
 
@@ -209,7 +209,7 @@ ALIASES
   $ fluence aqua yaml
 ```
 
-_See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/aqua/yml.ts)_
+_See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/aqua/yml.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -265,7 +265,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/build.ts)_
+_See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/build.ts)_
 
 ## `fluence chain info`
 
@@ -287,7 +287,7 @@ DESCRIPTION
   Show contract addresses for the fluence environment and accounts for the local environment
 ```
 
-_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/chain/info.ts)_
+_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/chain/info.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
@@ -314,7 +314,7 @@ DESCRIPTION
   Change app id in the deal
 ```
 
-_See code: [src/commands/deal/change-app.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deal/change-app.ts)_
+_See code: [src/commands/deal/change-app.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deal/change-app.ts)_
 
 ## `fluence deal create`
 
@@ -350,7 +350,7 @@ DESCRIPTION
   Create your deal with the specified parameters
 ```
 
-_See code: [src/commands/deal/create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deal/create.ts)_
+_See code: [src/commands/deal/create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deal/create.ts)_
 
 ## `fluence deal deposit [AMOUNT] [DEPLOYMENT-NAMES]`
 
@@ -378,7 +378,7 @@ DESCRIPTION
   Deposit do the deal
 ```
 
-_See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deal/deposit.ts)_
+_See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deal/deposit.ts)_
 
 ## `fluence deal info [DEPLOYMENT-NAMES]`
 
@@ -405,7 +405,7 @@ DESCRIPTION
   Get info about the deal
 ```
 
-_See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deal/info.ts)_
+_See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deal/info.ts)_
 
 ## `fluence deal logs [DEPLOYMENT-NAMES]`
 
@@ -445,7 +445,7 @@ EXAMPLES
   $ fluence deal logs
 ```
 
-_See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deal/logs.ts)_
+_See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deal/logs.ts)_
 
 ## `fluence deal stop [DEPLOYMENT-NAMES]`
 
@@ -472,7 +472,7 @@ DESCRIPTION
   Stop the deal
 ```
 
-_See code: [src/commands/deal/stop.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deal/stop.ts)_
+_See code: [src/commands/deal/stop.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deal/stop.ts)_
 
 ## `fluence deal withdraw [AMOUNT] [DEPLOYMENT-NAMES]`
 
@@ -500,7 +500,7 @@ DESCRIPTION
   Withdraw tokens from the deal
 ```
 
-_See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deal/withdraw.ts)_
+_See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deal/withdraw.ts)_
 
 ## `fluence deal workers-add [DEPLOYMENT-NAMES]`
 
@@ -530,7 +530,7 @@ ALIASES
   $ fluence deal wa
 ```
 
-_See code: [src/commands/deal/workers-add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deal/workers-add.ts)_
+_See code: [src/commands/deal/workers-add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deal/workers-add.ts)_
 
 ## `fluence deal workers-remove [UNIT-IDS]`
 
@@ -559,7 +559,7 @@ ALIASES
   $ fluence deal wr
 ```
 
-_See code: [src/commands/deal/workers-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deal/workers-remove.ts)_
+_See code: [src/commands/deal/workers-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deal/workers-remove.ts)_
 
 ## `fluence default env [ENV]`
 
@@ -582,7 +582,7 @@ EXAMPLES
   $ fluence default env
 ```
 
-_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/default/env.ts)_
+_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/default/env.ts)_
 
 ## `fluence default peers [ENV]`
 
@@ -605,7 +605,7 @@ EXAMPLES
   $ fluence default peers
 ```
 
-_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/default/peers.ts)_
+_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/default/peers.ts)_
 
 ## `fluence delegator collateral-add [IDS]`
 
@@ -634,7 +634,7 @@ ALIASES
   $ fluence delegator ca
 ```
 
-_See code: [src/commands/delegator/collateral-add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/delegator/collateral-add.ts)_
+_See code: [src/commands/delegator/collateral-add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/delegator/collateral-add.ts)_
 
 ## `fluence delegator collateral-withdraw [IDS]`
 
@@ -665,7 +665,7 @@ ALIASES
   $ fluence delegator cw
 ```
 
-_See code: [src/commands/delegator/collateral-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/delegator/collateral-withdraw.ts)_
+_See code: [src/commands/delegator/collateral-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/delegator/collateral-withdraw.ts)_
 
 ## `fluence delegator reward-withdraw [IDS]`
 
@@ -694,7 +694,7 @@ ALIASES
   $ fluence delegator rw
 ```
 
-_See code: [src/commands/delegator/reward-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/delegator/reward-withdraw.ts)_
+_See code: [src/commands/delegator/reward-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/delegator/reward-withdraw.ts)_
 
 ## `fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -722,7 +722,7 @@ EXAMPLES
   $ fluence dep install
 ```
 
-_See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/dep/install.ts)_
+_See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/dep/install.ts)_
 
 ## `fluence dep reset`
 
@@ -745,7 +745,7 @@ EXAMPLES
   $ fluence dep reset
 ```
 
-_See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/dep/reset.ts)_
+_See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/dep/reset.ts)_
 
 ## `fluence dep uninstall PACKAGE-NAME`
 
@@ -771,7 +771,7 @@ EXAMPLES
   $ fluence dep uninstall
 ```
 
-_See code: [src/commands/dep/uninstall.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/dep/uninstall.ts)_
+_See code: [src/commands/dep/uninstall.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/dep/uninstall.ts)_
 
 ## `fluence dep versions`
 
@@ -796,7 +796,7 @@ EXAMPLES
   $ fluence dep versions
 ```
 
-_See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/dep/versions.ts)_
+_See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/dep/versions.ts)_
 
 ## `fluence deploy [DEPLOYMENT-NAMES]`
 
@@ -848,7 +848,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [src/commands/deploy.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/deploy.ts)_
+_See code: [src/commands/deploy.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/deploy.ts)_
 
 ## `fluence help [COMMAND]`
 
@@ -896,7 +896,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [src/commands/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -920,7 +920,7 @@ EXAMPLES
   $ fluence key default
 ```
 
-_See code: [src/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/key/default.ts)_
+_See code: [src/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/key/default.ts)_
 
 ## `fluence key new [NAME]`
 
@@ -945,7 +945,7 @@ EXAMPLES
   $ fluence key new
 ```
 
-_See code: [src/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/key/new.ts)_
+_See code: [src/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/key/new.ts)_
 
 ## `fluence key remove [NAME]`
 
@@ -969,7 +969,7 @@ EXAMPLES
   $ fluence key remove
 ```
 
-_See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/key/remove.ts)_
+_See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/key/remove.ts)_
 
 ## `fluence local down`
 
@@ -992,7 +992,7 @@ EXAMPLES
   $ fluence local down
 ```
 
-_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/local/down.ts)_
+_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/local/down.ts)_
 
 ## `fluence local init`
 
@@ -1017,7 +1017,7 @@ EXAMPLES
   $ fluence local init
 ```
 
-_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/local/init.ts)_
+_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/local/init.ts)_
 
 ## `fluence local logs`
 
@@ -1038,7 +1038,7 @@ EXAMPLES
   $ fluence local logs
 ```
 
-_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/local/logs.ts)_
+_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/local/logs.ts)_
 
 ## `fluence local ps`
 
@@ -1059,7 +1059,7 @@ EXAMPLES
   $ fluence local ps
 ```
 
-_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/local/ps.ts)_
+_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/local/ps.ts)_
 
 ## `fluence local up`
 
@@ -1092,7 +1092,7 @@ EXAMPLES
   $ fluence local up
 ```
 
-_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/local/up.ts)_
+_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/local/up.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -1118,7 +1118,7 @@ EXAMPLES
   $ fluence module add
 ```
 
-_See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/module/add.ts)_
+_See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/module/add.ts)_
 
 ## `fluence module build [PATH]`
 
@@ -1143,7 +1143,7 @@ EXAMPLES
   $ fluence module build
 ```
 
-_See code: [src/commands/module/build.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/module/build.ts)_
+_See code: [src/commands/module/build.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/module/build.ts)_
 
 ## `fluence module new [NAME]`
 
@@ -1168,7 +1168,7 @@ EXAMPLES
   $ fluence module new
 ```
 
-_See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/module/new.ts)_
+_See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/module/new.ts)_
 
 ## `fluence module pack [PATH]`
 
@@ -1196,7 +1196,7 @@ EXAMPLES
   $ fluence module pack
 ```
 
-_See code: [src/commands/module/pack.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/module/pack.ts)_
+_See code: [src/commands/module/pack.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/module/pack.ts)_
 
 ## `fluence module remove [NAME | PATH | URL]`
 
@@ -1220,7 +1220,7 @@ EXAMPLES
   $ fluence module remove
 ```
 
-_See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/module/remove.ts)_
+_See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/module/remove.ts)_
 
 ## `fluence provider cc-activate`
 
@@ -1249,7 +1249,7 @@ ALIASES
   $ fluence provider ca
 ```
 
-_See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/cc-activate.ts)_
+_See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/cc-activate.ts)_
 
 ## `fluence provider cc-collateral-withdraw`
 
@@ -1280,7 +1280,7 @@ ALIASES
   $ fluence provider ccw
 ```
 
-_See code: [src/commands/provider/cc-collateral-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/cc-collateral-withdraw.ts)_
+_See code: [src/commands/provider/cc-collateral-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/cc-collateral-withdraw.ts)_
 
 ## `fluence provider cc-create`
 
@@ -1310,7 +1310,7 @@ ALIASES
   $ fluence provider cc
 ```
 
-_See code: [src/commands/provider/cc-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/cc-create.ts)_
+_See code: [src/commands/provider/cc-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/cc-create.ts)_
 
 ## `fluence provider cc-info`
 
@@ -1340,7 +1340,7 @@ ALIASES
   $ fluence provider ci
 ```
 
-_See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/cc-info.ts)_
+_See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/cc-info.ts)_
 
 ## `fluence provider cc-remove`
 
@@ -1369,7 +1369,7 @@ ALIASES
   $ fluence provider cr
 ```
 
-_See code: [src/commands/provider/cc-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/cc-remove.ts)_
+_See code: [src/commands/provider/cc-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/cc-remove.ts)_
 
 ## `fluence provider cc-rewards-withdraw`
 
@@ -1398,7 +1398,7 @@ ALIASES
   $ fluence provider crw
 ```
 
-_See code: [src/commands/provider/cc-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/cc-rewards-withdraw.ts)_
+_See code: [src/commands/provider/cc-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/cc-rewards-withdraw.ts)_
 
 ## `fluence provider deal-exit`
 
@@ -1426,7 +1426,7 @@ ALIASES
   $ fluence provider de
 ```
 
-_See code: [src/commands/provider/deal-exit.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/deal-exit.ts)_
+_See code: [src/commands/provider/deal-exit.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/deal-exit.ts)_
 
 ## `fluence provider deal-list`
 
@@ -1451,7 +1451,7 @@ ALIASES
   $ fluence provider dl
 ```
 
-_See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/deal-list.ts)_
+_See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/deal-list.ts)_
 
 ## `fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID]`
 
@@ -1481,7 +1481,7 @@ ALIASES
   $ fluence provider dri
 ```
 
-_See code: [src/commands/provider/deal-rewards-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/deal-rewards-info.ts)_
+_See code: [src/commands/provider/deal-rewards-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/deal-rewards-info.ts)_
 
 ## `fluence provider deal-rewards-withdraw`
 
@@ -1508,7 +1508,7 @@ ALIASES
   $ fluence provider drw
 ```
 
-_See code: [src/commands/provider/deal-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/deal-rewards-withdraw.ts)_
+_See code: [src/commands/provider/deal-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/deal-rewards-withdraw.ts)_
 
 ## `fluence provider gen`
 
@@ -1533,7 +1533,7 @@ EXAMPLES
   $ fluence provider gen
 ```
 
-_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/gen.ts)_
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/gen.ts)_
 
 ## `fluence provider info`
 
@@ -1562,7 +1562,7 @@ ALIASES
   $ fluence provider i
 ```
 
-_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/info.ts)_
+_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/info.ts)_
 
 ## `fluence provider init`
 
@@ -1586,7 +1586,7 @@ DESCRIPTION
   Init provider config. Creates a provider.yaml file
 ```
 
-_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/init.ts)_
+_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/init.ts)_
 
 ## `fluence provider offer-create`
 
@@ -1614,7 +1614,7 @@ ALIASES
   $ fluence provider oc
 ```
 
-_See code: [src/commands/provider/offer-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/offer-create.ts)_
+_See code: [src/commands/provider/offer-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/offer-create.ts)_
 
 ## `fluence provider offer-info`
 
@@ -1644,7 +1644,7 @@ ALIASES
   $ fluence provider oi
 ```
 
-_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/offer-info.ts)_
+_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/offer-info.ts)_
 
 ## `fluence provider offer-update`
 
@@ -1672,7 +1672,7 @@ ALIASES
   $ fluence provider ou
 ```
 
-_See code: [src/commands/provider/offer-update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/offer-update.ts)_
+_See code: [src/commands/provider/offer-update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/offer-update.ts)_
 
 ## `fluence provider register`
 
@@ -1697,7 +1697,7 @@ ALIASES
   $ fluence provider r
 ```
 
-_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/register.ts)_
+_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/register.ts)_
 
 ## `fluence provider tokens-distribute`
 
@@ -1726,7 +1726,7 @@ ALIASES
   $ fluence provider td
 ```
 
-_See code: [src/commands/provider/tokens-distribute.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/tokens-distribute.ts)_
+_See code: [src/commands/provider/tokens-distribute.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/tokens-distribute.ts)_
 
 ## `fluence provider tokens-withdraw`
 
@@ -1756,7 +1756,7 @@ ALIASES
   $ fluence provider tw
 ```
 
-_See code: [src/commands/provider/tokens-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/tokens-withdraw.ts)_
+_See code: [src/commands/provider/tokens-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/tokens-withdraw.ts)_
 
 ## `fluence provider update`
 
@@ -1781,7 +1781,7 @@ ALIASES
   $ fluence provider u
 ```
 
-_See code: [src/commands/provider/update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/provider/update.ts)_
+_See code: [src/commands/provider/update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/provider/update.ts)_
 
 ## `fluence run`
 
@@ -1839,7 +1839,7 @@ EXAMPLES
   $ fluence run -f 'funcName("stringArg")'
 ```
 
-_See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/run.ts)_
+_See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -1866,7 +1866,7 @@ EXAMPLES
   $ fluence service add
 ```
 
-_See code: [src/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/service/add.ts)_
+_See code: [src/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/service/add.ts)_
 
 ## `fluence service new [NAME]`
 
@@ -1890,7 +1890,7 @@ EXAMPLES
   $ fluence service new
 ```
 
-_See code: [src/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/service/new.ts)_
+_See code: [src/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/service/new.ts)_
 
 ## `fluence service remove [NAME | PATH | URL]`
 
@@ -1913,7 +1913,7 @@ EXAMPLES
   $ fluence service remove
 ```
 
-_See code: [src/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/service/remove.ts)_
+_See code: [src/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/service/remove.ts)_
 
 ## `fluence service repl [NAME | PATH | URL]`
 
@@ -1938,7 +1938,7 @@ EXAMPLES
   $ fluence service repl
 ```
 
-_See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/service/repl.ts)_
+_See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/service/repl.ts)_
 
 ## `fluence spell build [SPELL-NAMES]`
 
@@ -1963,7 +1963,7 @@ EXAMPLES
   $ fluence spell build
 ```
 
-_See code: [src/commands/spell/build.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/spell/build.ts)_
+_See code: [src/commands/spell/build.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/spell/build.ts)_
 
 ## `fluence spell new [NAME]`
 
@@ -1987,7 +1987,7 @@ EXAMPLES
   $ fluence spell new
 ```
 
-_See code: [src/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.0/src/commands/spell/new.ts)_
+_See code: [src/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.17.1/src/commands/spell/new.ts)_
 
 ## `fluence update [CHANNEL]`
 
