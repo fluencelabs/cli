@@ -478,7 +478,6 @@ export async function collateralWithdraw(
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
-
     await sign(
       `Withdraw collateral from: ${commitment.commitmentId}}`,
       capacity.withdrawCollateral,
@@ -589,7 +588,12 @@ export async function getCommitmentsInfo(flags: CCFlags) {
   const core = readonlyDealClient.getCore();
 
   const [commitments, currentEpoch, epochDuration, initTimestamp] =
-    await Promise.all([getCommitments(flags), core.currentEpoch(), core.epochDuration(), core.initTimestamp()]);
+    await Promise.all([
+      getCommitments(flags),
+      core.currentEpoch(),
+      core.epochDuration(),
+      core.initTimestamp(),
+    ]);
 
   return Promise.all(
     commitments.map(async (c) => {
@@ -610,15 +614,18 @@ export async function getCommitmentsInfo(flags: CCFlags) {
       } catch {}
 
       const ccStartDate =
-        commitment.startEpoch === undefined ?
-        undefined :
-        bigintSecondsToDate(initTimestamp + (commitment.startEpoch * epochDuration));
+        commitment.startEpoch === undefined
+          ? undefined
+          : bigintSecondsToDate(
+              initTimestamp + commitment.startEpoch * epochDuration,
+            );
 
       const ccEndDate =
-        commitment.endEpoch === undefined ?
-        undefined :
-        bigintSecondsToDate(initTimestamp + (commitment.endEpoch * epochDuration));
-
+        commitment.endEpoch === undefined
+          ? undefined
+          : bigintSecondsToDate(
+              initTimestamp + commitment.endEpoch * epochDuration,
+            );
 
       return {
         ...("providerConfigComputePeer" in c
