@@ -43,13 +43,14 @@ import {
   getReadonlyDealClient,
   sign,
 } from "../dealClient.js";
+import { bigintSecondsToDate } from "../helpers/bigintOps.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import {
   splitErrorsAndResults,
   stringifyUnknown,
   commaSepStrToArr,
 } from "../helpers/utils.js";
-import { input } from "../prompt.js";
+import { input, confirm } from "../prompt.js";
 import {
   resolveComputePeersByNames,
   type ResolvedComputePeer,
@@ -477,45 +478,57 @@ export async function collateralWithdraw(
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
-    try {
-      if (unitIds.length < flags[MAX_CUS_FLAG_NAME]) {
-        await signBatch(
-          `Remove the following compute units from capacity commitments:\n\n${[...unitIds].join("\n")}\n\nand finish commitment ${commitmentId}`,
-          [
-            populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
-            populateTx(capacity.finishCommitment, commitmentId),
-          ],
-        );
-      } else {
-        for (const unitIdsBatch of chunk(
-          [...unitIds],
-          flags[MAX_CUS_FLAG_NAME],
-        )) {
-          await sign(
-            `Remove the following compute units from capacity commitments:\n\n${[...unitIdsBatch].join("\n")}`,
-            capacity.removeCUFromCC,
-            commitmentId,
-            [...unitIdsBatch],
-          );
-        }
-
-        await sign(
-          `Finish capacity commitment ${commitmentId}`,
-          capacity.finishCommitment,
-          commitmentId,
-        );
-      }
-    } catch (error) {
-      commandObj.warn(
-        `If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`,
-      );
-
-      throw error;
-    }
+    await sign(
+      `Withdraw collateral from: ${commitment.commitmentId}}`,
+      capacity.withdrawCollateral,
+      commitmentId,
+    );
 
     commandObj.logToStderr(
       `Collateral withdrawn for:\n${stringifyBasicCommitmentInfo(commitment)}`,
     );
+
+    const finish = await confirm({
+      message: `Do you want to finish this commitment?`,
+    });
+
+    if (finish) {
+      try {
+        if (unitIds.length < flags[MAX_CUS_FLAG_NAME]) {
+          await signBatch(
+            `Remove the following compute units from capacity commitments:\n\n${[...unitIds].join("\n")}\n\nand finish commitment ${commitmentId}`,
+            [
+              populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
+              populateTx(capacity.finishCommitment, commitmentId),
+            ],
+          );
+        } else {
+          for (const unitIdsBatch of chunk(
+            [...unitIds],
+            flags[MAX_CUS_FLAG_NAME],
+          )) {
+            await sign(
+              `Remove the following compute units from capacity commitments:\n\n${[...unitIdsBatch].join("\n")}`,
+              capacity.removeCUFromCC,
+              commitmentId,
+              [...unitIdsBatch],
+            );
+          }
+
+          await sign(
+            `Finish capacity commitment ${commitmentId}`,
+            capacity.finishCommitment,
+            commitmentId,
+          );
+        }
+      } catch (error) {
+        commandObj.warn(
+          `If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`,
+        );
+
+        throw error;
+      }
+    }
   }
 }
 
@@ -572,7 +585,15 @@ export function stringifyBasicCommitmentInfo(
 export async function getCommitmentsInfo(flags: CCFlags) {
   const { readonlyDealClient } = await getReadonlyDealClient();
   const capacity = readonlyDealClient.getCapacity();
-  const commitments = await getCommitments(flags);
+  const core = readonlyDealClient.getCore();
+
+  const [commitments, currentEpoch, epochDuration, initTimestamp] =
+    await Promise.all([
+      getCommitments(flags),
+      core.currentEpoch(),
+      core.epochDuration(),
+      core.initTimestamp(),
+    ]);
 
   return Promise.all(
     commitments.map(async (c) => {
@@ -592,6 +613,20 @@ export async function getCommitmentsInfo(flags: CCFlags) {
         commitment = await capacity.getCommitment(c.commitmentId);
       } catch {}
 
+      const ccStartDate =
+        commitment.startEpoch === undefined
+          ? undefined
+          : bigintSecondsToDate(
+              initTimestamp + commitment.startEpoch * epochDuration,
+            );
+
+      const ccEndDate =
+        commitment.endEpoch === undefined
+          ? undefined
+          : bigintSecondsToDate(
+              initTimestamp + commitment.endEpoch * epochDuration,
+            );
+
       return {
         ...("providerConfigComputePeer" in c
           ? {
@@ -604,8 +639,11 @@ export async function getCommitmentsInfo(flags: CCFlags) {
           commitment.status === undefined
             ? undefined
             : Number(commitment.status),
+        currentEpoch: optBigIntToStr(currentEpoch),
         startEpoch: optBigIntToStr(commitment.startEpoch),
+        startDate: ccStartDate,
         endEpoch: optBigIntToStr(commitment.endEpoch),
+        endDate: ccEndDate,
         rewardDelegatorRate: await rewardDelegationRateToString(
           commitment.rewardDelegatorRate,
         ),
@@ -675,8 +713,11 @@ export async function getCommitmentInfoString(
         PeerId: ccInfo.peerId,
         "Capacity commitment ID": ccInfo.commitmentId,
         Status: await ccStatusToString(ccInfo.status),
+        "Current epoch": ccInfo.currentEpoch,
         "Start epoch": ccInfo.startEpoch,
         "End epoch": ccInfo.endEpoch,
+        "Start date": ccInfo.startDate?.toLocaleString(),
+        "End date": ccInfo.endDate?.toLocaleString(),
         "Reward delegator rate": ccInfo.rewardDelegatorRate,
         Delegator:
           ccInfo.delegator === ethers.ZeroAddress
