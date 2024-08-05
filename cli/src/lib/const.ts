@@ -138,8 +138,8 @@ export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
 
 export const WS_CHAIN_URLS: Record<ChainENV, string> = {
   kras: "wss://ipc.kras.fluence.dev",
-  dar: "wss://ipc.dar.fluence.dev",
-  stage: "wss://ipc.stage.fluence.dev",
+  dar: "wss://ws.fluence-testnet.t.raas.gelato.cloud",
+  stage: "wss://ws-123420000220.raas-testnet.gelato.digital",
   local: `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
 };
 
