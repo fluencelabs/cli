@@ -40,6 +40,7 @@ import {
   RUN_DEPLOYED_SERVICES_FUNCTION_NAME,
   type Template,
   WORKER_SPELL,
+  DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
 } from "../../src/lib/const.js";
 import {
   LOGS_GET_ERROR_START,
@@ -81,7 +82,8 @@ export async function getMultiaddrs(cwd: string): Promise<Node[]> {
             })
           )
             .trim()
-            .split("\n"),
+            .split("\n")
+            .slice(0, DEFAULT_NUMBER_OF_LOCAL_NET_NOXES),
         )
       : [];
 

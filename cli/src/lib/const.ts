@@ -130,6 +130,7 @@ export const TCP_PORT_START = 7771;
 export const WEB_SOCKET_PORT_START = 9991;
 export const HTTP_PORT_START = 18080;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
+export const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
 
 export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
   ...CHAIN_URLS_WITHOUT_LOCAL,

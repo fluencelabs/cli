@@ -65,6 +65,7 @@ import {
   DEFAULT_CURL_EFFECTOR_CID,
   CHAIN_URLS_FOR_CONTAINERS,
   CLI_NAME,
+  DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -1056,8 +1057,6 @@ const configSchemaV1 = {
     "capacityCommitments",
   ],
 } as const satisfies JSONSchemaType<ConfigV1>;
-
-const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
 
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
