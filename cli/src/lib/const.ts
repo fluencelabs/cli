@@ -506,6 +506,7 @@ export const CC_FLAGS = {
     description: "Comma separated capacity commitment IDs",
     exclusive: [NOX_NAMES_FLAG_NAME],
   }),
+  ...OFFER_FLAG,
 };
 
 export const MAX_CUS_FLAG_NAME = "max-cus";
