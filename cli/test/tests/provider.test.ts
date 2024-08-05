@@ -22,8 +22,11 @@ import { describe } from "vitest";
 
 import { LOCAL_NET_DEFAULT_ACCOUNTS } from "../../src/common.js";
 import { initProviderConfigWithPath } from "../../src/lib/configs/project/provider.js";
-import { DEFAULT_NUMBER_OF_LOCAL_NET_NOXES } from "../../src/lib/const";
-import { OFFER_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../../src/lib/const.js";
+import {
+  OFFER_FLAG_NAME,
+  PRIV_KEY_FLAG_NAME,
+  DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+} from "../../src/lib/const.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
@@ -116,10 +119,14 @@ describe("provider tests", () => {
         cwd,
       });
 
+      const numberOfNoxesWithWaitDelegationStatus = (
+        ccInfoRes1.match(/Status: WaitDelegation/g) ?? []
+      ).length;
+
       assert(
-        (ccInfoRes1.match(/Status: WaitDelegation/g) ?? []).length ===
+        numberOfNoxesWithWaitDelegationStatus ===
           DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
-        `CC status must be WaitDelegation`,
+        `All ${numToStr(DEFAULT_NUMBER_OF_LOCAL_NET_NOXES)} noxes must have WaitDelegation status. Got: ${numToStr(numberOfNoxesWithWaitDelegationStatus)}`,
       );
 
       await fluence({
@@ -140,13 +147,16 @@ describe("provider tests", () => {
         cwd,
       });
 
+      const numberOfNoxesWithWaitStartStatus = (
+        ccInfoRes2.match(/Status: WaitStart/g) ?? []
+      ).length;
+
       assert(
-        (ccInfoRes2.match(/Status: WaitStart/g) ?? []).length ===
-          DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
-        `CC status must be WaitStart`,
+        numberOfNoxesWithWaitStartStatus === DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+        `All ${numToStr(DEFAULT_NUMBER_OF_LOCAL_NET_NOXES)} noxes must have WaitStart status. Got: ${numToStr(numberOfNoxesWithWaitStartStatus)}`,
       );
 
-      await sleepSeconds(CC_DURATION_MINUTES * 60);
+      await sleepSeconds(5);
 
       const ccInfoRes3 = await fluence({
         args: ["provider", "cc-info"],
@@ -157,10 +167,13 @@ describe("provider tests", () => {
         cwd,
       });
 
+      const numberOfNoxesWithActiveStatus = (
+        ccInfoRes3.match(/Status: Active/g) ?? []
+      ).length;
+
       assert(
-        (ccInfoRes3.match(/Status: Active/g) ?? []).length ===
-          DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
-        `CC status must be Active`,
+        numberOfNoxesWithActiveStatus === DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+        `All ${numToStr(DEFAULT_NUMBER_OF_LOCAL_NET_NOXES)} noxes must have Active status. Got: ${numToStr(numberOfNoxesWithActiveStatus)}`,
       );
 
       await sleepSeconds(CC_DURATION_MINUTES * 60);
@@ -174,10 +187,13 @@ describe("provider tests", () => {
         cwd,
       });
 
+      const numberOfNoxesWithInactiveStatus = (
+        ccInfoRes4.match(/Status: Inactive/g) ?? []
+      ).length;
+
       assert(
-        (ccInfoRes4.match(/Status: Inactive/g) ?? []).length ===
-          DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
-        `CC status must be Inactive`,
+        numberOfNoxesWithInactiveStatus === DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+        `All ${numToStr(DEFAULT_NUMBER_OF_LOCAL_NET_NOXES)} noxes must have Inactive status. Got: ${numToStr(numberOfNoxesWithInactiveStatus)}`,
       );
 
       await fluence({
@@ -198,10 +214,13 @@ describe("provider tests", () => {
         cwd,
       });
 
+      const numberOfNoxesWithRemovedStatus = (
+        ccInfoRes5.match(/Status: Removed/g) ?? []
+      ).length;
+
       assert(
-        (ccInfoRes5.match(/Status: Removed/g) ?? []).length ===
-          DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
-        `CC status must be Removed`,
+        numberOfNoxesWithRemovedStatus === DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+        `All ${numToStr(DEFAULT_NUMBER_OF_LOCAL_NET_NOXES)} noxes must have Removed status. Got: ${numToStr(numberOfNoxesWithRemovedStatus)}`,
       );
     },
   );
