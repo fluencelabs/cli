@@ -51,6 +51,8 @@ on:
 env:
   CI: true
   FORCE_COLOR: true
+  AWS_REGION: "eu-west-1"
+  AWS_S3_FORCE_PATH_STYLE: true
 
 jobs:
   pack:
@@ -60,6 +62,10 @@ jobs:
     permissions:
       contents: write
       id-token: write
+
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
     steps:
       - name: Checkout fluence-cli
@@ -91,10 +97,14 @@ jobs:
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "18.20.3"
           registry-url: "https://npm.fluence.dev"
+          cache: "yarn"
 
       - run: yarn install
+
+      - run: yarn install
+        working-directory: cli
 
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
@@ -103,6 +113,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
+          working-directory: cli
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -111,6 +122,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
+          working-directory: cli
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -133,33 +145,43 @@ jobs:
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
 
-      - name: Set version
-        if: inputs.upload-to-s3 != true
-        uses: fluencelabs/github-actions/npm-publish-snapshot@main
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
         with:
-          id: ${{ steps.version.outputs.id }}
-          package-manager: yarn npm
-          flags: --tag snapshot
-          publish: false
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Build
+        run: yarn build
+
+      - name: Build CLI
+        run: yarn build
+        working-directory: cli
 
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
+        working-directory: cli
 
       - name: Upload fluence-cli
         if: inputs.upload-to-s3 == true
+        working-directory: cli
         run: yarn upload-${{ inputs.platform }}
 
       - name: Promote fluence-cli
         if: inputs.channel != 'null' && inputs.platform != 'win32-x64'
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
+        working-directory: cli
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
       - name: Promote fluence-cli windows
         if: inputs.channel != 'null' && inputs.platform == 'win32-x64'
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes
+        working-directory: cli
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes
 
       - name: Rename archive
         if: inputs.platform != 'win32-x64'
-        run: mv dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
+        run: mv cli/dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
 
       - name: Upload archive to CI
         if: inputs.platform != 'win32-x64'
@@ -177,7 +199,7 @@ jobs:
 
       - name: Rename windows installer
         if: inputs.platform == 'win32-x64'
-        run: mv dist/win32/fluence-*.exe fluence-cli-${{ inputs.platform }}.exe
+        run: mv cli/dist/win32/fluence-*.exe fluence-cli-${{ inputs.platform }}.exe
 
       - name: Upload windows installer to CI
         if: inputs.platform == 'win32-x64'
@@ -195,8 +217,10 @@ jobs:
 
       - name: Promote fluence-cli to unstable
         if: inputs.tag != 'null' && inputs.platform != 'win32-x64'
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --no-xz --indexes
+        working-directory: cli
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --no-xz --indexes
 
       - name: Promote fluence-cli windows to unstable
         if: inputs.tag != 'null' && inputs.platform == 'win32-x64'
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --win --no-xz --indexes
+        working-directory: cli
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --win --no-xz --indexes

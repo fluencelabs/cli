@@ -75,9 +75,9 @@ rm $(which fluence)
 
 ## Documentation
 
-1. [A complete list of commands together with usage examples](./docs/commands/README.md)
-1. [Documentation for all Fluence CLI configs](./docs/configs/README.md)
-1. [Environment variables that affect Fluence CLI and are important for Fluence CLI maintainers](./example.env)
+1. [A complete list of commands together with usage examples](./cli/docs/commands/README.md)
+1. [Documentation for all Fluence CLI configs](./cli/docs/configs/README.md)
+1. [Environment variables that affect Fluence CLI and are important for Fluence CLI maintainers](./cli/example.env)
 
 ## Support
 
@@ -94,4 +94,4 @@ you read and follow some basic [rules](./CONTRIBUTING.md).
 ## License
 
 All software code is copyright (c) Fluence Labs, Inc. under the
-[Apache-2.0](./LICENSE) license.
+[GNU Affero General Public License version 3](./LICENSE) license.

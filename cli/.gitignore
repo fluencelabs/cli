@@ -1,0 +1,46 @@
+# oclif default
+**/.DS_Store
+*-debug.log
+*-error.log
+/.idea
+/.nyc_output
+/dist
+/lib
+oclif.lock
+oclif.manifest.json
+.eslintcache
+tmp
+
+# for ease of development
+/schemas
+/.f
+.env
+
+# recommended by Fluence
+.idea
+.DS_Store
+.fluence
+**/target/
+.repl_history
+
+# ignore compiled files
+src/lib/compiled-aqua
+src/lib/compiled-aqua-with-tracing
+src/versions
+src/aqua-dependencies
+src/common.ts
+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Swap the comments on the following lines if you wish to use zero-installs
+# In that case, don't forget to run `yarn config set enableGlobalCache false`!
+# Documentation here: https://yarnpkg.com/features/caching#zero-installs
+
+#!.yarn/cache
+.pnp.*
+node_modules

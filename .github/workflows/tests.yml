@@ -11,10 +11,6 @@ on:
         description: "Fluence environment to run tests against"
         type: string
         default: "local"
-      run-tests-in-parallel:
-        description: "Whether to run tests in parallel or synchronously"
-        type: string
-        default: "false"
       nox-image:
         description: "nox image tag"
         type: string
@@ -72,6 +68,11 @@ env:
   CI: true
   FORCE_COLOR: true
   DEBUG: "fcli:*,deal-ts-clients:*"
+  FLUENCE_ENV: "${{ inputs.fluence-env }}"
+  FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+  CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
+  NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+  FLUENCE_LOG_DISPLAY_SPAN_LIST: true
 
 jobs:
   tests:
@@ -79,12 +80,13 @@ jobs:
     runs-on: builder
     timeout-minutes: 60
 
-    outputs:
-      version: "${{ steps.snapshot.outputs.version }}"
-
     permissions:
       contents: write
       id-token: write
+
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
     steps:
       - name: Checkout fluence-cli
@@ -118,7 +120,7 @@ jobs:
           case ${{ inputs.nox-image }} in
           # if nox image is not passed from e2e read from versions.json
           'null')
-            nox="$(jq .nox src/versions.json -r)"
+            nox="$(jq .nox cli/src/versions.json -r)"
           ;;
           # else set nox image to snapshot passed from e2e
           *)
@@ -134,9 +136,9 @@ jobs:
           # set deal images
           case ${{ inputs.chain-rpc-image }} in
           'null')
-            chain_rpc="$(jq '.["chain-rpc"]' src/versions.json -r)"
-            chain_deploy_script="$(jq '.["chain-deploy-script"]' src/versions.json -r)"
-            subgraph_deploy_script="$(jq '.["subgraph-deploy-script"]' src/versions.json -r)"
+            chain_rpc="$(jq '.["chain-rpc"]' cli/src/versions.json -r)"
+            chain_deploy_script="$(jq '.["chain-deploy-script"]' cli/src/versions.json -r)"
+            subgraph_deploy_script="$(jq '.["subgraph-deploy-script"]' cli/src/versions.json -r)"
           ;;
           # else set deal images to snapshots passed from e2e
           *)
@@ -174,17 +176,20 @@ jobs:
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "18.20.3"
           registry-url: "https://npm.fluence.dev"
           cache: "yarn"
-
-      - run: yarn install
 
       - name: Configure yarn to publish to private registry
         run: |
           yarn config set npmRegistryServer "https://npm.fluence.dev"
           yarn config set npmAlwaysAuth true
           yarn config set npmAuthToken $NODE_AUTH_TOKEN
+
+      - run: yarn install
+
+      - run: yarn install
+        working-directory: cli
 
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
@@ -193,6 +198,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
+          working-directory: cli
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -201,6 +207,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
+          working-directory: cli
 
       - name: Set deal-ts-clients version
         if: inputs.deal-ts-clients-version != 'null'
@@ -209,6 +216,7 @@ jobs:
           package: "@fluencelabs/deal-ts-clients"
           version: "${{ inputs.deal-ts-clients-version }}"
           package-manager: yarn
+          working-directory: cli
 
       - name: Set installation-spell version
         if: inputs.installation-spell-version != 'null'
@@ -218,6 +226,7 @@ jobs:
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
           flags: "--dev"
+          working-directory: cli
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -239,33 +248,62 @@ jobs:
               }
             }
 
-      - name: Run tests
-        env:
-          FLUENCE_ENV: "${{ inputs.fluence-env }}"
-          RUN_TESTS_IN_PARALLEL: "${{ inputs.run-tests-in-parallel }}"
-          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
-          CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
-          CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
-          NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-        run: yarn test-linux-x64
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Build
+        run: yarn build
+
+      - name: Build CLI
+        run: yarn build
+        working-directory: cli
+
+      - name: Pack Fluence CLI for Linux
+        run: yarn pack-linux-x64
+        working-directory: cli
+
+      - name: Download Marine and Mrepl
+        run: yarn download-marine-and-mrepl
+        working-directory: cli
+
+      - name: Generate templates
+        run: yarn generate-templates
+        working-directory: cli
+
+      - name: Set up the environment (local up)
+        if: inputs.fluence-env == 'local'
+        run: yarn local-up
+        working-directory: cli
+
+      - name: Run deal deploy tests
+        run: yarn vitest-deal-deploy
+        working-directory: cli
+
+      - name: Run deal update tests
+        run: yarn vitest-deal-update
+        working-directory: cli
+
+      - name: Run smoke tests
+        run: yarn vitest-smoke
+        working-directory: cli
+
+      - name: Run js-to-aqua tests
+        run: yarn vitest-js-to-aqua
+        working-directory: cli
 
       - name: Dump container logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
 
       - name: Dump anvil state
-        if: always()
+        if: contains(github.event.pull_request.labels.*.name, 'dump-anvil') && failure()
         run: |
           curl http://localhost:8545 \
             -X POST \
             -H "Content-Type: application/json" \
             --data '{"id":0,"jsonrpc":"2.0","method":"anvil_dumpState","params":[]}'
-
-      - name: Stop containers
-        if: always()
-        working-directory: tmp/templates/quickstart
-        run: ../../linux-x64/fluence/bin/run.js local down
-
-      - name: Cleanup
-        if: always()
-        run: rm -rf tmp ~/.fluence

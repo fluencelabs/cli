@@ -1,0 +1,26 @@
+{
+  "name": "@repo/eslint-config",
+  "license": "AGPL-3.0",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "license-header.js",
+    "common.js",
+    "node.js"
+  ],
+  "devDependencies": {
+    "@eslint/compat": "1.0.1",
+    "eslint": "9.3.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-license-header": "0.6.1",
+    "eslint-plugin-only-warn": "1.1.0",
+    "eslint-plugin-react": "7.34.2",
+    "eslint-plugin-react-hooks": "4.6.2",
+    "eslint-plugin-unused-imports": "3.2.0",
+    "globals": "15.1.0",
+    "typescript": "5.4.5",
+    "typescript-eslint": "7.10.0"
+  }
+}

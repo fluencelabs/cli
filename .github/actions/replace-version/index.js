@@ -15,6 +15,7 @@ try {
 
   const versionsFilePath = join(
     process.env.GITHUB_WORKSPACE,
+    "cli",
     "src",
     "versions.json",
   );
@@ -63,7 +64,7 @@ try {
     }
   }
 
-  const newVersionsJSONString = JSON.stringify(versions, null, 2);
+  const newVersionsJSONString = `${JSON.stringify(versions, null, 2)}\n`;
 
   // Save updated versions.json
   writeFileSync(versionsFilePath, newVersionsJSONString);
