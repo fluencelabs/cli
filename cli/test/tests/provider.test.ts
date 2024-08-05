@@ -22,6 +22,7 @@ import { describe } from "vitest";
 
 import { LOCAL_NET_DEFAULT_ACCOUNTS } from "../../src/common.js";
 import { initProviderConfigWithPath } from "../../src/lib/configs/project/provider.js";
+import { DEFAULT_NUMBER_OF_LOCAL_NET_NOXES } from "../../src/lib/const";
 import { OFFER_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../../src/lib/const.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
@@ -106,6 +107,21 @@ describe("provider tests", () => {
         cwd,
       });
 
+      const ccInfoRes1 = await fluence({
+        args: ["provider", "cc-info"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      });
+
+      assert(
+        (ccInfoRes1.match(/Status: WaitDelegation/g) ?? []).length ===
+          DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+        `CC status must be WaitDelegation`,
+      );
+
       await fluence({
         args: ["provider", "cc-activate"],
         flags: {
@@ -115,7 +131,7 @@ describe("provider tests", () => {
         cwd,
       });
 
-      await fluence({
+      const ccInfoRes2 = await fluence({
         args: ["provider", "cc-info"],
         flags: {
           ...PRIV_KEY_1,
@@ -123,10 +139,16 @@ describe("provider tests", () => {
         },
         cwd,
       });
+
+      assert(
+        (ccInfoRes2.match(/Status: WaitStart/g) ?? []).length ===
+          DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+        `CC status must be WaitStart`,
+      );
 
       await sleepSeconds(CC_DURATION_MINUTES * 60);
 
-      await fluence({
+      const ccInfoRes3 = await fluence({
         args: ["provider", "cc-info"],
         flags: {
           ...PRIV_KEY_1,
@@ -134,6 +156,29 @@ describe("provider tests", () => {
         },
         cwd,
       });
+
+      assert(
+        (ccInfoRes3.match(/Status: Active/g) ?? []).length ===
+          DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+        `CC status must be Active`,
+      );
+
+      await sleepSeconds(CC_DURATION_MINUTES * 60);
+
+      const ccInfoRes4 = await fluence({
+        args: ["provider", "cc-info"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      });
+
+      assert(
+        (ccInfoRes4.match(/Status: Inactive/g) ?? []).length ===
+          DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+        `CC status must be Inactive`,
+      );
 
       await fluence({
         args: ["provider", "cc-collateral-withdraw"],
@@ -143,6 +188,21 @@ describe("provider tests", () => {
         },
         cwd,
       });
+
+      const ccInfoRes5 = await fluence({
+        args: ["provider", "cc-info"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      });
+
+      assert(
+        (ccInfoRes5.match(/Status: Removed/g) ?? []).length ===
+          DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+        `CC status must be Removed`,
+      );
     },
   );
 });
