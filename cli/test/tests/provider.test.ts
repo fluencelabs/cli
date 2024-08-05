@@ -107,6 +107,15 @@ describe("provider tests", () => {
       });
 
       await fluence({
+        args: ["provider", "cc-activate"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      });
+
+      await fluence({
         args: ["provider", "cc-info"],
         flags: {
           ...PRIV_KEY_1,
