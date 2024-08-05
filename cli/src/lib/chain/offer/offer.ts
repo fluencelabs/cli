@@ -340,7 +340,7 @@ export async function updateOffers(flags: OffersArgs) {
   if (notFoundOffersInfo.length > 0) {
     commandObj.warn(
       commandObj.warn(
-        `Can't find offer info using the indexer:\n${notFoundOffersInfo
+        `Can't find the following offers:\n${notFoundOffersInfo
           .map((offer) => {
             return `${offer.offerName}: ${offer.offerId}`;
           })
