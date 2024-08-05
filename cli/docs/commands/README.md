@@ -643,13 +643,14 @@ Withdraw FLT collateral from capacity commitment
 ```
 USAGE
   $ fluence delegator collateral-withdraw [IDS] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
-    <private-key>] [--max-cus <value>]
+    <private-key>] [--max-cus <value>] [--finish]
 
 ARGUMENTS
   IDS  Comma separated capacity commitment IDs
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --finish                                     Finish capacity commitment after collateral withdrawal
   --max-cus=<value>                            [default: 32] Maximum number of compute units to put in a batch when
                                                signing a transaction
   --no-input                                   Don't interactively ask for any input from the user
