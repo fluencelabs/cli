@@ -26,8 +26,9 @@ import { OFFER_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../../src/lib/const.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
+import { CC_DURATION_MINUTES } from "../helpers/constants.js";
 import { initializeTemplate } from "../helpers/sharedSteps.js";
-import { wrappedTest } from "../helpers/utils.js";
+import { sleepSeconds, wrappedTest } from "../helpers/utils.js";
 
 const PRIV_KEY_1 = {
   [PRIV_KEY_FLAG_NAME]: LOCAL_NET_DEFAULT_ACCOUNTS[1].privateKey,
@@ -98,6 +99,35 @@ describe("provider tests", () => {
 
       await fluence({
         args: ["provider", "cc-create"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      });
+
+      await fluence({
+        args: ["provider", "cc-info"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      });
+
+      await sleepSeconds(CC_DURATION_MINUTES * 60);
+
+      await fluence({
+        args: ["provider", "cc-info"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      });
+
+      await fluence({
+        args: ["provider", "cc-collateral-withdraw"],
         flags: {
           ...PRIV_KEY_1,
           [OFFER_FLAG_NAME]: NEW_OFFER_NAME,

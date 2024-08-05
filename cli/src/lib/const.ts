@@ -521,6 +521,8 @@ export const MAX_CUS_FLAG = {
   }),
 };
 
+export const FINISH_COMMITMENT_FLAG_NAME = "finish";
+
 export const JSON_FLAG = {
   json: Flags.boolean({
     description: "Output JSON",
