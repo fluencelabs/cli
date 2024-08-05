@@ -1263,8 +1263,8 @@ Withdraw FLT collateral from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-collateral-withdraw [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--env <dar | kras | stage |
-    local | custom>] [--priv-key <private-key>] [--max-cus <value>]
+  $ fluence provider cc-collateral-withdraw [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
+    [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>] [--max-cus <value>]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
@@ -1274,6 +1274,8 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
@@ -1325,7 +1327,7 @@ Get info about capacity commitments
 ```
 USAGE
   $ fluence provider cc-info [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--json]
+    [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>] [--json]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
@@ -1334,6 +1336,8 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
@@ -1355,7 +1359,7 @@ Remove Capacity commitment. You can remove it only BEFORE you activated it by de
 ```
 USAGE
   $ fluence provider cc-remove [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2> | --cc-ids <value>]
+    [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
@@ -1363,6 +1367,8 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
@@ -1383,8 +1389,8 @@ Withdraw FLT rewards from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-rewards-withdraw [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--env <dar | kras | stage |
-    local | custom>] [--priv-key <private-key>]
+  $ fluence provider cc-rewards-withdraw [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
+    [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --cc-ids=<value>                             Comma separated capacity commitment IDs
@@ -1392,6 +1398,8 @@ FLAGS
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
