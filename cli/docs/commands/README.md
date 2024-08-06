@@ -780,11 +780,12 @@ Get versions of all cli dependencies, including aqua, marine, mrepl and internal
 
 ```
 USAGE
-  $ fluence dep versions [--no-input] [--default]
+  $ fluence dep versions [--no-input] [--default] [--json]
 
 FLAGS
   --default   Display default npm and cargo dependencies and their versions for current CLI version. Default npm
               dependencies are always available to be imported in Aqua
+  --json      Output JSON
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
