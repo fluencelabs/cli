@@ -22,11 +22,7 @@ import { describe } from "vitest";
 
 import { LOCAL_NET_DEFAULT_ACCOUNTS } from "../../src/common.js";
 import { initProviderConfigWithPath } from "../../src/lib/configs/project/provider.js";
-import {
-  OFFER_FLAG_NAME,
-  PRIV_KEY_FLAG_NAME,
-  DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
-} from "../../src/lib/const.js";
+import { OFFER_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../../src/lib/const.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
