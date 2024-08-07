@@ -15,6 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// In Firefox: client variable can be undefined - that's why we need to use optional chaining
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
   type CLIToConnectorFullMsg,
@@ -24,6 +27,7 @@ import {
   jsonStringify,
   LOCAL_NET_WALLET_KEYS,
   CHAIN_IDS,
+  ChainId,
 } from "@repo/common";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -34,9 +38,15 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 
-export function App() {
-  const { isConnected, address } = useAccount();
-  const { chain } = useClient();
+export function App({
+  chainId,
+  setChainId,
+}: {
+  chainId: ChainId;
+  setChainId: (chainId: ChainId) => void;
+}) {
+  const { isConnected, address, chainId: accountChainId } = useAccount();
+  const client = useClient();
   const { switchChain } = useSwitchChain();
   const [isExpectingAddress, setIsExpectingAddress] = useState(false);
   const [isCLIConnected, setIsCLIConnected] = useState(true);
@@ -54,6 +64,30 @@ export function App() {
     reset,
   } = useSendTransaction();
 
+  const [trySwitchChainFlag, setTrySwitchChainFlag] = useState(false);
+
+  useEffect(() => {
+    if (chainId === client?.chain.id && chainId === accountChainId) {
+      return;
+    }
+
+    // For some reason switchChain does not work if called immediately
+    // So we try until user switches the chain cause we can't proceed until he does
+    setTimeout(() => {
+      switchChain({ chainId });
+
+      setTrySwitchChainFlag((prev) => {
+        return !prev;
+      });
+    }, 2000);
+  }, [
+    accountChainId,
+    client?.chain.id,
+    chainId,
+    switchChain,
+    trySwitchChainFlag,
+  ]);
+
   useEffect(() => {
     if (isExpectingAddress && address !== undefined) {
       setIsExpectingAddress(false);
@@ -70,14 +104,13 @@ export function App() {
     events.onmessage = ({ data }) => {
       // We are sure CLI returns what we expect so there is no need to validate
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { chainId, msg } = jsonParse(
+      const { chainId: chainIdFromCLI, msg } = jsonParse(
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         data as string,
       ) as CLIToConnectorFullMsg;
 
-      if (chainId !== chain.id) {
-        reset();
-        switchChain({ chainId });
+      if (chainId !== chainIdFromCLI) {
+        setChainId(chainIdFromCLI);
       }
 
       if (msg.tag !== "ping") {
@@ -108,7 +141,6 @@ export function App() {
           setIsCLIConnected(false);
         }, 3000);
         // We disable this rule so it's possible to rely on TypeScript to make sure we handle all the messages
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       } else if (msg.tag === "returnToCLI") {
         setIsReturnToCLI(true);
       } else {
@@ -118,7 +150,7 @@ export function App() {
         );
       }
     };
-  }, [chain.id, reset, sendTransaction, switchChain]);
+  }, [chainId, reset, sendTransaction, setChainId]);
 
   const {
     data: txReceipt,
@@ -149,8 +181,8 @@ export function App() {
 
   return (
     <>
-      {isConnected && <p>Chain: {chain.name}</p>}
-      {chain.id === CHAIN_IDS.local && (
+      {isConnected && <p>Chain: {client?.chain.name}</p>}
+      {client?.chain.id === CHAIN_IDS.local && (
         <details>
           <summary>How to work with local chain</summary>
           <ol>
@@ -206,11 +238,11 @@ export function App() {
           {isLoading && <div>Waiting for transaction receipt...</div>}
           {isSuccess &&
             txHash !== undefined &&
-            (chain.id === CHAIN_IDS.local ? (
+            (client?.chain.blockExplorers?.default.url === undefined ? (
               <div>Transaction successful!</div>
             ) : (
               <a
-                href={`${chain.blockExplorers.default.url}tx${txHash}`}
+                href={`${client.chain.blockExplorers.default.url}tx${txHash}`}
                 target="_blank"
                 rel="noreferrer"
               >
