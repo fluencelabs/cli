@@ -47,10 +47,19 @@ export function App({
 }) {
   const { isConnected, address, chainId: accountChainId } = useAccount();
   const client = useClient();
-  const { switchChain } = useSwitchChain();
+  const { switchChain, isPending: isSwitchChainPending } = useSwitchChain();
   const [isExpectingAddress, setIsExpectingAddress] = useState(false);
   const [isCLIConnected, setIsCLIConnected] = useState(true);
   const [isReturnToCLI, setIsReturnToCLI] = useState(false);
+
+  const [wasSwitchChainDialogShown, setWasSwitchChainDialogShown] =
+    useState(false);
+
+  useEffect(() => {
+    if (isSwitchChainPending && !wasSwitchChainDialogShown) {
+      setWasSwitchChainDialogShown(true);
+    }
+  }, [isSwitchChainPending, wasSwitchChainDialogShown]);
 
   const [transactionPayload, setTransactionPayload] =
     useState<TransactionPayload | null>(null);
@@ -66,8 +75,15 @@ export function App({
 
   const [trySwitchChainFlag, setTrySwitchChainFlag] = useState(false);
 
+  const isCorrectChainIdSet =
+    chainId === client?.chain.id && chainId === accountChainId;
+
   useEffect(() => {
-    if (chainId === client?.chain.id && chainId === accountChainId) {
+    if (isCorrectChainIdSet) {
+      setWasSwitchChainDialogShown(false);
+    }
+
+    if (wasSwitchChainDialogShown || isCorrectChainIdSet) {
       return;
     }
 
@@ -81,11 +97,11 @@ export function App({
       });
     }, 2000);
   }, [
-    accountChainId,
-    client?.chain.id,
     chainId,
     switchChain,
     trySwitchChainFlag,
+    wasSwitchChainDialogShown,
+    isCorrectChainIdSet,
   ]);
 
   useEffect(() => {
@@ -221,10 +237,10 @@ export function App({
       />
       {isConnected && (
         <>
-          {transactionPayload !== null && (
+          {transactionPayload !== null && isCorrectChainIdSet && (
             <button
               type="button"
-              className="sendTransactionButton"
+              className="button"
               onClick={() => {
                 if (!isPending && !isLoading && !isSuccess) {
                   respond({ tag: "sendTransaction" });
@@ -232,6 +248,17 @@ export function App({
               }}
             >
               Send transaction
+            </button>
+          )}
+          {wasSwitchChainDialogShown && (
+            <button
+              type="button"
+              className="button"
+              onClick={() => {
+                setWasSwitchChainDialogShown(false);
+              }}
+            >
+              Switch chain
             </button>
           )}
           {isPending && <div>Please sign transaction in your wallet</div>}
