@@ -60,7 +60,7 @@ summary {
   cursor: pointer;
 }
 
-.sendTransactionButton {
+.button {
   appearance: none;
   display: flex;
   justify-content: center;
