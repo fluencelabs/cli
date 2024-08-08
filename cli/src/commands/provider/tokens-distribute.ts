@@ -19,7 +19,12 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
-import { CHAIN_FLAGS, FLT_SYMBOL, NOX_NAMES_FLAG } from "../../lib/const.js";
+import {
+  CHAIN_FLAGS,
+  FLT_SYMBOL,
+  NOX_NAMES_FLAG,
+  OFFER_FLAG,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class TokensDistribute extends BaseCommand<
@@ -31,6 +36,7 @@ export default class TokensDistribute extends BaseCommand<
     ...baseFlags,
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
+    ...OFFER_FLAG,
     amount: Flags.string({
       description: `Amount of ${FLT_SYMBOL} tokens to distribute to noxes`,
     }),

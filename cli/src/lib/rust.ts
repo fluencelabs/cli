@@ -211,9 +211,9 @@ targets = [
       );
     }
   } else if (toolchainToUse === versions["rust-toolchain"]) {
-    commandObj.log(`Using default ${toolchainToUse} rust toolchain`);
+    commandObj.logToStderr(`Using default ${toolchainToUse} rust toolchain`);
   } else {
-    commandObj.log(
+    commandObj.logToStderr(
       `Using ${toolchainToUse} rust toolchain from ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
     );
   }
