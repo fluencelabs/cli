@@ -93,9 +93,3 @@ export const config = getDefaultConfig({
     },
   ],
 });
-
-declare module "wagmi" {
-  interface Register {
-    config: typeof config;
-  }
-}

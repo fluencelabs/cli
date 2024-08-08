@@ -60,7 +60,7 @@ summary {
   cursor: pointer;
 }
 
-.sendTransactionButton {
+.button {
   appearance: none;
   display: flex;
   justify-content: center;
@@ -74,7 +74,7 @@ summary {
   font-size: inherit;
 }
 
-.sendTransactionButton_disabled {
+.button_disabled {
   cursor: wait;
   opacity: 0.5;
 }

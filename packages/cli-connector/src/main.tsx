@@ -20,8 +20,10 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { Buffer } from "buffer";
 
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ChainId, CLIToConnectorFullMsg, jsonParse } from "@repo/common";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import React from "react";
+import { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
 
@@ -39,14 +41,46 @@ if (root === null) {
   throw new Error("Root element not found");
 }
 
-ReactDOM.createRoot(root).render(
-  <React.StrictMode>
+export function AppWrapper() {
+  const [chainId, setChainId] = useState<ChainId | undefined>(undefined);
+
+  useEffect(() => {
+    if (chainId !== undefined) {
+      return;
+    }
+
+    const eventSource = new EventSource("/events");
+
+    eventSource.onmessage = ({ data }) => {
+      // We are sure CLI returns what we expect so there is no need to validate
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const { chainId: chainIdFromCLI } = jsonParse(
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        data as string,
+      ) as CLIToConnectorFullMsg;
+
+      setChainId(chainIdFromCLI);
+      eventSource.close();
+    };
+  }, [chainId, setChainId]);
+
+  if (chainId === undefined) {
+    return;
+  }
+
+  return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          <App />
+        <RainbowKitProvider initialChain={chainId}>
+          <App chainId={chainId} setChainId={setChainId} />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
+  );
+}
+
+ReactDOM.createRoot(root).render(
+  <React.StrictMode>
+    <AppWrapper />
   </React.StrictMode>,
 );
