@@ -43,12 +43,21 @@ export type MarineCLI = {
   ): Promise<string>;
 };
 
-export async function initMarineCli(): Promise<MarineCLI> {
+export async function ensureMarinePath() {
   const marineCLIDirPath = await ensureMarineOrMreplDependency({
     name: MARINE_CARGO_DEPENDENCY,
   });
 
-  const marineCLIPath = join(marineCLIDirPath, BIN_DIR_NAME, "marine");
+  return join(marineCLIDirPath, BIN_DIR_NAME, "marine");
+}
+
+export async function ensureMreplPath() {
+  const mreplDirPath = await ensureMarineOrMreplDependency({ name: "mrepl" });
+  return join(mreplDirPath, BIN_DIR_NAME, "mrepl");
+}
+
+export async function initMarineCli(): Promise<MarineCLI> {
+  const marineCLIPath = await ensureMarinePath();
 
   return async ({
     args,

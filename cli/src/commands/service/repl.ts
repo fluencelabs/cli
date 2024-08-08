@@ -16,7 +16,6 @@
  */
 
 import { spawn } from "node:child_process";
-import { join } from "node:path";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
@@ -30,7 +29,6 @@ import {
 } from "../../lib/configs/project/fluence.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import {
-  BIN_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   MARINE_BUILD_ARGS_FLAG,
   NO_INPUT_FLAG,
@@ -41,10 +39,10 @@ import { getModuleWasmPath } from "../../lib/helpers/downloadFile.js";
 import { updateAquaServiceInterfaceFile } from "../../lib/helpers/generateServiceInterface.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { exitCli, initCli } from "../../lib/lifeCycle.js";
+import { ensureMreplPath } from "../../lib/marineCli.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import { projectRootDir } from "../../lib/paths.js";
 import { input, list } from "../../lib/prompt.js";
-import { ensureMarineOrMreplDependency } from "../../lib/rust.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
@@ -111,8 +109,7 @@ export default class REPL extends Command {
       return;
     }
 
-    const mreplDirPath = await ensureMarineOrMreplDependency({ name: "mrepl" });
-    const mreplPath = join(mreplDirPath, BIN_DIR_NAME, "mrepl");
+    const mreplPath = await ensureMreplPath();
 
     commandObj.logToStderr(`Service config for repl was generated at: ${fluenceServiceConfigTomlPath}
 ${SEPARATOR}Execute ${color.yellow(

@@ -16,7 +16,12 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { jsonStringify, LOCAL_NET_DEFAULT_ACCOUNTS } from "../../common.js";
+import {
+  BLOCK_SCOUT_URLS,
+  jsonStringify,
+  LOCAL_NET_DEFAULT_ACCOUNTS,
+} from "../../common.js";
+import { CHAIN_URLS } from "../../common.js";
 import { getChainId } from "../../lib/chain/chainId.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
@@ -45,9 +50,15 @@ export default class Info extends BaseCommand<typeof Info> {
 
     commandObj.log(
       jsonStringify({
-        chainId: await getChainId(),
+        ...(chainEnv === "local"
+          ? { defaultAccountsForLocalEnv: LOCAL_NET_DEFAULT_ACCOUNTS }
+          : {}),
         contracts,
-        defaultAccountsForLocalEnv: LOCAL_NET_DEFAULT_ACCOUNTS,
+        chainId: await getChainId(),
+        chainRPC: CHAIN_URLS[chainEnv],
+        ...(chainEnv === "local"
+          ? {}
+          : { blockScoutUrl: BLOCK_SCOUT_URLS[chainEnv] }),
       }),
     );
   }

@@ -33,6 +33,7 @@ import {
   CC_IDS_FLAG_NAME,
   MAX_CUS_FLAG_NAME,
   DEFAULT_MAX_CUS,
+  FINISH_COMMITMENT_FLAG_NAME,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
@@ -50,7 +51,7 @@ import {
   stringifyUnknown,
   commaSepStrToArr,
 } from "../helpers/utils.js";
-import { input, confirm } from "../prompt.js";
+import { input } from "../prompt.js";
 import {
   resolveComputePeersByNames,
   type ResolvedComputePeer,
@@ -437,7 +438,10 @@ export async function removeCommitments(flags: CCFlags) {
 }
 
 export async function collateralWithdraw(
-  flags: CCFlags & { [MAX_CUS_FLAG_NAME]: number },
+  flags: CCFlags & {
+    [MAX_CUS_FLAG_NAME]: number;
+    [FINISH_COMMITMENT_FLAG_NAME]?: boolean;
+  },
 ) {
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
@@ -488,46 +492,46 @@ export async function collateralWithdraw(
       `Collateral withdrawn for:\n${stringifyBasicCommitmentInfo(commitment)}`,
     );
 
-    const finish = await confirm({
-      message: `Do you want to finish this commitment?`,
-    });
+    const shouldFinishCommitment = flags[FINISH_COMMITMENT_FLAG_NAME] ?? true; // for provider it's true by default
 
-    if (finish) {
-      try {
-        if (unitIds.length < flags[MAX_CUS_FLAG_NAME]) {
-          await signBatch(
-            `Remove the following compute units from capacity commitments:\n\n${[...unitIds].join("\n")}\n\nand finish commitment ${commitmentId}`,
-            [
-              populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
-              populateTx(capacity.finishCommitment, commitmentId),
-            ],
-          );
-        } else {
-          for (const unitIdsBatch of chunk(
-            [...unitIds],
-            flags[MAX_CUS_FLAG_NAME],
-          )) {
-            await sign(
-              `Remove the following compute units from capacity commitments:\n\n${[...unitIdsBatch].join("\n")}`,
-              capacity.removeCUFromCC,
-              commitmentId,
-              [...unitIdsBatch],
-            );
-          }
+    if (!shouldFinishCommitment) {
+      continue;
+    }
 
+    try {
+      if (unitIds.length < flags[MAX_CUS_FLAG_NAME]) {
+        await signBatch(
+          `Remove the following compute units from capacity commitments:\n\n${[...unitIds].join("\n")}\n\nand finish commitment ${commitmentId}`,
+          [
+            populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
+            populateTx(capacity.finishCommitment, commitmentId),
+          ],
+        );
+      } else {
+        for (const unitIdsBatch of chunk(
+          [...unitIds],
+          flags[MAX_CUS_FLAG_NAME],
+        )) {
           await sign(
-            `Finish capacity commitment ${commitmentId}`,
-            capacity.finishCommitment,
+            `Remove the following compute units from capacity commitments:\n\n${[...unitIdsBatch].join("\n")}`,
+            capacity.removeCUFromCC,
             commitmentId,
+            [...unitIdsBatch],
           );
         }
-      } catch (error) {
-        commandObj.warn(
-          `If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`,
-        );
 
-        throw error;
+        await sign(
+          `Finish capacity commitment ${commitmentId}`,
+          capacity.finishCommitment,
+          commitmentId,
+        );
       }
+    } catch (error) {
+      commandObj.warn(
+        `If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`,
+      );
+
+      throw error;
     }
   }
 }
