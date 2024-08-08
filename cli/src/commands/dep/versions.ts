@@ -19,13 +19,11 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import InternalAquaDependenciesPackageJSON from "../../cli-aqua-dependencies/package.json" assert { type: "json" };
+import { jsonStringify } from "../../common.js";
 import { commandObj } from "../../lib/commandObj.js";
-import {
-  CLI_NAME_FULL,
-  CLI_NAME,
-  FLUENCE_CONFIG_FULL_FILE_NAME,
-} from "../../lib/const.js";
+import { CLI_NAME_FULL, JSON_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { ensureMarinePath, ensureMreplPath } from "../../lib/marineCli.js";
 import {
   getRustToolchainToUse,
   resolveMarineAndMreplDependencies,
@@ -45,6 +43,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
       description:
         "Display default npm and cargo dependencies and their versions for current CLI version. Default npm dependencies are always available to be imported in Aqua",
     }),
+    ...JSON_FLAG,
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
@@ -55,20 +54,20 @@ export default class Versions extends BaseCommand<typeof Versions> {
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     if (flags.default) {
+      const defaultDeps = {
+        "cli version": commandObj.config.version,
+        [`default aqua dependencies`]: versions.npm,
+        tools: {
+          marine: versions.cargo.marine,
+          mrepl: versions.cargo.mrepl,
+        },
+        "default rust toolchain": versions["rust-toolchain"],
+      };
+
       commandObj.log(
-        yamlDiffPatch(
-          "",
-          {},
-          {
-            "cli version": commandObj.config.version,
-            [`default ${depInstallCommandExplanation}`]: versions.npm,
-            [`default ${marineAndMreplExplanation}`]: {
-              marine: versions.cargo.marine,
-              mrepl: versions.cargo.mrepl,
-            },
-            "default rust toolchain": versions["rust-toolchain"],
-          },
-        ),
+        flags.json
+          ? jsonStringify(defaultDeps)
+          : yamlDiffPatch("", {}, defaultDeps),
       );
 
       return;
@@ -78,38 +77,51 @@ export default class Versions extends BaseCommand<typeof Versions> {
       CLIPackageJSON.devDependencies,
     );
 
-    commandObj.log(
-      yamlDiffPatch(
-        "",
-        {},
-        {
-          [`${CLI_NAME_FULL} version`]: commandObj.config.version,
-          "nox version": versions["nox"],
-          "rust toolchain": await getRustToolchainToUse(),
-          [depInstallCommandExplanation]:
-            maybeFluenceConfig === null
-              ? versions.npm
-              : maybeFluenceConfig.aquaDependencies,
-          [marineAndMreplExplanation]: Object.fromEntries(
-            await resolveMarineAndMreplDependencies(),
+    const deps = {
+      [`${CLI_NAME_FULL} version`]: commandObj.config.version,
+      "nox version": versions["nox"],
+      "rust toolchain": await getRustToolchainToUse(),
+      "aqua dependencies":
+        maybeFluenceConfig === null
+          ? versions.npm
+          : maybeFluenceConfig.aquaDependencies,
+      tools: Object.fromEntries(
+        await Promise.all(
+          (await resolveMarineAndMreplDependencies()).map(
+            async ([tool, version]) => {
+              return [
+                tool,
+                {
+                  version,
+                  path:
+                    tool === "marine"
+                      ? await ensureMarinePath()
+                      : await ensureMreplPath(),
+                },
+              ] as const;
+            },
           ),
-          "internal dependencies": filterOutNonFluenceDependencies(
-            CLIPackageJSON.dependencies,
-          ),
-          ...(Object.keys(devDependencies).length === 0
-            ? {}
-            : {
-                "dev dependencies": filterOutNonFluenceDependencies(
-                  CLIPackageJSON.devDependencies,
-                ),
-              }),
-          "internal aqua dependencies":
-            InternalAquaDependenciesPackageJSON.dependencies,
-          "js-client dependencies": filterOutNonFluenceDependencies(
-            JSClientPackageJSON.dependencies,
-          ),
-        },
+        ),
       ),
+      "internal dependencies": filterOutNonFluenceDependencies(
+        CLIPackageJSON.dependencies,
+      ),
+      ...(Object.keys(devDependencies).length === 0
+        ? {}
+        : {
+            "dev dependencies": filterOutNonFluenceDependencies(
+              CLIPackageJSON.devDependencies,
+            ),
+          }),
+      "internal aqua dependencies":
+        InternalAquaDependenciesPackageJSON.dependencies,
+      "js-client dependencies": filterOutNonFluenceDependencies(
+        JSClientPackageJSON.dependencies,
+      ),
+    };
+
+    commandObj.log(
+      flags.json ? jsonStringify(deps) : yamlDiffPatch("", {}, deps),
     );
   }
 }
@@ -123,6 +135,3 @@ const filterOutNonFluenceDependencies = (
     }),
   );
 };
-
-const depInstallCommandExplanation = `aqua dependencies that you can install or update using '${CLI_NAME} dep i <name>@<version>'`;
-const marineAndMreplExplanation = `marine and mrepl dependencies that can be overridden in ${FLUENCE_CONFIG_FULL_FILE_NAME} using marineVersion and mreplVersion properties`;

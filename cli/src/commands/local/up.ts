@@ -78,12 +78,20 @@ export default class Up extends BaseCommand<typeof Up> {
       default: true,
     }),
     ...DOCKER_COMPOSE_FLAGS,
-    reset: Flags.boolean({
+    "no-reset": Flags.boolean({
       description:
-        "Resets docker-compose.yaml to default, removes volumes and previous local deployments",
-      allowNo: true,
-      default: true,
+        "Don't reset docker-compose.yaml to default, don't remove volumes and previous local deployments",
+      default: false,
       char: "r",
+    }),
+    "no-wait": Flags.boolean({
+      description: "Don't wait for services to be running|healthy",
+      default: false,
+    }),
+    "no-set-up": Flags.boolean({
+      description:
+        "Don't set up provider, offer, commitments and deposit collateral, so there will be no active offer on the network after command is finished",
+      default: false,
     }),
   };
 
@@ -104,7 +112,7 @@ export default class Up extends BaseCommand<typeof Up> {
       [PRIV_KEY_FLAG_NAME]: LOCAL_NET_DEFAULT_WALLET_KEY,
     });
 
-    if (flags.reset) {
+    if (!flags["no-reset"]) {
       const dirPath = dockerComposeDirPath();
       await initNewReadonlyDockerComposeConfig();
 
@@ -158,12 +166,17 @@ export default class Up extends BaseCommand<typeof Up> {
         "quiet-pull": flags["quiet-pull"],
         d: flags.detach,
         build: flags.build,
+        wait: !flags["no-wait"],
       },
       printOutput: true,
       options: {
         cwd: dockerComposeConfig.$getDirPath(),
       },
     });
+
+    if (flags["no-set-up"]) {
+      return;
+    }
 
     const allOffers = { [OFFER_FLAG_NAME]: ALL_FLAG_VALUE };
     await distributeToNox({ ...flags, ...allOffers, amount: "10" });

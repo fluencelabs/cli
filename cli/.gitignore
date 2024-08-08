@@ -15,6 +15,7 @@ tmp
 /schemas
 /.f
 .env
+rust-toolchain.toml
 
 # recommended by Fluence
 .idea

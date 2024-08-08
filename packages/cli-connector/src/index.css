@@ -60,7 +60,7 @@ summary {
   cursor: pointer;
 }
 
-.sendTransactionButton {
+.button {
   appearance: none;
   display: flex;
   justify-content: center;
@@ -72,6 +72,11 @@ summary {
   background-color: #000;
   color: #fff;
   font-size: inherit;
+}
+
+.button_disabled {
+  cursor: wait;
+  opacity: 0.5;
 }
 
 .error {

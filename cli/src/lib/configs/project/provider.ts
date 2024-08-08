@@ -65,6 +65,7 @@ import {
   DEFAULT_CURL_EFFECTOR_CID,
   CHAIN_URLS_FOR_CONTAINERS,
   CLI_NAME,
+  DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -93,6 +94,7 @@ import {
   type InitializedReadonlyConfig,
   type Migrations,
   type ConfigValidateFunction,
+  getConfigInitFunction,
 } from "../initConfig.js";
 
 import { initNewEnvConfig } from "./env.js";
@@ -1056,8 +1058,6 @@ const configSchemaV1 = {
   ],
 } as const satisfies JSONSchemaType<ConfigV1>;
 
-const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
-
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
     const { yamlDiffPatch } = await import("yaml-diff-patch");
@@ -1527,6 +1527,15 @@ export async function ensureReadonlyProviderConfig() {
   }
 
   return providerConfig;
+}
+
+export async function initProviderConfigWithPath(path: string) {
+  return getConfigInitFunction({
+    ...initConfigOptions,
+    getConfigOrConfigDirPath: () => {
+      return path;
+    },
+  })();
 }
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV1;
