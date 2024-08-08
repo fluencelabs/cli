@@ -1070,24 +1070,25 @@ Run docker-compose.yaml using docker compose and set up provider using all the o
 ```
 USAGE
   $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <private-key>]
-    [--quiet-pull] [-d] [--build] [--flags <--flag arg>] [-r] [--wait] [--set-up]
+    [--quiet-pull] [-d] [--build] [--flags <--flag arg>] [-r] [--no-wait] [--no-set-up]
 
 FLAGS
   -d, --detach                  Detached mode: Run containers in the background
-  -r, --[no-]reset              Resets docker-compose.yaml to default, removes volumes and previous local deployments
+  -r, --no-reset                Don't reset docker-compose.yaml to default, don't remove volumes and previous local
+                                deployments
       --build                   Build images before starting containers
       --flags=<--flag arg>      Space separated flags to pass to `docker compose`
       --no-input                Don't interactively ask for any input from the user
+      --no-set-up               Don't set up provider, offer, commitments and deposit collateral, so there will be no
+                                active offer on the network after command is finished
+      --no-wait                 Don't wait for services to be running|healthy
       --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
       --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure. On
                                 local env 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used by
                                 default when CLI is used in non-interactive mode
       --quiet-pull              Pull without printing progress information
-      --[no-]set-up             Set up provider, offer, commitments and deposit collateral, so there is an active offer
-                                on the network
       --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local
                                 peers
-      --[no-]wait               Wait for services to be running|healthy. Implies detached mode.
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose and set up provider using all the offers from the 'offers' section in
