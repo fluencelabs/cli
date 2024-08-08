@@ -20,7 +20,7 @@ import assert from "node:assert";
 import { initProviderConfigWithPath } from "../../src/lib/configs/project/provider.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
-import { fluenceEnv, CC_DURATION_MINUTES } from "../helpers/constants.js";
+import { fluenceEnv, CC_DURATION_SECONDS } from "../helpers/constants.js";
 import { pathToTheTemplateWhereLocalEnvironmentIsSpunUp } from "../helpers/paths.js";
 
 if (fluenceEnv === "local") {
@@ -40,7 +40,7 @@ if (fluenceEnv === "local") {
       Object.values(providerConfig.capacityCommitments).map((config, i, ar) => {
         return [
           `nox-${numToStr(i + ar.length)}`,
-          { ...config, duration: `${numToStr(CC_DURATION_MINUTES)} minute` },
+          { ...config, duration: `${numToStr(CC_DURATION_SECONDS)} seconds` },
         ] as const;
       }),
     ),
