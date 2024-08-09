@@ -220,7 +220,7 @@ Chain config
 |----------------------|---------|----------|---------------------------------------------------|
 | `ccContract`         | string  | No       | Capacity commitment contract address (deprecated) |
 | `coreContract`       | string  | No       | Core contract address (deprecated)                |
-| `dealSyncStartBlock` | string  | No       | Start block                                       |
+| `dealSyncStartBlock` | string  | No       | Start block (deprecated)                          |
 | `defaultBaseFee`     | number  | No       | Default base fee                                  |
 | `defaultPriorityFee` | number  | No       | Default priority fee                              |
 | `diamondContract`    | string  | No       | Diamond contract address                          |
@@ -321,9 +321,9 @@ Decider service configuration
 | `deciderPeriodSec`    | integer | No       | Decider period in seconds         |
 | `matcherAddress`      | string  | No       | Matcher address (deprecated)      |
 | `networkApiEndpoint`  | string  | No       | Network API endpoint (deprecated) |
-| `networkId`           | integer | No       | Network ID                        |
-| `startBlock`          | string  | No       | Start block                       |
-| `walletKey`           | string  | No       | Wallet key                        |
+| `networkId`           | integer | No       | Network ID (deprecated)           |
+| `startBlock`          | string  | No       | Start block (deprecated)          |
+| `walletKey`           | string  | No       | Wallet key (deprecated)           |
 | `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
 
 ## nox
@@ -372,7 +372,7 @@ Chain config
 |----------------------|---------|----------|---------------------------------------------------|
 | `ccContract`         | string  | No       | Capacity commitment contract address (deprecated) |
 | `coreContract`       | string  | No       | Core contract address (deprecated)                |
-| `dealSyncStartBlock` | string  | No       | Start block                                       |
+| `dealSyncStartBlock` | string  | No       | Start block (deprecated)                          |
 | `defaultBaseFee`     | number  | No       | Default base fee                                  |
 | `defaultPriorityFee` | number  | No       | Default priority fee                              |
 | `diamondContract`    | string  | No       | Diamond contract address                          |
@@ -473,9 +473,9 @@ Decider service configuration
 | `deciderPeriodSec`    | integer | No       | Decider period in seconds         |
 | `matcherAddress`      | string  | No       | Matcher address (deprecated)      |
 | `networkApiEndpoint`  | string  | No       | Network API endpoint (deprecated) |
-| `networkId`           | integer | No       | Network ID                        |
-| `startBlock`          | string  | No       | Start block                       |
-| `walletKey`           | string  | No       | Wallet key                        |
+| `networkId`           | integer | No       | Network ID (deprecated)           |
+| `startBlock`          | string  | No       | Start block (deprecated)          |
+| `walletKey`           | string  | No       | Wallet key (deprecated)           |
 | `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
 
 ## offers
