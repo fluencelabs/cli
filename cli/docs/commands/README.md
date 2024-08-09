@@ -975,7 +975,7 @@ _See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/
 
 ## `fluence local down`
 
-Stop currently running docker-compose.yaml using docker compose
+Stop and remove currently running docker-compose.yaml using docker compose
 
 ```
 USAGE
@@ -988,7 +988,7 @@ FLAGS
       --no-input            Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Stop currently running docker-compose.yaml using docker compose
+  Stop and remove currently running docker-compose.yaml using docker compose
 
 EXAMPLES
   $ fluence local down
