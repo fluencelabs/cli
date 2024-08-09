@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.18.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.17.1...fluence-cli-v0.18.0) (2024-08-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **kras:** switch kras chain to raas ([#993](https://github.com/fluencelabs/cli/issues/993))
+
+### Features
+
+* add provider test ([#980](https://github.com/fluencelabs/cli/issues/980)) ([e8be713](https://github.com/fluencelabs/cli/commit/e8be7136bd079604acc42f5b27dd2983cb2e46a4))
+* **deps, provider:** deal-ts-clients 0.15.2, integrate new collateral withdrawal [fixes JS-783] ([#992](https://github.com/fluencelabs/cli/issues/992)) ([efab776](https://github.com/fluencelabs/cli/commit/efab7760920eee3bcd5390955877dffa8f8b13fd))
+* **kras:** switch kras chain to raas ([#993](https://github.com/fluencelabs/cli/issues/993)) ([ff3da14](https://github.com/fluencelabs/cli/commit/ff3da141ac0d669b6a6dfeb19a2a7e0553712b28))
+* offer-info updates [fixes DXJ-770] ([#906](https://github.com/fluencelabs/cli/issues/906)) ([f60a390](https://github.com/fluencelabs/cli/commit/f60a3902e4604fd293ca98558441228df37caf39))
+
+
+### Bug Fixes
+
+* **deps:** fluence-network-environment 1.2.2 ([#989](https://github.com/fluencelabs/cli/issues/989)) ([e5a141d](https://github.com/fluencelabs/cli/commit/e5a141d96d41393fdc27238e0162729bf1ac6178))
+
 ## [0.17.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.17.0...fluence-cli-v0.17.1) (2024-07-26)
 
 
