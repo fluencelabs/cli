@@ -435,7 +435,7 @@ FLAGS
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --spell=<spell-name>                         [default: worker-spell] Spell name to get logs for
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 30000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 60000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
@@ -840,7 +840,7 @@ FLAGS
                                                    used by default when CLI is used in non-interactive mode
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 30000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 60000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
@@ -1846,7 +1846,7 @@ FLAGS
       --quiet                                      Print only execution result. Overrides all --log-level-* flags
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 30000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 60000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
