@@ -518,12 +518,12 @@ const noxConfigYAMLSchemaV1 = {
             networkId: {
               nullable: true,
               type: "integer",
-              description: `Network ID`,
+              description: `Network ID (deprecated)`,
             },
             startBlock: {
               nullable: true,
               type: "string",
-              description: `Start block`,
+              description: `Start block (deprecated)`,
             },
             matcherAddress: {
               nullable: true,
@@ -533,7 +533,7 @@ const noxConfigYAMLSchemaV1 = {
             walletKey: {
               nullable: true,
               type: "string",
-              description: `Wallet key`,
+              description: `Wallet key (deprecated)`,
             },
           },
           required: [],
@@ -560,7 +560,7 @@ const noxConfigYAMLSchemaV1 = {
         dealSyncStartBlock: {
           nullable: true,
           type: "string",
-          description: `Start block`,
+          description: `Start block (deprecated)`,
         },
         wsEndpoint: {
           nullable: true,
@@ -1586,22 +1586,6 @@ async function resolveNoxConfigYAML(
     config.chain = { ...config.chain, walletPrivateKey };
   }
 
-  config.systemServices = {
-    ...config.systemServices,
-    decider: {
-      ...config.systemServices?.decider,
-      walletKey: config.systemServices?.decider?.walletKey ?? walletPrivateKey,
-      startBlock:
-        config.systemServices?.decider?.startBlock ??
-        config.chain.dealSyncStartBlock ??
-        DEFAULT_START_BLOCK,
-      networkId:
-        config.systemServices?.decider?.networkId ??
-        config.chain.networkId ??
-        (await getChainId()),
-    },
-  };
-
   let ipfs: undefined | LatestNoxConfigYAML["ipfs"];
   // eslint-disable-next-line prefer-const
   ({ ipfs, ...config } = config);
@@ -1744,8 +1728,6 @@ const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
   local: NOX_IPFS_MULTIADDR,
 };
 
-const DEFAULT_START_BLOCK = "earliest";
-
 async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
@@ -1774,7 +1756,6 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       wsEndpoint: WS_CHAIN_URLS[env],
       diamondContract: contractAddresses.diamond,
       networkId,
-      dealSyncStartBlock: DEFAULT_START_BLOCK,
       defaultPriorityFee: 0,
     },
     ccp: {
