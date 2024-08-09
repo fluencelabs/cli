@@ -156,7 +156,7 @@ export function splitErrorsAndResults<T, U, V>(
     v: T,
     i: number,
   ) => { error: NonNullable<U> } | { result: NonNullable<V> },
-) {
+): [NonNullable<U>[], NonNullable<V>[]] {
   const errors: Array<NonNullable<U>> = [];
   const results: Array<NonNullable<V>> = [];
 
@@ -170,7 +170,7 @@ export function splitErrorsAndResults<T, U, V>(
     }
   }
 
-  return [errors, results] as const;
+  return [errors, results];
 }
 
 export async function setTryTimeout<T, U>(

@@ -435,7 +435,7 @@ FLAGS
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --spell=<spell-name>                         [default: worker-spell] Spell name to get logs for
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 30000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
@@ -840,7 +840,7 @@ FLAGS
                                                    used by default when CLI is used in non-interactive mode
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 30000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
@@ -975,7 +975,7 @@ _See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/
 
 ## `fluence local down`
 
-Stop currently running docker-compose.yaml using docker compose
+Stop and remove currently running docker-compose.yaml using docker compose
 
 ```
 USAGE
@@ -988,7 +988,7 @@ FLAGS
       --no-input            Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Stop currently running docker-compose.yaml using docker compose
+  Stop and remove currently running docker-compose.yaml using docker compose
 
 EXAMPLES
   $ fluence local down
@@ -1846,7 +1846,7 @@ FLAGS
       --quiet                                      Print only execution result. Overrides all --log-level-* flags
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 30000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
