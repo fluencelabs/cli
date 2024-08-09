@@ -110,7 +110,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
 
   dbg("start connecting to fluence network");
   await initFluenceClient(flags);
-  await doRegisterIpfsClient(false);
+  await doRegisterIpfsClient(true);
   dbg("start running upload");
 
   const uploadResult = await upload(
