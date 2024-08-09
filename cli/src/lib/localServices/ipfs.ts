@@ -49,6 +49,7 @@ const upload = async (
 ) => {
   try {
     const ipfsClient = await createIPFSClient(multiaddr);
+    log(`created ipfs client`);
 
     const { cid } = await ipfsClient.add(content, {
       pin: true,
@@ -156,6 +157,8 @@ export const doRegisterIpfsClient = async (
 
   registerIpfsClient({
     async upload(multiaddr, absolutePath) {
+      log(`uploading ${absolutePath} to ${multiaddr}`);
+
       try {
         await access(absolutePath);
       } catch {
@@ -164,7 +167,9 @@ export const doRegisterIpfsClient = async (
         );
       }
 
+      log(`reading ${absolutePath}`);
       const data = await readFile(absolutePath);
+      log(`uploading ${absolutePath} to ${multiaddr}`);
       return upload(multiaddr, data, log);
     },
     async upload_string(multiaddr, string) {
