@@ -393,6 +393,7 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
     marketContract?: string;
     ccContract?: string;
     coreContract?: string;
+    diamondContract?: string;
     walletPrivateKey?: string;
     defaultBaseFee?: number;
     defaultPriorityFee?: number;
@@ -512,27 +513,27 @@ const noxConfigYAMLSchemaV1 = {
             networkApiEndpoint: {
               nullable: true,
               type: "string",
-              description: `Network API endpoint`,
+              description: `Network API endpoint (deprecated)`,
             },
             networkId: {
               nullable: true,
               type: "integer",
-              description: `Network ID`,
+              description: `Network ID (deprecated)`,
             },
             startBlock: {
               nullable: true,
               type: "string",
-              description: `Start block`,
+              description: `Start block (deprecated)`,
             },
             matcherAddress: {
               nullable: true,
               type: "string",
-              description: `Matcher address`,
+              description: `Matcher address (deprecated)`,
             },
             walletKey: {
               nullable: true,
               type: "string",
-              description: `Wallet key`,
+              description: `Wallet key (deprecated)`,
             },
           },
           required: [],
@@ -559,7 +560,7 @@ const noxConfigYAMLSchemaV1 = {
         dealSyncStartBlock: {
           nullable: true,
           type: "string",
-          description: `Start block`,
+          description: `Start block (deprecated)`,
         },
         wsEndpoint: {
           nullable: true,
@@ -574,17 +575,22 @@ const noxConfigYAMLSchemaV1 = {
         coreContract: {
           nullable: true,
           type: "string",
-          description: `Core contract address`,
+          description: `Core contract address (deprecated)`,
         },
         ccContract: {
           nullable: true,
           type: "string",
-          description: `Capacity commitment contract address`,
+          description: `Capacity commitment contract address (deprecated)`,
         },
         marketContract: {
           nullable: true,
           type: "string",
-          description: `Market contract address`,
+          description: `Market contract address (deprecated)`,
+        },
+        diamondContract: {
+          nullable: true,
+          type: "string",
+          description: `Diamond contract address`,
         },
         networkId: {
           nullable: true,
@@ -1190,20 +1196,11 @@ function migrateNoxConfigYAMLV0ToV1(nox: NoxConfigYAMLV0) {
 function migrateChainConfigV0ToV1(
   chainConfig: NonNullable<NoxConfigYAMLV0["chainConfig"]>,
 ) {
-  const {
-    coreContractAddress,
-    ccContractAddress,
-    marketContractAddress,
-    walletKey,
-    ...restChainConfig
-  } = chainConfig;
+  const { walletKey, ...restChainConfig } = chainConfig;
 
   return omitBy(
     {
       ...restChainConfig,
-      coreContract: coreContractAddress,
-      ccContract: ccContractAddress,
-      marketContract: marketContractAddress,
       walletPrivateKey: walletKey,
     },
     isUndefined,
@@ -1589,22 +1586,6 @@ async function resolveNoxConfigYAML(
     config.chain = { ...config.chain, walletPrivateKey };
   }
 
-  config.systemServices = {
-    ...config.systemServices,
-    decider: {
-      ...config.systemServices?.decider,
-      walletKey: config.systemServices?.decider?.walletKey ?? walletPrivateKey,
-      startBlock:
-        config.systemServices?.decider?.startBlock ??
-        config.chain.dealSyncStartBlock ??
-        DEFAULT_START_BLOCK,
-      networkId:
-        config.systemServices?.decider?.networkId ??
-        config.chain.networkId ??
-        (await getChainId()),
-    },
-  };
-
   let ipfs: undefined | LatestNoxConfigYAML["ipfs"];
   // eslint-disable-next-line prefer-const
   ({ ipfs, ...config } = config);
@@ -1647,13 +1628,7 @@ function resolveCCPConfigYAML(
 
 function noxConfigYAMLToConfigToml(
   {
-    chain: {
-      marketContract,
-      ccContract,
-      coreContract,
-      walletPrivateKey,
-      ...chain
-    } = {},
+    chain: { diamondContract, walletPrivateKey, ...chain } = {},
     ccp,
     listenIp,
     metrics,
@@ -1664,9 +1639,7 @@ function noxConfigYAMLToConfigToml(
 ) {
   const chainConfig = {
     httpEndpoint: chain.httpEndpoint,
-    coreContractAddress: coreContract,
-    ccContractAddress: ccContract,
-    marketContractAddress: marketContract,
+    diamondContractAddress: diamondContract,
     networkId: chain.networkId,
     walletKey: walletPrivateKey,
     defaultBaseFee: chain.defaultBaseFee,
@@ -1755,8 +1728,6 @@ const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
   local: NOX_IPFS_MULTIADDR,
 };
 
-const DEFAULT_START_BLOCK = "earliest";
-
 async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
@@ -1778,18 +1749,13 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
           env === "local"
             ? NOX_IPFS_MULTIADDR
             : "/dns4/ipfs.fluence.dev/tcp/5001",
-        networkApiEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
-        matcherAddress: contractAddresses.market,
       },
     },
     chain: {
       httpEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
       wsEndpoint: WS_CHAIN_URLS[env],
-      coreContract: contractAddresses.core,
-      ccContract: contractAddresses.capacity,
-      marketContract: contractAddresses.market,
+      diamondContract: contractAddresses.diamond,
       networkId,
-      dealSyncStartBlock: DEFAULT_START_BLOCK,
       defaultPriorityFee: 0,
     },
     ccp: {

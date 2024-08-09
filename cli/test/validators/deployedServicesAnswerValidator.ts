@@ -23,7 +23,7 @@ export type DeployedServicesAnswer = {
   answer: string;
   worker: {
     host_id: string;
-    pat_id: string;
+    cu_ids: string[];
     worker_id: string;
   };
 }[];
@@ -39,10 +39,13 @@ export const deployedServicesAnswerSchema: JSONSchemaType<DeployedServicesAnswer
           type: "object",
           properties: {
             host_id: { type: "string" },
-            pat_id: { type: "string" },
+            cu_ids: {
+              type: "array",
+              items: { type: "string" },
+            },
             worker_id: { type: "string" },
           },
-          required: ["host_id", "pat_id", "worker_id"],
+          required: ["host_id", "cu_ids", "worker_id"],
         },
       },
       required: ["worker"],
