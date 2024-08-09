@@ -27,7 +27,7 @@ import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Down extends BaseCommand<typeof Down> {
-  static override description = `Stop currently running ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
+  static override description = `Stop and remove currently running ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,

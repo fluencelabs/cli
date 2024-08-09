@@ -19,7 +19,11 @@ import type { ComputeUnit } from "@fluencelabs/deal-ts-clients/dist/dealExplorer
 import { color } from "@oclif/color";
 
 import { commandObj } from "../../commandObj.js";
-import { CLI_NAME } from "../../const.js";
+import {
+  CLI_NAME,
+  PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  PT_SYMBOL,
+} from "../../const.js";
 import { getDealClient, signBatch, populateTx } from "../../dealClient.js";
 import { uint8ArrayToHex } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
@@ -28,13 +32,14 @@ import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
 } from "../conversions.js";
-import { ptFormatWithSymbol } from "../currencies.js";
+import { ptFormat, ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 import {
   type OffersArgs,
   resolveOffersFromProviderConfig,
   type EnsureOfferConfig,
+  getOffersInfo,
 } from "./offer.js";
 
 type PeersOnChain = {
@@ -47,7 +52,7 @@ type Txs = { description?: string; tx: ReturnType<typeof populateTx> }[];
 
 export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
-  const offersFoundOnChain = filterOffersFoundOnChain(offers);
+  const offersFoundOnChain = await filterOffersFoundOnChain(offers);
   const populatedTxs = await populateUpdateOffersTxs(offersFoundOnChain);
 
   const updateOffersTxs = [
@@ -96,31 +101,33 @@ type OnChainOffer = Awaited<
   ReturnType<typeof filterOffersFoundOnChain>
 >[number];
 
-function filterOffersFoundOnChain(offers: EnsureOfferConfig[]) {
-  const [offersNotFoundOnChain, offersToUpdateFoundOnChain] =
-    splitErrorsAndResults(
-      offers,
-      ({
-        offerInfo: { offerInfo, offerIndexerInfo } = {
-          offerInfo: undefined,
-          offerIndexerInfo: undefined,
-        },
-        offerId,
-        ...rest
-      }) => {
-        return offerId === undefined ||
-          offerInfo === undefined ||
-          offerIndexerInfo === undefined
-          ? { error: { ...rest, offerId } }
-          : { result: { ...rest, offerInfo, offerIndexerInfo, offerId } };
-      },
-    );
+async function filterOffersFoundOnChain(offers: EnsureOfferConfig[]) {
+  const [offersWithoutIds, offersWithIds] = splitErrorsAndResults(
+    offers,
+    (offer) => {
+      return offer.offerId === undefined
+        ? { error: offer }
+        : { result: { ...offer, offerId: offer.offerId } };
+    },
+  );
 
-  if (offersNotFoundOnChain.length > 0) {
+  if (offersWithoutIds.length > 0) {
     commandObj.warn(
-      `Some of the offers are not found on chain:\n${offersNotFoundOnChain
+      `Some of the offers don't have ids stored in ${PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME} so this offers might not have been created on chain:\n${offersWithoutIds
+        .map(({ offerName }) => {
+          return offerName;
+        })
+        .join("\n")}`,
+    );
+  }
+
+  const [offerInfoErrors, offersInfo] = await getOffersInfo(offersWithIds);
+
+  if (offerInfoErrors.length > 0) {
+    commandObj.warn(
+      `Some of the offers are not found on chain:\n${offerInfoErrors
         .map(({ offerName, offerId }) => {
-          return `${offerName}${offerId === undefined ? "" : ` (${offerId})`}`;
+          return `${offerName} (${offerId})`;
         })
         .join(
           "\n",
@@ -128,7 +135,7 @@ function filterOffersFoundOnChain(offers: EnsureOfferConfig[]) {
     );
   }
 
-  return offersToUpdateFoundOnChain;
+  return offersInfo;
 }
 
 function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
@@ -208,17 +215,20 @@ async function populatePeersToRemoveTxs(
   );
 }
 
-async function populatePaymentTokenTx({ offerInfo, offerId }: OnChainOffer) {
+async function populatePaymentTokenTx({
+  offerIndexerInfo,
+  offerId,
+}: OnChainOffer) {
   const { dealClient } = await getDealClient();
   const usdc = dealClient.getUSDC();
   const market = dealClient.getMarket();
   const usdcAddress = await usdc.getAddress();
-  return offerInfo.paymentToken === usdcAddress
+  return offerIndexerInfo.paymentToken.address === usdcAddress
     ? []
     : [
         {
           description: `\nchanging payment token from ${color.yellow(
-            offerInfo.paymentToken,
+            offerIndexerInfo.paymentToken.address,
           )} to ${color.yellow(usdcAddress)}`,
           tx: populateTx(market.changePaymentToken, offerId, usdcAddress),
         },
@@ -226,18 +236,19 @@ async function populatePaymentTokenTx({ offerInfo, offerId }: OnChainOffer) {
 }
 
 async function populateMinPricePerWorkerEpochTx({
-  offerInfo,
+  offerIndexerInfo,
   minPricePerWorkerEpochBigInt,
   offerId,
 }: OnChainOffer) {
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
-  return offerInfo.minPricePerWorkerEpoch === minPricePerWorkerEpochBigInt
+  return offerIndexerInfo.pricePerEpoch ===
+    (await ptFormat(minPricePerWorkerEpochBigInt))
     ? []
     : [
         {
           description: `\nchanging minPricePerWorker from ${color.yellow(
-            await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
+            `${offerIndexerInfo.pricePerEpoch} ${PT_SYMBOL}`,
           )} to ${color.yellow(
             await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
           )}`,
