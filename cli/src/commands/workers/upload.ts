@@ -64,7 +64,7 @@ export default class Upload extends BaseCommand<typeof Upload> {
     );
 
     await initFluenceClient(flags);
-    await doRegisterIpfsClient(true);
+    await doRegisterIpfsClient(false);
     const { Fluence } = await import("@fluencelabs/js-client");
     const initPeerId = Fluence.getClient().getPeerId();
 
