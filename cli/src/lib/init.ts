@@ -661,7 +661,7 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
       answer: Type.Union([Type.String(), Type.Null()]),
       worker: Type.Object({
         host_id: Type.String(),
-        pat_id: Type.String(),
+        cu_ids: Type.Array(Type.String()),
         worker_id: Type.Union([Type.String(), Type.Null()]),
       }),
     }),

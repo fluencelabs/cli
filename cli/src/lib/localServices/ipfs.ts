@@ -42,13 +42,14 @@ export async function createIPFSClient(multiaddrString: string) {
   );
 }
 
-const upload = async (
+async function upload(
   multiaddr: string,
   content: Parameters<IPFSHTTPClient["add"]>[0],
   log: (msg: unknown) => void,
-) => {
+): Promise<string> {
   try {
     const ipfsClient = await createIPFSClient(multiaddr);
+    log(`created ipfs client`);
 
     const { cid } = await ipfsClient.add(content, {
       pin: true,
@@ -95,7 +96,7 @@ const upload = async (
       `\n\nFailed to upload to ${multiaddr}:\n\n${stringifyUnknown(error)}`,
     );
   }
-};
+}
 
 const dagUpload = async (
   multiaddr: string,
@@ -141,21 +142,17 @@ const dagUpload = async (
   }
 };
 
-export const doRegisterIpfsClient = async (
-  offAquaLogs: boolean,
-): Promise<void> => {
+export function getIpfsClient(offAquaLogs: boolean) {
   const log = (msg: unknown) => {
     if (!offAquaLogs) {
       commandObj.logToStderr(`ipfs: ${stringifyUnknown(msg)}`);
     }
   };
 
-  const { registerIpfsClient } = await import(
-    "../compiled-aqua/installation-spell/files.js"
-  );
+  return {
+    async upload(multiaddr: string, absolutePath: string) {
+      log(`uploading ${absolutePath} to ${multiaddr}`);
 
-  registerIpfsClient({
-    async upload(multiaddr, absolutePath) {
       try {
         await access(absolutePath);
       } catch {
@@ -164,13 +161,15 @@ export const doRegisterIpfsClient = async (
         );
       }
 
+      log(`reading ${absolutePath}`);
       const data = await readFile(absolutePath);
+      log(`uploading ${absolutePath} to ${multiaddr}`);
       return upload(multiaddr, data, log);
     },
-    async upload_string(multiaddr, string) {
+    async upload_string(multiaddr: string, string: string) {
       return upload(multiaddr, Buffer.from(string), log);
     },
-    async dag_upload(multiaddr, absolutePath) {
+    async dag_upload(multiaddr: string, absolutePath: string) {
       try {
         await access(absolutePath);
       } catch {
@@ -182,16 +181,16 @@ export const doRegisterIpfsClient = async (
       const data = await readFile(absolutePath, FS_OPTIONS);
       return dagUpload(multiaddr, data, log);
     },
-    async dag_upload_string(multiaddr, string) {
+    async dag_upload_string(multiaddr: string, string: string) {
       return dagUpload(multiaddr, string, log);
     },
-    async id(multiaddr): Promise<string> {
+    async id(multiaddr: string): Promise<string> {
       const ipfsClient = await createIPFSClient(multiaddr);
       const result = await ipfsClient.id();
       // eslint-disable-next-line no-restricted-syntax
       return result.id.toString();
     },
-    async exists(multiaddr, cid): Promise<boolean> {
+    async exists(multiaddr: string, cid: string): Promise<boolean> {
       const ipfsClient = await createIPFSClient(multiaddr);
 
       try {
@@ -213,7 +212,7 @@ export const doRegisterIpfsClient = async (
         );
       }
     },
-    async remove(multiaddr, cid): Promise<string> {
+    async remove(multiaddr: string, cid: string): Promise<string> {
       const ipfsClient = await createIPFSClient(multiaddr);
       const { CID } = await import("ipfs-http-client");
 
@@ -236,5 +235,15 @@ export const doRegisterIpfsClient = async (
         return "Error: remove failed";
       }
     },
-  });
-};
+  };
+}
+
+export async function doRegisterIpfsClient(
+  offAquaLogs: boolean,
+): Promise<void> {
+  const { registerIpfsClient } = await import(
+    "../compiled-aqua/installation-spell/files.js"
+  );
+
+  registerIpfsClient(getIpfsClient(offAquaLogs));
+}

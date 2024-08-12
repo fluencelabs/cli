@@ -435,7 +435,7 @@ FLAGS
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --spell=<spell-name>                         [default: worker-spell] Spell name to get logs for
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 30000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
@@ -806,22 +806,14 @@ Deploy according to 'deployments' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deploy [DEPLOYMENT-NAMES] [--no-input] [--off-aqua-logs] [--env <dar | kras | stage | local |
-    custom>] [--priv-key <private-key>] [-k <name>] [--relay <multiaddress>] [--ttl <milliseconds>] [--dial-timeout
-    <milliseconds>] [--particle-id] [--import <path>...] [--no-build] [--tracing] [--marine-build-args <--flag arg>]
-    [-u] [--peer-ids <value>]
+  $ fluence deploy [DEPLOYMENT-NAMES] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>] [--import <path>...] [--no-build] [--marine-build-args <--flag arg>] [-u] [--peer-ids <value>]
 
 ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  -k, --sk=<name>                                  Name of the secret key for js-client inside CLI to use. If not
-                                                   specified, will use the default key for the project. If there is no
-                                                   fluence project or there is no default key, will use user's default
-                                                   key
   -u, --update                                     Update your previous deployment
-      --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
-                                                   peer
       --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
       --import=<path>...                           Path to a directory to import aqua files from. May be used several
                                                    times
@@ -830,18 +822,12 @@ FLAGS
                                                    --release
       --no-build                                   Don't build the project before running the command
       --no-input                                   Don't interactively ask for any input from the user
-      --off-aqua-logs                              Turns off logs from Console.print in aqua and from IPFS service
-      --particle-id                                Print particle ids when running Fluence js-client
       --peer-ids=<value>                           Comma separated list of peer ids to deploy to. Creates one deal per
                                                    each free CU of the peer. Skips off-chain matching
       --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local env
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
                                                    used by default when CLI is used in non-interactive mode
-      --relay=<multiaddress>                       Relay for Fluence js-client to connect to
-      --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 30000] Particle Time To Live since 'now'. After that,
-                                                   particle is expired and not processed.
 
 DESCRIPTION
   Deploy according to 'deployments' property in fluence.yaml
@@ -1846,7 +1832,7 @@ FLAGS
       --quiet                                      Print only execution result. Overrides all --log-level-* flags
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 30000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
