@@ -35,27 +35,24 @@ import {
 } from "./configs/project/workers.js";
 import {
   LOCAL_IPFS_ADDRESS,
-  OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FULL_FILE_NAME,
-  FLUENCE_CLIENT_FLAGS,
-  IMPORT_FLAG,
   NO_BUILD_FLAG,
-  TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
   DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
   CHAIN_FLAGS,
   DEPLOYMENT_NAMES_ARG_NAME,
+  IMPORT_FLAG,
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
 import { createAndMatchDealsWithAllCUsOfPeerIds } from "./deal.js";
 import { getReadonlyDealClient } from "./dealClient.js";
 import { stringifyUnknown } from "./helpers/utils.js";
-import { disconnectFluenceClient, initFluenceClient } from "./jsClient.js";
+import { disconnectFluenceClient } from "./jsClient.js";
 import { initCli } from "./lifeCycle.js";
-import { doRegisterIpfsClient } from "./localServices/ipfs.js";
+import { getIpfsClient } from "./localServices/ipfs.js";
 import { confirm } from "./prompt.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
@@ -64,12 +61,9 @@ export const DEPLOY_EXAMPLES = ["<%= config.bin %> <%= command.id %>"];
 
 export const DEPLOY_FLAGS = {
   ...baseFlags,
-  ...OFF_AQUA_LOGS_FLAG,
   ...CHAIN_FLAGS,
-  ...FLUENCE_CLIENT_FLAGS,
   ...IMPORT_FLAG,
   ...NO_BUILD_FLAG,
-  ...TRACING_FLAG,
   ...MARINE_BUILD_ARGS_FLAG,
   update: Flags.boolean({
     char: "u",
@@ -108,13 +102,9 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
     flags,
   });
 
-  dbg("start connecting to fluence network");
-  await initFluenceClient(flags);
-  await doRegisterIpfsClient(true);
   dbg("start running upload");
 
   const uploadResult = await upload(
-    flags.tracing,
     uploadArg,
     fluenceConfig[IPFS_ADDR_PROPERTY] ??
       (fluenceEnv === "local" ? LOCAL_IPFS_ADDRESS : DEFAULT_IPFS_ADDRESS),
@@ -382,22 +372,56 @@ async function determineDealState(
   return isDealEnded ? "ended" : "matched";
 }
 
-async function upload(
-  tracing: boolean,
-  uploadArg: Upload_deployArgConfig,
-  ipfsAddress: string,
-) {
-  if (tracing) {
-    const { upload_deal } = await import(
-      "./compiled-aqua-with-tracing/installation-spell/upload.js"
-    );
-
-    return upload_deal(uploadArg, ipfsAddress);
-  }
-
-  const { upload_deal } = await import(
-    "./compiled-aqua/installation-spell/upload.js"
+async function upload(config: Upload_deployArgConfig, ipfsAddress: string) {
+  const deployDefs = await Promise.all(
+    config.workers.map(async (w) => {
+      const definitionCID = await uploadWorkerConfig(ipfsAddress, w.config);
+      return {
+        name: w.name,
+        hosts: w.hosts,
+        definition: definitionCID,
+        dummy_deal_id: w.dummy_deal_id,
+      };
+    }),
   );
 
-  return upload_deal(uploadArg, ipfsAddress);
+  return {
+    installation_script: config.installation_script,
+    installation_trigger: config.installation_trigger,
+    workers: deployDefs,
+  };
+}
+
+async function uploadWorkerConfig(
+  ipfs: string,
+  config: Upload_deployArgConfig["workers"][number]["config"],
+) {
+  const ipfsClient = getIpfsClient(false);
+
+  const services = await Promise.all(
+    config.services.map(async ({ name, total_memory_limit, modules }) => {
+      return {
+        name,
+        total_memory_limit,
+        modules: await Promise.all(
+          modules.map(async ({ name, wasm }) => {
+            return { name, wasm: await ipfsClient.upload(ipfs, wasm) };
+          }),
+        ),
+      };
+    }),
+  );
+
+  const spells = await Promise.all(
+    config.spells.map(async (sp) => {
+      const script = await ipfsClient.upload_string(ipfs, sp.script);
+      const cfg_str = JSON.stringify(sp.config);
+      const config = await ipfsClient.upload_string(ipfs, cfg_str);
+      const init_args_str = JSON.stringify(sp.init_args);
+      const init_args = await ipfsClient.upload_string(ipfs, init_args_str);
+      return { name: sp.name, script, config, init_args };
+    }),
+  );
+
+  return ipfsClient.upload_string(ipfs, JSON.stringify({ services, spells }));
 }
