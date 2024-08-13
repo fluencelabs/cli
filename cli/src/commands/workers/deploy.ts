@@ -71,7 +71,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     await initFluenceClient(flags);
-    await doRegisterIpfsClient(true);
+    await doRegisterIpfsClient();
     const { Fluence } = await import("@fluencelabs/js-client");
     const relayId = Fluence.getClient().getRelayPeerId();
     const initPeerId = Fluence.getClient().getPeerId();

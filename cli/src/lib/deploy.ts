@@ -396,7 +396,7 @@ async function uploadWorkerConfig(
   ipfs: string,
   config: Upload_deployArgConfig["workers"][number]["config"],
 ) {
-  const ipfsClient = getIpfsClient(false);
+  const ipfsClient = getIpfsClient();
 
   const services = await Promise.all(
     config.services.map(async ({ name, total_memory_limit, modules }) => {
