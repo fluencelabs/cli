@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.18.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.17.1...fluence-cli-v0.18.0) (2024-08-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **kras:** switch kras chain to raas ([#993](https://github.com/fluencelabs/cli/issues/993))
+
+### Features
+
+* add provider test ([#980](https://github.com/fluencelabs/cli/issues/980)) ([e8be713](https://github.com/fluencelabs/cli/commit/e8be7136bd079604acc42f5b27dd2983cb2e46a4))
+* **deps, provider:** deal-ts-clients 0.15.2, integrate new collateral withdrawal [fixes JS-783] ([#992](https://github.com/fluencelabs/cli/issues/992)) ([efab776](https://github.com/fluencelabs/cli/commit/efab7760920eee3bcd5390955877dffa8f8b13fd))
+* **kras:** switch kras chain to raas ([#993](https://github.com/fluencelabs/cli/issues/993)) ([ff3da14](https://github.com/fluencelabs/cli/commit/ff3da141ac0d669b6a6dfeb19a2a7e0553712b28))
+* nox diamond update, update aqua-lib 0.11.0 ([#995](https://github.com/fluencelabs/cli/issues/995)) ([442b6c8](https://github.com/fluencelabs/cli/commit/442b6c83c36e93411a50e25e4707e2c62d9b3125))
+* offer-info updates [fixes DXJ-770] ([#906](https://github.com/fluencelabs/cli/issues/906)) ([f60a390](https://github.com/fluencelabs/cli/commit/f60a3902e4604fd293ca98558441228df37caf39))
+
+
+### Bug Fixes
+
+* **deps:** deal-ts-clients 0.15.4, new stage & testnet contracts ([#996](https://github.com/fluencelabs/cli/issues/996)) ([a8e1118](https://github.com/fluencelabs/cli/commit/a8e1118e44b48498d1cf123d15f69ac92286db7f))
+* **deps:** fluence-network-environment 1.2.2 ([#989](https://github.com/fluencelabs/cli/issues/989)) ([e5a141d](https://github.com/fluencelabs/cli/commit/e5a141d96d41393fdc27238e0162729bf1ac6178))
+* don't ensure rust when showing versions ([#999](https://github.com/fluencelabs/cli/issues/999)) ([4200df2](https://github.com/fluencelabs/cli/commit/4200df263134f57ccca549dc53e2fdb4a6c6d91e))
+
 ## [0.17.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.17.0...fluence-cli-v0.17.1) (2024-07-26)
 
 
