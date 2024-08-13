@@ -53,6 +53,7 @@ import { numToStr } from "../../helpers/typesafeStringify.js";
 import { uint8ArrayToHex } from "../../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
+  setTryTimeout,
   splitErrorsAndResults,
   stringifyUnknown,
 } from "../../helpers/utils.js";
@@ -200,34 +201,54 @@ export async function createOffers(flags: OffersArgs) {
     );
   }
 
-  const [offerInfoErrors, offersInfo] = await getOffersInfo(offerIds);
+  type GetOffersInfoReturnType = Awaited<
+    ReturnType<typeof getOffersInfo<(typeof offerIds)[number]>>
+  >;
+
+  let offerInfoErrors: GetOffersInfoReturnType[0] = [];
+  let offersInfo: GetOffersInfoReturnType[1] = [];
+
+  const getOffersInfoRes = await setTryTimeout(
+    "Getting offers info from indexer",
+    async () => {
+      [offerInfoErrors, offersInfo] = await getOffersInfo(offerIds);
+
+      if (offerInfoErrors.length > 0) {
+        throw new Error("Not all offers info received");
+      }
+
+      return { ok: true };
+    },
+    (error) => {
+      return { error };
+    },
+    20_000,
+    2_000,
+  );
+
+  if ("error" in getOffersInfoRes && offerInfoErrors.length === 0) {
+    commandObj.warn(stringifyUnknown(getOffersInfoRes.error));
+  }
+
   const providerAddress = await getSignerAddress();
 
-  offersInfo.forEach(({ offerName, offerIndexerInfo }) => {
+  offerIds.forEach(({ offerName, offerId }) => {
     const offerPerEnv = providerArtifactsConfig.offers[fluenceEnv] ?? {};
-
-    offerPerEnv[offerName] = {
-      id: offerIndexerInfo.id,
-      providerAddress,
-    };
-
+    offerPerEnv[offerName] = { id: offerId, providerAddress };
     providerArtifactsConfig.offers[fluenceEnv] = offerPerEnv;
   });
 
   await providerArtifactsConfig.$commit();
 
-  const offersStr = offersInfo
+  const offersStr = offerIds
     .map(({ offerName }) => {
       return offerName;
     })
     .join(", ");
 
   commandObj.logToStderr(`
-${
-  offersInfo.length === 0
-    ? "No offers where created!"
-    : `Offers ${color.yellow(offersStr)} successfully created!`
-}
+Offers ${color.yellow(offersStr)} successfully created!
+
 ${await offersInfoToString([offerInfoErrors, offersInfo])}
 `);
 }
