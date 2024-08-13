@@ -48,7 +48,7 @@ import {
 const CARGO = "cargo";
 const RUSTUP = "rustup";
 
-async function ensureRust(): Promise<void> {
+export async function ensureRust(): Promise<void> {
   if (!(await isRustInstalled())) {
     if (commandObj.config.windows) {
       commandObj.error(
@@ -333,17 +333,11 @@ async function tryDownloadingBinary({
   return true;
 }
 
-type CargoDependencyArg = {
-  name: MarineOrMrepl;
-  version?: string | undefined;
-};
-
-export async function ensureMarineOrMreplDependency({
-  name,
-}: CargoDependencyArg): Promise<string> {
-  await ensureRust();
+export async function ensureMarineOrMreplDependency(
+  name: MarineOrMrepl,
+): Promise<string> {
   const fluenceConfig = await initFluenceConfig();
-  const version = fluenceConfig?.[`${name}Version`] ?? versions.cargo[name];
+  const version = await getMarineOrMreplVersion(name);
 
   const { dependencyDirPath, dependencyTmpDirPath } =
     await resolveDependencyDirPathAndTmpPath({ name, version });
@@ -385,20 +379,16 @@ export async function ensureMarineOrMreplDependency({
 }
 
 export async function ensureMarineAndMreplDependencies(): Promise<void> {
-  for (const [name, version] of await resolveMarineAndMreplDependencies()) {
-    // Not installing dependencies in parallel
-    // for cargo logs to be clearly readable
-    await ensureMarineOrMreplDependency({ name, version });
-  }
+  await ensureRust();
+  await ensureMarineOrMreplDependency("marine");
+  await ensureMarineOrMreplDependency("mrepl");
 }
 
-export async function resolveMarineAndMreplDependencies() {
-  const fluenceConfig = await initFluenceConfig();
-
-  return [
-    ["marine", fluenceConfig?.marineVersion ?? versions.cargo.marine],
-    ["mrepl", fluenceConfig?.mreplVersion ?? versions.cargo.mrepl],
-  ] as const;
+export async function getMarineOrMreplVersion(marineOrMrepl: MarineOrMrepl) {
+  return (
+    (await initFluenceConfig())?.[`${marineOrMrepl}Version`] ??
+    versions.cargo[marineOrMrepl]
+  );
 }
 
 type ResolveDependencyDirPathAndTmpPath = {

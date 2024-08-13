@@ -18,9 +18,9 @@
 import { join } from "node:path";
 
 import { commandObj } from "./commandObj.js";
-import { BIN_DIR_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
+import { BIN_DIR_NAME } from "./const.js";
 import { execPromise } from "./execPromise.js";
-import { ensureMarineOrMreplDependency } from "./rust.js";
+import { ensureMarineOrMreplDependency, ensureRust } from "./rust.js";
 import { type Flags } from "./typeHelpers.js";
 
 type MarineCliInput =
@@ -44,19 +44,17 @@ export type MarineCLI = {
 };
 
 export async function ensureMarinePath() {
-  const marineCLIDirPath = await ensureMarineOrMreplDependency({
-    name: MARINE_CARGO_DEPENDENCY,
-  });
-
+  const marineCLIDirPath = await ensureMarineOrMreplDependency("marine");
   return join(marineCLIDirPath, BIN_DIR_NAME, "marine");
 }
 
 export async function ensureMreplPath() {
-  const mreplDirPath = await ensureMarineOrMreplDependency({ name: "mrepl" });
+  const mreplDirPath = await ensureMarineOrMreplDependency("mrepl");
   return join(mreplDirPath, BIN_DIR_NAME, "mrepl");
 }
 
 export async function initMarineCli(): Promise<MarineCLI> {
+  await ensureRust();
   const marineCLIPath = await ensureMarinePath();
 
   return async ({
