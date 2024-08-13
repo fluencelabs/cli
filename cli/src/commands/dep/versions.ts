@@ -26,7 +26,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { ensureMarinePath, ensureMreplPath } from "../../lib/marineCli.js";
 import {
   getRustToolchainToUse,
-  resolveMarineAndMreplDependencies,
+  getMarineOrMreplVersion,
 } from "../../lib/rust.js";
 import CLIPackageJSON from "../../versions/cli.package.json" assert { type: "json" };
 import JSClientPackageJSON from "../../versions/js-client.package.json" assert { type: "json" };
@@ -85,24 +85,16 @@ export default class Versions extends BaseCommand<typeof Versions> {
         maybeFluenceConfig === null
           ? versions.npm
           : maybeFluenceConfig.aquaDependencies,
-      tools: Object.fromEntries(
-        await Promise.all(
-          (await resolveMarineAndMreplDependencies()).map(
-            async ([tool, version]) => {
-              return [
-                tool,
-                {
-                  version,
-                  path:
-                    tool === "marine"
-                      ? await ensureMarinePath()
-                      : await ensureMreplPath(),
-                },
-              ] as const;
-            },
-          ),
-        ),
-      ),
+      tools: {
+        marine: {
+          version: await getMarineOrMreplVersion("marine"),
+          path: await ensureMarinePath(),
+        },
+        mrepl: {
+          version: await getMarineOrMreplVersion("mrepl"),
+          path: await ensureMreplPath(),
+        },
+      },
       "internal dependencies": filterOutNonFluenceDependencies(
         CLIPackageJSON.dependencies,
       ),
