@@ -21,6 +21,7 @@ import type { IPFSHTTPClient } from "ipfs-http-client";
 
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS } from "../const.js";
+import { dbg } from "../dbg.js";
 import { setTryTimeout, stringifyUnknown } from "../helpers/utils.js";
 
 // !IMPORTANT for some reason when in tsconfig.json "moduleResolution" is set to "nodenext" - "ipfs-http-client" types all become "any"
@@ -45,11 +46,10 @@ export async function createIPFSClient(multiaddrString: string) {
 async function upload(
   multiaddr: string,
   content: Parameters<IPFSHTTPClient["add"]>[0],
-  log: (msg: unknown) => void,
 ): Promise<string> {
   try {
     const ipfsClient = await createIPFSClient(multiaddr);
-    log(`created ipfs client`);
+    dbg(`created ipfs client`);
 
     const { cid } = await ipfsClient.add(content, {
       pin: true,
@@ -70,16 +70,16 @@ async function upload(
       5000,
     );
 
-    log(`did pin ${cidString} to ${multiaddr}`);
+    dbg(`did pin ${cidString} to ${multiaddr}`);
 
     try {
       const pinned = ipfsClient.pin.ls({ paths: cidString, type: "all" });
 
       for await (const r of pinned) {
         if (r.type === "recursive") {
-          log(`file ${cidString} pinned to ${multiaddr}`);
+          dbg(`file ${cidString} pinned to ${multiaddr}`);
         } else {
-          log(`pin result type is not recursive. ${stringifyUnknown(r)}`);
+          dbg(`pin result type is not recursive. ${stringifyUnknown(r)}`);
         }
       }
     } catch (error) {
@@ -101,7 +101,6 @@ async function upload(
 const dagUpload = async (
   multiaddr: string,
   content: Parameters<IPFSHTTPClient["dag"]["put"]>[0],
-  log: (msg: unknown) => void,
 ) => {
   const ipfsClient = await createIPFSClient(multiaddr);
 
@@ -114,16 +113,16 @@ const dagUpload = async (
     const cidString = cid.toString();
 
     await ipfsClient.pin.add(cidString);
-    log(`did pin ${cidString} to ${multiaddr}`);
+    dbg(`did pin ${cidString} to ${multiaddr}`);
 
     try {
       const pinned = ipfsClient.pin.ls({ paths: cidString, type: "all" });
 
       for await (const r of pinned) {
         if (r.type === "recursive") {
-          log(`file ${cidString} pinned to ${multiaddr}`);
+          dbg(`file ${cidString} pinned to ${multiaddr}`);
         } else {
-          log(`pin result type is not recursive. ${stringifyUnknown(r)}`);
+          dbg(`pin result type is not recursive. ${stringifyUnknown(r)}`);
         }
       }
     } catch (error) {
@@ -142,16 +141,10 @@ const dagUpload = async (
   }
 };
 
-export function getIpfsClient(offAquaLogs: boolean) {
-  const log = (msg: unknown) => {
-    if (!offAquaLogs) {
-      commandObj.logToStderr(`ipfs: ${stringifyUnknown(msg)}`);
-    }
-  };
-
+export function getIpfsClient() {
   return {
     async upload(multiaddr: string, absolutePath: string) {
-      log(`uploading ${absolutePath} to ${multiaddr}`);
+      dbg(`uploading ${absolutePath} to ${multiaddr}`);
 
       try {
         await access(absolutePath);
@@ -161,13 +154,13 @@ export function getIpfsClient(offAquaLogs: boolean) {
         );
       }
 
-      log(`reading ${absolutePath}`);
+      dbg(`reading ${absolutePath}`);
       const data = await readFile(absolutePath);
-      log(`uploading ${absolutePath} to ${multiaddr}`);
-      return upload(multiaddr, data, log);
+      dbg(`uploading ${absolutePath} to ${multiaddr}`);
+      return upload(multiaddr, data);
     },
     async upload_string(multiaddr: string, string: string) {
-      return upload(multiaddr, Buffer.from(string), log);
+      return upload(multiaddr, Buffer.from(string));
     },
     async dag_upload(multiaddr: string, absolutePath: string) {
       try {
@@ -179,10 +172,10 @@ export function getIpfsClient(offAquaLogs: boolean) {
       }
 
       const data = await readFile(absolutePath, FS_OPTIONS);
-      return dagUpload(multiaddr, data, log);
+      return dagUpload(multiaddr, data);
     },
     async dag_upload_string(multiaddr: string, string: string) {
-      return dagUpload(multiaddr, string, log);
+      return dagUpload(multiaddr, string);
     },
     async id(multiaddr: string): Promise<string> {
       const ipfsClient = await createIPFSClient(multiaddr);
@@ -225,25 +218,23 @@ export function getIpfsClient(offAquaLogs: boolean) {
 
         for await (const r of rm) {
           if (r.error !== undefined) {
-            log(`block rm failed. ${stringifyUnknown(r.error)}`);
+            dbg(`block rm failed. ${stringifyUnknown(r.error)}`);
           }
         }
 
         return "Success";
       } catch (err) {
-        log(`remove failed. ${stringifyUnknown(err)}`);
+        dbg(`remove failed. ${stringifyUnknown(err)}`);
         return "Error: remove failed";
       }
     },
   };
 }
 
-export async function doRegisterIpfsClient(
-  offAquaLogs: boolean,
-): Promise<void> {
+export async function doRegisterIpfsClient(): Promise<void> {
   const { registerIpfsClient } = await import(
     "../compiled-aqua/installation-spell/files.js"
   );
 
-  registerIpfsClient(getIpfsClient(offAquaLogs));
+  registerIpfsClient(getIpfsClient());
 }
