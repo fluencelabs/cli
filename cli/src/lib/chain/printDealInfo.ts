@@ -41,15 +41,14 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
 
   commandObj.log(`DealID: "${dealId}"`);
   commandObj.log(`Status: ${DealStatus[Number(status)] ?? "Unknown"}`);
-  const { ethers } = await import("ethers");
 
   commandObj.log(
     `Balance: ${await ptFormatWithSymbol(await deal.getFreeBalance())}`,
   );
 
   commandObj.log(
-    `Price per worker per epoch: ${await ptFormatWithSymbol(
-      await deal.pricePerWorkerEpoch(),
+    `Price per compute unit per epoch: ${await ptFormatWithSymbol(
+      await deal.pricePerCuPerEpoch(),
     )}`,
   );
 
@@ -57,32 +56,28 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   commandObj.log(`Min workers: ${bigintToStr(await deal.minWorkers())}`);
   commandObj.log(`Target workers: ${bigintToStr(await deal.targetWorkers())}`);
 
-  const currentComputeUnitCount = await deal["getComputeUnitCount()"]();
+  const cuCountPerWorker = await deal.cuCountPerWorker();
 
   commandObj.log(
-    `Current compute units: ${bigintToStr(currentComputeUnitCount)}`,
+    `Compute unit count per worker: ${bigintToStr(cuCountPerWorker)}`,
   );
 
-  if (currentComputeUnitCount === 0n) {
-    commandObj.log(`No compute units`);
+  const workers = await deal.getWorkers();
+
+  if (workers.length === 0) {
+    commandObj.log(`No workers`);
   } else {
-    const computeUnits = await deal.getComputeUnits();
-
-    for (const unit of computeUnits) {
-      commandObj.log(`\nCompute unit: ${unit.id}`);
-      commandObj.log(`Provider: ${unit.provider}`);
-
-      if (unit.workerId === ethers.ZeroHash) {
-        commandObj.log(`Worker Id: None`);
-      } else {
-        commandObj.log(`Worker Id: ${unit.workerId}`);
-      }
-
-      commandObj.log(`Peer Id Hex: ${unit.peerId}`);
+    for (const worker of workers) {
+      commandObj.log(`\nOff-chain id: ${worker.offchainId}`);
+      commandObj.log(`On-chain id: ${worker.onchainId}`);
 
       commandObj.log(
-        `Peer Id base58: ${await peerIdHexStringToBase58String(unit.peerId)}`,
+        `Peer Id base58: ${await peerIdHexStringToBase58String(worker.peerId)}`,
       );
+
+      commandObj.log(`Joined epoch: ${bigintToStr(worker.joinedEpoch)}`);
+      commandObj.log(`Compute units: ${worker.computeUnitIds.join("\n")}`);
+      commandObj.log(`Provider: ${worker.provider}`);
     }
   }
 }

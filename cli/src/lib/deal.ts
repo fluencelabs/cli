@@ -58,7 +58,8 @@ type DealCreateArg = {
   minWorkers: number;
   targetWorkers: number;
   maxWorkersPerProvider: number;
-  pricePerWorkerEpoch: string;
+  pricePerCuPerEpoch: string;
+  cuCountPerWorker: number;
   effectors: string[];
   initialBalance: string | undefined;
   whitelist: string[] | undefined;
@@ -72,7 +73,8 @@ export async function dealCreate({
   minWorkers,
   targetWorkers,
   maxWorkersPerProvider,
-  pricePerWorkerEpoch,
+  pricePerCuPerEpoch,
+  cuCountPerWorker,
   effectors,
   initialBalance,
   whitelist,
@@ -84,19 +86,19 @@ export async function dealCreate({
   const core = dealClient.getCore();
   const usdc = dealClient.getUSDC();
 
-  const pricePerWorkerEpochBigInt = await ptParse(pricePerWorkerEpoch);
+  const pricePerCuPerEpochBigInt = await ptParse(pricePerCuPerEpoch);
   const minDealDepositedEpochs = await core.minDealDepositedEpochs();
   const targetWorkersBigInt = BigInt(targetWorkers);
 
   const minInitialBalanceBigInt =
-    targetWorkersBigInt * pricePerWorkerEpochBigInt * minDealDepositedEpochs;
+    targetWorkersBigInt * pricePerCuPerEpochBigInt * minDealDepositedEpochs;
 
   const initialBalanceBigInt =
     typeof initialBalance === "string"
       ? await ptParse(initialBalance)
       : await getDefaultInitialBalance(
           minInitialBalanceBigInt,
-          pricePerWorkerEpochBigInt,
+          pricePerCuPerEpochBigInt,
           targetWorkersBigInt,
         );
 
@@ -131,8 +133,9 @@ export async function dealCreate({
     initialBalanceBigInt,
     minWorkers,
     targetWorkers,
+    cuCountPerWorker,
     maxWorkersPerProvider,
-    pricePerWorkerEpochBigInt,
+    pricePerCuPerEpochBigInt,
     await Promise.all(
       effectors.map((cid) => {
         return cidStringToCIDV1Struct(cid);
@@ -211,13 +214,13 @@ export async function createAndMatchDealsWithAllCUsOfPeerIds({
           market.matchDeal,
           dealAddress,
           [offerId],
-          [[unitId]],
+          [[[unitId]]], // TODO. Really?
         );
 
         const pats = getEventValues({
           contract: market,
           txReceipt: matchDealTxReceipt,
-          eventName: "ComputeUnitMatched",
+          eventName: "ComputeUnitsMatched",
           value: "unitId",
         });
 
@@ -310,13 +313,13 @@ export async function match(dealAddress: string) {
     market.matchDeal,
     dealAddress,
     matchedOffers.offers,
-    matchedOffers.computeUnitsPerOffers,
+    matchedOffers.computeUnits,
   );
 
   const pats = getEventValues({
     contract: market,
     txReceipt: matchDealTxReceipt,
-    eventName: "ComputeUnitMatched",
+    eventName: "ComputeUnitsMatched",
     value: "unitId",
   });
 

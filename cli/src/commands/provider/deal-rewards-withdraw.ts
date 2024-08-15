@@ -61,23 +61,23 @@ export default class DealRewardsWithdraw extends BaseCommand<
 
     for (const dealId of dealIds) {
       const deal = dealClient.getDeal(dealId);
-      const computeUnits = await deal.getComputeUnits();
+      const workers = await deal.getWorkers();
 
       const rewardSum = (
         await Promise.all(
-          computeUnits.map(({ id }) => {
-            return deal.getRewardAmount(id);
+          workers.map(({ onchainId }) => {
+            return deal.getRewardAmount(onchainId);
           }),
         )
       ).reduce((acc, reward) => {
         return acc + reward;
       }, 0n);
 
-      for (const { id } of computeUnits) {
+      for (const { onchainId } of workers) {
         await sign(
-          `Withdrawing rewards for compute unit ${id}`,
+          `Withdrawing rewards for compute unit ${onchainId}`,
           deal.withdrawRewards,
-          id,
+          onchainId,
         );
       }
 

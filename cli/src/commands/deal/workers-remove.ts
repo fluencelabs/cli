@@ -35,7 +35,10 @@ export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
   };
 
   static override args = {
-    "UNIT-IDS": Args.string({
+    "DEAL-ID": Args.string({
+      description: `Deal id. You can get it using '${CLI_NAME} deal info' command`,
+    }),
+    "WORKER-IDS": Args.string({
       description: `Comma-separated compute unit ids. You can get them using '${CLI_NAME} deal info' command`,
     }),
   };
@@ -43,27 +46,32 @@ export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(RemoveUnit));
 
-    const unitIds = commaSepStrToArr(
-      args["UNIT-IDS"] ??
+    const { dealClient } = await getDealClient();
+
+    const dealContract = dealClient.getDeal(
+      args["DEAL-ID"] ?? (await input({ message: "Enter deal id" })),
+    );
+
+    const workerIds = commaSepStrToArr(
+      args["WORKER-IDS"] ??
         (await input({
-          message: "Enter comma-separated compute unit ids",
+          message: "Enter comma-separated compute worker ids",
           validate: (v: string) => {
             return commaSepStrToArr(v).length > 0;
           },
         })),
     );
 
-    const { dealClient } = await getDealClient();
-    const market = dealClient.getMarket();
-
-    for (const unitId of unitIds) {
+    for (const workerId of workerIds) {
       await sign(
-        `Remove compute unit ${unitId} from deal`,
-        market.returnComputeUnitFromDeal,
-        unitId,
+        `Remove worker ${workerId} from deal`,
+        dealContract.removeWorker,
+        workerId,
       );
 
-      commandObj.log(`Unit ${color.yellow(unitId)} was removed from the deal`);
+      commandObj.log(
+        `Worker ${color.yellow(workerId)} was removed from the deal`,
+      );
     }
   }
 }

@@ -25,6 +25,7 @@
   "scripts": {
     "before-build": "npm i --prefix \"./src/cli-aqua-dependencies\" && tsx src/beforeBuild.ts && npm i --prefix \"./src/aqua-dependencies\"",
     "build": "yarn before-build && shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies && shx cp -r ../packages/cli-connector/dist ./dist/cli-connector",
+    "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "find-dead-code": "ts-prune",
@@ -58,7 +59,7 @@
     "@fluencelabs/air-beautify-wasm": "0.3.9",
     "@fluencelabs/aqua-api": "0.14.10",
     "@fluencelabs/aqua-to-js": "0.3.13",
-    "@fluencelabs/deal-ts-clients": "0.15.4",
+    "@fluencelabs/deal-ts-clients": "0.15.5-move-to-workers-matcher-ad11dd0-5811-1.0",
     "@fluencelabs/fluence-network-environment": "1.2.2",
     "@fluencelabs/js-client": "0.9.0",
     "@fluencelabs/npm-aqua-compiler": "0.0.3",

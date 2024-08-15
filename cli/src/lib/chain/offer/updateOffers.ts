@@ -253,7 +253,7 @@ async function populateMinPricePerWorkerEpochTx({
             await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
           )}`,
           tx: populateTx(
-            market.changeMinPricePerWorkerEpoch,
+            market.changeMinPricePerCuPerEpoch,
             offerId,
             minPricePerWorkerEpochBigInt,
           ),

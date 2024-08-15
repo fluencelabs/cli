@@ -54,7 +54,7 @@ import {
   LOCAL_IPFS_ADDRESS,
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-  DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
+  DEFAULT_PRICE_PER_CU_PER_EPOCH_DEVELOPER,
   TOP_LEVEL_SCHEMA_ID,
   aquaLogLevelsString,
   AQUA_LOG_LEVELS,
@@ -311,7 +311,7 @@ const dealSchemaObj = {
     pricePerWorkerEpoch: {
       type: "string",
       description: `Price per worker epoch in ${PT_SYMBOL}`,
-      default: DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
+      default: DEFAULT_PRICE_PER_CU_PER_EPOCH_DEVELOPER,
       nullable: true,
     },
     initialBalance: {
@@ -351,8 +351,6 @@ const dealSchemaObj = {
 } as const satisfies JSONSchemaType<Deal>;
 
 const dealSchema: JSONSchemaType<Deal> = dealSchemaObj;
-
-const validateDealSchema = ajv.compile(dealSchema);
 
 const workerConfigSchemaObj = {
   type: "object",
@@ -397,7 +395,7 @@ export function assertIsArrayWithHostsOrDeals(
   unknownArr: [string, unknown][],
 ): asserts unknownArr is [string, Host | Deal][] {
   unknownArr.forEach(([, unknown]) => {
-    assert(validateHostsSchema(unknown) || validateDealSchema(unknown));
+    assert(validateHostsSchema(unknown) || validateDeploymentSchema(unknown));
   });
 }
 
@@ -913,9 +911,6 @@ type ConfigV8 = Omit<ConfigV7, "deals" | "version"> & {
 
 const configSchemaV8Obj = {
   ...configSchemaV7Obj,
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-  title: FLUENCE_CONFIG_FULL_FILE_NAME,
-  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...configSchemaV7ObjPropertiesWithoutDeals,
     version: { type: "integer", const: 8 },
@@ -937,6 +932,82 @@ const configSchemaV8Obj = {
 
 const configSchemaV8: JSONSchemaType<ConfigV8> = configSchemaV8Obj;
 
+type Deployment = Omit<Deal & Worker, "pricePerWorkerEpoch"> & {
+  pricePerCuPerEpoch?: string;
+  cuCountPerWorker?: number;
+};
+
+type ConfigV9 = Omit<ConfigV8, "version" | "deployments"> & {
+  version: 9;
+  deployments?: Record<string, Deployment>;
+};
+
+const dealObjWithoutPricePerWorkerEpoch: Omit<
+  typeof configSchemaV8Obj.properties.deployments.properties.deploymentName.properties,
+  "pricePerWorkerEpoch"
+> &
+  Mutable<
+    Partial<
+      Pick<
+        typeof configSchemaV8Obj.properties.deployments.properties.deploymentName.properties,
+        "pricePerWorkerEpoch"
+      >
+    >
+  > = {
+  ...configSchemaV8Obj.properties.deployments.properties.deploymentName
+    .properties,
+};
+
+delete dealObjWithoutPricePerWorkerEpoch.pricePerWorkerEpoch;
+
+const deploymentSchemaObj = {
+  ...dealSchemaObj,
+  properties: {
+    ...dealObjWithoutPricePerWorkerEpoch,
+    pricePerCuPerEpoch: {
+      type: "string",
+      description: `Price per compute unit per epoch in ${PT_SYMBOL}`,
+      nullable: true,
+    },
+    cuCountPerWorker: {
+      type: "integer",
+      description: `Number of compute units per worker. Default: 1`,
+      nullable: true,
+      default: 1,
+    },
+  },
+} as const satisfies JSONSchemaType<Deployment>;
+
+const deploymentSchema: JSONSchemaType<Deployment> = deploymentSchemaObj;
+
+const validateDeploymentSchema = ajv.compile(deploymentSchema);
+
+const configSchemaV9Obj = {
+  ...configSchemaV8Obj,
+  properties: {
+    ...configSchemaV8Obj.properties,
+    version: { type: "integer", const: 9 },
+    deployments: {
+      ...configSchemaV8Obj.properties.deployments,
+      additionalProperties: deploymentSchema,
+      properties: {
+        deploymentName: deploymentSchema,
+      },
+    },
+  },
+} as const satisfies JSONSchemaType<ConfigV9>;
+
+const configSchemaV9: JSONSchemaType<ConfigV9> = configSchemaV9Obj;
+
+const latestSchemaObj = configSchemaV9Obj;
+
+const latestSchema: JSONSchemaType<LatestConfig> = {
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+  title: FLUENCE_CONFIG_FULL_FILE_NAME,
+  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
+  ...latestSchemaObj,
+};
+
 const getConfigOrConfigDirPath = () => {
   return projectRootDir;
 };
@@ -947,13 +1018,14 @@ function getDefault(): string {
 # You can use \`fluence init\` command to generate a template for new Fluence project
 
 # config version
-version: 8
+version: ${numToStr(latestSchemaObj.properties.version.const)}
 
 # A map of deployment names as keys and deployments as values
 deployments:
   ${DEFAULT_DEPLOYMENT_NAME}:
     targetWorkers: ${numToStr(TARGET_WORKERS_DEFAULT)} # max amount of workers in the deal
-    pricePerWorkerEpoch: "${DEFAULT_PRICE_PER_EPOCH_DEVELOPER}" # price per worker epoch in ${PT_SYMBOL}
+    pricePerCuPerEpoch: "${DEFAULT_PRICE_PER_CU_PER_EPOCH_DEVELOPER}" # price per compute unit per epoch in ${PT_SYMBOL}
+    cuCountPerWorker: 1 # number of compute units per worker. Default: 1
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
 #   # initialBalance: "1.98"
@@ -1131,6 +1203,7 @@ const validateConfigSchemaV4 = ajv.compile(configSchemaV4);
 const validateConfigSchemaV5 = ajv.compile(configSchemaV5);
 const validateConfigSchemaV6 = ajv.compile(configSchemaV6);
 const validateConfigSchemaV7 = ajv.compile(configSchemaV7);
+const validateConfigSchemaV8 = ajv.compile(configSchemaV8);
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -1345,6 +1418,41 @@ const migrations: Migrations<Config> = [
       deployments: config.deals,
     };
   },
+  async (config: Config): Promise<ConfigV9> => {
+    if (!validateConfigSchemaV8(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV8.errors,
+        )}`,
+      );
+    }
+
+    const { deployments, ...restConfig } = config;
+
+    return {
+      ...restConfig,
+      version: 9,
+      ...(deployments === undefined
+        ? {}
+        : {
+            deployments: Object.fromEntries(
+              Object.entries(deployments).map(
+                ([k, { pricePerWorkerEpoch, ...v }]) => {
+                  return [
+                    k,
+                    {
+                      ...v,
+                      ...(pricePerWorkerEpoch === undefined
+                        ? {}
+                        : { pricePerCuPerEpoch: pricePerWorkerEpoch }),
+                    },
+                  ] as const;
+                },
+              ),
+            ),
+          }),
+    };
+  },
 ];
 
 type Config =
@@ -1356,8 +1464,9 @@ type Config =
   | ConfigV5
   | ConfigV6
   | ConfigV7
-  | ConfigV8;
-type LatestConfig = ConfigV8;
+  | ConfigV8
+  | ConfigV9;
+type LatestConfig = ConfigV9;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 export type FluenceConfigWithServices = FluenceConfig & {
@@ -1601,8 +1710,9 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
     configSchemaV6,
     configSchemaV7,
     configSchemaV8,
+    configSchemaV9,
   ],
-  latestSchema: configSchemaV8,
+  latestSchema,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath,
@@ -1640,4 +1750,4 @@ export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV8;
+export const fluenceSchema: JSONSchemaType<LatestConfig> = latestSchema;

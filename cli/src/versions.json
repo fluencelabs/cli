@@ -1,9 +1,9 @@
 {
   "protocolVersion": 1,
   "nox": "fluencelabs/nox:0.26.0",
-  "chain-rpc": "fluencelabs/chain-rpc:0.15.4",
-  "chain-deploy-script": "fluencelabs/chain-deploy-script:0.15.4",
-  "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.15.4",
+  "chain-rpc": "docker.fluence.dev/chain-rpc:move-to-workers-matcher-ad11dd0-5811-1",
+  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:move-to-workers-matcher-ad11dd0-5811-1",
+  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:move-to-workers-matcher-ad11dd0-5811-1",
   "rust-toolchain": "nightly-2024-06-10",
   "npm": {
     "@fluencelabs/aqua-lib": "0.11.0",

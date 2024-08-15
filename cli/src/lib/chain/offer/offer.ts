@@ -405,7 +405,7 @@ export async function updateOffers(flags: OffersArgs) {
           await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
         )}`,
         tx: [
-          market.changeMinPricePerWorkerEpoch,
+          market.changeMinPricePerCuPerEpoch,
           offerId,
           minPricePerWorkerEpochBigInt,
         ],
