@@ -214,7 +214,7 @@ export async function createAndMatchDealsWithAllCUsOfPeerIds({
           market.matchDeal,
           dealAddress,
           [offerId],
-          [[[unitId]]], // TODO. Really?
+          [[[unitId]]],
         );
 
         const pats = getEventValues({
