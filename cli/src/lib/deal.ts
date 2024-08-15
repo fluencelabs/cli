@@ -300,7 +300,7 @@ export async function match(dealAddress: string) {
     1000 * 5, // 5 seconds
   );
 
-  if (matchedOffers.offers.length === 0) {
+  if (matchedOffers === null) {
     return commandObj.error(`No matched offers for deal ${dealAddress}`);
   }
 
