@@ -16,7 +16,7 @@
 * [`fluence deal stop [DEPLOYMENT-NAMES]`](#fluence-deal-stop-deployment-names)
 * [`fluence deal withdraw [AMOUNT] [DEPLOYMENT-NAMES]`](#fluence-deal-withdraw-amount-deployment-names)
 * [`fluence deal workers-add [DEPLOYMENT-NAMES]`](#fluence-deal-workers-add-deployment-names)
-* [`fluence deal workers-remove [UNIT-IDS]`](#fluence-deal-workers-remove-unit-ids)
+* [`fluence deal workers-remove [DEAL-ID] [WORKER-IDS]`](#fluence-deal-workers-remove-deal-id-worker-ids)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
 * [`fluence delegator collateral-add [IDS]`](#fluence-delegator-collateral-add-ids)
@@ -323,14 +323,15 @@ Create your deal with the specified parameters
 ```
 USAGE
   $ fluence deal create --app-cid <value> --collateral-per-worker <value> --min-workers <value> --target-workers
-    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> [--no-input] [--initial-balance <value>]
-    [--effectors <value>] [--whitelist <value> | --blacklist <value>] [--protocol-version <value>] [--env <dar | kras |
-    stage | local | custom>] [--priv-key <private-key>]
+    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> --cu-count-per-worker <value>
+    [--no-input] [--initial-balance <value>] [--effectors <value>] [--whitelist <value> | --blacklist <value>]
+    [--protocol-version <value>] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --app-cid=<value>                            (required) CID of the application that will be deployed
   --blacklist=<value>                          Comma-separated list of blacklisted providers
   --collateral-per-worker=<value>              (required) Collateral per worker
+  --cu-count-per-worker=<value>                (required) Compute unit count per worker
   --effectors=<value>                          Comma-separated list of effector to be used in the deal
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --initial-balance=<value>                    Initial balance
@@ -532,17 +533,18 @@ ALIASES
 
 _See code: [src/commands/deal/workers-add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.18.0/src/commands/deal/workers-add.ts)_
 
-## `fluence deal workers-remove [UNIT-IDS]`
+## `fluence deal workers-remove [DEAL-ID] [WORKER-IDS]`
 
 Remove unit from the deal
 
 ```
 USAGE
-  $ fluence deal workers-remove [UNIT-IDS] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
-    <private-key>]
+  $ fluence deal workers-remove [DEAL-ID] [WORKER-IDS] [--no-input] [--env <dar | kras | stage | local | custom>]
+    [--priv-key <private-key>]
 
 ARGUMENTS
-  UNIT-IDS  Comma-separated compute unit ids. You can get them using 'fluence deal info' command
+  DEAL-ID     Deal id. You can get it using 'fluence deal info' command
+  WORKER-IDS  Comma-separated compute unit ids. You can get them using 'fluence deal info' command
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command

@@ -87,13 +87,11 @@ A map with deployment names as keys and deployments as values
 
 ### Properties
 
-| Property         | Type                      | Required | Description       |
-|------------------|---------------------------|----------|-------------------|
-| `deploymentName` | [object](#deploymentname) | No       | Deployment config |
+| Property         | Type                      | Required | Description |
+|------------------|---------------------------|----------|-------------|
+| `deploymentName` | [object](#deploymentname) | No       |             |
 
 ### deploymentName
-
-Deployment config
 
 #### Properties
 
@@ -101,11 +99,12 @@ Deployment config
 |-------------------------|----------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `blacklist`             | string[] | No       | Blacklist of providers to deploy to. Can't be used together with whitelist                                                                                                 |
 | `computeUnits`          | integer  | No       | Number of compute units you require. 1 compute unit = 2GB. Currently the only allowed value is 1. This will change in the future. Default: 1                               |
+| `cuCountPerWorker`      | integer  | No       | Number of compute units per worker. Default: 1                                                                                                                             |
 | `effectors`             | string[] | No       | Effector CIDs to be used in the deal. Must be a valid CID                                                                                                                  |
 | `initialBalance`        | string   | No       | Initial balance after deploy in USDC. Default: targetWorkers * pricePerWorkerEpoch * minDealDepositedEpochs. For local environment: enough for deal to be active for 1 day |
 | `maxWorkersPerProvider` | integer  | No       | Max workers per provider. Matches target workers by default                                                                                                                |
 | `minWorkers`            | integer  | No       | Required workers to activate the deal. Matches target workers by default                                                                                                   |
-| `pricePerWorkerEpoch`   | string   | No       | Price per worker epoch in USDC                                                                                                                                             |
+| `pricePerCuPerEpoch`    | string   | No       | Price per compute unit per epoch in USDC                                                                                                                                   |
 | `protocolVersion`       | integer  | No       | Protocol version. Default: 1                                                                                                                                               |
 | `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml                                                                          |
 | `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml                                                                              |
