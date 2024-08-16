@@ -28,7 +28,7 @@ const CURRENTLY_UNUSED_CID =
 export async function registerProvider() {
   const initialProviderInfo = await getProviderInfo();
 
-  if (initialProviderInfo.name.length > 0) {
+  if (initialProviderInfo.name !== null) {
     commandObj.error(
       `Provider is already registered with name: ${initialProviderInfo.name}. If you want to update the provider info, use '${CLI_NAME} provider update' command`,
     );
@@ -48,7 +48,7 @@ export async function registerProvider() {
 
   const providerInfo = await getProviderInfo();
 
-  if (providerInfo.name.length === 0) {
+  if (providerInfo.name === null) {
     commandObj.error(
       "Provider registration failed: could not retrieve provider name from chain",
     );
@@ -66,7 +66,7 @@ Provider address: ${signerAddress}
 export async function updateProvider() {
   const initialProviderInfo = await getProviderInfo();
 
-  if (initialProviderInfo.name.length === 0) {
+  if (initialProviderInfo.name === null) {
     commandObj.error(
       `Provider is not registered yet. Please use '${CLI_NAME} provider register' command to register a new provider first`,
     );
@@ -86,7 +86,7 @@ export async function updateProvider() {
 
   const providerInfo = await getProviderInfo();
 
-  if (providerInfo.name.length === 0) {
+  if (providerInfo.name === null) {
     commandObj.error(
       "Provider update failed: could not retrieve provider name from chain",
     );
@@ -103,15 +103,16 @@ Provider address: ${signerAddress}
 
 export async function getProviderInfo() {
   const { dealClient } = await getDealClient();
-  const signerAddress = await getSignerAddress();
+  const address = await getSignerAddress();
   const market = dealClient.getMarket();
-  return market.getProviderInfo(signerAddress);
+  const { name } = await market.getProviderInfo(address);
+  return { name: name === "" ? null : name, address };
 }
 
 export async function assertProviderIsRegistered() {
   const providerInfo = await getProviderInfo();
 
-  if (providerInfo.name.length === 0) {
+  if (providerInfo.name === null) {
     commandObj.error(
       `You have to register as a provider first. Use '${CLI_NAME} provider register' command for that`,
     );
