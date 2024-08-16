@@ -323,7 +323,7 @@ Create your deal with the specified parameters
 ```
 USAGE
   $ fluence deal create --app-cid <value> --collateral-per-worker <value> --min-workers <value> --target-workers
-    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> --cu-count-per-worker <value>
+    <value> --max-workers-per-provider <value> --price-per-cu-per-epoch <value> --cu-count-per-worker <value>
     [--no-input] [--initial-balance <value>] [--effectors <value>] [--whitelist <value> | --blacklist <value>]
     [--protocol-version <value>] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
 
@@ -338,7 +338,7 @@ FLAGS
   --max-workers-per-provider=<value>           (required) Max workers per provider
   --min-workers=<value>                        (required) Required workers to activate the deal
   --no-input                                   Don't interactively ask for any input from the user
-  --price-per-worker-epoch=<value>             (required) Price per worker epoch
+  --price-per-cu-per-epoch=<value>             (required) Price per CU per epoch
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
