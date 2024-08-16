@@ -961,6 +961,7 @@ const dealObjWithoutPricePerWorkerEpoch: Omit<
 delete dealObjWithoutPricePerWorkerEpoch.pricePerWorkerEpoch;
 
 const deploymentSchemaObj = {
+  description: "Deployment config",
   ...dealSchemaObj,
   properties: {
     ...dealObjWithoutPricePerWorkerEpoch,

@@ -1076,6 +1076,7 @@ type ConfigV2 = Omit<ConfigV1, "version" | "offers"> & {
 
 const offerSchemaV1 = {
   type: "object",
+  description: "Defines a provider offer",
   additionalProperties: false,
   properties: {
     minPricePerCuPerEpoch: {
