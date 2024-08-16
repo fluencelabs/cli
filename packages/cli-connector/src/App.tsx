@@ -29,7 +29,8 @@ import {
   CHAIN_IDS,
   ChainId,
 } from "@repo/common";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import * as v from "valibot";
 import {
   useClient,
   useSendTransaction,
@@ -37,6 +38,16 @@ import {
   useAccount,
   useWaitForTransactionReceipt,
 } from "wagmi";
+
+const TransactionError = v.object({
+  cause: v.object({
+    cause: v.object({
+      data: v.object({
+        message: v.string(),
+      }),
+    }),
+  }),
+});
 
 export function App({
   chainId,
@@ -72,6 +83,14 @@ export function App({
     data: txHash,
     reset,
   } = useSendTransaction();
+
+  const txErrorString = useMemo(() => {
+    const parsedError = v.safeParse(TransactionError, error);
+
+    return parsedError.success
+      ? parsedError.output.cause.cause.data.message
+      : error?.message ?? "";
+  }, [error]);
 
   const [trySwitchChainFlag, setTrySwitchChainFlag] = useState(false);
 
@@ -278,7 +297,15 @@ export function App({
                 Transaction successful!
               </a>
             ))}
-          {isError && <div className="error">Error! {error.message}</div>}
+          {isError && (
+            <>
+              <div className="error">Error: {txErrorString}</div>
+              <details className="error">
+                <summary>Error details:</summary>
+                <pre>{jsonStringify(error)}</pre>
+              </details>
+            </>
+          )}
           {transactionPayload !== null && (
             <details>
               <summary>Transaction details</summary>

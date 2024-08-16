@@ -83,4 +83,5 @@ summary {
   max-width: 100%;
   overflow: auto;
   color: #d70000;
+  white-space: pre;
 }

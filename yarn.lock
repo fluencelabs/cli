@@ -950,6 +950,7 @@ __metadata:
     react-dom: "npm:^18.2.25"
     typescript: "npm:5.2.2"
     typescript-eslint: "npm:7.8.0"
+    valibot: "npm:^0.37.0"
     viem: "npm:^2.9.29"
     vite: "npm:4.4.9"
     wagmi: "npm:^2.7.0"
@@ -7618,6 +7619,18 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 10c0/1607dd32ac7fc22f2d8f77051e6a64845c9bce5cd3dd8aa0070c074ec73e666a1f63c7b4e0f4bf2bc8b9d59dc85a15e17807446d9d2b17c8485fbc2147b27f9b
+  languageName: node
+  linkType: hard
+
+"valibot@npm:^0.37.0":
+  version: 0.37.0
+  resolution: "valibot@npm:0.37.0"
+  peerDependencies:
+    typescript: ">=5"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/816d3c7bde49df0d54d72daa51682a00484fe8e52e92810e9a4ad78580a4538e42bf390e8430ba4520fbee88ac77a4da62dcc074b2c6deb2e866eee2ebe498b1
   languageName: node
   linkType: hard
 
