@@ -51,8 +51,8 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "Max workers per provider",
       required: true,
     }),
-    "price-per-worker-epoch": Flags.string({
-      description: "Price per worker epoch",
+    "price-per-cu-per-epoch": Flags.string({
+      description: "Price per CU per epoch",
       required: true,
     }),
     "initial-balance": Flags.string({
@@ -89,7 +89,7 @@ export default class Create extends BaseCommand<typeof Create> {
       minWorkers: flags["min-workers"],
       targetWorkers: flags["target-workers"],
       maxWorkersPerProvider: flags["max-workers-per-provider"],
-      pricePerCuPerEpoch: flags["price-per-worker-epoch"],
+      pricePerCuPerEpoch: flags["price-per-cu-per-epoch"],
       effectors:
         flags.effectors === undefined ? [] : commaSepStrToArr(flags.effectors),
       initialBalance: flags["initial-balance"],

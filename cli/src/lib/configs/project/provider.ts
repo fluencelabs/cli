@@ -1163,11 +1163,14 @@ const configSchemaV2 = {
   ],
 } as const satisfies JSONSchemaType<ConfigV2>;
 
+const latestConfigSchemaObj =
+  configSchemaV2 satisfies JSONSchemaType<LatestConfig>;
+
 const latestConfigSchema: JSONSchemaType<LatestConfig> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_CONFIG_FULL_FILE_NAME}`,
   title: PROVIDER_CONFIG_FULL_FILE_NAME,
   description: `Defines config used for provider set up`,
-  ...configSchemaV2,
+  ...latestConfigSchemaObj,
 };
 
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
@@ -1234,7 +1237,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
 # You can use \`fluence provider init\` command to generate this config template
 
 # config version
-version: 2
+version: ${numToStr(latestConfigSchemaObj.properties.version.const)}
 
 ${yamlDiffPatch("", {}, userProvidedConfig)}
   `;

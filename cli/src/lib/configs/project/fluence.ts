@@ -316,7 +316,7 @@ const dealSchemaObj = {
     },
     initialBalance: {
       type: "string",
-      description: `Initial balance after deploy in ${PT_SYMBOL}. Default: targetWorkers * pricePerWorkerEpoch * minDealDepositedEpochs. For local environment: enough for deal to be active for 1 day`,
+      description: `Initial balance after deploy in ${PT_SYMBOL}. Default: targetWorkers * pricePerCuPerEpoch * minDealDepositedEpochs. For local environment: enough for deal to be active for 1 day`,
       nullable: true,
     },
     effectors: {

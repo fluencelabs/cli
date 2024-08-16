@@ -108,11 +108,11 @@ export async function dealCreate({
         deploymentName === undefined ? "" : `${color.yellow(deploymentName)} :`
       }initialBalance ${color.yellow(
         initialBalance,
-      )} is less than minimum initialBalance = targetWorkers * pricePerWorkerEpoch * ${bigintToStr(
+      )} is less than minimum initialBalance = targetWorkers * pricePerCuPerEpoch * ${bigintToStr(
         minDealDepositedEpochs,
       )} = ${color.yellow(
         await ptFormatWithSymbol(minInitialBalanceBigInt),
-      )}. Please, increase initialBalance or decrease targetWorkers or pricePerWorkerEpoch`,
+      )}. Please, increase initialBalance or decrease targetWorkers or pricePerCuPerEpoch`,
     );
   }
 
@@ -238,7 +238,7 @@ export async function createAndMatchDealsWithAllCUsOfPeerIds({
 
 async function getDefaultInitialBalance(
   minInitialBalanceBigInt: bigint,
-  pricePerWorkerEpochBigInt: bigint,
+  pricePerCuPerEpochBigInt: bigint,
   targetWorkersBigInt: bigint,
 ) {
   if ((await ensureChainEnv()) === "local") {
@@ -249,7 +249,7 @@ async function getDefaultInitialBalance(
       (DEFAULT_DEAL_ACTIVE_DURATION_FOR_LOCAL_ENV /
         (await core.epochDuration())) *
       targetWorkersBigInt *
-      pricePerWorkerEpochBigInt;
+      pricePerCuPerEpochBigInt;
 
     return balance < minInitialBalanceBigInt
       ? minInitialBalanceBigInt
