@@ -1233,7 +1233,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
 # You can use \`fluence provider init\` command to generate this config template
 
 # config version
-version: 0
+version: 2
 
 ${yamlDiffPatch("", {}, userProvidedConfig)}
   `;
