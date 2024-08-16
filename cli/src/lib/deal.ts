@@ -50,7 +50,7 @@ import {
   splitErrorsAndResults,
   stringifyUnknown,
 } from "./helpers/utils.js";
-import { checkboxes, input } from "./prompt.js";
+import { checkboxes, input, list } from "./prompt.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 type DealCreateArg = {
@@ -449,6 +449,90 @@ export async function getDeals({
     ).map((dealId) => {
       return { dealName: dealId, dealId };
     });
+  }
+}
+
+const DEAL_ID_FLAG_NAME = "deal-id";
+const DEAL_NAME_FLAG_NAME = "name";
+
+export async function getDeal({
+  flags: { [DEAL_ID_FLAG_NAME]: dealId, [DEAL_NAME_FLAG_NAME]: dealName },
+}: {
+  flags: {
+    [DEAL_ID_FLAG_NAME]: string | undefined;
+    [DEAL_NAME_FLAG_NAME]: string | undefined;
+  };
+}): Promise<DealNameAndId> {
+  if (dealId !== undefined && dealName !== undefined) {
+    commandObj.error(
+      `You can't use both ${color.yellow(
+        `--${DEAL_NAME_FLAG_NAME}`,
+      )} flag and ${color.yellow(
+        `--${DEAL_IDS_FLAG_NAME}`,
+      )} flag at the same time. Please pick one of them`,
+    );
+  }
+
+  if (dealId !== undefined) {
+    return { dealName: dealId, dealId };
+  }
+
+  const workersConfig = await initNewWorkersConfigReadonly();
+  const fluenceEnv = await ensureFluenceEnv();
+
+  if (dealName !== undefined) {
+    const { dealIdOriginal: dealId } =
+      workersConfig.deals?.[fluenceEnv]?.[dealName] ?? {};
+
+    if (dealId === undefined) {
+      return commandObj.error(
+        `Couldn't find deployment: ${color.yellow(
+          dealName,
+        )} at ${workersConfig.$getPath()} in ${color.yellow(
+          `deals.${fluenceEnv}`,
+        )} property`,
+      );
+    }
+
+    return { dealName, dealId };
+  }
+
+  try {
+    return await list<DealNameAndId, never>({
+      message: `Select deployment that you did on ${color.yellow(
+        fluenceEnv,
+      )} environment`,
+      options: Object.entries(workersConfig.deals?.[fluenceEnv] ?? {}).map(
+        ([dealName, { dealIdOriginal: dealId }]) => {
+          return { name: dealName, value: { dealName, dealId } };
+        },
+      ),
+      oneChoiceMessage(choice) {
+        return `There is currently only one deployment that you did on ${color.yellow(
+          fluenceEnv,
+        )} environment: ${color.yellow(choice)}. Do you want to select it`;
+      },
+      onNoChoices() {
+        throw new Error(NO_DEPLOYMENTS_FOUND_ERROR_MESSAGE);
+      },
+      flagName: DEAL_ID_FLAG_NAME,
+    });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      !error.message.includes(NO_DEPLOYMENTS_FOUND_ERROR_MESSAGE)
+    ) {
+      throw error;
+    }
+
+    commandObj.warn(
+      `No deployments found for ${color.yellow(
+        fluenceEnv,
+      )} environment at ${workersConfig.$getPath()}`,
+    );
+
+    const dealId = await input({ message: "Enter deal id" });
+    return { dealName: dealId, dealId };
   }
 }
 

@@ -114,11 +114,11 @@ export async function createOffers(flags: OffersArgs) {
   //     ({
   //       computePeersToRegister,
   //       effectorPrefixesAndHash,
-  //       minPricePerWorkerEpochBigInt,
+  //       minPricePerCuPerEpochBigInt,
   //     }) => {
   //       return [
   //         market.registerMarketOffer,
-  //         minPricePerWorkerEpochBigInt,
+  //         minPricePerCuPerEpochBigInt,
   //         usdcAddress,
   //         effectorPrefixesAndHash,
   //         computePeersToRegister,
@@ -144,7 +144,7 @@ export async function createOffers(flags: OffersArgs) {
     const {
       computePeersFromProviderConfig,
       effectorPrefixesAndHash,
-      minPricePerWorkerEpochBigInt,
+      minPricePerCuPerEpochBigInt,
       offerName,
       minProtocolVersion,
       maxProtocolVersion,
@@ -153,7 +153,7 @@ export async function createOffers(flags: OffersArgs) {
     const txReceipt = await sign(
       `Register offer: ${offerName}`,
       market.registerMarketOffer,
-      minPricePerWorkerEpochBigInt,
+      minPricePerCuPerEpochBigInt,
       usdcAddress,
       effectorPrefixesAndHash,
       computePeersFromProviderConfig,
@@ -373,7 +373,7 @@ export async function updateOffers(flags: OffersArgs) {
   }
 
   for (const {
-    minPricePerWorkerEpochBigInt,
+    minPricePerCuPerEpochBigInt,
     offerId,
     effectors,
     offerName,
@@ -391,23 +391,23 @@ export async function updateOffers(flags: OffersArgs) {
       });
     }
 
-    const minPricePerWorkerEpochBigIntFromIndexer = await ptParse(
+    const minPricePerCuPerEpochBigIntFromIndexer = await ptParse(
       offerIndexerInfo.pricePerEpoch,
     );
 
     if (
-      minPricePerWorkerEpochBigIntFromIndexer !== minPricePerWorkerEpochBigInt
+      minPricePerCuPerEpochBigIntFromIndexer !== minPricePerCuPerEpochBigInt
     ) {
       populatedTxs.push({
-        description: `\nchanging minPricePerWorker from ${color.yellow(
-          await ptFormatWithSymbol(minPricePerWorkerEpochBigIntFromIndexer),
+        description: `\nchanging minPricePerCuPerEpochBigInt from ${color.yellow(
+          await ptFormatWithSymbol(minPricePerCuPerEpochBigIntFromIndexer),
         )} to ${color.yellow(
-          await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
+          await ptFormatWithSymbol(minPricePerCuPerEpochBigInt),
         )}`,
         tx: [
           market.changeMinPricePerCuPerEpoch,
           offerId,
-          minPricePerWorkerEpochBigInt,
+          minPricePerCuPerEpochBigInt,
         ],
       });
     }
@@ -726,7 +726,7 @@ async function ensureOfferConfigs() {
       async ([
         offerName,
         {
-          minPricePerWorkerEpoch,
+          minPricePerCuPerEpoch,
           effectors,
           computePeers,
           minProtocolVersion,
@@ -736,8 +736,8 @@ async function ensureOfferConfigs() {
         const computePeerConfigs =
           await ensureComputerPeerConfigs(computePeers);
 
-        const minPricePerWorkerEpochBigInt = await ptParse(
-          minPricePerWorkerEpoch,
+        const minPricePerCuPerEpochBigInt = await ptParse(
+          minPricePerCuPerEpoch,
         );
 
         const computePeersFromProviderConfig = await Promise.all(
@@ -767,7 +767,7 @@ async function ensureOfferConfigs() {
 
         return {
           offerName,
-          minPricePerWorkerEpochBigInt,
+          minPricePerCuPerEpochBigInt,
           effectorPrefixesAndHash,
           effectors,
           computePeersFromProviderConfig,

@@ -175,7 +175,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
           populateCUToAddTxs(offer, peersOnChain),
 
           populatePaymentTokenTx(offer),
-          populateMinPricePerWorkerEpochTx(offer),
+          populateMinPricePerCuPerEpochTx(offer),
         ])
       ).flat() satisfies Txs;
 
@@ -235,27 +235,27 @@ async function populatePaymentTokenTx({
       ];
 }
 
-async function populateMinPricePerWorkerEpochTx({
+async function populateMinPricePerCuPerEpochTx({
   offerIndexerInfo,
-  minPricePerWorkerEpochBigInt,
+  minPricePerCuPerEpochBigInt,
   offerId,
 }: OnChainOffer) {
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
   return offerIndexerInfo.pricePerEpoch ===
-    (await ptFormat(minPricePerWorkerEpochBigInt))
+    (await ptFormat(minPricePerCuPerEpochBigInt))
     ? []
     : [
         {
-          description: `\nchanging minPricePerWorker from ${color.yellow(
+          description: `\nchanging minPricePerCuPerEpoch from ${color.yellow(
             `${offerIndexerInfo.pricePerEpoch} ${PT_SYMBOL}`,
           )} to ${color.yellow(
-            await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
+            await ptFormatWithSymbol(minPricePerCuPerEpochBigInt),
           )}`,
           tx: populateTx(
             market.changeMinPricePerCuPerEpoch,
             offerId,
-            minPricePerWorkerEpochBigInt,
+            minPricePerCuPerEpochBigInt,
           ),
         },
       ];

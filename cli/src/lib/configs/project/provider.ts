@@ -132,7 +132,7 @@ const capacityCommitmentSchema = {
   },
 } as const satisfies JSONSchemaType<CapacityCommitment>;
 
-export type Offer = {
+export type OfferV0 = {
   minPricePerWorkerEpoch: string;
   computePeers: Array<string>;
   effectors?: Array<string>;
@@ -870,14 +870,14 @@ type ComputePeerV0 = {
 
 type ConfigV0 = {
   providerName: string;
-  offers: Record<string, Offer>;
+  offers: Record<string, OfferV0>;
   computePeers: Record<string, ComputePeerV0>;
   capacityCommitments: Record<string, CapacityCommitment>;
   nox?: NoxConfigYAMLV0;
   version: 0;
 };
 
-const offerSchema = {
+const offerSchemaV0 = {
   type: "object",
   description: "Defines a provider offer",
   additionalProperties: false,
@@ -913,7 +913,7 @@ const offerSchema = {
     },
   },
   required: ["minPricePerWorkerEpoch", "computePeers"],
-} as const satisfies JSONSchemaType<Offer>;
+} as const satisfies JSONSchemaType<OfferV0>;
 
 const computePeerSchemaV0 = {
   type: "object",
@@ -931,7 +931,7 @@ const computePeerSchemaV0 = {
   required: ["computeUnits"],
 } as const satisfies JSONSchemaType<ComputePeerV0>;
 
-const configSchemaV0 = {
+const configSchemaV0Obj = {
   type: "object",
   additionalProperties: false,
   properties: {
@@ -943,9 +943,9 @@ const configSchemaV0 = {
     offers: {
       description: "A map with offer names as keys and offers as values",
       type: "object",
-      additionalProperties: offerSchema,
+      additionalProperties: offerSchemaV0,
       properties: {
-        Offer: offerSchema,
+        Offer: offerSchemaV0,
       },
       required: [],
     },
@@ -981,6 +981,8 @@ const configSchemaV0 = {
   ],
 } as const satisfies JSONSchemaType<ConfigV0>;
 
+const configSchemaV0: JSONSchemaType<ConfigV0> = configSchemaV0Obj;
+
 type ComputePeerV1 = Omit<ComputePeerV0, "nox"> & {
   nox?: NoxConfigYAMLV1;
   ccp?: CCPConfigYAMLV1;
@@ -1010,10 +1012,7 @@ type ConfigV1 = Omit<ConfigV0, "version" | "nox" | "computePeers"> & {
   ccp?: CCPConfigYAMLV1;
 };
 
-const configSchemaV1 = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_CONFIG_FULL_FILE_NAME}`,
-  title: PROVIDER_CONFIG_FULL_FILE_NAME,
-  description: `Defines config used for provider set up`,
+const configSchemaV1Obj = {
   type: "object",
   additionalProperties: false,
   properties: {
@@ -1025,9 +1024,9 @@ const configSchemaV1 = {
     offers: {
       description: "A map with offer names as keys and offers as values",
       type: "object",
-      additionalProperties: offerSchema,
+      additionalProperties: offerSchemaV0,
       properties: {
-        Offer: offerSchema,
+        Offer: offerSchemaV0,
       },
       required: [],
     },
@@ -1063,6 +1062,112 @@ const configSchemaV1 = {
     "capacityCommitments",
   ],
 } as const satisfies JSONSchemaType<ConfigV1>;
+
+const configSchemaV1: JSONSchemaType<ConfigV1> = configSchemaV1Obj;
+
+export type OfferV1 = Omit<OfferV0, "minPricePerWorkerEpoch"> & {
+  minPricePerCuPerEpoch: string;
+};
+
+type ConfigV2 = Omit<ConfigV1, "version" | "offers"> & {
+  version: 2;
+  offers: Record<string, OfferV1>;
+};
+
+const offerSchemaV1 = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    minPricePerCuPerEpoch: {
+      type: "string",
+      description: `Minimum price per compute unit per epoch in ${PT_SYMBOL}`,
+    },
+    computePeers: {
+      description: "Number of Compute Units for this Compute Peer",
+      type: "array",
+      items: { type: "string" },
+      uniqueItems: true,
+    },
+    effectors: { type: "array", items: { type: "string" }, nullable: true },
+    minProtocolVersion: {
+      type: "integer",
+      description: `Min protocol version. Must be less then or equal to maxProtocolVersion. Default: ${numToStr(
+        versions.protocolVersion,
+      )}`,
+      nullable: true,
+      default: versions.protocolVersion,
+      minimum: 1,
+    },
+    maxProtocolVersion: {
+      type: "integer",
+      description: `Max protocol version. Must be more then or equal to minProtocolVersion. Default: ${numToStr(
+        versions.protocolVersion,
+      )}`,
+      nullable: true,
+      default: versions.protocolVersion,
+      minimum: 1,
+    },
+  },
+  required: ["minPricePerCuPerEpoch", "computePeers"],
+} as const satisfies JSONSchemaType<OfferV1>;
+
+const configSchemaV2 = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    providerName: {
+      description: "Provider name. Must not be empty",
+      type: "string",
+      minLength: 1,
+    },
+    offers: {
+      description: "A map with offer names as keys and offers as values",
+      type: "object",
+      additionalProperties: offerSchemaV1,
+      properties: {
+        Offer: offerSchemaV1,
+      },
+      required: [],
+    },
+    computePeers: {
+      description:
+        "A map with compute peer names as keys and compute peers as values",
+      type: "object",
+      additionalProperties: computePeerSchemaV1,
+      properties: {
+        ComputePeer: computePeerSchemaV1,
+      },
+      required: [],
+    },
+    nox: noxConfigYAMLSchemaV1,
+    ccp: ccpConfigYAMLSchemaV1,
+    capacityCommitments: {
+      description:
+        "A map with nox names as keys and capacity commitments as values",
+      type: "object",
+      additionalProperties: capacityCommitmentSchema,
+      properties: {
+        noxName: capacityCommitmentSchema,
+      },
+      required: [],
+    },
+    version: { type: "integer", const: 2, description: "Config version" },
+  },
+  required: [
+    "version",
+    "computePeers",
+    "offers",
+    "providerName",
+    "capacityCommitments",
+  ],
+} as const satisfies JSONSchemaType<ConfigV2>;
+
+const latestConfigSchema: JSONSchemaType<LatestConfig> = {
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_CONFIG_FULL_FILE_NAME}`,
+  title: PROVIDER_CONFIG_FULL_FILE_NAME,
+  description: `Defines config used for provider set up`,
+  ...configSchemaV2,
+};
 
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
@@ -1136,6 +1241,7 @@ ${yamlDiffPatch("", {}, userProvidedConfig)}
 }
 
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
+const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -1161,6 +1267,28 @@ const migrations: Migrations<Config> = [
     return {
       ...newConfig,
       computePeers: migrateComputePeersV0ToV1(computePeers),
+    };
+  },
+  async (config: Config): Promise<ConfigV2> => {
+    if (!validateConfigSchemaV1(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV0.errors,
+        )}`,
+      );
+    }
+
+    const { offers, ...restConfig } = config;
+
+    return {
+      ...restConfig,
+      version: 2,
+      offers: mapValues(offers, ({ minPricePerWorkerEpoch, ...restConfig }) => {
+        return {
+          ...restConfig,
+          minPricePerCuPerEpoch: minPricePerWorkerEpoch,
+        };
+      }),
     };
   },
 ];
@@ -1207,8 +1335,8 @@ function migrateChainConfigV0ToV1(
   );
 }
 
-type Config = ConfigV0 | ConfigV1;
-type LatestConfig = ConfigV1;
+type Config = ConfigV0 | ConfigV1 | ConfigV2;
+type LatestConfig = ConfigV2;
 type LatestCCPConfigYAML = CCPConfigYAMLV1;
 type LatestNoxConfigYAML = NoxConfigYAMLV1;
 export type ProviderConfig = InitializedConfig<LatestConfig>;
@@ -1491,8 +1619,8 @@ function validateMissingComputePeers(config: LatestConfig): ValidationResult {
 }
 
 const initConfigOptions = {
-  allSchemas: [configSchemaV0, configSchemaV1],
-  latestSchema: configSchemaV1,
+  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
+  latestSchema: latestConfigSchema,
   migrations,
   name: PROVIDER_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath: () => {
@@ -1535,7 +1663,7 @@ export async function initProviderConfigWithPath(path: string) {
   })();
 }
 
-export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV1;
+export const providerSchema: JSONSchemaType<LatestConfig> = latestConfigSchema;
 
 function mergeConfigYAML<T>(a: T, b: Record<string, unknown>) {
   return mergeWith(cloneDeep(a), b, (objValue, srcValue) => {
