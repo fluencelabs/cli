@@ -484,11 +484,13 @@ A map with offer names as keys and offers as values
 
 ### Properties
 
-| Property | Type             | Required | Description |
-|----------|------------------|----------|-------------|
-| `Offer`  | [object](#offer) | No       |             |
+| Property | Type             | Required | Description              |
+|----------|------------------|----------|--------------------------|
+| `Offer`  | [object](#offer) | No       | Defines a provider offer |
 
 ### Offer
+
+Defines a provider offer
 
 #### Properties
 

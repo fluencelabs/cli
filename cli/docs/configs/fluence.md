@@ -87,11 +87,13 @@ A map with deployment names as keys and deployments as values
 
 ### Properties
 
-| Property         | Type                      | Required | Description |
-|------------------|---------------------------|----------|-------------|
-| `deploymentName` | [object](#deploymentname) | No       |             |
+| Property         | Type                      | Required | Description       |
+|------------------|---------------------------|----------|-------------------|
+| `deploymentName` | [object](#deploymentname) | No       | Deployment config |
 
 ### deploymentName
+
+Deployment config
 
 #### Properties
 
