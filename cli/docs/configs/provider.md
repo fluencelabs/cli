@@ -484,21 +484,19 @@ A map with offer names as keys and offers as values
 
 ### Properties
 
-| Property | Type             | Required | Description              |
-|----------|------------------|----------|--------------------------|
-| `Offer`  | [object](#offer) | No       | Defines a provider offer |
+| Property | Type             | Required | Description |
+|----------|------------------|----------|-------------|
+| `Offer`  | [object](#offer) | No       |             |
 
 ### Offer
 
-Defines a provider offer
-
 #### Properties
 
-| Property                 | Type     | Required | Description                                                                        |
-|--------------------------|----------|----------|------------------------------------------------------------------------------------|
-| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer                                      |
-| `minPricePerWorkerEpoch` | string   | **Yes**  | Minimum price per worker epoch in USDC                                             |
-| `effectors`              | string[] | No       |                                                                                    |
-| `maxProtocolVersion`     | integer  | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 1 |
-| `minProtocolVersion`     | integer  | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 1 |
+| Property                | Type     | Required | Description                                                                        |
+|-------------------------|----------|----------|------------------------------------------------------------------------------------|
+| `computePeers`          | string[] | **Yes**  | Number of Compute Units for this Compute Peer                                      |
+| `minPricePerCuPerEpoch` | string   | **Yes**  | Minimum price per compute unit per epoch in USDC                                   |
+| `effectors`             | string[] | No       |                                                                                    |
+| `maxProtocolVersion`    | integer  | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 1 |
+| `minProtocolVersion`    | integer  | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 1 |
 

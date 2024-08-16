@@ -16,7 +16,7 @@
 * [`fluence deal stop [DEPLOYMENT-NAMES]`](#fluence-deal-stop-deployment-names)
 * [`fluence deal withdraw [AMOUNT] [DEPLOYMENT-NAMES]`](#fluence-deal-withdraw-amount-deployment-names)
 * [`fluence deal workers-add [DEPLOYMENT-NAMES]`](#fluence-deal-workers-add-deployment-names)
-* [`fluence deal workers-remove [DEAL-ID] [WORKER-IDS]`](#fluence-deal-workers-remove-deal-id-worker-ids)
+* [`fluence deal workers-remove [WORKER-IDS]`](#fluence-deal-workers-remove-worker-ids)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
 * [`fluence delegator collateral-add [IDS]`](#fluence-delegator-collateral-add-ids)
@@ -533,21 +533,22 @@ ALIASES
 
 _See code: [src/commands/deal/workers-add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.18.0/src/commands/deal/workers-add.ts)_
 
-## `fluence deal workers-remove [DEAL-ID] [WORKER-IDS]`
+## `fluence deal workers-remove [WORKER-IDS]`
 
 Remove unit from the deal
 
 ```
 USAGE
-  $ fluence deal workers-remove [DEAL-ID] [WORKER-IDS] [--no-input] [--env <dar | kras | stage | local | custom>]
-    [--priv-key <private-key>]
+  $ fluence deal workers-remove [WORKER-IDS] [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key
+    <private-key>] [--deal-id <value>] [--name <value>]
 
 ARGUMENTS
-  DEAL-ID     Deal id. You can get it using 'fluence deal info' command
   WORKER-IDS  Comma-separated compute unit ids. You can get them using 'fluence deal info' command
 
 FLAGS
+  --deal-id=<value>                            Deal id. You can get it using 'fluence deal info' command
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --name=<value>                               Name of the deployment from workers.yaml
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local env
