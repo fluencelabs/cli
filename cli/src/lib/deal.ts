@@ -92,7 +92,10 @@ export async function dealCreate({
   const cuCountPerWorkerBigInt = BigInt(cuCountPerWorker);
 
   const minInitialBalanceBigInt =
-    targetWorkersBigInt * pricePerCuPerEpochBigInt * minDealDepositedEpochs * cuCountPerWorkerBigInt;
+    targetWorkersBigInt *
+    pricePerCuPerEpochBigInt *
+    minDealDepositedEpochs *
+    cuCountPerWorkerBigInt;
 
   const initialBalanceBigInt =
     typeof initialBalance === "string"
@@ -101,7 +104,7 @@ export async function dealCreate({
           minInitialBalanceBigInt,
           pricePerCuPerEpochBigInt,
           targetWorkersBigInt,
-          cuCountPerWorkerBigInt
+          cuCountPerWorkerBigInt,
         );
 
   if (initialBalanceBigInt < minInitialBalanceBigInt) {
@@ -242,7 +245,7 @@ async function getDefaultInitialBalance(
   minInitialBalanceBigInt: bigint,
   pricePerCuPerEpochBigInt: bigint,
   targetWorkersBigInt: bigint,
-  cuCountPerWorker: bigint
+  cuCountPerWorker: bigint,
 ) {
   if ((await ensureChainEnv()) === "local") {
     const { readonlyDealClient } = await getReadonlyDealClient();
