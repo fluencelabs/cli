@@ -37,6 +37,7 @@ import type {
   TransactionReceipt,
 } from "ethers";
 import chunk from "lodash-es/chunk.js";
+import stripAnsi from "strip-ansi";
 
 import {
   CHAIN_URLS,
@@ -369,7 +370,7 @@ async function doSign<
           : [...originalArgs, DEFAULT_OVERRIDES];
 
         return {
-          title,
+          title: stripAnsi(title),
           debugInfo,
           name: method.name,
           transactionData: await method.populateTransaction(...args),
