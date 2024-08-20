@@ -32,7 +32,7 @@ import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
 } from "../conversions.js";
-import { ptFormat, ptFormatWithSymbol } from "../currencies.js";
+import { ptParse, ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 import {
@@ -222,7 +222,7 @@ async function populatePaymentTokenTx({
   const usdc = dealClient.getUSDC();
   const market = dealClient.getMarket();
   const usdcAddress = await usdc.getAddress();
-  return offerIndexerInfo.paymentToken.address === usdcAddress
+  return offerIndexerInfo.paymentToken.address === usdcAddress.toLowerCase()
     ? []
     : [
         {
@@ -241,8 +241,8 @@ async function populateMinPricePerCuPerEpochTx({
 }: OnChainOffer) {
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
-  return offerIndexerInfo.pricePerEpoch ===
-    (await ptFormat(minPricePerCuPerEpochBigInt))
+  return (await ptParse(offerIndexerInfo.pricePerEpoch)) ===
+    minPricePerCuPerEpochBigInt
     ? []
     : [
         {
