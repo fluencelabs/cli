@@ -74,11 +74,11 @@ export default class DealRewardsWithdraw extends BaseCommand<
       }, 0n);
 
       for (const { onchainId } of workers) {
-        await sign(
-          `Withdrawing rewards for compute unit ${onchainId}`,
-          deal.withdrawRewards,
-          onchainId,
-        );
+        await sign({
+          title: `Withdraw rewards for compute unit ${onchainId}`,
+          method: deal.withdrawRewards,
+          args: [onchainId],
+        });
       }
 
       commandObj.logToStderr(

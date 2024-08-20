@@ -78,7 +78,6 @@ export type OffersArgs = {
 
 export async function createOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
-  await assertProviderIsRegistered();
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
   const usdc = dealClient.getUSDC();
@@ -150,16 +149,19 @@ export async function createOffers(flags: OffersArgs) {
       maxProtocolVersion,
     } = offer;
 
-    const txReceipt = await sign(
-      `Register offer: ${offerName}`,
-      market.registerMarketOffer,
-      minPricePerCuPerEpochBigInt,
-      usdcAddress,
-      effectorPrefixesAndHash,
-      computePeersFromProviderConfig,
-      minProtocolVersion ?? versions.protocolVersion,
-      maxProtocolVersion ?? versions.protocolVersion,
-    );
+    const txReceipt = await sign({
+      validateAddress: assertProviderIsRegistered,
+      title: `Register offer: ${offerName}`,
+      method: market.registerMarketOffer,
+      args: [
+        minPricePerCuPerEpochBigInt,
+        usdcAddress,
+        effectorPrefixesAndHash,
+        computePeersFromProviderConfig,
+        minProtocolVersion ?? versions.protocolVersion,
+        maxProtocolVersion ?? versions.protocolVersion,
+      ],
+    });
 
     registerMarketOfferTxReceipts.push({ offerName, txReceipt });
   }
@@ -325,7 +327,6 @@ async function formatOfferInfo(
 
 export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
-  await assertProviderIsRegistered();
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
   const usdc = dealClient.getUSDC();
@@ -639,6 +640,7 @@ export async function updateOffers(flags: OffersArgs) {
       populatedTxs.map(({ tx }) => {
         return tx;
       }),
+      assertProviderIsRegistered,
     );
   }
 }

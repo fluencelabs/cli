@@ -278,16 +278,14 @@ async function doSign<
   A extends Array<unknown> = Array<unknown>,
   R = unknown,
   S extends Exclude<StateMutability, "view"> = "payable",
->(
-  getTransaction: () => Promise<
-    [
-      string,
-      TypedContractMethod<A, R, S>,
-      ...Parameters<TypedContractMethod<A, R, S>>,
-    ]
-  >,
-) {
-  const [title, method, ...originalArgs] = await getTransaction();
+>(getTransaction: () => Promise<SignArgs<A, R, S>>) {
+  const {
+    title,
+    method,
+    args: originalArgs,
+    validateAddress,
+  } = await getTransaction();
+
   const overrides = originalArgs[originalArgs.length - 1];
 
   const hasOverrides =
@@ -359,7 +357,7 @@ async function doSign<
 
     ({ txHash } = await createTransaction(
       async (): Promise<TransactionPayload> => {
-        const [title, method, ...originalArgs] = await getTransaction();
+        const { title, method, args: originalArgs } = await getTransaction();
 
         // @ts-expect-error this probably impossible to type correctly with current TypeScript compiler
         const args: Parameters<TypedContractMethod<A, R, S>> = hasOverrides
@@ -376,6 +374,7 @@ async function doSign<
           transactionData: await method.populateTransaction(...args),
         };
       },
+      validateAddress,
     ));
 
     const { providerOrWallet } = await getDealClient();
@@ -403,17 +402,28 @@ async function doSign<
   return txReceipt;
 }
 
+export type ValidateAddress =
+  | ((address: `0x${string}`) => never | Promise<void>)
+  | undefined;
+
+type SignArgs<
+  A extends Array<unknown> = Array<unknown>,
+  R = unknown,
+  S extends Exclude<StateMutability, "view"> = "payable",
+> = {
+  title: string;
+  method: TypedContractMethod<A, R, S>;
+  args: Parameters<TypedContractMethod<A, R, S>>;
+  validateAddress?: ValidateAddress;
+};
+
 export async function sign<
   A extends Array<unknown> = Array<unknown>,
   R = unknown,
   S extends Exclude<StateMutability, "view"> = "payable",
->(
-  title: string,
-  method: TypedContractMethod<A, R, S>,
-  ...originalArgs: Parameters<TypedContractMethod<A, R, S>>
-) {
+>(signArgs: SignArgs<A, R, S>) {
   return doSign(() => {
-    return Promise.resolve([title, method, ...originalArgs] as const);
+    return Promise.resolve(signArgs);
   });
 }
 
@@ -442,6 +452,7 @@ let batchTxMessage: string | undefined;
 export async function signBatch(
   title: string,
   populatedTxsWithDebugInfo: Array<ReturnType<typeof populateTx>>,
+  validateAddress?: ValidateAddress,
 ) {
   const populatedTxsWithDebugInfoResolved = await Promise.all(
     populatedTxsWithDebugInfo.map(async ({ populate, debugInfo }) => {
@@ -486,15 +497,18 @@ export async function signBatch(
 
     receipts.push(
       await doSign(async () => {
-        return [
-          title,
-          multicall,
-          await Promise.all(
-            txs.map(async ({ populate }) => {
-              return (await populate()).data;
-            }),
-          ),
-        ];
+        return {
+          title: title,
+          method: multicall,
+          args: [
+            await Promise.all(
+              txs.map(async ({ populate }) => {
+                return (await populate()).data;
+              }),
+            ),
+          ],
+          validateAddress,
+        } as const;
       }),
     );
   }

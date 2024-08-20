@@ -123,37 +123,38 @@ export async function dealCreate({
 
   const dealFactory = dealClient.getDealFactory();
 
-  await sign(
-    `Approve ${await ptFormatWithSymbol(initialBalanceBigInt)} to be deposited to the deal`,
-    usdc.approve,
-    await dealFactory.getAddress(),
-    initialBalanceBigInt,
-  );
+  await sign({
+    title: `Approve ${await ptFormatWithSymbol(initialBalanceBigInt)} to be deposited to the deal`,
+    method: usdc.approve,
+    args: [await dealFactory.getAddress(), initialBalanceBigInt],
+  });
 
-  const deployDealTxReceipt = await sign(
-    `Create deal with appCID: ${appCID}`,
-    dealFactory.deployDeal,
-    await cidStringToCIDV1Struct(appCID),
-    await usdc.getAddress(),
-    initialBalanceBigInt,
-    minWorkers,
-    targetWorkers,
-    cuCountPerWorker,
-    maxWorkersPerProvider,
-    pricePerCuPerEpochBigInt,
-    await Promise.all(
-      effectors.map((cid) => {
-        return cidStringToCIDV1Struct(cid);
-      }),
-    ),
-    whitelist !== undefined ? 1 : blacklist !== undefined ? 2 : 0,
-    whitelist !== undefined
-      ? whitelist
-      : blacklist !== undefined
-        ? blacklist
-        : [],
-    protocolVersion ?? versions.protocolVersion,
-  );
+  const deployDealTxReceipt = await sign({
+    title: `Create deal with appCID: ${appCID}`,
+    method: dealFactory.deployDeal,
+    args: [
+      await cidStringToCIDV1Struct(appCID),
+      await usdc.getAddress(),
+      initialBalanceBigInt,
+      minWorkers,
+      targetWorkers,
+      cuCountPerWorker,
+      maxWorkersPerProvider,
+      pricePerCuPerEpochBigInt,
+      await Promise.all(
+        effectors.map((cid) => {
+          return cidStringToCIDV1Struct(cid);
+        }),
+      ),
+      whitelist !== undefined ? 1 : blacklist !== undefined ? 2 : 0,
+      whitelist !== undefined
+        ? whitelist
+        : blacklist !== undefined
+          ? blacklist
+          : [],
+      protocolVersion ?? versions.protocolVersion,
+    ],
+  });
 
   const dealId = getEventValue({
     contract: dealFactory,
@@ -214,13 +215,11 @@ export async function createAndMatchDealsWithAllCUsOfPeerIds({
       });
 
       try {
-        const matchDealTxReceipt = await sign(
-          `Match deal ${dealAddress} with CU ${unitId} from offer ${offerId}`,
-          market.matchDeal,
-          dealAddress,
-          [offerId],
-          [[[unitId]]],
-        );
+        const matchDealTxReceipt = await sign({
+          title: `Match deal ${dealAddress} with CU ${unitId} from offer ${offerId}`,
+          method: market.matchDeal,
+          args: [dealAddress, [offerId], [[[unitId]]]],
+        });
 
         const pats = getEventValues({
           contract: market,
@@ -275,11 +274,11 @@ export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
   const { dealClient } = await getDealClient();
   const deal = dealClient.getDeal(dealAddress);
 
-  await sign(
-    `Update deal with new appCID: ${appCID}`,
-    deal.setAppCID,
-    await cidStringToCIDV1Struct(appCID),
-  );
+  await sign({
+    title: `Update deal with new appCID: ${appCID}`,
+    method: deal.setAppCID,
+    args: [await cidStringToCIDV1Struct(appCID)],
+  });
 }
 
 export async function match(dealAddress: string) {
@@ -315,13 +314,11 @@ export async function match(dealAddress: string) {
 
   const market = dealClient.getMarket();
 
-  const matchDealTxReceipt = await sign(
-    `Match deal ${dealAddress} with offers:\n\n${matchedOffers.offers.join("\n")}`,
-    market.matchDeal,
-    dealAddress,
-    matchedOffers.offers,
-    matchedOffers.computeUnits,
-  );
+  const matchDealTxReceipt = await sign({
+    title: `Match deal ${dealAddress} with offers:\n\n${matchedOffers.offers.join("\n")}`,
+    method: market.matchDeal,
+    args: [dealAddress, matchedOffers.offers, matchedOffers.computeUnits],
+  });
 
   const pats = getEventValues({
     contract: market,

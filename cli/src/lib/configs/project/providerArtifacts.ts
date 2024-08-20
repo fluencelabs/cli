@@ -28,7 +28,6 @@ import {
   type FluenceEnv,
   isFluenceEnv,
 } from "../../const.js";
-import { getSignerAddress } from "../../dealClient.js";
 import {
   ensureProviderArtifactsConfigPath,
   getFluenceDir,
@@ -240,12 +239,9 @@ const migrations: Migrations<Config> = [
 
       const newConfigPerEnv: Record<string, OfferConfigV2> = {};
 
-      const address = await getSignerAddress();
-
       for (const [offerName, offer] of Object.entries(configPerEnv)) {
         const providerAddress = await input({
           message: `Enter provider address that was used when creating offer ${offerName} with offerId: ${offer.id} at ${configPath}`,
-          default: address,
         });
 
         newConfigPerEnv[offerName] = { ...offer, providerAddress };

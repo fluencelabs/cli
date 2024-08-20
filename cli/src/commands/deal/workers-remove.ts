@@ -72,11 +72,11 @@ export default class WorkersRemove extends BaseCommand<typeof WorkersRemove> {
     );
 
     for (const workerId of workerIds) {
-      await sign(
-        `Remove worker ${workerId} from deal`,
-        dealContract.removeWorker,
-        workerId,
-      );
+      await sign({
+        title: `Remove worker ${workerId} from deal`,
+        method: dealContract.removeWorker,
+        args: [workerId],
+      });
 
       commandObj.log(
         `Worker ${color.yellow(workerId)} was removed from the deal`,

@@ -81,6 +81,7 @@ export type CLIToConnectorMsg =
     }
   | {
       tag: "ping";
+      addressUsedByCLI: string | null;
     }
   | {
       tag: "returnToCLI";
@@ -103,6 +104,7 @@ export type ConnectorToCLIMessageTransactionSuccess = {
 
 export type ConnectorToCLIMessageSendTransaction = {
   tag: "sendTransaction";
+  address: `0x${string}`;
 };
 
 export type ConnectorToCLIMessage =

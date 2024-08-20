@@ -16,7 +16,6 @@
  */
 
 // In Firefox: client variable can be undefined - that's why we need to use optional chaining
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
@@ -57,6 +56,7 @@ export function App({
   setChainId: (chainId: ChainId) => void;
 }) {
   const { isConnected, address, chainId: accountChainId } = useAccount();
+  const [addressUsedByCLI, setAddressUsedByCLI] = useState<string | null>(null);
   const client = useClient();
   const { switchChain, isPending: isSwitchChainPending } = useSwitchChain();
   const [isExpectingAddress, setIsExpectingAddress] = useState(false);
@@ -123,13 +123,6 @@ export function App({
     isCorrectChainIdSet,
   ]);
 
-  useEffect(() => {
-    if (isExpectingAddress && address !== undefined) {
-      setIsExpectingAddress(false);
-      respond({ tag: "address", address });
-    }
-  }, [address, isExpectingAddress]);
-
   const CLIDisconnectedTimeout = useRef<number>();
   const gotFirstMessage = useRef(false);
 
@@ -149,6 +142,7 @@ export function App({
       }
 
       if (msg.tag !== "ping") {
+        reset();
         setIsReturnToCLI(false);
       }
 
@@ -156,11 +150,8 @@ export function App({
         setIsExpectingAddress(true);
       } else if (msg.tag === "previewTransaction") {
         gotFirstMessage.current = true;
-        reset();
         setTransactionPayload(msg.payload);
       } else if (msg.tag === "sendTransaction") {
-        reset();
-
         if (!gotFirstMessage.current) {
           gotFirstMessage.current = true;
           setTransactionPayload(msg.payload);
@@ -169,6 +160,7 @@ export function App({
           sendTransaction(msg.payload.transactionData);
         }
       } else if (msg.tag === "ping") {
+        setAddressUsedByCLI(msg.addressUsedByCLI);
         setIsCLIConnected(true);
         clearTimeout(CLIDisconnectedTimeout.current);
 
@@ -176,6 +168,7 @@ export function App({
           setIsCLIConnected(false);
         }, 3000);
         // We disable this rule so it's possible to rely on TypeScript to make sure we handle all the messages
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       } else if (msg.tag === "returnToCLI") {
         setIsReturnToCLI(true);
       } else {
@@ -256,15 +249,39 @@ export function App({
           smallScreen: "none",
         }}
       />
-      {isConnected && (
+      {addressUsedByCLI !== null &&
+        address !== undefined &&
+        addressUsedByCLI !== address && (
+          <div className="error">
+            The account address sent to CLI when command execution started:
+            {" \n"}
+            <b>{addressUsedByCLI}</b> is different from the current account
+            address:{" \n"}
+            <b>{address}</b>. Please switch back to the{" \n"}
+            <b>{addressUsedByCLI}</b> account or rerun the CLI command
+          </div>
+        )}
+      {isConnected && address !== undefined && (
         <>
+          {isExpectingAddress && (
+            <button
+              type="button"
+              className="button"
+              onClick={() => {
+                setIsExpectingAddress(false);
+                respond({ tag: "address", address });
+              }}
+            >
+              Send account address to CLI
+            </button>
+          )}
           {transactionPayload !== null && isCorrectChainIdSet && (
             <button
               type="button"
               className={`button${isSendTxButtonEnabled ? "" : " button_disabled"}`}
               onClick={() => {
                 if (isSendTxButtonEnabled) {
-                  respond({ tag: "sendTransaction" });
+                  respond({ tag: "sendTransaction", address });
                 }
               }}
             >

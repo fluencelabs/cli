@@ -85,8 +85,6 @@ export async function updateOffers(flags: OffersArgs) {
     return;
   }
 
-  await assertProviderIsRegistered();
-
   await signBatch(
     `Updating offers:\n\n${populatedTxs
       .map(({ offerName, offerId }) => {
@@ -94,6 +92,7 @@ export async function updateOffers(flags: OffersArgs) {
       })
       .join("\n")}`,
     updateOffersTxs,
+    assertProviderIsRegistered,
   );
 }
 

@@ -82,18 +82,20 @@ export async function depositCollateral(flags: CCFlags) {
     0n,
   );
 
-  await sign(
-    `Deposit ${await fltFormatWithSymbol(collateralToApproveCommitment)} collateral to the following capacity commitments:\n\n${commitments
+  await sign({
+    title: `Deposit ${await fltFormatWithSymbol(collateralToApproveCommitment)} collateral to the following capacity commitments:\n\n${commitments
       .map(({ commitmentId, noxName, peerId }) => {
         return [noxName, peerId, commitmentId].filter(Boolean).join("\n");
       })
       .join("\n\n")}`,
-    capacity.depositCollateral,
-    commitments.map(({ commitmentId }) => {
-      return commitmentId;
-    }),
-    { value: collateralToApproveCommitment },
-  );
+    method: capacity.depositCollateral,
+    args: [
+      commitments.map(({ commitmentId }) => {
+        return commitmentId;
+      }),
+      { value: collateralToApproveCommitment },
+    ],
+  });
 
   commandObj.logToStderr(
     `${color.yellow(
