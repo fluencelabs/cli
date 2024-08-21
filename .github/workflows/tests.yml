@@ -67,7 +67,7 @@ on:
 env:
   CI: true
   FORCE_COLOR: true
-  DEBUG: "fcli:*,deal-ts-clients:*"
+  DEBUG: "*"
   FLUENCE_ENV: "${{ inputs.fluence-env }}"
   FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
   CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
