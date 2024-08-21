@@ -485,10 +485,12 @@ export async function signBatch(
 
   const { IMulticall__factory } = await import("@fluencelabs/deal-ts-clients");
   const { providerOrWallet } = await getDealClient();
+
   const { multicall } = IMulticall__factory.connect(
     firstAddr,
     providerOrWallet,
   );
+
   const receipts = [];
 
   for (const txs of populatedTxsChunked) {
