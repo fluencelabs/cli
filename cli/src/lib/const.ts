@@ -61,6 +61,8 @@ export const DEFAULT_PRICE_PER_CU_PER_EPOCH_PROVIDER = "0.33";
 export const DEFAULT_PRICE_PER_CU_PER_EPOCH_DEVELOPER = "0.33";
 export const DEFAULT_DEAL_ACTIVE_DURATION_FOR_LOCAL_ENV = BigInt(60 * 60 * 24);
 
+export const GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX = 100;
+
 export const defaultNumberProperties: Record<CurrencyProperty, string> = {
   minPricePerCuPerEpoch: DEFAULT_PRICE_PER_CU_PER_EPOCH_PROVIDER,
 };

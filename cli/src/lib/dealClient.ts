@@ -445,7 +445,7 @@ export function populateTx<T extends unknown[]>(
   };
 }
 
-const BATCH_SIZE = 10;
+export const BATCH_SIZE = 10;
 
 let batchTxMessage: string | undefined;
 

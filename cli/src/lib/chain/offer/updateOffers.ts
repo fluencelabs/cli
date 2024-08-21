@@ -17,6 +17,7 @@
 
 import type { ComputeUnit } from "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/types/schemes.js";
 import { color } from "@oclif/color";
+import chunk from "lodash-es/chunk.js";
 
 import { commandObj } from "../../commandObj.js";
 import {
@@ -24,8 +25,14 @@ import {
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   PT_SYMBOL,
 } from "../../const.js";
-import { getDealClient, signBatch, populateTx } from "../../dealClient.js";
-import { uint8ArrayToHex } from "../../helpers/typesafeStringify.js";
+import { GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX } from "../../const.js";
+import {
+  getDealClient,
+  signBatch,
+  BATCH_SIZE,
+  populateTx,
+} from "../../dealClient.js";
+import { numToStr, uint8ArrayToHex } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
 import {
@@ -399,15 +406,20 @@ async function populateCUToAddTxs(
     },
   );
 
-  return computeUnitsToAdd.map(({ hexPeerId, unitIds, peerIdBase58 }) => {
-    return {
-      description: `\nAdding compute units to peer ${peerIdBase58}:\n${unitIds
-        .map((unitId) => {
-          return uint8ArrayToHex(Buffer.from(unitId));
-        })
-        .join("\n")}`,
-      tx: populateTx(market.addComputeUnits, hexPeerId, unitIds),
-    };
+  return computeUnitsToAdd.flatMap(({ hexPeerId, unitIds, peerIdBase58 }) => {
+    return chunk(
+      unitIds,
+      Math.floor(GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX / BATCH_SIZE),
+    ).map((CUIds, i) => {
+      return {
+        ...(i === 0
+          ? {
+              description: `\nAdding ${numToStr(unitIds.length)} compute units to peer ${peerIdBase58}`,
+            }
+          : {}),
+        tx: populateTx(market.addComputeUnits, hexPeerId, CUIds),
+      };
+    });
   });
 }
 

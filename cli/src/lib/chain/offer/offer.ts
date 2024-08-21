@@ -40,6 +40,7 @@ import {
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX,
 } from "../../const.js";
 import { dbg } from "../../dbg.js";
 import {
@@ -69,7 +70,6 @@ import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
-const GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX = 100;
 const GUESS_NUMBER_OF_CP_THAT_FIT_IN_ONE_TX = 50;
 
 export type OffersArgs = {
