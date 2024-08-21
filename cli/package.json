@@ -59,7 +59,7 @@
     "@fluencelabs/air-beautify-wasm": "0.3.9",
     "@fluencelabs/aqua-api": "0.14.10",
     "@fluencelabs/aqua-to-js": "0.3.13",
-    "@fluencelabs/deal-ts-clients": "0.16.2-move-to-workers-5dc6304-5897-1.0",
+    "@fluencelabs/deal-ts-clients": "0.17.1-active-ccs-per-provider-f3ba4cb-5953-1.0",
     "@fluencelabs/fluence-network-environment": "1.2.2",
     "@fluencelabs/js-client": "0.9.0",
     "@fluencelabs/npm-aqua-compiler": "0.0.3",
