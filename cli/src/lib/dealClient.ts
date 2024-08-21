@@ -483,9 +483,9 @@ export async function signBatch(
 
   const populatedTxsChunked = chunk(populatedTxsWithDebugInfo, BATCH_SIZE);
 
-  const { Multicall__factory } = await import("@fluencelabs/deal-ts-clients");
+  const { IMulticall__factory } = await import("@fluencelabs/deal-ts-clients");
   const { providerOrWallet } = await getDealClient();
-  const { multicall } = Multicall__factory.connect(firstAddr, providerOrWallet);
+  const { multicall } = IMulticall__factory.connect(firstAddr, providerOrWallet);
   const receipts = [];
 
   for (const txs of populatedTxsChunked) {
