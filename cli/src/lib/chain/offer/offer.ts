@@ -17,6 +17,8 @@
 
 import type { OfferDetail } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/types/schemes.js";
 import { color } from "@oclif/color";
+import type { TransactionReceipt } from "ethers";
+import chunk from "lodash-es/chunk.js";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -38,6 +40,7 @@ import {
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX,
 } from "../../const.js";
 import { dbg } from "../../dbg.js";
 import {
@@ -67,6 +70,7 @@ import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
+const GUESS_NUMBER_OF_CP_THAT_FIT_IN_ONE_TX = 50;
 
 export type OffersArgs = {
   [OFFER_FLAG_NAME]?: string | undefined;
@@ -134,7 +138,10 @@ export async function createOffers(flags: OffersArgs) {
   //   value: OFFER_ID_PROPERTY,
   // });
 
-  const registerMarketOfferTxReceipts = [];
+  const registeredMarketOffers: (
+    | { result: { offerId: string; offerName: string } }
+    | { error: string }
+  )[] = [];
 
   for (const offer of offers) {
     const {
@@ -146,49 +153,99 @@ export async function createOffers(flags: OffersArgs) {
       maxProtocolVersion,
     } = offer;
 
-    const txReceipt = await sign({
-      validateAddress: assertProviderIsRegistered,
-      title: `Register offer: ${offerName}`,
-      method: market.registerMarketOffer,
-      args: [
-        minPricePerCuPerEpochBigInt,
-        usdcAddress,
-        effectorPrefixesAndHash,
-        computePeersFromProviderConfig,
-        minProtocolVersion ?? versions.protocolVersion,
-        maxProtocolVersion ?? versions.protocolVersion,
-      ],
+    function getOfferIdRes(txReceipt: TransactionReceipt) {
+      const offerId = getEventValue({
+        contract: market,
+        eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
+        txReceipt,
+        value: OFFER_ID_PROPERTY,
+      });
+
+      return typeof offerId === "string"
+        ? { result: { offerId, offerName } }
+        : {
+            error: `for ${color.yellow(
+              offerName,
+            )} instead of offer id got: ${stringifyUnknown(offerId)} from ${MARKET_OFFER_REGISTERED_EVENT_NAME} event`,
+          };
+    }
+
+    const allCUs = computePeersFromProviderConfig.flatMap(({ unitIds }) => {
+      return unitIds;
     });
 
-    registerMarketOfferTxReceipts.push({ offerName, txReceipt });
-  }
+    const REGISTER_OFFER_TITLE = `Register offer: ${offerName}`;
 
-  const notValidatedOfferIds = registerMarketOfferTxReceipts.map(
-    ({ offerName, txReceipt }) => {
-      return {
-        offerName,
-        offerId: getEventValue({
-          contract: market,
-          eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
-          txReceipt,
-          value: OFFER_ID_PROPERTY,
-        }),
-      };
-    },
-  );
+    if (
+      allCUs.length <= GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX &&
+      computePeersFromProviderConfig.length <=
+        GUESS_NUMBER_OF_CP_THAT_FIT_IN_ONE_TX
+    ) {
+      const offerRegisterTxReceipt = await sign({
+        validateAddress: assertProviderIsRegistered,
+        title: REGISTER_OFFER_TITLE,
+        method: market.registerMarketOffer,
+        args: [
+          minPricePerCuPerEpochBigInt,
+          usdcAddress,
+          effectorPrefixesAndHash,
+          computePeersFromProviderConfig,
+          minProtocolVersion ?? versions.protocolVersion,
+          maxProtocolVersion ?? versions.protocolVersion,
+        ],
+      });
 
-  const [offerIdErrors, offerIds] = splitErrorsAndResults(
-    notValidatedOfferIds,
-    ({ offerId, offerName }) => {
-      if (typeof offerId === "string") {
-        return { result: { offerId, offerName } };
+      registeredMarketOffers.push(getOfferIdRes(offerRegisterTxReceipt));
+    } else {
+      const offerRegisterTxReceipt = await sign({
+        validateAddress: assertProviderIsRegistered,
+        title: REGISTER_OFFER_TITLE,
+        method: market.registerMarketOffer,
+        args: [
+          minPricePerCuPerEpochBigInt,
+          usdcAddress,
+          effectorPrefixesAndHash,
+          [],
+          minProtocolVersion ?? versions.protocolVersion,
+          maxProtocolVersion ?? versions.protocolVersion,
+        ],
+      });
+
+      const offerIdRes = getOfferIdRes(offerRegisterTxReceipt);
+      registeredMarketOffers.push(offerIdRes);
+
+      if ("error" in offerIdRes) {
+        continue;
       }
 
-      return {
-        error: `for ${color.yellow(
-          offerName,
-        )} instead of offer id got: ${stringifyUnknown(offerId)}`,
-      };
+      const { offerId } = offerIdRes.result;
+
+      for (const cp of computePeersFromProviderConfig) {
+        for (const [i, unitIds] of Object.entries(
+          chunk(cp.unitIds, GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX),
+        )) {
+          if (i === "0") {
+            await sign({
+              title: `Add compute peer ${cp.name} (${cp.peerIdBase58})\nto offer ${offerName} (${offerId})`,
+              method: market.addComputePeers,
+              args: [offerId, [{ ...cp, unitIds }]],
+            });
+          } else {
+            await sign({
+              title: `Add ${numToStr(unitIds.length)} compute units\nto compute peer ${cp.name} (${cp.peerIdBase58})\nfor offer ${offerName} (${offerId})`,
+              method: market.addComputeUnits,
+              args: [cp.peerId, unitIds],
+            });
+          }
+        }
+      }
+    }
+  }
+
+  const [offerIdErrors, offerIds] = splitErrorsAndResults(
+    registeredMarketOffers,
+    (res) => {
+      return res;
     },
   );
 
