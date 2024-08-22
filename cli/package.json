@@ -128,7 +128,7 @@
     "tsx": "4.9.3",
     "typescript": "5.4.5",
     "typescript-eslint": "7.8.0",
-    "undici": "6.16.0",
+    "undici": "6.19.2",
     "vitest": "1.6.0"
   },
   "oclif": {
