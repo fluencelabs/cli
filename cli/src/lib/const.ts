@@ -53,16 +53,18 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
-export const currencyProperties = ["minPricePerWorkerEpoch"] as const;
+export const currencyProperties = ["minPricePerCuPerEpoch"] as const;
 export type CurrencyProperty = (typeof currencyProperties)[number];
 
 export const COLLATERAL_DEFAULT = 1;
-export const DEFAULT_PRICE_PER_EPOCH_PROVIDER = "0.33";
-export const DEFAULT_PRICE_PER_EPOCH_DEVELOPER = "0.33";
+export const DEFAULT_PRICE_PER_CU_PER_EPOCH_PROVIDER = "0.33";
+export const DEFAULT_PRICE_PER_CU_PER_EPOCH_DEVELOPER = "0.33";
 export const DEFAULT_DEAL_ACTIVE_DURATION_FOR_LOCAL_ENV = BigInt(60 * 60 * 24);
 
+export const GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX = 100;
+
 export const defaultNumberProperties: Record<CurrencyProperty, string> = {
-  minPricePerWorkerEpoch: DEFAULT_PRICE_PER_EPOCH_PROVIDER,
+  minPricePerCuPerEpoch: DEFAULT_PRICE_PER_CU_PER_EPOCH_PROVIDER,
 };
 
 export const MIN_MEMORY_PER_MODULE_STR = "2 MiB";
@@ -74,7 +76,7 @@ export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
 
 export const DEFAULT_CURL_EFFECTOR_CID =
-  "bafkreids22lgia5bqs63uigw4mqwhsoxvtnkpfqxqy5uwyyerrldsr32ce";
+  "bafybeicorj3sl6fhqpuubmt5r2n7plkjkmto6jxqckgte2624dj5zvzufm";
 
 const byteUnits = [
   "kB",

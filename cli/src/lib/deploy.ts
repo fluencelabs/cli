@@ -40,7 +40,7 @@ import {
   MARINE_BUILD_ARGS_FLAG,
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
-  DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
+  DEFAULT_PRICE_PER_CU_PER_EPOCH_DEVELOPER,
   CHAIN_FLAGS,
   DEPLOYMENT_NAMES_ARG_NAME,
   IMPORT_FLAG,
@@ -125,8 +125,9 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       targetWorkers = TARGET_WORKERS_DEFAULT,
       minWorkers = targetWorkers,
       effectors = [],
-      pricePerWorkerEpoch = DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
+      pricePerCuPerEpoch = DEFAULT_PRICE_PER_CU_PER_EPOCH_DEVELOPER,
       maxWorkersPerProvider = targetWorkers,
+      cuCountPerWorker = 1,
     } = deal;
 
     let createdDeal = workersConfig.deals?.[fluenceEnv]?.[deploymentName];
@@ -210,7 +211,8 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       minWorkers,
       targetWorkers,
       maxWorkersPerProvider,
-      pricePerWorkerEpoch,
+      pricePerCuPerEpoch,
+      cuCountPerWorker,
       effectors,
       deploymentName,
       initialBalance: deal.initialBalance,

@@ -482,11 +482,11 @@ export async function collateralWithdraw(
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
-    await sign(
-      `Withdraw collateral from: ${commitment.commitmentId}}`,
-      capacity.withdrawCollateral,
-      commitmentId,
-    );
+    await sign({
+      title: `Withdraw collateral from: ${commitment.commitmentId}}`,
+      method: capacity.withdrawCollateral,
+      args: [commitmentId],
+    });
 
     commandObj.logToStderr(
       `Collateral withdrawn for:\n${stringifyBasicCommitmentInfo(commitment)}`,
@@ -512,19 +512,18 @@ export async function collateralWithdraw(
           [...unitIds],
           flags[MAX_CUS_FLAG_NAME],
         )) {
-          await sign(
-            `Remove the following compute units from capacity commitments:\n\n${[...unitIdsBatch].join("\n")}`,
-            capacity.removeCUFromCC,
-            commitmentId,
-            [...unitIdsBatch],
-          );
+          await sign({
+            title: `Remove the following compute units from capacity commitments:\n\n${[...unitIdsBatch].join("\n")}`,
+            method: capacity.removeCUFromCC,
+            args: [commitmentId, [...unitIdsBatch]],
+          });
         }
 
-        await sign(
-          `Finish capacity commitment ${commitmentId}`,
-          capacity.finishCommitment,
-          commitmentId,
-        );
+        await sign({
+          title: `Finish capacity commitment ${commitmentId}`,
+          method: capacity.finishCommitment,
+          args: [commitmentId],
+        });
       }
     } catch (error) {
       commandObj.warn(

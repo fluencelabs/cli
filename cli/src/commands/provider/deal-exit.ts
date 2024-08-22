@@ -52,7 +52,6 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     const { flags } = await initCli(this, await this.parse(DealExit));
     const { dealClient } = await getDealClient();
     const signerAddress = await getSignerAddress();
-    const market = dealClient.getMarket();
 
     const dealIds = flags.all
       ? (await getProviderDeals()).map(({ id }) => {
@@ -65,27 +64,29 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
             })),
         );
 
-    const computeUnits = (
+    const workers = (
       await Promise.all(
         dealIds.map(async (id) => {
           const deal = dealClient.getDeal(id);
-          return deal.getComputeUnits();
+          return (await deal.getWorkers()).map((worker) => {
+            return { deal, worker };
+          });
         }),
       )
     ).flat();
 
     await signBatch(
-      `Remove the following compute units from deals:\n\n${computeUnits
-        .map(({ id }) => {
-          return id;
+      `Remove the following workers from deals:\n\n${workers
+        .map(({ worker: { onchainId } }) => {
+          return onchainId;
         })
         .join("\n")}`,
-      computeUnits
-        .filter((computeUnit) => {
-          return computeUnit.provider.toLowerCase() === signerAddress;
+      workers
+        .filter(({ worker }) => {
+          return worker.provider.toLowerCase() === signerAddress;
         })
-        .map((computeUnit) => {
-          return populateTx(market.returnComputeUnitFromDeal, computeUnit.id);
+        .map(({ deal, worker: { onchainId } }) => {
+          return populateTx(deal.removeWorker, onchainId);
         }),
     );
   }

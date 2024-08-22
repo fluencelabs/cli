@@ -17,6 +17,7 @@
 
 import type { ComputeUnit } from "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/types/schemes.js";
 import { color } from "@oclif/color";
+import chunk from "lodash-es/chunk.js";
 
 import { commandObj } from "../../commandObj.js";
 import {
@@ -24,15 +25,21 @@ import {
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   PT_SYMBOL,
 } from "../../const.js";
-import { getDealClient, signBatch, populateTx } from "../../dealClient.js";
-import { uint8ArrayToHex } from "../../helpers/typesafeStringify.js";
+import { GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX } from "../../const.js";
+import {
+  getDealClient,
+  signBatch,
+  BATCH_SIZE,
+  populateTx,
+} from "../../dealClient.js";
+import { numToStr, uint8ArrayToHex } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
 import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
 } from "../conversions.js";
-import { ptFormat, ptFormatWithSymbol } from "../currencies.js";
+import { ptParse, ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 import {
@@ -85,8 +92,6 @@ export async function updateOffers(flags: OffersArgs) {
     return;
   }
 
-  await assertProviderIsRegistered();
-
   await signBatch(
     `Updating offers:\n\n${populatedTxs
       .map(({ offerName, offerId }) => {
@@ -94,6 +99,7 @@ export async function updateOffers(flags: OffersArgs) {
       })
       .join("\n")}`,
     updateOffersTxs,
+    assertProviderIsRegistered,
   );
 }
 
@@ -175,7 +181,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
           populateCUToAddTxs(offer, peersOnChain),
 
           populatePaymentTokenTx(offer),
-          populateMinPricePerWorkerEpochTx(offer),
+          populateMinPricePerCuPerEpochTx(offer),
         ])
       ).flat() satisfies Txs;
 
@@ -223,7 +229,7 @@ async function populatePaymentTokenTx({
   const usdc = dealClient.getUSDC();
   const market = dealClient.getMarket();
   const usdcAddress = await usdc.getAddress();
-  return offerIndexerInfo.paymentToken.address === usdcAddress
+  return offerIndexerInfo.paymentToken.address === usdcAddress.toLowerCase()
     ? []
     : [
         {
@@ -235,27 +241,27 @@ async function populatePaymentTokenTx({
       ];
 }
 
-async function populateMinPricePerWorkerEpochTx({
+async function populateMinPricePerCuPerEpochTx({
   offerIndexerInfo,
-  minPricePerWorkerEpochBigInt,
+  minPricePerCuPerEpochBigInt,
   offerId,
 }: OnChainOffer) {
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
-  return offerIndexerInfo.pricePerEpoch ===
-    (await ptFormat(minPricePerWorkerEpochBigInt))
+  return (await ptParse(offerIndexerInfo.pricePerEpoch)) ===
+    minPricePerCuPerEpochBigInt
     ? []
     : [
         {
-          description: `\nchanging minPricePerWorker from ${color.yellow(
+          description: `\nchanging minPricePerCuPerEpoch from ${color.yellow(
             `${offerIndexerInfo.pricePerEpoch} ${PT_SYMBOL}`,
           )} to ${color.yellow(
-            await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
+            await ptFormatWithSymbol(minPricePerCuPerEpochBigInt),
           )}`,
           tx: populateTx(
-            market.changeMinPricePerWorkerEpoch,
+            market.changeMinPricePerCuPerEpoch,
             offerId,
-            minPricePerWorkerEpochBigInt,
+            minPricePerCuPerEpochBigInt,
           ),
         },
       ];
@@ -400,15 +406,20 @@ async function populateCUToAddTxs(
     },
   );
 
-  return computeUnitsToAdd.map(({ hexPeerId, unitIds, peerIdBase58 }) => {
-    return {
-      description: `\nAdding compute units to peer ${peerIdBase58}:\n${unitIds
-        .map((unitId) => {
-          return uint8ArrayToHex(Buffer.from(unitId));
-        })
-        .join("\n")}`,
-      tx: populateTx(market.addComputeUnits, hexPeerId, unitIds),
-    };
+  return computeUnitsToAdd.flatMap(({ hexPeerId, unitIds, peerIdBase58 }) => {
+    return chunk(
+      unitIds,
+      Math.floor(GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX / BATCH_SIZE),
+    ).map((CUIds, i) => {
+      return {
+        ...(i === 0
+          ? {
+              description: `\nAdding ${numToStr(unitIds.length)} compute units to peer ${peerIdBase58}`,
+            }
+          : {}),
+        tx: populateTx(market.addComputeUnits, hexPeerId, CUIds),
+      };
+    });
   });
 }
 
