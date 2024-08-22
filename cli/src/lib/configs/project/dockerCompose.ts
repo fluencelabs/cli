@@ -200,7 +200,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
     ),
     services: {
       [IPFS_CONTAINER_NAME]: {
-        image: "ipfs/kubo:master-2024-05-16-4f94f36",
+        image: "ipfs/kubo:v0.27.0",
         ports: [`${IPFS_PORT}:${IPFS_PORT}`, "4001:4001"],
         environment: {
           IPFS_PROFILE: "server",
