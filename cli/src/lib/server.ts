@@ -229,5 +229,9 @@ export async function returnToCLI() {
 }
 
 function ping() {
-  void sendEvent({ tag: "ping", addressUsedByCLI: addressFromConnector });
+  void sendEvent({
+    tag: "ping",
+    addressUsedByCLI: addressFromConnector,
+    CLIVersion: commandObj.config.version,
+  });
 }
