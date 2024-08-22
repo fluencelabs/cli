@@ -30,11 +30,13 @@ import {
   type ConnectorToCLIMessageTransactionSuccess,
   type ConnectorToCLIMessageAddress,
   type ConnectorToCLIMessageSendTransaction,
+  type ConnectorToCLIMessage,
 } from "../common.js";
 
 import { getChainId } from "./chain/chainId.js";
 import { commandObj } from "./commandObj.js";
 import { CLI_CONNECTOR_DIR_NAME } from "./const.js";
+import type { ValidateAddress } from "./dealClient.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 
 const PORT = 5172;
@@ -54,7 +56,7 @@ let currentClientResponse: (() => void) | null = null;
 /**
  * Resolves the Promise with the answer to the "question" and allows the CLI to continue
  */
-let sendResultBack: ((result: unknown) => void) | null = null;
+let sendResultBack: ((result: ConnectorToCLIMessage) => void) | null = null;
 
 async function initServer() {
   const cliConnectorPath = await resolveCliConnectorPath();
@@ -76,15 +78,14 @@ async function initServer() {
       currentClientResponse?.();
     });
 
-    app.post("/response", (req, res) => {
+    app.post("/response", ({ body }: { body: ConnectorToCLIMessage }, res) => {
       // continue when got response from client
-      sendResultBack?.(req.body);
+      sendResultBack?.(body);
 
       // we must answer to POST request so it doesn't hang
       res.status(200).send({
         message: "Data received successfully",
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        receivedData: req.body,
+        receivedData: body,
       });
     });
 
@@ -137,7 +138,7 @@ async function sendEventAndWaitForResponse(msg: CLIToConnectorMsg) {
   };
 
   return new Promise((res) => {
-    sendResultBack = (value: unknown) => {
+    sendResultBack = (value: ConnectorToCLIMessage) => {
       res(value);
     };
 
@@ -163,6 +164,7 @@ async function sendEvent(msg: CLIToConnectorMsg) {
 
 export async function createTransaction(
   getPayload: () => Promise<TransactionPayload>,
+  validateAddress?: ValidateAddress,
 ): Promise<ConnectorToCLIMessageTransactionSuccess> {
   const payload = await getPayload();
 
@@ -178,6 +180,12 @@ export async function createTransaction(
   })) as
     | ConnectorToCLIMessageSendTransaction
     | ConnectorToCLIMessageTransactionSuccess;
+
+  if (validateAddress !== undefined && resp.tag === "sendTransaction") {
+    addressFromConnector = resp.address;
+    commandObj.logToStderr(`Connected to account ${addressFromConnector}`);
+    await validateAddress(resp.address);
+  }
 
   // Then we try until frontend successfully signs the transaction and sends tx hash back
   while (resp.tag !== "transactionSuccess") {
@@ -210,6 +218,7 @@ export async function getAddressFromConnector(): Promise<string> {
   })) as ConnectorToCLIMessageAddress;
 
   addressFromConnector = address;
+  commandObj.logToStderr(`Connected to account ${addressFromConnector}`);
   return addressFromConnector;
 }
 
@@ -220,5 +229,5 @@ export async function returnToCLI() {
 }
 
 function ping() {
-  void sendEvent({ tag: "ping" });
+  void sendEvent({ tag: "ping", addressUsedByCLI: addressFromConnector });
 }

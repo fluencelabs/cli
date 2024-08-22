@@ -19,6 +19,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { jsonStringify } from "../../common.js";
+import { getProviderInfo } from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { NOX_NAMES_FLAG, CHAIN_FLAGS, JSON_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -37,9 +38,16 @@ export default class Info extends BaseCommand<typeof Info> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Info));
     const computePeers = await resolveComputePeersByNames(flags);
+    const providerInfo = await getProviderInfo();
 
     const infoToPrint = {
-      info: computePeers.map(({ name, peerId, walletAddress }) => {
+      providerInfo: {
+        ...(providerInfo.name === null
+          ? { status: "NotRegistered" }
+          : { status: "Registered", name: providerInfo.name }),
+        address: providerInfo.address,
+      },
+      computePeers: computePeers.map(({ name, peerId, walletAddress }) => {
         return {
           nox: name,
           peerId,

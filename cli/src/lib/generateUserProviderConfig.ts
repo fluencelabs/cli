@@ -23,7 +23,10 @@ import {
   validateAddress,
 } from "./chain/chainValidators.js";
 import { isInteractive } from "./commandObj.js";
-import type { UserProvidedConfig, Offer } from "./configs/project/provider.js";
+import type {
+  UserProvidedConfig,
+  OfferV1,
+} from "./configs/project/provider.js";
 import {
   defaultNumberProperties,
   type CurrencyProperty,
@@ -41,7 +44,7 @@ import {
 import { checkboxes, confirm, input } from "./prompt.js";
 
 async function promptToSetNumberProperty(
-  offer: Offer,
+  offer: OfferV1,
   property: CurrencyProperty,
 ) {
   const propertyStr = await input({
@@ -182,7 +185,7 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
     const effectors =
       effectorsString === "" ? [] : commaSepStrToArr(effectorsString);
 
-    const offer: Offer = {
+    const offer: OfferV1 = {
       ...defaultNumberProperties,
       computePeers,
       ...(effectors.length > 0 ? { effectors } : {}),

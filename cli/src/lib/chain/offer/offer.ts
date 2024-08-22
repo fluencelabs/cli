@@ -17,6 +17,8 @@
 
 import type { OfferDetail } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/types/schemes.js";
 import { color } from "@oclif/color";
+import type { TransactionReceipt } from "ethers";
+import chunk from "lodash-es/chunk.js";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -38,6 +40,7 @@ import {
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX,
 } from "../../const.js";
 import { dbg } from "../../dbg.js";
 import {
@@ -46,11 +49,9 @@ import {
   getSignerAddress,
   sign,
   getEventValue,
-  signBatch,
 } from "../../dealClient.js";
 import { startSpinner, stopSpinner } from "../../helpers/spinner.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
-import { uint8ArrayToHex } from "../../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
   setTryTimeout,
@@ -60,16 +61,16 @@ import {
 import { checkboxes } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import {
-  cidHexStringToBase32,
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
   peerIdToUint8Array,
 } from "../conversions.js";
-import { ptFormatWithSymbol, ptParse } from "../currencies.js";
+import { ptParse } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
+const GUESS_NUMBER_OF_CP_THAT_FIT_IN_ONE_TX = 50;
 
 export type OffersArgs = {
   [OFFER_FLAG_NAME]?: string | undefined;
@@ -78,7 +79,6 @@ export type OffersArgs = {
 
 export async function createOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
-  await assertProviderIsRegistered();
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
   const usdc = dealClient.getUSDC();
@@ -114,11 +114,11 @@ export async function createOffers(flags: OffersArgs) {
   //     ({
   //       computePeersToRegister,
   //       effectorPrefixesAndHash,
-  //       minPricePerWorkerEpochBigInt,
+  //       minPricePerCuPerEpochBigInt,
   //     }) => {
   //       return [
   //         market.registerMarketOffer,
-  //         minPricePerWorkerEpochBigInt,
+  //         minPricePerCuPerEpochBigInt,
   //         usdcAddress,
   //         effectorPrefixesAndHash,
   //         computePeersToRegister,
@@ -138,58 +138,114 @@ export async function createOffers(flags: OffersArgs) {
   //   value: OFFER_ID_PROPERTY,
   // });
 
-  const registerMarketOfferTxReceipts = [];
+  const registeredMarketOffers: (
+    | { result: { offerId: string; offerName: string } }
+    | { error: string }
+  )[] = [];
 
   for (const offer of offers) {
     const {
       computePeersFromProviderConfig,
       effectorPrefixesAndHash,
-      minPricePerWorkerEpochBigInt,
+      minPricePerCuPerEpochBigInt,
       offerName,
       minProtocolVersion,
       maxProtocolVersion,
     } = offer;
 
-    const txReceipt = await sign(
-      `Register offer: ${offerName}`,
-      market.registerMarketOffer,
-      minPricePerWorkerEpochBigInt,
-      usdcAddress,
-      effectorPrefixesAndHash,
-      computePeersFromProviderConfig,
-      minProtocolVersion ?? versions.protocolVersion,
-      maxProtocolVersion ?? versions.protocolVersion,
-    );
+    function getOfferIdRes(txReceipt: TransactionReceipt) {
+      const offerId = getEventValue({
+        contract: market,
+        eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
+        txReceipt,
+        value: OFFER_ID_PROPERTY,
+      });
 
-    registerMarketOfferTxReceipts.push({ offerName, txReceipt });
-  }
+      return typeof offerId === "string"
+        ? { result: { offerId, offerName } }
+        : {
+            error: `for ${color.yellow(
+              offerName,
+            )} instead of offer id got: ${stringifyUnknown(offerId)} from ${MARKET_OFFER_REGISTERED_EVENT_NAME} event`,
+          };
+    }
 
-  const notValidatedOfferIds = registerMarketOfferTxReceipts.map(
-    ({ offerName, txReceipt }) => {
-      return {
-        offerName,
-        offerId: getEventValue({
-          contract: market,
-          eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
-          txReceipt,
-          value: OFFER_ID_PROPERTY,
-        }),
-      };
-    },
-  );
+    const allCUs = computePeersFromProviderConfig.flatMap(({ unitIds }) => {
+      return unitIds;
+    });
 
-  const [offerIdErrors, offerIds] = splitErrorsAndResults(
-    notValidatedOfferIds,
-    ({ offerId, offerName }) => {
-      if (typeof offerId === "string") {
-        return { result: { offerId, offerName } };
+    const REGISTER_OFFER_TITLE = `Register offer: ${offerName}`;
+
+    if (
+      allCUs.length <= GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX &&
+      computePeersFromProviderConfig.length <=
+        GUESS_NUMBER_OF_CP_THAT_FIT_IN_ONE_TX
+    ) {
+      const offerRegisterTxReceipt = await sign({
+        validateAddress: assertProviderIsRegistered,
+        title: REGISTER_OFFER_TITLE,
+        method: market.registerMarketOffer,
+        args: [
+          minPricePerCuPerEpochBigInt,
+          usdcAddress,
+          effectorPrefixesAndHash,
+          computePeersFromProviderConfig,
+          minProtocolVersion ?? versions.protocolVersion,
+          maxProtocolVersion ?? versions.protocolVersion,
+        ],
+      });
+
+      registeredMarketOffers.push(getOfferIdRes(offerRegisterTxReceipt));
+    } else {
+      const offerRegisterTxReceipt = await sign({
+        validateAddress: assertProviderIsRegistered,
+        title: REGISTER_OFFER_TITLE,
+        method: market.registerMarketOffer,
+        args: [
+          minPricePerCuPerEpochBigInt,
+          usdcAddress,
+          effectorPrefixesAndHash,
+          [],
+          minProtocolVersion ?? versions.protocolVersion,
+          maxProtocolVersion ?? versions.protocolVersion,
+        ],
+      });
+
+      const offerIdRes = getOfferIdRes(offerRegisterTxReceipt);
+      registeredMarketOffers.push(offerIdRes);
+
+      if ("error" in offerIdRes) {
+        continue;
       }
 
-      return {
-        error: `for ${color.yellow(
-          offerName,
-        )} instead of offer id got: ${stringifyUnknown(offerId)}`,
-      };
+      const { offerId } = offerIdRes.result;
+
+      for (const cp of computePeersFromProviderConfig) {
+        for (const [i, unitIds] of Object.entries(
+          chunk(cp.unitIds, GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX),
+        )) {
+          if (i === "0") {
+            await sign({
+              title: `Add compute peer ${cp.name} (${cp.peerIdBase58})\nto offer ${offerName} (${offerId})`,
+              method: market.addComputePeers,
+              args: [offerId, [{ ...cp, unitIds }]],
+            });
+          } else {
+            await sign({
+              title: `Add ${numToStr(unitIds.length)} compute units\nto compute peer ${cp.name} (${cp.peerIdBase58})\nfor offer ${offerName} (${offerId})`,
+              method: market.addComputeUnits,
+              args: [cp.peerId, unitIds],
+            });
+          }
+        }
+      }
+    }
+  }
+
+  const [offerIdErrors, offerIds] = splitErrorsAndResults(
+    registeredMarketOffers,
+    (res) => {
+      return res;
     },
   );
 
@@ -323,326 +379,6 @@ async function formatOfferInfo(
   );
 }
 
-export async function updateOffers(flags: OffersArgs) {
-  const offers = await resolveOffersFromProviderConfig(flags);
-  await assertProviderIsRegistered();
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
-  const usdc = dealClient.getUSDC();
-  const usdcAddress = await usdc.getAddress();
-
-  const [notCreatedOffers, offersToUpdate] = splitErrorsAndResults(
-    offers,
-    (offer) => {
-      const offerId = offer.offerId;
-
-      if (offerId === undefined) {
-        return { error: offer };
-      }
-
-      return { result: { ...offer, offerId } };
-    },
-  );
-
-  if (notCreatedOffers.length > 0) {
-    commandObj.error(
-      `You can't update offers that are not created yet. Not created offers: ${notCreatedOffers
-        .map(({ offerName }) => {
-          return offerName;
-        })
-        .join(
-          ", ",
-        )}. You can create them if you want using '${CLI_NAME} provider offer-create' command`,
-    );
-  }
-
-  const [notFoundOffersInfo, offersInfo] = await getOffersInfo(offersToUpdate);
-
-  if (notFoundOffersInfo.length > 0) {
-    commandObj.warn(
-      commandObj.warn(
-        `Can't find the following offers:\n${notFoundOffersInfo
-          .map((offer) => {
-            return `${offer.offerName}: ${offer.offerId}`;
-          })
-          .join(
-            "",
-          )}\n\nPlease check whether the offer exists and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`,
-      ),
-    );
-  }
-
-  for (const {
-    minPricePerWorkerEpochBigInt,
-    offerId,
-    effectors,
-    offerName,
-    computePeersFromProviderConfig,
-    offerIndexerInfo,
-  } of offersInfo) {
-    const populatedTxs = [];
-
-    if (offerIndexerInfo.paymentToken.address !== usdcAddress.toLowerCase()) {
-      populatedTxs.push({
-        description: `\nchanging payment token from ${color.yellow(
-          offerIndexerInfo.paymentToken.address,
-        )} to ${color.yellow(usdcAddress)}`,
-        tx: [market.changePaymentToken, offerId, usdcAddress],
-      });
-    }
-
-    const minPricePerWorkerEpochBigIntFromIndexer = await ptParse(
-      offerIndexerInfo.pricePerEpoch,
-    );
-
-    if (
-      minPricePerWorkerEpochBigIntFromIndexer !== minPricePerWorkerEpochBigInt
-    ) {
-      populatedTxs.push({
-        description: `\nchanging minPricePerWorker from ${color.yellow(
-          await ptFormatWithSymbol(minPricePerWorkerEpochBigIntFromIndexer),
-        )} to ${color.yellow(
-          await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
-        )}`,
-        tx: [
-          market.changeMinPricePerWorkerEpoch,
-          offerId,
-          minPricePerWorkerEpochBigInt,
-        ],
-      });
-    }
-
-    const offerClientInfoEffectors = await Promise.all(
-      offerIndexerInfo.effectors.map(({ cid }) => {
-        return cidHexStringToBase32(cid);
-      }),
-    );
-
-    const removedEffectors = offerClientInfoEffectors.filter((cid) => {
-      return effectors === undefined ? true : !effectors.includes(cid);
-    });
-
-    if (removedEffectors.length > 0) {
-      populatedTxs.push({
-        description: `\nRemoving effectors:\n${removedEffectors.join("\n")}`,
-        tx: [
-          market.removeEffector,
-          offerId,
-          await Promise.all(
-            removedEffectors.map((cid) => {
-              return cidStringToCIDV1Struct(cid);
-            }),
-          ),
-        ],
-      });
-    }
-
-    const addedEffectors = (effectors ?? []).filter((effector) => {
-      return !offerClientInfoEffectors.some((cid) => {
-        return cid === effector;
-      });
-    });
-
-    if (addedEffectors.length > 0) {
-      populatedTxs.push({
-        description: `\nAdding effectors:\n${addedEffectors.join("\n")}`,
-        tx: [
-          market.addEffector,
-          offerId,
-          await Promise.all(
-            addedEffectors.map((effector) => {
-              return cidStringToCIDV1Struct(effector);
-            }),
-          ),
-        ],
-      });
-    }
-
-    const peersOnChain = await Promise.all(
-      offerIndexerInfo.peers.map(async ({ id, ...rest }) => {
-        return {
-          peerIdBase58: await peerIdHexStringToBase58String(id),
-          hexPeerId: id,
-          ...rest,
-        };
-      }),
-    );
-
-    const computeUnitsToRemove = peersOnChain.flatMap(
-      ({ peerIdBase58, computeUnits }) => {
-        const alreadyRegisteredPeer = computePeersFromProviderConfig.find(
-          (p) => {
-            return p.peerIdBase58 === peerIdBase58;
-          },
-        );
-
-        if (alreadyRegisteredPeer === undefined) {
-          return [];
-        }
-
-        if (alreadyRegisteredPeer.unitIds.length < computeUnits.length) {
-          return [
-            {
-              peerIdBase58,
-              computeUnits: computeUnits
-                .slice(
-                  alreadyRegisteredPeer.unitIds.length - computeUnits.length,
-                )
-                .map(({ id }) => {
-                  return id;
-                }),
-            },
-          ];
-        }
-
-        return [];
-      },
-    );
-
-    if (computeUnitsToRemove.length > 0) {
-      populatedTxs.push(
-        ...computeUnitsToRemove.flatMap(({ peerIdBase58, computeUnits }) => {
-          return computeUnits.map((computeUnit, index) => {
-            return {
-              description:
-                index === 0
-                  ? `\nRemoving compute units from peer ${peerIdBase58}:\n${computeUnit}`
-                  : computeUnit,
-              tx: [market.removeComputeUnit, computeUnit],
-            };
-          });
-        }),
-      );
-    }
-
-    const computePeersToRemove = peersOnChain.filter(({ peerIdBase58 }) => {
-      return !computePeersFromProviderConfig.some((p) => {
-        return p.peerIdBase58 === peerIdBase58;
-      });
-    });
-
-    if (computePeersToRemove.length > 0) {
-      populatedTxs.push(
-        ...computePeersToRemove.flatMap(
-          ({ peerIdBase58, hexPeerId, computeUnits }) => {
-            return [
-              ...computeUnits.map((computeUnit, index) => {
-                return {
-                  description:
-                    index === 0
-                      ? `\nRemoving peer ${peerIdBase58} with compute units:\n${computeUnit.id}`
-                      : computeUnit.id,
-                  tx: [market.removeComputeUnit, computeUnit.id],
-                };
-              }),
-              {
-                description: "",
-                tx: [market.removeComputePeer, hexPeerId],
-              },
-            ];
-          },
-        ),
-      );
-    }
-
-    const computeUnitsToAdd = peersOnChain.flatMap(
-      ({ peerIdBase58, hexPeerId, computeUnits }) => {
-        const alreadyRegisteredPeer = computePeersFromProviderConfig.find(
-          (p) => {
-            return p.peerIdBase58 === peerIdBase58;
-          },
-        );
-
-        if (
-          alreadyRegisteredPeer === undefined ||
-          alreadyRegisteredPeer.unitIds.length <= computeUnits.length
-        ) {
-          return [];
-        }
-
-        return [
-          {
-            hexPeerId,
-            peerIdBase58: alreadyRegisteredPeer.peerIdBase58,
-            unitIds: alreadyRegisteredPeer.unitIds.slice(
-              computeUnits.length - alreadyRegisteredPeer.unitIds.length,
-            ),
-          },
-        ];
-      },
-    );
-
-    if (computeUnitsToAdd.length > 0) {
-      populatedTxs.push(
-        ...computeUnitsToAdd.map(({ hexPeerId, unitIds, peerIdBase58 }) => {
-          return {
-            description: `\nAdding compute units to peer ${peerIdBase58}:\n${unitIds
-              .map((unitId) => {
-                return uint8ArrayToHex(Buffer.from(unitId));
-              })
-              .join("\n")}`,
-            tx: [market.addComputeUnits, hexPeerId, unitIds],
-          };
-        }),
-      );
-    }
-
-    const computePeersToAdd = computePeersFromProviderConfig.filter(
-      ({ peerIdBase58 }) => {
-        return !peersOnChain.some((p) => {
-          return p.peerIdBase58 === peerIdBase58;
-        });
-      },
-    );
-
-    if (computePeersToAdd.length > 0) {
-      populatedTxs.push({
-        description: computePeersToAdd
-          .map(({ peerIdBase58, unitIds }) => {
-            return `\nAdding peer ${peerIdBase58} with compute units:\n${unitIds
-              .map((unitId) => {
-                return uint8ArrayToHex(Buffer.from(unitId));
-              })
-              .join("\n")}`;
-          })
-          .join("\n"),
-        tx: [market.addComputePeers, offerId, computePeersToAdd],
-      });
-    }
-
-    if (populatedTxs.length === 0) {
-      commandObj.logToStderr(
-        `\nNo changes found for offer ${color.yellow(
-          offerName,
-        )}. Skipping update`,
-      );
-
-      continue;
-    }
-
-    commandObj.logToStderr(
-      `\nUpdating offer ${color.yellow(offerName)} with id ${color.yellow(
-        offerId,
-      )}:\n${populatedTxs
-        .filter(({ description }) => {
-          return description !== "";
-        })
-        .map(({ description }) => {
-          return description;
-        })
-        .join("\n")}\n`,
-    );
-
-    await signBatch(
-      "Update offer",
-      // @ts-expect-error TODO: don't know at this moment how to fix this error. Will solve later
-      populatedTxs.map(({ tx }) => {
-        return tx;
-      }),
-    );
-  }
-}
-
 export async function resolveOffersFromProviderConfig(
   flags: OffersArgs,
 ): Promise<EnsureOfferConfig[]> {
@@ -726,7 +462,7 @@ async function ensureOfferConfigs() {
       async ([
         offerName,
         {
-          minPricePerWorkerEpoch,
+          minPricePerCuPerEpoch,
           effectors,
           computePeers,
           minProtocolVersion,
@@ -736,8 +472,8 @@ async function ensureOfferConfigs() {
         const computePeerConfigs =
           await ensureComputerPeerConfigs(computePeers);
 
-        const minPricePerWorkerEpochBigInt = await ptParse(
-          minPricePerWorkerEpoch,
+        const minPricePerCuPerEpochBigInt = await ptParse(
+          minPricePerCuPerEpoch,
         );
 
         const computePeersFromProviderConfig = await Promise.all(
@@ -767,7 +503,7 @@ async function ensureOfferConfigs() {
 
         return {
           offerName,
-          minPricePerWorkerEpochBigInt,
+          minPricePerCuPerEpochBigInt,
           effectorPrefixesAndHash,
           effectors,
           computePeersFromProviderConfig,

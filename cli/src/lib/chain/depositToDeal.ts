@@ -44,19 +44,20 @@ export async function depositToDeal(
     const deal = dealClient.getDeal(dealId);
     const tokensString = await ptFormatWithSymbol(parsedAmount);
 
-    await sign(
-      `Approve ${tokensString} tokens to be deposited to the deal ${dealName}`,
-      ERC20__factory.connect(await deal.paymentToken(), providerOrWallet)
-        .approve,
-      await deal.getAddress(),
-      parsedAmount,
-    );
+    await sign({
+      title: `Approve ${tokensString} tokens to be deposited to the deal ${dealName}`,
+      method: ERC20__factory.connect(
+        await deal.paymentToken(),
+        providerOrWallet,
+      ).approve,
+      args: [await deal.getAddress(), parsedAmount],
+    });
 
-    await sign(
-      `Deposit ${tokensString} to the deal ${dealName} (${dealId})`,
-      deal.deposit,
-      parsedAmount,
-    );
+    await sign({
+      title: `Deposit ${tokensString} to the deal ${dealName} (${dealId})`,
+      method: deal.deposit,
+      args: [parsedAmount],
+    });
 
     commandObj.log(
       `${color.yellow(

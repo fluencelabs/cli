@@ -50,7 +50,7 @@ import {
   splitErrorsAndResults,
   stringifyUnknown,
 } from "./helpers/utils.js";
-import { checkboxes, input } from "./prompt.js";
+import { checkboxes, input, list } from "./prompt.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 type DealCreateArg = {
@@ -58,7 +58,8 @@ type DealCreateArg = {
   minWorkers: number;
   targetWorkers: number;
   maxWorkersPerProvider: number;
-  pricePerWorkerEpoch: string;
+  pricePerCuPerEpoch: string;
+  cuCountPerWorker: number;
   effectors: string[];
   initialBalance: string | undefined;
   whitelist: string[] | undefined;
@@ -72,7 +73,8 @@ export async function dealCreate({
   minWorkers,
   targetWorkers,
   maxWorkersPerProvider,
-  pricePerWorkerEpoch,
+  pricePerCuPerEpoch,
+  cuCountPerWorker,
   effectors,
   initialBalance,
   whitelist,
@@ -84,20 +86,25 @@ export async function dealCreate({
   const core = dealClient.getCore();
   const usdc = dealClient.getUSDC();
 
-  const pricePerWorkerEpochBigInt = await ptParse(pricePerWorkerEpoch);
+  const pricePerCuPerEpochBigInt = await ptParse(pricePerCuPerEpoch);
   const minDealDepositedEpochs = await core.minDealDepositedEpochs();
   const targetWorkersBigInt = BigInt(targetWorkers);
+  const cuCountPerWorkerBigInt = BigInt(cuCountPerWorker);
 
   const minInitialBalanceBigInt =
-    targetWorkersBigInt * pricePerWorkerEpochBigInt * minDealDepositedEpochs;
+    targetWorkersBigInt *
+    pricePerCuPerEpochBigInt *
+    minDealDepositedEpochs *
+    cuCountPerWorkerBigInt;
 
   const initialBalanceBigInt =
     typeof initialBalance === "string"
       ? await ptParse(initialBalance)
       : await getDefaultInitialBalance(
           minInitialBalanceBigInt,
-          pricePerWorkerEpochBigInt,
+          pricePerCuPerEpochBigInt,
           targetWorkersBigInt,
+          cuCountPerWorkerBigInt,
         );
 
   if (initialBalanceBigInt < minInitialBalanceBigInt) {
@@ -106,46 +113,48 @@ export async function dealCreate({
         deploymentName === undefined ? "" : `${color.yellow(deploymentName)} :`
       }initialBalance ${color.yellow(
         initialBalance,
-      )} is less than minimum initialBalance = targetWorkers * pricePerWorkerEpoch * ${bigintToStr(
+      )} is less than minimum initialBalance = targetWorkers * pricePerCuPerEpoch * ${bigintToStr(
         minDealDepositedEpochs,
       )} = ${color.yellow(
         await ptFormatWithSymbol(minInitialBalanceBigInt),
-      )}. Please, increase initialBalance or decrease targetWorkers or pricePerWorkerEpoch`,
+      )}. Please, increase initialBalance or decrease targetWorkers or pricePerCuPerEpoch`,
     );
   }
 
   const dealFactory = dealClient.getDealFactory();
 
-  await sign(
-    `Approve ${await ptFormatWithSymbol(initialBalanceBigInt)} to be deposited to the deal`,
-    usdc.approve,
-    await dealFactory.getAddress(),
-    initialBalanceBigInt,
-  );
+  await sign({
+    title: `Approve ${await ptFormatWithSymbol(initialBalanceBigInt)} to be deposited to the deal`,
+    method: usdc.approve,
+    args: [await dealFactory.getAddress(), initialBalanceBigInt],
+  });
 
-  const deployDealTxReceipt = await sign(
-    `Create deal with appCID: ${appCID}`,
-    dealFactory.deployDeal,
-    await cidStringToCIDV1Struct(appCID),
-    await usdc.getAddress(),
-    initialBalanceBigInt,
-    minWorkers,
-    targetWorkers,
-    maxWorkersPerProvider,
-    pricePerWorkerEpochBigInt,
-    await Promise.all(
-      effectors.map((cid) => {
-        return cidStringToCIDV1Struct(cid);
-      }),
-    ),
-    whitelist !== undefined ? 1 : blacklist !== undefined ? 2 : 0,
-    whitelist !== undefined
-      ? whitelist
-      : blacklist !== undefined
-        ? blacklist
-        : [],
-    protocolVersion ?? versions.protocolVersion,
-  );
+  const deployDealTxReceipt = await sign({
+    title: `Create deal with appCID: ${appCID}`,
+    method: dealFactory.deployDeal,
+    args: [
+      await cidStringToCIDV1Struct(appCID),
+      await usdc.getAddress(),
+      initialBalanceBigInt,
+      minWorkers,
+      targetWorkers,
+      cuCountPerWorker,
+      maxWorkersPerProvider,
+      pricePerCuPerEpochBigInt,
+      await Promise.all(
+        effectors.map((cid) => {
+          return cidStringToCIDV1Struct(cid);
+        }),
+      ),
+      whitelist !== undefined ? 1 : blacklist !== undefined ? 2 : 0,
+      whitelist !== undefined
+        ? whitelist
+        : blacklist !== undefined
+          ? blacklist
+          : [],
+      protocolVersion ?? versions.protocolVersion,
+    ],
+  });
 
   const dealId = getEventValue({
     contract: dealFactory,
@@ -206,18 +215,16 @@ export async function createAndMatchDealsWithAllCUsOfPeerIds({
       });
 
       try {
-        const matchDealTxReceipt = await sign(
-          `Match deal ${dealAddress} with CU ${unitId} from offer ${offerId}`,
-          market.matchDeal,
-          dealAddress,
-          [offerId],
-          [[unitId]],
-        );
+        const matchDealTxReceipt = await sign({
+          title: `Match deal ${dealAddress} with CU ${unitId} from offer ${offerId}`,
+          method: market.matchDeal,
+          args: [dealAddress, [offerId], [[[unitId]]]],
+        });
 
         const pats = getEventValues({
           contract: market,
           txReceipt: matchDealTxReceipt,
-          eventName: "ComputeUnitMatched",
+          eventName: "ComputeUnitsMatched",
           value: "unitId",
         });
 
@@ -235,8 +242,9 @@ export async function createAndMatchDealsWithAllCUsOfPeerIds({
 
 async function getDefaultInitialBalance(
   minInitialBalanceBigInt: bigint,
-  pricePerWorkerEpochBigInt: bigint,
+  pricePerCuPerEpochBigInt: bigint,
   targetWorkersBigInt: bigint,
+  cuCountPerWorker: bigint,
 ) {
   if ((await ensureChainEnv()) === "local") {
     const { readonlyDealClient } = await getReadonlyDealClient();
@@ -246,7 +254,8 @@ async function getDefaultInitialBalance(
       (DEFAULT_DEAL_ACTIVE_DURATION_FOR_LOCAL_ENV /
         (await core.epochDuration())) *
       targetWorkersBigInt *
-      pricePerWorkerEpochBigInt;
+      pricePerCuPerEpochBigInt *
+      cuCountPerWorker;
 
     return balance < minInitialBalanceBigInt
       ? minInitialBalanceBigInt
@@ -265,11 +274,11 @@ export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
   const { dealClient } = await getDealClient();
   const deal = dealClient.getDeal(dealAddress);
 
-  await sign(
-    `Update deal with new appCID: ${appCID}`,
-    deal.setAppCID,
-    await cidStringToCIDV1Struct(appCID),
-  );
+  await sign({
+    title: `Update deal with new appCID: ${appCID}`,
+    method: deal.setAppCID,
+    args: [await cidStringToCIDV1Struct(appCID)],
+  });
 }
 
 export async function match(dealAddress: string) {
@@ -313,7 +322,7 @@ export async function match(dealAddress: string) {
     1000 * 5, // 5 seconds
   );
 
-  if (matchedOffers.offers.length === 0) {
+  if (matchedOffers === null) {
     return commandObj.error(`No matched offers for deal ${dealAddress}`);
   }
 
@@ -322,18 +331,16 @@ export async function match(dealAddress: string) {
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
 
-  const matchDealTxReceipt = await sign(
-    `Match deal ${dealAddress} with offers:\n\n${matchedOffers.offers.join("\n")}`,
-    market.matchDeal,
-    dealAddress,
-    matchedOffers.offers,
-    matchedOffers.computeUnitsPerOffers,
-  );
+  const matchDealTxReceipt = await sign({
+    title: `Match deal ${dealAddress} with offers:\n\n${matchedOffers.offers.join("\n")}`,
+    method: market.matchDeal,
+    args: [dealAddress, matchedOffers.offers, matchedOffers.computeUnits],
+  });
 
   const pats = getEventValues({
     contract: market,
     txReceipt: matchDealTxReceipt,
-    eventName: "ComputeUnitMatched",
+    eventName: "ComputeUnitsMatched",
     value: "unitId",
   });
 
@@ -463,6 +470,90 @@ export async function getDeals({
     ).map((dealId) => {
       return { dealName: dealId, dealId };
     });
+  }
+}
+
+const DEAL_ID_FLAG_NAME = "deal-id";
+const DEAL_NAME_FLAG_NAME = "name";
+
+export async function getDeal({
+  flags: { [DEAL_ID_FLAG_NAME]: dealId, [DEAL_NAME_FLAG_NAME]: dealName },
+}: {
+  flags: {
+    [DEAL_ID_FLAG_NAME]: string | undefined;
+    [DEAL_NAME_FLAG_NAME]: string | undefined;
+  };
+}): Promise<DealNameAndId> {
+  if (dealId !== undefined && dealName !== undefined) {
+    commandObj.error(
+      `You can't use both ${color.yellow(
+        `--${DEAL_NAME_FLAG_NAME}`,
+      )} flag and ${color.yellow(
+        `--${DEAL_IDS_FLAG_NAME}`,
+      )} flag at the same time. Please pick one of them`,
+    );
+  }
+
+  if (dealId !== undefined) {
+    return { dealName: dealId, dealId };
+  }
+
+  const workersConfig = await initNewWorkersConfigReadonly();
+  const fluenceEnv = await ensureFluenceEnv();
+
+  if (dealName !== undefined) {
+    const { dealIdOriginal: dealId } =
+      workersConfig.deals?.[fluenceEnv]?.[dealName] ?? {};
+
+    if (dealId === undefined) {
+      return commandObj.error(
+        `Couldn't find deployment: ${color.yellow(
+          dealName,
+        )} at ${workersConfig.$getPath()} in ${color.yellow(
+          `deals.${fluenceEnv}`,
+        )} property`,
+      );
+    }
+
+    return { dealName, dealId };
+  }
+
+  try {
+    return await list<DealNameAndId, never>({
+      message: `Select deployment that you did on ${color.yellow(
+        fluenceEnv,
+      )} environment`,
+      options: Object.entries(workersConfig.deals?.[fluenceEnv] ?? {}).map(
+        ([dealName, { dealIdOriginal: dealId }]) => {
+          return { name: dealName, value: { dealName, dealId } };
+        },
+      ),
+      oneChoiceMessage(choice) {
+        return `There is currently only one deployment that you did on ${color.yellow(
+          fluenceEnv,
+        )} environment: ${color.yellow(choice)}. Do you want to select it`;
+      },
+      onNoChoices() {
+        throw new Error(NO_DEPLOYMENTS_FOUND_ERROR_MESSAGE);
+      },
+      flagName: DEAL_ID_FLAG_NAME,
+    });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      !error.message.includes(NO_DEPLOYMENTS_FOUND_ERROR_MESSAGE)
+    ) {
+      throw error;
+    }
+
+    commandObj.warn(
+      `No deployments found for ${color.yellow(
+        fluenceEnv,
+      )} environment at ${workersConfig.$getPath()}`,
+    );
+
+    const dealId = await input({ message: "Enter deal id" });
+    return { dealName: dealId, dealId };
   }
 }
 

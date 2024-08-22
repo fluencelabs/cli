@@ -51,8 +51,8 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "Max workers per provider",
       required: true,
     }),
-    "price-per-worker-epoch": Flags.string({
-      description: "Price per worker epoch",
+    "price-per-cu-per-epoch": Flags.string({
+      description: "Price per CU per epoch",
       required: true,
     }),
     "initial-balance": Flags.string({
@@ -73,6 +73,10 @@ export default class Create extends BaseCommand<typeof Create> {
     "protocol-version": Flags.integer({
       description: "Protocol version",
     }),
+    "cu-count-per-worker": Flags.integer({
+      description: "Compute unit count per worker",
+      required: true,
+    }),
     ...CHAIN_FLAGS,
   };
 
@@ -80,11 +84,12 @@ export default class Create extends BaseCommand<typeof Create> {
     const { flags } = await initCli(this, await this.parse(Create));
 
     const dealAddress = await dealCreate({
+      cuCountPerWorker: flags["cu-count-per-worker"],
       appCID: flags["app-cid"],
       minWorkers: flags["min-workers"],
       targetWorkers: flags["target-workers"],
       maxWorkersPerProvider: flags["max-workers-per-provider"],
-      pricePerWorkerEpoch: flags["price-per-worker-epoch"],
+      pricePerCuPerEpoch: flags["price-per-cu-per-epoch"],
       effectors:
         flags.effectors === undefined ? [] : commaSepStrToArr(flags.effectors),
       initialBalance: flags["initial-balance"],
