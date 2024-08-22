@@ -464,7 +464,7 @@ __metadata:
     ajv: "npm:8.13.0"
     chokidar: "npm:3.6.0"
     countly-sdk-nodejs: "npm:22.6.0"
-    debug: "npm:4.3.4"
+    debug: "npm:4.3.6"
     dotenv: "npm:16.4.5"
     eslint: "npm:9.3.0"
     eslint-config-prettier: "npm:^9.1.0"
@@ -5030,6 +5030,18 @@ __metadata:
     supports-color:
       optional: true
   checksum: 10c0/cedbec45298dd5c501d01b92b119cd3faebe5438c3917ff11ae1bff86a6c722930ac9c8659792824013168ba6db7c4668225d845c633fbdafbbf902a6389f736
+  languageName: node
+  linkType: hard
+
+"debug@npm:4.3.6":
+  version: 4.3.6
+  resolution: "debug@npm:4.3.6"
+  dependencies:
+    ms: "npm:2.1.2"
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: 10c0/3293416bff072389c101697d4611c402a6bacd1900ac20c0492f61a9cdd6b3b29750fc7f5e299f8058469ef60ff8fb79b86395a30374fbd2490113c1c7112285
   languageName: node
   linkType: hard
 
