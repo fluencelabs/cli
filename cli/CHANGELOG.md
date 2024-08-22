@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.19.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.18.0...fluence-cli-v0.19.0) (2024-08-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **marketplace:** many CUs in a worker ([#1001](https://github.com/fluencelabs/cli/issues/1001))
+
+### Features
+
+* **marketplace:** many CUs in a worker ([#1001](https://github.com/fluencelabs/cli/issues/1001)) ([5333eff](https://github.com/fluencelabs/cli/commit/5333eff4ef1529fa6443f25119968d44c0164817))
+
+
+### Bug Fixes
+
+* add retry to getting offers info from indexer when offer is created ([#998](https://github.com/fluencelabs/cli/issues/998)) ([909d8cb](https://github.com/fluencelabs/cli/commit/909d8cbbc0688a2704e9922ed61887717eff9107))
+
 ## [0.18.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.17.1...fluence-cli-v0.18.0) (2024-08-13)
 
 
