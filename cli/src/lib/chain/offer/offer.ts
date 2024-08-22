@@ -78,22 +78,25 @@ export type OffersArgs = {
 };
 
 export async function createOffers(flags: OffersArgs) {
-  const offers = await resolveOffersFromProviderConfig(flags);
+  const allOffers = await resolveOffersFromProviderConfig(flags);
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
   const usdc = dealClient.getUSDC();
   const providerArtifactsConfig = await initNewProviderArtifactsConfig();
   const fluenceEnv = await ensureFluenceEnv();
 
-  const alreadyCreatedOffers = offers.filter(({ offerName }) => {
-    const { id } =
-      providerArtifactsConfig.offers[fluenceEnv]?.[offerName] ?? {};
+  const [alreadyCreatedOffers, offers] = splitErrorsAndResults(
+    allOffers,
+    (offer) => {
+      const { id } =
+        providerArtifactsConfig.offers[fluenceEnv]?.[offer.offerName] ?? {};
 
-    return id !== undefined;
-  });
+      return id !== undefined ? { result: offer } : { error: offer };
+    },
+  );
 
   if (alreadyCreatedOffers.length > 0 && flags.force !== true) {
-    commandObj.error(
+    commandObj.warn(
       `You already created the following offers: ${alreadyCreatedOffers
         .map(({ offerName }) => {
           return offerName;
@@ -176,69 +179,75 @@ export async function createOffers(flags: OffersArgs) {
 
     const REGISTER_OFFER_TITLE = `Register offer: ${offerName}`;
 
-    if (
-      allCUs.length <= GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX &&
-      computePeersFromProviderConfig.length <=
-        GUESS_NUMBER_OF_CP_THAT_FIT_IN_ONE_TX
-    ) {
-      const offerRegisterTxReceipt = await sign({
-        validateAddress: assertProviderIsRegistered,
-        title: REGISTER_OFFER_TITLE,
-        method: market.registerMarketOffer,
-        args: [
-          minPricePerCuPerEpochBigInt,
-          usdcAddress,
-          effectorPrefixesAndHash,
-          computePeersFromProviderConfig,
-          minProtocolVersion ?? versions.protocolVersion,
-          maxProtocolVersion ?? versions.protocolVersion,
-        ],
-      });
+    try {
+      if (
+        allCUs.length <= GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX &&
+        computePeersFromProviderConfig.length <=
+          GUESS_NUMBER_OF_CP_THAT_FIT_IN_ONE_TX
+      ) {
+        const offerRegisterTxReceipt = await sign({
+          validateAddress: assertProviderIsRegistered,
+          title: REGISTER_OFFER_TITLE,
+          method: market.registerMarketOffer,
+          args: [
+            minPricePerCuPerEpochBigInt,
+            usdcAddress,
+            effectorPrefixesAndHash,
+            computePeersFromProviderConfig,
+            minProtocolVersion ?? versions.protocolVersion,
+            maxProtocolVersion ?? versions.protocolVersion,
+          ],
+        });
 
-      registeredMarketOffers.push(getOfferIdRes(offerRegisterTxReceipt));
-    } else {
-      const offerRegisterTxReceipt = await sign({
-        validateAddress: assertProviderIsRegistered,
-        title: REGISTER_OFFER_TITLE,
-        method: market.registerMarketOffer,
-        args: [
-          minPricePerCuPerEpochBigInt,
-          usdcAddress,
-          effectorPrefixesAndHash,
-          [],
-          minProtocolVersion ?? versions.protocolVersion,
-          maxProtocolVersion ?? versions.protocolVersion,
-        ],
-      });
+        registeredMarketOffers.push(getOfferIdRes(offerRegisterTxReceipt));
+      } else {
+        const offerRegisterTxReceipt = await sign({
+          validateAddress: assertProviderIsRegistered,
+          title: REGISTER_OFFER_TITLE,
+          method: market.registerMarketOffer,
+          args: [
+            minPricePerCuPerEpochBigInt,
+            usdcAddress,
+            effectorPrefixesAndHash,
+            [],
+            minProtocolVersion ?? versions.protocolVersion,
+            maxProtocolVersion ?? versions.protocolVersion,
+          ],
+        });
 
-      const offerIdRes = getOfferIdRes(offerRegisterTxReceipt);
-      registeredMarketOffers.push(offerIdRes);
+        const offerIdRes = getOfferIdRes(offerRegisterTxReceipt);
+        registeredMarketOffers.push(offerIdRes);
 
-      if ("error" in offerIdRes) {
-        continue;
-      }
+        if ("error" in offerIdRes) {
+          continue;
+        }
 
-      const { offerId } = offerIdRes.result;
+        const { offerId } = offerIdRes.result;
 
-      for (const cp of computePeersFromProviderConfig) {
-        for (const [i, unitIds] of Object.entries(
-          chunk(cp.unitIds, GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX),
-        )) {
-          if (i === "0") {
-            await sign({
-              title: `Add compute peer ${cp.name} (${cp.peerIdBase58})\nto offer ${offerName} (${offerId})`,
-              method: market.addComputePeers,
-              args: [offerId, [{ ...cp, unitIds }]],
-            });
-          } else {
-            await sign({
-              title: `Add ${numToStr(unitIds.length)} compute units\nto compute peer ${cp.name} (${cp.peerIdBase58})\nfor offer ${offerName} (${offerId})`,
-              method: market.addComputeUnits,
-              args: [cp.peerId, unitIds],
-            });
+        for (const cp of computePeersFromProviderConfig) {
+          for (const [i, unitIds] of Object.entries(
+            chunk(cp.unitIds, GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX),
+          )) {
+            if (i === "0") {
+              await sign({
+                title: `Add compute peer ${cp.name} (${cp.peerIdBase58})\nto offer ${offerName} (${offerId})`,
+                method: market.addComputePeers,
+                args: [offerId, [{ ...cp, unitIds }]],
+              });
+            } else {
+              await sign({
+                title: `Add ${numToStr(unitIds.length)} compute units\nto compute peer ${cp.name} (${cp.peerIdBase58})\nfor offer ${offerName} (${offerId})`,
+                method: market.addComputeUnits,
+                args: [cp.peerId, unitIds],
+              });
+            }
           }
         }
       }
+    } catch (e) {
+      commandObj.warn(
+        `Error when creating offer ${offerName}: ${stringifyUnknown(e)}`,
+      );
     }
   }
 
@@ -250,7 +259,7 @@ export async function createOffers(flags: OffersArgs) {
   );
 
   if (offerIdErrors.length > 0) {
-    commandObj.error(
+    commandObj.warn(
       `When getting ${OFFER_ID_PROPERTY} property from event ${MARKET_OFFER_REGISTERED_EVENT_NAME}:\n\n${offerIdErrors.join(
         ", ",
       )}`,
