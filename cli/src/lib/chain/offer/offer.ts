@@ -91,7 +91,7 @@ export async function createOffers(flags: OffersArgs) {
       const { id } =
         providerArtifactsConfig.offers[fluenceEnv]?.[offer.offerName] ?? {};
 
-      return id !== undefined ? { result: offer } : { error: offer };
+      return id === undefined ? { result: offer } : { error: offer };
     },
   );
 
