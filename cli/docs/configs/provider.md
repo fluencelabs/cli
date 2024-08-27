@@ -197,6 +197,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
 | `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
+| `vmConfig`               | [object](#vmconfig)       | No       | VM Configuration                                                                                                  |
 | `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
 ##### ccp
@@ -326,6 +327,42 @@ Decider service configuration
 | `walletKey`           | string  | No       | Wallet key (deprecated)           |
 | `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
 
+##### vmConfig
+
+VM Configuration
+
+###### Properties
+
+| Property     | Type               | Required | Description                                |
+|--------------|--------------------|----------|--------------------------------------------|
+| `network`    | [object](#network) | **Yes**  | VM Network Configuration                   |
+| `allowGpu`   | boolean            | No       | Whether to add info about GPUs to VM's XML |
+| `libvirtUri` | string             | No       | QEMU Socket                                |
+
+###### network
+
+VM Network Configuration
+
+**Properties**
+
+| Property     | Type                 | Required | Description                                                      |
+|--------------|----------------------|----------|------------------------------------------------------------------|
+| `publicIp`   | string               | **Yes**  | Public IP address to assign the VM. Must be publicly accessible. |
+| `bridgeName` | string               | No       | Name of the network bridge device                                |
+| `portRange`  | [object](#portrange) | No       | iptables-mapped port range from Host to VM                       |
+| `vmIp`       | string               | No       | Internal IP address to assign the VM                             |
+
+**portRange**
+
+iptables-mapped port range from Host to VM
+
+**Properties**
+
+| Property | Type    | Required | Description                                             |
+|----------|---------|----------|---------------------------------------------------------|
+| `end`    | integer | No       | End of the iptables-mapped port range from Host to VM   |
+| `start`  | integer | No       | Start of the iptables-mapped port range from Host to VM |
+
 ## nox
 
 Configuration to pass to the nox compute peer. Config.toml files are generated from this config
@@ -349,6 +386,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
 | `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
+| `vmConfig`               | [object](#vmconfig)       | No       | VM Configuration                                                                                                  |
 | `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
 ### ccp
@@ -477,6 +515,42 @@ Decider service configuration
 | `startBlock`          | string  | No       | Start block (deprecated)          |
 | `walletKey`           | string  | No       | Wallet key (deprecated)           |
 | `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
+
+### vmConfig
+
+VM Configuration
+
+#### Properties
+
+| Property     | Type               | Required | Description                                |
+|--------------|--------------------|----------|--------------------------------------------|
+| `network`    | [object](#network) | **Yes**  | VM Network Configuration                   |
+| `allowGpu`   | boolean            | No       | Whether to add info about GPUs to VM's XML |
+| `libvirtUri` | string             | No       | QEMU Socket                                |
+
+#### network
+
+VM Network Configuration
+
+##### Properties
+
+| Property     | Type                 | Required | Description                                                      |
+|--------------|----------------------|----------|------------------------------------------------------------------|
+| `publicIp`   | string               | **Yes**  | Public IP address to assign the VM. Must be publicly accessible. |
+| `bridgeName` | string               | No       | Name of the network bridge device                                |
+| `portRange`  | [object](#portrange) | No       | iptables-mapped port range from Host to VM                       |
+| `vmIp`       | string               | No       | Internal IP address to assign the VM                             |
+
+##### portRange
+
+iptables-mapped port range from Host to VM
+
+###### Properties
+
+| Property | Type    | Required | Description                                             |
+|----------|---------|----------|---------------------------------------------------------|
+| `end`    | integer | No       | End of the iptables-mapped port range from Host to VM   |
+| `start`  | integer | No       | Start of the iptables-mapped port range from Host to VM |
 
 ## offers
 

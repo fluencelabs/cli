@@ -426,11 +426,11 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
       publicIp: string;
       vmIp?: string;
       portRange?: {
-        start?: number,
-        end?: number
-      }
-    }
-  }
+        start?: number;
+        end?: number;
+      };
+    };
+  };
 };
 
 const DEFAULT_TIMER_RESOLUTION = "1 minute";
@@ -792,12 +792,12 @@ const noxConfigYAMLSchemaV1 = {
                   nullable: true,
                   type: "integer",
                   description: `End of the iptables-mapped port range from Host to VM`,
-                }
-              }
-            }
-          }
-        }
-      }
+                },
+              },
+            },
+          },
+        },
+      },
     },
   },
   required: [],
