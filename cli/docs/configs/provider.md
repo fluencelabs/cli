@@ -197,7 +197,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
 | `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
-| `vmConfig`               | [object](#vmconfig)       | No       | VM Configuration                                                                                                  |
+| `vm`                     | [object](#vm)             | No       | VM Configuration                                                                                                  |
 | `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
 ##### ccp
@@ -327,7 +327,7 @@ Decider service configuration
 | `walletKey`           | string  | No       | Wallet key (deprecated)           |
 | `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
 
-##### vmConfig
+##### vm
 
 VM Configuration
 
@@ -386,7 +386,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
 | `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
-| `vmConfig`               | [object](#vmconfig)       | No       | VM Configuration                                                                                                  |
+| `vm`                     | [object](#vm)             | No       | VM Configuration                                                                                                  |
 | `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
 ### ccp
@@ -516,7 +516,7 @@ Decider service configuration
 | `walletKey`           | string  | No       | Wallet key (deprecated)           |
 | `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
 
-### vmConfig
+### vm
 
 VM Configuration
 
