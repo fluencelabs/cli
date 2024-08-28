@@ -418,7 +418,7 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
     tokioDetailedMetricsEnabled?: boolean;
   };
   bootstrapNodes?: Array<string>;
-  vmConfig?: {
+  vm?: {
     libvirtUri?: string;
     allowGpu?: boolean;
     network: {
@@ -737,7 +737,7 @@ const noxConfigYAMLSchemaV1 = {
       type: "string",
       description: `Raw TOML config string to parse and merge with the rest of the config. Has the highest priority`,
     },
-    vmConfig: {
+    vm: {
       type: "object",
       description: "VM Configuration",
       additionalProperties: false,
