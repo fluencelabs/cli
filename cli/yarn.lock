@@ -395,10 +395,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/air-beautify-wasm@npm:0.3.9":
-  version: 0.3.9
-  resolution: "@fluencelabs/air-beautify-wasm@npm:0.3.9"
-  checksum: 10c0/62ad2bbf746eaa865a507df022d116209592c28fac379f8c0ae77d7d22664480f7b93f896a73d324150cfdc939bc228dfd4dfedb11fb9f2d3e32745fbb583d58
+"@fluencelabs/air-beautify-wasm@npm:0.4.0":
+  version: 0.4.0
+  resolution: "@fluencelabs/air-beautify-wasm@npm:0.4.0"
+  checksum: 10c0/25b7f1ab4444c18ba05b9a5b6a2125b2376f26d718de026adee7ce138afee158be7532fee5348fd800d958953377d3430ae5445e6ee348a2af2ceeec810fb36b
   languageName: node
   linkType: hard
 
@@ -433,7 +433,7 @@ __metadata:
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@actions/core": "npm:1.10.1"
-    "@fluencelabs/air-beautify-wasm": "npm:0.3.9"
+    "@fluencelabs/air-beautify-wasm": "npm:0.4.0"
     "@fluencelabs/aqua-api": "npm:0.14.10"
     "@fluencelabs/aqua-to-js": "npm:0.3.13"
     "@fluencelabs/deal-ts-clients": "npm:0.18.0"
