@@ -985,7 +985,7 @@ __metadata:
     eslint-plugin-react: "npm:7.34.2"
     eslint-plugin-react-hooks: "npm:4.6.2"
     eslint-plugin-unused-imports: "npm:3.2.0"
-    globals: "npm:15.1.0"
+    globals: "npm:15.9.0"
     typescript: "npm:5.4.5"
     typescript-eslint: "npm:7.10.0"
   languageName: unknown
@@ -4219,10 +4219,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:15.1.0":
-  version: 15.1.0
-  resolution: "globals@npm:15.1.0"
-  checksum: 10c0/ae9cd15057dc6a21d6dbafe9f47b66bd063c6d3c9215fa1e8294bd130d89f188c48370a11a9525a5a33bd8689fc4fdfd3f474d930692d7abb7459cd982503336
+"globals@npm:15.9.0":
+  version: 15.9.0
+  resolution: "globals@npm:15.9.0"
+  checksum: 10c0/de4b553e412e7e830998578d51b605c492256fb2a9273eaeec6ec9ee519f1c5aa50de57e3979911607fd7593a4066420e01d8c3d551e7a6a236e96c521aee36c
   languageName: node
   linkType: hard
 
