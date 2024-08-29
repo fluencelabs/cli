@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "0.3.9",
-    "@fluencelabs/aqua-api": "0.14.10",
+    "@fluencelabs/aqua-api": "0.14.11",
     "@fluencelabs/aqua-to-js": "0.3.13",
     "@fluencelabs/deal-ts-clients": "0.18.0",
     "@fluencelabs/fluence-network-environment": "1.2.2",
