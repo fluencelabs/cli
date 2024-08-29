@@ -125,6 +125,7 @@ export function App({
 
   const CLIDisconnectedTimeout = useRef<number>();
   const gotFirstMessage = useRef(false);
+  const cliVersion = useRef<string | null>(null);
 
   useEffect(() => {
     const events = new EventSource("/events");
@@ -160,6 +161,15 @@ export function App({
           sendTransaction(msg.payload.transactionData);
         }
       } else if (msg.tag === "ping") {
+        if (cliVersion.current === null) {
+          cliVersion.current = msg.CLIVersion;
+        }
+
+        if (cliVersion.current !== msg.CLIVersion) {
+          // reload the page to get the latest frontend version
+          window.location.href = window.location.href;
+        }
+
         setAddressUsedByCLI(msg.addressUsedByCLI);
         setIsCLIConnected(true);
         clearTimeout(CLIDisconnectedTimeout.current);
@@ -207,7 +217,16 @@ export function App({
     return <h1>Return to your terminal in order to continue</h1>;
   }
 
-  const isSendTxButtonEnabled = !isPending && !isLoading && !isSuccess;
+  const hasSwitchedAccountDuringCommandExecution =
+    addressUsedByCLI !== null &&
+    address !== undefined &&
+    addressUsedByCLI !== address;
+
+  const isSendTxButtonEnabled =
+    !isPending &&
+    !isLoading &&
+    !isSuccess &&
+    !hasSwitchedAccountDuringCommandExecution;
 
   return (
     <>
@@ -249,18 +268,16 @@ export function App({
           smallScreen: "none",
         }}
       />
-      {addressUsedByCLI !== null &&
-        address !== undefined &&
-        addressUsedByCLI !== address && (
-          <div className="error">
-            The account address sent to CLI when command execution started:
-            {" \n"}
-            <b>{addressUsedByCLI}</b> is different from the current account
-            address:{" \n"}
-            <b>{address}</b>. Please switch back to the{" \n"}
-            <b>{addressUsedByCLI}</b> account or rerun the CLI command
-          </div>
-        )}
+      {hasSwitchedAccountDuringCommandExecution && (
+        <div className="error">
+          The account address sent to CLI when command execution started:
+          {" \n"}
+          <b>{addressUsedByCLI}</b> is different from the current account
+          address:{" \n"}
+          <b>{address}</b>. Please switch back to the{" \n"}
+          <b>{addressUsedByCLI}</b> account or rerun the CLI command
+        </div>
+      )}
       {isConnected && address !== undefined && (
         <>
           {isExpectingAddress && (
