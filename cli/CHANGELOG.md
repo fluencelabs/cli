@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.19.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.19.0...fluence-cli-v0.19.1) (2024-08-29)
+
+
+### Features
+
+* **vm:** add vmConfig to computePeer.nox ([#1009](https://github.com/fluencelabs/cli/issues/1009)) ([9aa8c2d](https://github.com/fluencelabs/cli/commit/9aa8c2d8c928c3504c18318048069bb2d3d63e5f))
+
+
+### Bug Fixes
+
+* **chain:** update chain uris to .fluence.dev domains ([#1007](https://github.com/fluencelabs/cli/issues/1007)) ([e1cc1d8](https://github.com/fluencelabs/cli/commit/e1cc1d80a1780d64b3004f0f610322b6c435be7a))
+
 ## [0.19.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.18.0...fluence-cli-v0.19.0) (2024-08-22)
 
 
