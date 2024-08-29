@@ -19,6 +19,7 @@ import { access, readFile } from "node:fs/promises";
 
 import type { IPFSHTTPClient } from "ipfs-http-client";
 
+import { jsonStringify } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS } from "../const.js";
 import { dbg } from "../dbg.js";
@@ -30,17 +31,27 @@ import { setTryTimeout, stringifyUnknown } from "../helpers/utils.js";
 
 /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
 
-export async function createIPFSClient(multiaddrString: string) {
-  const [{ multiaddr, protocols }, { create }] = await Promise.all([
-    import("@multiformats/multiaddr"),
-    import("ipfs-http-client"),
-  ]);
+let ipfsClient: Promise<IPFSHTTPClient> | null = null;
 
-  return create(
-    multiaddr(multiaddrString)
-      .decapsulateCode(protocols("p2p").code)
-      .toOptions(),
-  );
+export function createIPFSClient(multiaddrString: string) {
+  if (ipfsClient === null) {
+    ipfsClient = (async () => {
+      const [{ multiaddr, protocols }, { create }] = await Promise.all([
+        import("@multiformats/multiaddr"),
+        import("ipfs-http-client"),
+      ]);
+
+      const createOptions = multiaddr(multiaddrString)
+        .decapsulateCode(protocols("p2p").code)
+        .toOptions();
+
+      dbg(`creating ipfs client with options: ${jsonStringify(createOptions)}`);
+      dbg(`multiaddr: ${multiaddrString}`);
+      return create(createOptions);
+    })();
+  }
+
+  return ipfsClient;
 }
 
 async function upload(
@@ -49,7 +60,6 @@ async function upload(
 ): Promise<string> {
   try {
     const ipfsClient = await createIPFSClient(multiaddr);
-    dbg(`created ipfs client`);
 
     const { cid } = await ipfsClient.add(content, {
       pin: true,

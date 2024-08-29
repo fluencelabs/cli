@@ -82,6 +82,7 @@ export type CLIToConnectorMsg =
   | {
       tag: "ping";
       addressUsedByCLI: string | null;
+      CLIVersion: string;
     }
   | {
       tag: "returnToCLI";
