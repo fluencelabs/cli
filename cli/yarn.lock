@@ -488,7 +488,7 @@ __metadata:
     parse-duration: "npm:1.1.0"
     platform: "npm:1.3.6"
     proper-lockfile: "npm:4.1.2"
-    semver: "npm:7.6.1"
+    semver: "npm:7.6.3"
     shx: "npm:0.3.4"
     strip-ansi: "npm:^7.1.0"
     tar: "npm:7.1.0"
@@ -12202,12 +12202,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.6.1":
-  version: 7.6.1
-  resolution: "semver@npm:7.6.1"
+"semver@npm:7.6.3":
+  version: 7.6.3
+  resolution: "semver@npm:7.6.3"
   bin:
     semver: bin/semver.js
-  checksum: 10c0/fd28315954ffc80204df0cb5c62355160ebf54059f5ffe386e9903162ddf687ed14004c30f6e5347fa695fc77bafa242798af8d351f1d260207f007cfbeccb82
+  checksum: 10c0/88f33e148b210c153873cb08cfe1e281d518aaa9a666d4d148add6560db5cd3c582f3a08ccb91f38d5f379ead256da9931234ed122057f40bb5766e65e58adaf
   languageName: node
   linkType: hard
 
