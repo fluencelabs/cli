@@ -44,9 +44,9 @@ export type ChainENV = (typeof CHAIN_ENV)[number];
 export const isChainEnv = getIsUnion(CHAIN_ENV);
 
 export const CHAIN_URLS_WITHOUT_LOCAL = {
-  kras: "https://rpc.fluence.raas.gelato.cloud",
-  dar: "https://rpc.fluence-testnet.t.raas.gelato.cloud",
-  stage: "https://rpc-123420000220.raas-testnet.gelato.digital",
+  kras: "https://rpc.mainnet.fluence.dev",
+  dar: "https://rpc.testnet.fluence.dev",
+  stage: "https://rpc.stage.fluence.dev",
 } as const satisfies Record<Exclude<ChainENV, "local">, string>;
 
 export const CHAIN_URLS = {

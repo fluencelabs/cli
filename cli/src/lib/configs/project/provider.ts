@@ -418,6 +418,19 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
     tokioDetailedMetricsEnabled?: boolean;
   };
   bootstrapNodes?: Array<string>;
+  vm?: {
+    libvirtUri?: string;
+    allowGpu?: boolean;
+    network: {
+      bridgeName?: string;
+      publicIp: string;
+      vmIp?: string;
+      portRange?: {
+        start?: number;
+        end?: number;
+      };
+    };
+  };
 };
 
 const DEFAULT_TIMER_RESOLUTION = "1 minute";
@@ -723,6 +736,68 @@ const noxConfigYAMLSchemaV1 = {
       nullable: true,
       type: "string",
       description: `Raw TOML config string to parse and merge with the rest of the config. Has the highest priority`,
+    },
+    vm: {
+      type: "object",
+      description: "VM Configuration",
+      additionalProperties: false,
+      nullable: true,
+      required: ["network"],
+      properties: {
+        libvirtUri: {
+          nullable: true,
+          type: "string",
+          description: `QEMU Socket`,
+        },
+        allowGpu: {
+          nullable: true,
+          type: "boolean",
+          description: `Whether to add info about GPUs to VM's XML`,
+        },
+        network: {
+          type: "object",
+          description: "VM Network Configuration",
+          additionalProperties: false,
+          nullable: false,
+          required: ["publicIp"],
+          properties: {
+            bridgeName: {
+              nullable: true,
+              type: "string",
+              description: `Name of the network bridge device`,
+            },
+            publicIp: {
+              nullable: false,
+              type: "string",
+              description: `Public IP address to assign the VM. Must be publicly accessible.`,
+            },
+            vmIp: {
+              nullable: true,
+              type: "string",
+              description: `Internal IP address to assign the VM`,
+            },
+            portRange: {
+              type: "object",
+              description: "iptables-mapped port range from Host to VM",
+              additionalProperties: false,
+              nullable: true,
+              required: [],
+              properties: {
+                start: {
+                  nullable: true,
+                  type: "integer",
+                  description: `Start of the iptables-mapped port range from Host to VM`,
+                },
+                end: {
+                  nullable: true,
+                  type: "integer",
+                  description: `End of the iptables-mapped port range from Host to VM`,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   },
   required: [],
