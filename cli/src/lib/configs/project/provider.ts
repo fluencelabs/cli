@@ -429,6 +429,8 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
         start?: number;
         end?: number;
       };
+      hostSshPort?: number;
+      vmSshPort?: number;
     };
   };
 };
@@ -794,6 +796,16 @@ const noxConfigYAMLSchemaV1 = {
                   description: `End of the iptables-mapped port range from Host to VM`,
                 },
               },
+            },
+            hostSshPort: {
+              nullable: true,
+              type: "integer",
+              description: `Host SSH port, default is 22`,
+            },
+            vmSshPort: {
+              nullable: true,
+              type: "integer",
+              description: `VM SSH port, default is 2222`,
             },
           },
         },
