@@ -102,14 +102,14 @@ import { initNewProviderSecretsConfig } from "./providerSecrets.js";
 
 export type CapacityCommitment = {
   duration: string;
-  rewardDelegationRate: number;
+  stakerReward: number;
   delegator?: string;
 };
 
 const capacityCommitmentSchema = {
   type: "object",
   description: "Defines a capacity commitment",
-  required: ["duration", "rewardDelegationRate"],
+  required: ["duration", "stakerReward"],
   additionalProperties: false,
   properties: {
     duration: {
@@ -122,7 +122,7 @@ const capacityCommitmentSchema = {
       description: "Delegator address",
       nullable: true,
     },
-    rewardDelegationRate: {
+    stakerReward: {
       type: "number",
       minimum: 0,
       maximum: 100,
@@ -1301,7 +1301,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
           noxName,
           {
             duration: DEFAULT_CC_DURATION,
-            rewardDelegationRate: DEFAULT_CC_REWARD_DELEGATION_RATE,
+            stakerReward: DEFAULT_CC_REWARD_DELEGATION_RATE,
           },
         ] as const;
       }),
