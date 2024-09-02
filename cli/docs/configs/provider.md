@@ -345,12 +345,14 @@ VM Network Configuration
 
 **Properties**
 
-| Property     | Type                 | Required | Description                                                      |
-|--------------|----------------------|----------|------------------------------------------------------------------|
-| `publicIp`   | string               | **Yes**  | Public IP address to assign the VM. Must be publicly accessible. |
-| `bridgeName` | string               | No       | Name of the network bridge device                                |
-| `portRange`  | [object](#portrange) | No       | iptables-mapped port range from Host to VM                       |
-| `vmIp`       | string               | No       | Internal IP address to assign the VM                             |
+| Property      | Type                 | Required | Description                                                      |
+|---------------|----------------------|----------|------------------------------------------------------------------|
+| `publicIp`    | string               | **Yes**  | Public IP address to assign the VM. Must be publicly accessible. |
+| `bridgeName`  | string               | No       | Name of the network bridge device                                |
+| `hostSshPort` | integer              | No       | Host SSH port, default is 922                                    |
+| `portRange`   | [object](#portrange) | No       | iptables-mapped port range from Host to VM                       |
+| `vmIp`        | string               | No       | Internal IP address to assign the VM                             |
+| `vmSshPort`   | integer              | No       | VM SSH port, default is 22                                       |
 
 **portRange**
 
@@ -534,12 +536,14 @@ VM Network Configuration
 
 ##### Properties
 
-| Property     | Type                 | Required | Description                                                      |
-|--------------|----------------------|----------|------------------------------------------------------------------|
-| `publicIp`   | string               | **Yes**  | Public IP address to assign the VM. Must be publicly accessible. |
-| `bridgeName` | string               | No       | Name of the network bridge device                                |
-| `portRange`  | [object](#portrange) | No       | iptables-mapped port range from Host to VM                       |
-| `vmIp`       | string               | No       | Internal IP address to assign the VM                             |
+| Property      | Type                 | Required | Description                                                      |
+|---------------|----------------------|----------|------------------------------------------------------------------|
+| `publicIp`    | string               | **Yes**  | Public IP address to assign the VM. Must be publicly accessible. |
+| `bridgeName`  | string               | No       | Name of the network bridge device                                |
+| `hostSshPort` | integer              | No       | Host SSH port, default is 922                                    |
+| `portRange`   | [object](#portrange) | No       | iptables-mapped port range from Host to VM                       |
+| `vmIp`        | string               | No       | Internal IP address to assign the VM                             |
+| `vmSshPort`   | integer              | No       | VM SSH port, default is 22                                       |
 
 ##### portRange
 
