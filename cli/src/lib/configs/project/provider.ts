@@ -800,12 +800,12 @@ const noxConfigYAMLSchemaV1 = {
             hostSshPort: {
               nullable: true,
               type: "integer",
-              description: `Host SSH port, default is 22`,
+              description: `Host SSH port, default is 922`,
             },
             vmSshPort: {
               nullable: true,
               type: "integer",
-              description: `VM SSH port, default is 2222`,
+              description: `VM SSH port, default is 22`,
             },
           },
         },
