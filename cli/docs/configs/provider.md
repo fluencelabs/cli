@@ -30,11 +30,11 @@ Defines a capacity commitment
 
 #### Properties
 
-| Property               | Type   | Required | Description                                                                   |
-|------------------------|--------|----------|-------------------------------------------------------------------------------|
-| `duration`             | string | **Yes**  | Duration of the commitment in human-readable format. Example: 1 months 1 days |
-| `rewardDelegationRate` | number | **Yes**  | Reward delegation rate in percent                                             |
-| `delegator`            | string | No       | Delegator address                                                             |
+| Property       | Type   | Required | Description                                                                   |
+|----------------|--------|----------|-------------------------------------------------------------------------------|
+| `duration`     | string | **Yes**  | Duration of the commitment in human-readable format. Example: 1 months 1 days |
+| `stakerReward` | number | **Yes**  | Reward delegation rate in percent                                             |
+| `delegator`    | string | No       | Delegator address                                                             |
 
 ## ccp
 

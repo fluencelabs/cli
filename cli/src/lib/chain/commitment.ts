@@ -665,9 +665,7 @@ function optBigIntToStr(value: bigint | undefined) {
   return value === undefined ? undefined : bigintToStr(value);
 }
 
-async function stakerRewardToString(
-  stakerReward: bigint | undefined,
-) {
+async function stakerRewardToString(stakerReward: bigint | undefined) {
   if (stakerReward === undefined) {
     return undefined;
   }
