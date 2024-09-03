@@ -100,13 +100,46 @@ import {
 import { initNewEnvConfig } from "./env.js";
 import { initNewProviderSecretsConfig } from "./providerSecrets.js";
 
-export type CapacityCommitment = {
+type CapacityCommitmentV0 = {
   duration: string;
-  stakerReward: number;
+  rewardDelegationRate: number;
   delegator?: string;
 };
 
-const capacityCommitmentSchema = {
+const capacityCommitmentSchemaV0 = {
+  type: "object",
+  description: "Defines a capacity commitment",
+  required: ["duration", "rewardDelegationRate"],
+  additionalProperties: false,
+  properties: {
+    duration: {
+      type: "string",
+      default: DEFAULT_CC_DURATION,
+      description: `Duration of the commitment ${DURATION_EXAMPLE}`,
+    },
+    delegator: {
+      type: "string",
+      description: "Delegator address",
+      nullable: true,
+    },
+    rewardDelegationRate: {
+      type: "number",
+      minimum: 0,
+      maximum: 100,
+      description: "Reward delegation rate in percent",
+      default: DEFAULT_CC_REWARD_DELEGATION_RATE,
+    },
+  },
+} as const satisfies JSONSchemaType<CapacityCommitmentV0>;
+
+type CapacityCommitmentV1 = Omit<
+  CapacityCommitmentV0,
+  "rewardDelegationRate"
+> & {
+  stakerReward: number;
+};
+
+const capacityCommitmentSchemaV1 = {
   type: "object",
   description: "Defines a capacity commitment",
   required: ["duration", "stakerReward"],
@@ -126,11 +159,11 @@ const capacityCommitmentSchema = {
       type: "number",
       minimum: 0,
       maximum: 100,
-      description: "Reward delegation rate in percent",
+      description: "Staker reward in percent",
       default: DEFAULT_CC_REWARD_DELEGATION_RATE,
     },
   },
-} as const satisfies JSONSchemaType<CapacityCommitment>;
+} as const satisfies JSONSchemaType<CapacityCommitmentV1>;
 
 export type OfferV0 = {
   minPricePerWorkerEpoch: string;
@@ -959,7 +992,7 @@ type ConfigV0 = {
   providerName: string;
   offers: Record<string, OfferV0>;
   computePeers: Record<string, ComputePeerV0>;
-  capacityCommitments: Record<string, CapacityCommitment>;
+  capacityCommitments: Record<string, CapacityCommitmentV0>;
   nox?: NoxConfigYAMLV0;
   version: 0;
 };
@@ -1051,9 +1084,9 @@ const configSchemaV0Obj = {
       description:
         "A map with nox names as keys and capacity commitments as values",
       type: "object",
-      additionalProperties: capacityCommitmentSchema,
+      additionalProperties: capacityCommitmentSchemaV0,
       properties: {
-        noxName: capacityCommitmentSchema,
+        noxName: capacityCommitmentSchemaV0,
       },
       required: [],
     },
@@ -1133,9 +1166,9 @@ const configSchemaV1Obj = {
       description:
         "A map with nox names as keys and capacity commitments as values",
       type: "object",
-      additionalProperties: capacityCommitmentSchema,
+      additionalProperties: capacityCommitmentSchemaV0,
       properties: {
-        noxName: capacityCommitmentSchema,
+        noxName: capacityCommitmentSchemaV0,
       },
       required: [],
     },
@@ -1199,7 +1232,7 @@ const offerSchemaV1 = {
   required: ["minPricePerCuPerEpoch", "computePeers"],
 } as const satisfies JSONSchemaType<OfferV1>;
 
-const configSchemaV2 = {
+const configSchemaV2Obj = {
   type: "object",
   additionalProperties: false,
   properties: {
@@ -1233,9 +1266,9 @@ const configSchemaV2 = {
       description:
         "A map with nox names as keys and capacity commitments as values",
       type: "object",
-      additionalProperties: capacityCommitmentSchema,
+      additionalProperties: capacityCommitmentSchemaV0,
       properties: {
-        noxName: capacityCommitmentSchema,
+        noxName: capacityCommitmentSchemaV0,
       },
       required: [],
     },
@@ -1250,8 +1283,32 @@ const configSchemaV2 = {
   ],
 } as const satisfies JSONSchemaType<ConfigV2>;
 
+const configSchemaV2: JSONSchemaType<ConfigV2> = configSchemaV2Obj;
+
+type ConfigV3 = Omit<ConfigV2, "version" | "capacityCommitments"> & {
+  version: 3;
+  capacityCommitments: Record<string, CapacityCommitmentV1>;
+};
+
+const configSchemaV3Obj = {
+  ...configSchemaV2Obj,
+  properties: {
+    ...configSchemaV2Obj.properties,
+    version: { type: "integer", const: 3, description: "Config version" },
+    capacityCommitments: {
+      ...configSchemaV2Obj.properties.capacityCommitments,
+      additionalProperties: capacityCommitmentSchemaV1,
+      properties: {
+        noxName: capacityCommitmentSchemaV1,
+      },
+    },
+  },
+} as const satisfies JSONSchemaType<ConfigV3>;
+
+const configSchemaV3: JSONSchemaType<ConfigV3> = configSchemaV3Obj;
+
 const latestConfigSchemaObj =
-  configSchemaV2 satisfies JSONSchemaType<LatestConfig>;
+  configSchemaV3Obj satisfies JSONSchemaType<LatestConfig>;
 
 const latestConfigSchema: JSONSchemaType<LatestConfig> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_CONFIG_FULL_FILE_NAME}`,
@@ -1333,6 +1390,7 @@ ${yamlDiffPatch("", {}, userProvidedConfig)}
 
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
+const validateConfigSchemaV2 = ajv.compile(configSchemaV2);
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -1382,6 +1440,26 @@ const migrations: Migrations<Config> = [
       }),
     };
   },
+  async (config: Config): Promise<ConfigV3> => {
+    if (!validateConfigSchemaV2(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV0.errors,
+        )}`,
+      );
+    }
+
+    return {
+      ...config,
+      version: 3,
+      capacityCommitments: mapValues(
+        config.capacityCommitments,
+        ({ rewardDelegationRate: stakerReward, ...cc }) => {
+          return { ...cc, stakerReward };
+        },
+      ),
+    };
+  },
 ];
 
 function migrateComputePeersV0ToV1(
@@ -1426,8 +1504,8 @@ function migrateChainConfigV0ToV1(
   );
 }
 
-type Config = ConfigV0 | ConfigV1 | ConfigV2;
-type LatestConfig = ConfigV2;
+type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3;
+type LatestConfig = ConfigV3;
 type LatestCCPConfigYAML = CCPConfigYAMLV1;
 type LatestNoxConfigYAML = NoxConfigYAMLV1;
 export type ProviderConfig = InitializedConfig<LatestConfig>;
@@ -1710,7 +1788,7 @@ function validateMissingComputePeers(config: LatestConfig): ValidationResult {
 }
 
 const initConfigOptions = {
-  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
+  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2, configSchemaV3],
   latestSchema: latestConfigSchema,
   migrations,
   name: PROVIDER_CONFIG_FILE_NAME,
