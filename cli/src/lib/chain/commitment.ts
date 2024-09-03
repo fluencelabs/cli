@@ -257,8 +257,8 @@ export async function createCommitments(flags: {
             };
           }
 
-          const ccRewardDelegationRate = Math.floor(
-            (capacityCommitment.rewardDelegationRate / HUNDRED_PERCENT) *
+          const ccStakerReward = Math.floor(
+            (capacityCommitment.stakerReward / HUNDRED_PERCENT) *
               Number(precision),
           );
 
@@ -268,7 +268,7 @@ export async function createCommitments(flags: {
               peerIdUint8Arr,
               durationEpoch,
               ccDelegator ?? ethers.ZeroAddress,
-              ccRewardDelegationRate,
+              ccStakerReward,
             ),
           };
         }),
@@ -647,7 +647,7 @@ export async function getCommitmentsInfo(flags: CCFlags) {
         startDate: ccStartDate,
         endEpoch: optBigIntToStr(commitment.endEpoch),
         endDate: ccEndDate,
-        rewardDelegatorRate: await rewardDelegationRateToString(
+        stakerReward: await stakerRewardToString(
           commitment.rewardDelegatorRate,
         ),
         delegator: commitment.delegator,
@@ -665,10 +665,8 @@ function optBigIntToStr(value: bigint | undefined) {
   return value === undefined ? undefined : bigintToStr(value);
 }
 
-async function rewardDelegationRateToString(
-  rewardDelegatorRate: bigint | undefined,
-) {
-  if (rewardDelegatorRate === undefined) {
+async function stakerRewardToString(stakerReward: bigint | undefined) {
+  if (stakerReward === undefined) {
     return undefined;
   }
 
@@ -676,7 +674,7 @@ async function rewardDelegationRateToString(
   const core = readonlyDealClient.getCore();
   const precision = await core.precision();
   return `${numToStr(
-    (Number(rewardDelegatorRate) * HUNDRED_PERCENT) / Number(precision),
+    (Number(stakerReward) * HUNDRED_PERCENT) / Number(precision),
   )}%`;
 }
 
@@ -721,7 +719,7 @@ export async function getCommitmentInfoString(
         "End epoch": ccInfo.endEpoch,
         "Start date": ccInfo.startDate?.toLocaleString(),
         "End date": ccInfo.endDate?.toLocaleString(),
-        "Reward delegator rate": ccInfo.rewardDelegatorRate,
+        "Staker reward %": ccInfo.stakerReward,
         Delegator:
           ccInfo.delegator === ethers.ZeroAddress
             ? "Anyone can activate capacity commitment"
