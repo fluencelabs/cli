@@ -33,7 +33,7 @@ Defines a capacity commitment
 | Property       | Type   | Required | Description                                                                   |
 |----------------|--------|----------|-------------------------------------------------------------------------------|
 | `duration`     | string | **Yes**  | Duration of the commitment in human-readable format. Example: 1 months 1 days |
-| `stakerReward` | number | **Yes**  | Reward delegation rate in percent                                             |
+| `stakerReward` | number | **Yes**  | Staker reward in percent                                                      |
 | `delegator`    | string | No       | Delegator address                                                             |
 
 ## ccp
