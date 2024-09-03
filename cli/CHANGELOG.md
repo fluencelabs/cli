@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.19.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.19.1...fluence-cli-v0.19.2) (2024-09-03)
+
+
+### Features
+
+* use pinned IPFS container version, other improvements ([#1006](https://github.com/fluencelabs/cli/issues/1006)) ([3095b26](https://github.com/fluencelabs/cli/commit/3095b2633b99f448a4faef6cbe7073dc6a8dc589))
+
+
+### Bug Fixes
+
+* **provider:** rename rewardDelegationRate to stakerReward ([#1017](https://github.com/fluencelabs/cli/issues/1017)) ([efc8acc](https://github.com/fluencelabs/cli/commit/efc8acc25fb7038726f036eec0370f8fd35854fa))
+* **vm_config:** add hostSshPort and vmSshPort to Nox's vmConfig ([#1016](https://github.com/fluencelabs/cli/issues/1016)) ([38a281b](https://github.com/fluencelabs/cli/commit/38a281b0f0469bf257d657d76e516ba81235d997))
+
 ## [0.19.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.19.0...fluence-cli-v0.19.1) (2024-08-29)
 
 
