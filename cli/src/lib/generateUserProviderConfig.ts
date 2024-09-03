@@ -105,8 +105,8 @@ export async function addComputePeers(
       validate: validateAddress,
     });
 
-    const capacityCommitmentRewardDelegationRate = await input({
-      message: `Enter capacity commitment reward delegation rate (in %)`,
+    const capacityCommitmentStakerReward = await input({
+      message: `Enter capacity commitment staker reward (in %)`,
       default: numToStr(DEFAULT_CC_REWARD_DELEGATION_RATE),
       validate: validatePercent,
     });
@@ -114,7 +114,7 @@ export async function addComputePeers(
     userProvidedConfig.capacityCommitments[name] = {
       duration: capacityCommitmentDuration,
       delegator: capacityCommitmentDelegator,
-      rewardDelegationRate: Number(capacityCommitmentRewardDelegationRate),
+      stakerReward: Number(capacityCommitmentStakerReward),
     };
 
     userProvidedConfig.computePeers[name] = {
