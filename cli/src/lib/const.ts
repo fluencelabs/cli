@@ -425,6 +425,15 @@ export const PRIV_KEY_FLAG = {
   }),
 };
 
+export const ADDRESS_FLAG_NAME = "address";
+
+export const ADDRESS_FLAG = {
+  [ADDRESS_FLAG_NAME]: Flags.string({
+    description: "Account address",
+    helpValue: "<address>",
+  }),
+};
+
 export const CHAIN_FLAGS = {
   ...ENV_FLAG,
   ...PRIV_KEY_FLAG,
