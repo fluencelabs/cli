@@ -180,25 +180,25 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 
 ##### Properties
 
-| Property                 | Type                      | Required | Description                                                                                                       |
-|--------------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
-| `bootstrapNodes`         | string[]                  | No       | List of bootstrap nodes. Default: all addresses for the selected env                                              |
-| `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                    |
-| `chain`                  | [object](#chain)          | No       | Chain config                                                                                                      |
-| `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                          |
-| `effectors`              | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
-| `externalMultiaddresses` | string[]                  | No       | List of external multiaddresses                                                                                   |
-| `httpPort`               | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
-| `ipfs`                   | [object](#ipfs)           | No       | IPFS config                                                                                                       |
-| `listenIp`               | string                    | No       | IP to listen on                                                                                                   |
-| `metrics`                | [object](#metrics)        | No       | Metrics configuration                                                                                             |
-| `rawConfig`              | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
-| `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
-| `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
-| `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
-| `vm`                     | [object](#vm)             | No       | VM Configuration                                                                                                  |
-| `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+| Property                 | Type                      | Required | Description                                                                                                      |
+|--------------------------|---------------------------|----------|------------------------------------------------------------------------------------------------------------------|
+| `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                    |
+| `bootstrapNodes`         | string[]                  | No       | List of bootstrap nodes. Default: all addresses for the selected env                                             |
+| `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                   |
+| `chain`                  | [object](#chain)          | No       | Chain config                                                                                                     |
+| `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                         |
+| `effectors`              | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                    |
+| `externalMultiaddresses` | string[]                  | No       | List of external multiaddresses                                                                                  |
+| `httpPort`               | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 918      |
+| `ipfs`                   | [object](#ipfs)           | No       | IPFS config                                                                                                      |
+| `listenIp`               | string                    | No       | IP to listen on                                                                                                  |
+| `metrics`                | [object](#metrics)        | No       | Metrics configuration                                                                                            |
+| `rawConfig`              | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                  |
+| `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                   |
+| `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                   |
+| `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 977       |
+| `vm`                     | [object](#vm)             | No       | VM Configuration                                                                                                 |
+| `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 999 |
 
 ##### ccp
 
@@ -371,25 +371,25 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 
 ### Properties
 
-| Property                 | Type                      | Required | Description                                                                                                       |
-|--------------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
-| `bootstrapNodes`         | string[]                  | No       | List of bootstrap nodes. Default: all addresses for the selected env                                              |
-| `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                    |
-| `chain`                  | [object](#chain)          | No       | Chain config                                                                                                      |
-| `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                          |
-| `effectors`              | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
-| `externalMultiaddresses` | string[]                  | No       | List of external multiaddresses                                                                                   |
-| `httpPort`               | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
-| `ipfs`                   | [object](#ipfs)           | No       | IPFS config                                                                                                       |
-| `listenIp`               | string                    | No       | IP to listen on                                                                                                   |
-| `metrics`                | [object](#metrics)        | No       | Metrics configuration                                                                                             |
-| `rawConfig`              | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
-| `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
-| `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
-| `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
-| `vm`                     | [object](#vm)             | No       | VM Configuration                                                                                                  |
-| `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+| Property                 | Type                      | Required | Description                                                                                                      |
+|--------------------------|---------------------------|----------|------------------------------------------------------------------------------------------------------------------|
+| `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                    |
+| `bootstrapNodes`         | string[]                  | No       | List of bootstrap nodes. Default: all addresses for the selected env                                             |
+| `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                   |
+| `chain`                  | [object](#chain)          | No       | Chain config                                                                                                     |
+| `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                         |
+| `effectors`              | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                    |
+| `externalMultiaddresses` | string[]                  | No       | List of external multiaddresses                                                                                  |
+| `httpPort`               | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 918      |
+| `ipfs`                   | [object](#ipfs)           | No       | IPFS config                                                                                                      |
+| `listenIp`               | string                    | No       | IP to listen on                                                                                                  |
+| `metrics`                | [object](#metrics)        | No       | Metrics configuration                                                                                            |
+| `rawConfig`              | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                  |
+| `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                   |
+| `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                   |
+| `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 977       |
+| `vm`                     | [object](#vm)             | No       | VM Configuration                                                                                                 |
+| `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 999 |
 
 ### ccp
 
