@@ -21,9 +21,18 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { jsonStringify } from "../../common.js";
 import { getProviderInfo } from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { NOX_NAMES_FLAG, CHAIN_FLAGS, JSON_FLAG } from "../../lib/const.js";
+import { initNewProviderArtifactsConfig } from "../../lib/configs/project/providerArtifacts.js";
+import {
+  NOX_NAMES_FLAG,
+  CHAIN_FLAGS,
+  JSON_FLAG,
+  ADDRESS_FLAG,
+  ADDRESS_FLAG_NAME,
+  PRIV_KEY_FLAG_NAME,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { resolveComputePeersByNames } from "../../lib/resolveComputePeersByNames.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override aliases = ["provider:i"];
@@ -33,20 +42,18 @@ export default class Info extends BaseCommand<typeof Info> {
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
     ...JSON_FLAG,
+    ...ADDRESS_FLAG,
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Info));
     const computePeers = await resolveComputePeersByNames(flags);
-    const providerInfo = await getProviderInfo();
 
     const infoToPrint = {
-      providerInfo: {
-        ...(providerInfo.name === null
-          ? { status: "NotRegistered" }
-          : { status: "Registered", name: providerInfo.name }),
-        address: providerInfo.address,
-      },
+      ...(await formatProvidersInfo(
+        flags[ADDRESS_FLAG_NAME],
+        flags[PRIV_KEY_FLAG_NAME],
+      )),
       computePeers: computePeers.map(({ name, peerId, walletAddress }) => {
         return {
           nox: name,
@@ -63,4 +70,50 @@ export default class Info extends BaseCommand<typeof Info> {
 
     commandObj.log(yamlDiffPatch("", {}, infoToPrint));
   }
+}
+
+async function formatProvidersInfo(
+  addressFromFlags: string | undefined,
+  privKeyFromFlags: string | undefined,
+) {
+  const providerArtifactsConfig = await initNewProviderArtifactsConfig();
+  const fluenceEnv = await ensureFluenceEnv();
+
+  const providerAddressesFromArtifacts = Object.values(
+    providerArtifactsConfig.offers[fluenceEnv] ?? {},
+  ).map(({ providerAddress }) => {
+    return providerAddress;
+  });
+
+  if (
+    providerAddressesFromArtifacts.length === 0 ||
+    addressFromFlags !== undefined ||
+    privKeyFromFlags !== undefined
+  ) {
+    const providerInfo = await getProviderInfo(addressFromFlags);
+
+    return {
+      providerInfo: formatProviderInfo(providerInfo),
+    };
+  }
+
+  return {
+    providersInfo: await Promise.all(
+      providerAddressesFromArtifacts.map(async (address) => {
+        const providerInfo = await getProviderInfo(address);
+        return [address, formatProviderInfo(providerInfo)] as const;
+      }),
+    ),
+  };
+}
+
+function formatProviderInfo(
+  providerInfo: Awaited<ReturnType<typeof getProviderInfo>>,
+) {
+  return {
+    ...(providerInfo.name === null
+      ? { status: "NotRegistered" }
+      : { status: "Registered", name: providerInfo.name }),
+    address: providerInfo.address,
+  };
 }
