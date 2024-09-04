@@ -156,8 +156,10 @@ export async function removeOffers(flags: OffersArgs) {
 
   const providerArtifactsConfig = await initNewProviderArtifactsConfig();
 
-  providerArtifactsConfig.offers[await ensureFluenceEnv()] = omit(
-    providerArtifactsConfig.offers[await ensureFluenceEnv()],
+  const fluenceEnv = await ensureFluenceEnv();
+
+  providerArtifactsConfig.offers[fluenceEnv] = omit(
+    providerArtifactsConfig.offers[fluenceEnv],
     populatedTxs.map(({ offerName }) => {
       return offerName;
     }),
