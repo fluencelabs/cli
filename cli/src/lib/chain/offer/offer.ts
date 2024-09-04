@@ -266,6 +266,11 @@ export async function createOffers(flags: OffersArgs) {
     );
   }
 
+  if (offerIds.length === 0) {
+    commandObj.logToStderr("No offers created");
+    return;
+  }
+
   type GetOffersInfoReturnType = Awaited<
     ReturnType<typeof getOffersInfo<(typeof offerIds)[number]>>
   >;
@@ -633,6 +638,10 @@ export async function resolveCreatedOffers(flags: OfferArtifactsArgs) {
 export async function getOffersInfo<T extends OfferNameAndId>(
   offers: T[],
 ): Promise<[T[], (T & { offerIndexerInfo: OfferDetail })[]]> {
+  if (offers.length === 0) {
+    return [[], []];
+  }
+
   const dealCliClient = await getDealCliClient();
 
   const getOffersArg: Parameters<typeof dealCliClient.getOffers>[0] = {

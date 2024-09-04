@@ -57,6 +57,7 @@
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider offer-create`](#fluence-provider-offer-create)
 * [`fluence provider offer-info`](#fluence-provider-offer-info)
+* [`fluence provider offer-remove`](#fluence-provider-offer-remove)
 * [`fluence provider offer-update`](#fluence-provider-offer-update)
 * [`fluence provider register`](#fluence-provider-register)
 * [`fluence provider tokens-distribute`](#fluence-provider-tokens-distribute)
@@ -1651,6 +1652,34 @@ ALIASES
 ```
 
 _See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.19.2/src/commands/provider/offer-info.ts)_
+
+## `fluence provider offer-remove`
+
+Remove offers
+
+```
+USAGE
+  $ fluence provider offer-remove [--no-input] [--offers <offer-1,offer-2>] [--env <dar | kras | stage | local | custom>]
+    [--priv-key <private-key>]
+
+FLAGS
+  --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. To use all of your offers: --offers
+                                               all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local env
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
+                                               used by default when CLI is used in non-interactive mode
+
+DESCRIPTION
+  Remove offers
+
+ALIASES
+  $ fluence provider or
+```
+
+_See code: [src/commands/provider/offer-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.19.2/src/commands/provider/offer-remove.ts)_
 
 ## `fluence provider offer-update`
 
