@@ -128,9 +128,9 @@ export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
 export const CHAIN_RPC_CONTAINER_NAME = "chain-rpc";
 export const CHAIN_DEPLOY_SCRIPT_NAME = "chain-deploy-script";
 export const SUBGRAPH_DEPLOY_SCRIPT_NAME = "subgraph-deploy-script";
-export const TCP_PORT_START = 7771;
-export const WEB_SOCKET_PORT_START = 9991;
-export const HTTP_PORT_START = 18080;
+export const TCP_PORT_START = 977;
+export const WEB_SOCKET_PORT_START = 999;
+export const HTTP_PORT_START = 918;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
 export const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
 
