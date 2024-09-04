@@ -116,8 +116,8 @@ export async function getProviderInfoByAddress(address: string) {
   return { name: name === "" ? null : name, address };
 }
 
-export async function getProviderInfo() {
-  return getProviderInfoByAddress(await getSignerAddress());
+export async function getProviderInfo(address?: string) {
+  return getProviderInfoByAddress(address ?? (await getSignerAddress()));
 }
 
 export async function assertProviderIsRegistered(address: string) {
