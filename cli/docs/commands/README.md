@@ -1547,9 +1547,10 @@ Print nox signing wallets and peer ids
 ```
 USAGE
   $ fluence provider info [--no-input] [--env <dar | kras | stage | local | custom>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2>] [--json]
+    [--nox-names <nox-1,nox-2>] [--json] [--address <address>]
 
 FLAGS
+  --address=<address>                          Account address
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --json                                       Output JSON
   --no-input                                   Don't interactively ask for any input from the user
