@@ -429,7 +429,7 @@ export const ADDRESS_FLAG_NAME = "address";
 
 export const ADDRESS_FLAG = {
   [ADDRESS_FLAG_NAME]: Flags.string({
-    description: "Account address",
+    description: "Provider address",
     helpValue: "<address>",
   }),
 };
