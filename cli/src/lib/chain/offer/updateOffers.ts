@@ -18,8 +18,10 @@
 import type { ComputeUnit } from "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/types/schemes.js";
 import { color } from "@oclif/color";
 import chunk from "lodash-es/chunk.js";
+import omit from "lodash-es/omit.js";
 
 import { commandObj } from "../../commandObj.js";
+import { initNewProviderArtifactsConfig } from "../../configs/project/providerArtifacts.js";
 import {
   CLI_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
@@ -35,6 +37,7 @@ import {
 import { numToStr, uint8ArrayToHex } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
+import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
@@ -101,6 +104,66 @@ export async function updateOffers(flags: OffersArgs) {
     updateOffersTxs,
     assertProviderIsRegistered,
   );
+}
+
+export async function removeOffers(flags: OffersArgs) {
+  const offers = await resolveOffersFromProviderConfig(flags);
+  const offersFoundOnChain = await filterOffersFoundOnChain(offers);
+  const populatedTxs = await populateRemoveOffersTxs(offersFoundOnChain);
+
+  const removeOffersTxs = [
+    populatedTxs.flatMap(({ cuToRemoveTxs: txs }) => {
+      return txs.map(({ tx }) => {
+        return tx;
+      });
+    }),
+    populatedTxs.flatMap(({ removePeersFromOffersTxs }) => {
+      return removePeersFromOffersTxs.map(({ tx }) => {
+        return tx;
+      });
+    }),
+    populatedTxs.flatMap(({ removeOfferTx }) => {
+      return [removeOfferTx.tx];
+    }),
+  ].flat();
+
+  if (removeOffersTxs.length === 0) {
+    commandObj.logToStderr("Nothing to remove for selected offers");
+    return;
+  }
+
+  printOffersToRemoveInfo(populatedTxs);
+
+  if (
+    !(await confirm({
+      message: "Would you like to continue",
+      default: true,
+    }))
+  ) {
+    commandObj.logToStderr("Offers remove canceled");
+    return;
+  }
+
+  await signBatch(
+    `Removing offers:\n\n${populatedTxs
+      .map(({ offerName, offerId }) => {
+        return `${offerName} (${offerId})`;
+      })
+      .join("\n")}`,
+    removeOffersTxs,
+    assertProviderIsRegistered,
+  );
+
+  const providerArtifactsConfig = await initNewProviderArtifactsConfig();
+
+  providerArtifactsConfig.offers[await ensureFluenceEnv()] = omit(
+    providerArtifactsConfig.offers[await ensureFluenceEnv()],
+    populatedTxs.map(({ offerName }) => {
+      return offerName;
+    }),
+  );
+
+  await providerArtifactsConfig.$commit();
 }
 
 type OnChainOffer = Awaited<
@@ -186,6 +249,44 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
       ).flat() satisfies Txs;
 
       return { offerName, offerId, removePeersFromOffersTxs, txs };
+    }),
+  );
+}
+
+function populateRemoveOffersTxs(offersFoundOnChain: OnChainOffer[]) {
+  return Promise.all(
+    offersFoundOnChain.map(async (offer) => {
+      const { offerName, offerId, offerIndexerInfo } = offer;
+      offer.computePeersFromProviderConfig = [];
+
+      const peersOnChain = (await Promise.all(
+        offerIndexerInfo.peers.map(async ({ id, ...rest }) => {
+          return {
+            peerIdBase58: await peerIdHexStringToBase58String(id),
+            hexPeerId: id,
+            ...rest,
+          };
+        }),
+      )) satisfies PeersOnChain;
+
+      const removePeersFromOffersTxs = (await populatePeersToRemoveTxs(
+        offer,
+        peersOnChain,
+      )) satisfies Txs;
+
+      const cuToRemoveTxs = (
+        await populateCUToRemoveTxs(offer, peersOnChain)
+      ).flat() satisfies Txs;
+
+      const removeOfferTx = await populateOfferRemoveTx(offer);
+
+      return {
+        offerName,
+        offerId,
+        removePeersFromOffersTxs,
+        cuToRemoveTxs,
+        removeOfferTx,
+      };
     }),
   );
 }
@@ -374,6 +475,15 @@ async function populateCUToRemoveTxs(
   });
 }
 
+async function populateOfferRemoveTx({ offerId }: OnChainOffer) {
+  const { dealClient } = await getDealClient();
+  const market = dealClient.getMarket();
+  return {
+    description: `\nRemoving offer: ${offerId}`,
+    tx: populateTx(market.removeOffer, offerId),
+  };
+}
+
 async function populateCUToAddTxs(
   { computePeersFromProviderConfig }: OnChainOffer,
   peersOnChain: PeersOnChain,
@@ -481,6 +591,47 @@ function printOffersToUpdateInfo(
             .join("\n")}\n`,
         ];
       })
+      .join("\n\n")}`,
+  );
+}
+
+function printOffersToRemoveInfo(
+  populatedTxs: Awaited<ReturnType<typeof populateRemoveOffersTxs>>,
+) {
+  commandObj.logToStderr(
+    `Offers to remove:\n\n${populatedTxs
+      .flatMap(
+        ({
+          offerId,
+          offerName,
+          removePeersFromOffersTxs,
+          cuToRemoveTxs,
+          removeOfferTx,
+        }) => {
+          const allTxs = [
+            ...removePeersFromOffersTxs,
+            ...cuToRemoveTxs,
+            removeOfferTx,
+          ];
+
+          if (allTxs.length === 0) {
+            return [];
+          }
+
+          return [
+            `Offer ${color.green(offerName)} with id ${color.yellow(
+              offerId,
+            )}:\n${allTxs
+              .filter((tx): tx is typeof tx & { description: string } => {
+                return "description" in tx;
+              })
+              .map(({ description }) => {
+                return description;
+              })
+              .join("\n")}\n`,
+          ];
+        },
+      )
       .join("\n\n")}`,
   );
 }
