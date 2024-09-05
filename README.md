@@ -25,7 +25,7 @@ curl -qsL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | ba
 
 **Installing manually**
 
--   download fluence archive for your platfrom from
+-   download fluence archive for your platform from
     [latest release](https://github.com/fluencelabs/cli/releases/latest).
 -   extract archive contents to default fluence user directory
 
