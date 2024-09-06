@@ -62,7 +62,7 @@ import {
   peerIdHexStringToBase58String,
   peerIdToUint8Array,
 } from "./conversions.js";
-import { fltFormatWithSymbol } from "./currencies.js";
+import { fltFormatWithSymbol, fltParse } from "./currencies.js";
 
 const HUNDRED_PERCENT = 100;
 
@@ -783,25 +783,31 @@ export async function getCommitmentInfoString(
         ...(ccInfo.ccFromExplorer === null
           ? {}
           : {
-              "Total CC rewards over time": ccInfo.ccFromExplorer.rewards.total,
-              "In vesting / Available / Total claimed (Provider)": [
-                ccInfo.ccFromExplorer.rewards.provider.inVesting,
-                ccInfo.ccFromExplorer.rewards.provider.availableToClaim,
-                ccInfo.ccFromExplorer.rewards.provider.claimed,
-              ]
-                .map((val) => {
-                  return numToStr(val);
-                })
-                .join(" / "),
-              "In vesting / Available / Total claimed (Staker)": [
-                ccInfo.ccFromExplorer.rewards.delegator.inVesting,
-                ccInfo.ccFromExplorer.rewards.delegator.availableToClaim,
-                ccInfo.ccFromExplorer.rewards.delegator.claimed,
-              ]
-                .map((val) => {
-                  return numToStr(val);
-                })
-                .join(" / "),
+              "Total CC rewards over time": await fltFormatWithSymbol(
+                await fltParse(ccInfo.ccFromExplorer.rewards.total),
+              ),
+              "In vesting / Available / Total claimed (Provider)": (
+                await Promise.all(
+                  [
+                    ccInfo.ccFromExplorer.rewards.provider.inVesting,
+                    ccInfo.ccFromExplorer.rewards.provider.availableToClaim,
+                    ccInfo.ccFromExplorer.rewards.provider.claimed,
+                  ].map((val) => {
+                    return fltFormatWithSymbol(BigInt(val));
+                  }),
+                )
+              ).join(" / "),
+              "In vesting / Available / Total claimed (Staker)": (
+                await Promise.all(
+                  [
+                    ccInfo.ccFromExplorer.rewards.delegator.inVesting,
+                    ccInfo.ccFromExplorer.rewards.delegator.availableToClaim,
+                    ccInfo.ccFromExplorer.rewards.delegator.claimed,
+                  ].map((val) => {
+                    return fltFormatWithSymbol(BigInt(val));
+                  }),
+                )
+              ).join(" / "),
             }),
       } satisfies Record<string, string | undefined>,
       isUndefined,
