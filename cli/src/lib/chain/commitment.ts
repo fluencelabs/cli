@@ -43,6 +43,7 @@ import {
   populateTx,
   getReadonlyDealClient,
   sign,
+  getDealExplorerClient,
 } from "../dealClient.js";
 import { bigintSecondsToDate } from "../helpers/bigintOps.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
@@ -590,13 +591,21 @@ export async function getCommitmentsInfo(flags: CCFlags) {
   const capacity = readonlyDealClient.getCapacity();
   const core = readonlyDealClient.getCore();
 
-  const [commitments, currentEpoch, epochDuration, initTimestamp] =
-    await Promise.all([
-      getCommitments(flags),
-      core.currentEpoch(),
-      core.epochDuration(),
-      core.initTimestamp(),
-    ]);
+  const [
+    commitments,
+    currentEpoch,
+    epochDuration,
+    initTimestamp,
+    maxFailedRatio,
+  ] = await Promise.all([
+    getCommitments(flags),
+    core.currentEpoch(),
+    core.epochDuration(),
+    core.initTimestamp(),
+    core.maxFailedRatio(),
+  ]);
+
+  const dealExplorerClient = await getDealExplorerClient();
 
   return Promise.all(
     commitments.map(async (c) => {
@@ -614,7 +623,32 @@ export async function getCommitmentsInfo(flags: CCFlags) {
 
       try {
         commitment = await capacity.getCommitment(c.commitmentId);
-      } catch {}
+      } catch (e) {
+        dbg(
+          `Failed to get commitment from chain ${c.commitmentId}. Error: ${stringifyUnknown(e)}`,
+        );
+      }
+
+      const cuFailThreshold =
+        commitment.unitCount === undefined
+          ? undefined
+          : maxFailedRatio * commitment.unitCount;
+
+      let ccFromExplorer: Awaited<
+        ReturnType<typeof dealExplorerClient.getCapacityCommitment>
+      > = null;
+
+      try {
+        ccFromExplorer = await dealExplorerClient.getCapacityCommitment(
+          c.commitmentId,
+        );
+      } catch (e) {
+        dbg(
+          `Failed to get commitment ${c.commitmentId} from explorer. Error: ${stringifyUnknown(
+            e,
+          )}`,
+        );
+      }
 
       const ccStartDate =
         commitment.startEpoch === undefined
@@ -637,12 +671,13 @@ export async function getCommitmentsInfo(flags: CCFlags) {
               peerId: c.providerConfigComputePeer.peerId,
             }
           : {}),
+        ccFromExplorer,
         commitmentId: c.commitmentId,
         status:
           commitment.status === undefined
             ? undefined
             : Number(commitment.status),
-        currentEpoch: optBigIntToStr(currentEpoch),
+        currentEpoch: bigintToStr(currentEpoch),
         startEpoch: optBigIntToStr(commitment.startEpoch),
         startDate: ccStartDate,
         endEpoch: optBigIntToStr(commitment.endEpoch),
@@ -654,6 +689,7 @@ export async function getCommitmentsInfo(flags: CCFlags) {
         totalCU: optBigIntToStr(commitment.unitCount),
         failedEpoch: optBigIntToStr(commitment.failedEpoch),
         totalCUFailCount: optBigIntToStr(commitment.totalFailCount),
+        cuFailThreshold: optBigIntToStr(cuFailThreshold),
         collateralPerUnit: commitment.collateralPerUnit,
         exitedUnitCount: optBigIntToStr(commitment.exitedUnitCount),
       };
@@ -706,6 +742,20 @@ export async function getCommitmentInfoString(
 ) {
   const { ethers } = await import("ethers");
 
+  const staker =
+    ccInfo.delegator ?? ccInfo.ccFromExplorer?.delegatorAddress ?? undefined;
+
+  const startEndCurrentEpoch =
+    ccInfo.startEpoch === undefined || ccInfo.endEpoch === undefined
+      ? undefined
+      : [ccInfo.startEpoch, ccInfo.endEpoch, ccInfo.currentEpoch].join(" / ");
+
+  const missedProofsThreshold =
+    ccInfo.totalCUFailCount === undefined ||
+    ccInfo.cuFailThreshold === undefined
+      ? undefined
+      : [ccInfo.totalCUFailCount, ccInfo.cuFailThreshold].join(" / ");
+
   return yamlDiffPatch(
     "",
     {},
@@ -714,25 +764,46 @@ export async function getCommitmentInfoString(
         PeerId: ccInfo.peerId,
         "Capacity commitment ID": ccInfo.commitmentId,
         Status: await ccStatusToString(ccInfo.status),
-        "Current epoch": ccInfo.currentEpoch,
-        "Start epoch": ccInfo.startEpoch,
-        "End epoch": ccInfo.endEpoch,
-        "Start date": ccInfo.startDate?.toLocaleString(),
-        "End date": ccInfo.endDate?.toLocaleString(),
-        "Staker reward %": ccInfo.stakerReward,
-        Delegator:
-          ccInfo.delegator === ethers.ZeroAddress
+        Staker:
+          staker === ethers.ZeroAddress
             ? "Anyone can activate capacity commitment"
-            : ccInfo.delegator,
+            : staker,
+        "Staker reward":
+          ccInfo.stakerReward === undefined ? undefined : ccInfo.stakerReward,
+        "Start / End / Current epoch": startEndCurrentEpoch,
+        "Start date": ccInfo.startDate?.toLocaleString(),
+        "Expiration date": ccInfo.endDate?.toLocaleString(),
         "Total CU": ccInfo.totalCU,
-        "Failed epoch": ccInfo.failedEpoch,
-        "Total CU Fail Count": ccInfo.totalCUFailCount,
+        "Missed proofs / Threshold": missedProofsThreshold,
         "Collateral per unit":
           ccInfo.collateralPerUnit === undefined
             ? undefined
             : await fltFormatWithSymbol(ccInfo.collateralPerUnit),
         "Exited unit count": ccInfo.exitedUnitCount,
-      },
+        ...(ccInfo.ccFromExplorer === null
+          ? {}
+          : {
+              "Total CC rewards over time": ccInfo.ccFromExplorer.rewards.total,
+              "In vesting / Available / Total claimed (Provider)": [
+                ccInfo.ccFromExplorer.rewards.provider.inVesting,
+                ccInfo.ccFromExplorer.rewards.provider.availableToClaim,
+                ccInfo.ccFromExplorer.rewards.provider.claimed,
+              ]
+                .map((val) => {
+                  return numToStr(val);
+                })
+                .join(" / "),
+              "In vesting / Available / Total claimed (Staker)": [
+                ccInfo.ccFromExplorer.rewards.delegator.inVesting,
+                ccInfo.ccFromExplorer.rewards.delegator.availableToClaim,
+                ccInfo.ccFromExplorer.rewards.delegator.claimed,
+              ]
+                .map((val) => {
+                  return numToStr(val);
+                })
+                .join(" / "),
+            }),
+      } satisfies Record<string, string | undefined>,
       isUndefined,
     ),
   );
