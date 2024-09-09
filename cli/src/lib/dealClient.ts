@@ -666,3 +666,22 @@ export function getEventValues<T extends string, U extends Contract<T>>({
     return res;
   });
 }
+
+export async function batchRead<T>(rpcReadCalls: Array<() => Promise<T>>) {
+  let rpcResults: Array<T> = [];
+
+  for (const rpcReadCallBatch of chunk(
+    rpcReadCalls,
+    20, // it's our guess on the max number of concurrent requests to RPC
+  )) {
+    rpcResults = rpcResults.concat(
+      await Promise.all(
+        rpcReadCallBatch.map((rpcReadCall) => {
+          return rpcReadCall();
+        }),
+      ),
+    );
+  }
+
+  return rpcResults;
+}
