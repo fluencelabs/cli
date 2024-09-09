@@ -20,6 +20,7 @@ import assert from "node:assert";
 import type {
   DealClient,
   DealMatcherClient,
+  DealExplorerClient,
 } from "@fluencelabs/deal-ts-clients";
 import type { DealCliClient } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/dealCliClient.js";
 import type {
@@ -124,6 +125,27 @@ export async function getDealMatcherClient() {
   }
 
   return dealMatcherClient;
+}
+
+let dealExplorerClient: DealExplorerClient | undefined = undefined;
+
+export async function getDealExplorerClient() {
+  if (provider === undefined) {
+    provider = await ensureProvider();
+  }
+
+  if (dealExplorerClient === undefined) {
+    const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
+    const env = await ensureChainEnv();
+
+    dealExplorerClient = await DealExplorerClient.create(
+      env,
+      undefined,
+      provider,
+    );
+  }
+
+  return dealExplorerClient;
 }
 
 let dealCliClient: DealCliClient | undefined = undefined;
