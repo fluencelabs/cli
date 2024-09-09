@@ -200,6 +200,13 @@ export async function setTryTimeout<T, U>(
       const res = await callbackToTry();
       clearTimeout(timeout);
       isTrying = false;
+
+      if (attemptCounter > 1) {
+        commandObj.logToStderr(
+          `Succeeded to ${yellowMessage} after ${numToStr(attemptCounter)} attempts`,
+        );
+      }
+
       return res;
     } catch (e) {
       if (failCondition !== undefined && failCondition(e)) {
