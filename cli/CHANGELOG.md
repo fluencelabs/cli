@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.20.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.19.2...fluence-cli-v0.20.0) (2024-09-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* update default ports ([#1021](https://github.com/fluencelabs/cli/issues/1021))
+
+### Features
+
+* add offer-remove command ([#1018](https://github.com/fluencelabs/cli/issues/1018)) ([200a171](https://github.com/fluencelabs/cli/commit/200a17153acc76cd19f9bbe0f72cc992b0847b5c))
+* don't require connecting wallet on provider info if provider address is in provider artifacts for current env ([#1019](https://github.com/fluencelabs/cli/issues/1019)) ([fe63b24](https://github.com/fluencelabs/cli/commit/fe63b2457171bb82d7b1ab63cf4c0f67775c51ce))
+* match when not enough workers and running deal deploy, print success message in case of retry ([#1024](https://github.com/fluencelabs/cli/issues/1024)) ([48982b1](https://github.com/fluencelabs/cli/commit/48982b131b5c481ebd1b9ef5d3cb778f60ef3437))
+* up deal-ts-clients, show additional cc-info for providers ([#1023](https://github.com/fluencelabs/cli/issues/1023)) ([6a37315](https://github.com/fluencelabs/cli/commit/6a37315f582d9b2fb00255dd74ab2ec131075c7b))
+* update default ports ([#1021](https://github.com/fluencelabs/cli/issues/1021)) ([941128d](https://github.com/fluencelabs/cli/commit/941128d4b51bf06ca797384762e0510acf354d47))
+
+
+### Bug Fixes
+
+* collateral withdraw by doing moveResourcesFromDeal [fixes DXJ-766] ([#1025](https://github.com/fluencelabs/cli/issues/1025)) ([f33d633](https://github.com/fluencelabs/cli/commit/f33d6331750a2adb94f8cc05476ad767f6f0a979))
+* **deps:** bump deal-ts-clients to 0.18.7 ([#1026](https://github.com/fluencelabs/cli/issues/1026)) ([bc6d8c9](https://github.com/fluencelabs/cli/commit/bc6d8c931a28a5991acb07ee3198d250995297f4))
+
 ## [0.19.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.19.1...fluence-cli-v0.19.2) (2024-09-03)
 
 
