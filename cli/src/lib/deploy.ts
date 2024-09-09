@@ -17,6 +17,7 @@
 
 import assert from "node:assert";
 
+import type { DealStatus } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
@@ -49,6 +50,7 @@ import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
 import { createAndMatchDealsWithAllCUsOfPeerIds } from "./deal.js";
 import { getReadonlyDealClient } from "./dealClient.js";
+import { numToStr } from "./helpers/typesafeStringify.js";
 import { stringifyUnknown } from "./helpers/utils.js";
 import { disconnectFluenceClient } from "./jsClient.js";
 import { initCli } from "./lifeCycle.js";
@@ -76,7 +78,12 @@ export const DEPLOY_FLAGS = {
   }),
 };
 
-type DealState = "notCreated" | "notMatched" | "matched" | "ended";
+type DealState =
+  | "notCreated"
+  | "notMatched"
+  | "matched"
+  | "ended"
+  | "notEnoughWorkers";
 
 export async function deployImpl(this: Deploy, cl: typeof Deploy) {
   const { flags, fluenceConfig, args } = await initCli(
@@ -278,7 +285,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       );
     }
 
-    if (dealState === "notMatched") {
+    if (dealState === "notMatched" || dealState === "notEnoughWorkers") {
       try {
         if (flags["peer-ids"] !== undefined) {
           await createAndMatchDealsWithAllCUsOfPeerIds({
@@ -338,6 +345,20 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
   await disconnectFluenceClient();
 }
 
+async function getDealStatus(dealId: string) {
+  const { DealStatus } = await import("@fluencelabs/deal-ts-clients");
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const deal = readonlyDealClient.getDeal(dealId);
+  const status = Number(await deal.getStatus());
+
+  function isDealStatus(status: number): status is DealStatus {
+    return status in DealStatus;
+  }
+
+  assert(isDealStatus(status), `Unknown deal status: ${numToStr(status)}`);
+  return status;
+}
+
 async function determineDealState(
   createdDeal: Deal | undefined,
   workerName: string,
@@ -351,11 +372,9 @@ async function determineDealState(
     return "notMatched";
   }
 
-  const { readonlyDealClient } = await getReadonlyDealClient();
-
-  const deal = readonlyDealClient.getDeal(createdDeal.dealIdOriginal);
-  const status = await deal.getStatus();
-  const isDealEnded = status === 2n;
+  const status = await getDealStatus(createdDeal.dealIdOriginal);
+  const { DealStatus } = await import("@fluencelabs/deal-ts-clients");
+  const isDealEnded = status === DealStatus.ENDED;
 
   if (
     isDealEnded &&
@@ -369,6 +388,10 @@ async function determineDealState(
     }))
   ) {
     return "notCreated";
+  }
+
+  if (status === DealStatus.NOT_ENOUGH_WORKERS) {
+    return "notEnoughWorkers";
   }
 
   return isDealEnded ? "ended" : "matched";
