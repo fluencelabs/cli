@@ -38,6 +38,7 @@ import {
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
+  batchRead,
   getDealClient,
   getEventValues,
   signBatch,
@@ -486,11 +487,13 @@ export async function collateralWithdraw(
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
 
-    const units = await Promise.all(
-      unitIds.map(async (unitId) => {
-        return {
-          unitId,
-          unitInfo: await market.getComputeUnit(unitId),
+    const units = await batchRead(
+      unitIds.map((unitId) => {
+        return async () => {
+          return {
+            unitId,
+            unitInfo: await market.getComputeUnit(unitId),
+          };
         };
       }),
     );
