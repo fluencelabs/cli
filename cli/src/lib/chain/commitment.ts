@@ -34,6 +34,7 @@ import {
   MAX_CUS_FLAG_NAME,
   DEFAULT_MAX_CUS,
   FINISH_COMMITMENT_FLAG_NAME,
+  GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
@@ -44,6 +45,7 @@ import {
   getReadonlyDealClient,
   sign,
   getDealExplorerClient,
+  BATCH_SIZE,
 } from "../dealClient.js";
 import { bigintSecondsToDate } from "../helpers/bigintOps.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
@@ -444,6 +446,7 @@ export async function collateralWithdraw(
     [FINISH_COMMITMENT_FLAG_NAME]?: boolean;
   },
 ) {
+  const { ethers } = await import("ethers");
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
@@ -482,6 +485,65 @@ export async function collateralWithdraw(
     const { commitmentId } = commitment;
     const commitmentInfo = await capacity.getCommitment(commitmentId);
     const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
+
+    const units = await Promise.all(
+      unitIds.map(async (unitId) => {
+        return {
+          unitId,
+          unitInfo: await market.getComputeUnit(unitId),
+        };
+      }),
+    );
+
+    const unitsWithDeals = units.filter((unit) => {
+      return unit.unitInfo.deal !== ethers.ZeroAddress;
+    });
+
+    const unitIdsByOnChainWorkerId: Record<string, string[]> = {};
+
+    for (const { unitId, unitInfo } of unitsWithDeals) {
+      let unitIds = unitIdsByOnChainWorkerId[unitInfo.onchainWorkerId];
+
+      if (unitIds === undefined) {
+        unitIds = [];
+        unitIdsByOnChainWorkerId[unitInfo.onchainWorkerId] = unitIds;
+      }
+
+      unitIds.push(unitId);
+    }
+
+    const moveResourcesFromDealTxs = Object.entries(
+      unitIdsByOnChainWorkerId,
+    ).flatMap(([onchainWorkerId, unitIds]) => {
+      return chunk(
+        unitIds,
+        Math.floor(GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX / BATCH_SIZE),
+      ).map((units) => {
+        return populateTx(market.moveResourcesFromDeal, units, onchainWorkerId);
+      });
+    });
+
+    const dealsString = Array.from(
+      new Set(
+        unitsWithDeals.map(({ unitInfo }) => {
+          return unitInfo.deal;
+        }),
+      ),
+    ).join("\n");
+
+    try {
+      await signBatch(
+        `Moving resources from the following deals:\n${dealsString}`,
+        moveResourcesFromDealTxs,
+      );
+    } catch (e) {
+      commandObj.warn(
+        `Wasn't able to move resources from deals for ${stringifyBasicCommitmentInfo(commitment)}. Most likely the reason is you must wait until the provider exits from all the following deals:\n${dealsString}`,
+      );
+
+      dbg(stringifyUnknown(e));
+      continue;
+    }
 
     await sign({
       title: `Withdraw collateral from: ${commitment.commitmentId}}`,
