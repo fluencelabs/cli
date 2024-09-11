@@ -40,7 +40,7 @@ describe("fluence deploy tests", () => {
 
       await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
-      await deployDealAndWaitUntilDeployed(cwd);
+      const dealId = await deployDealAndWaitUntilDeployed(cwd);
 
       await waitUntilShowSubnetReturnsExpected(
         cwd,
@@ -54,6 +54,13 @@ describe("fluence deploy tests", () => {
       });
 
       assertLogsAreValid(logs);
+
+      // works because the same account that deploys is also a provider
+      await fluence({
+        args: ["provider", "deal-rewards-withdraw"],
+        flags: { "deal-ids": dealId },
+        cwd,
+      });
     },
   );
 });

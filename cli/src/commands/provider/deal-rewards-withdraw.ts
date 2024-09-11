@@ -25,7 +25,6 @@ import {
   PT_SYMBOL,
 } from "../../lib/const.js";
 import { getDealClient, getEventValue, sign } from "../../lib/dealClient.js";
-import { bigintToStr } from "../../lib/helpers/typesafeStringify.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -92,7 +91,9 @@ export default class DealRewardsWithdraw extends BaseCommand<
           typeof providerReward !== "bigint" ||
           typeof stakerReward !== "bigint"
         ) {
-          continue;
+          throw new Error(
+            `Failed to get rewards amount from event ${REWARD_WITHDRAWN_EVENT}. Please make sure event signature is correct`,
+          );
         }
 
         providerRewards = providerRewards + providerReward;
@@ -119,7 +120,7 @@ export default class DealRewardsWithdraw extends BaseCommand<
 
       const totalStr =
         allRewards.length > 1
-          ? `Total: ${bigintToStr(
+          ? `Total rewards: ${await ptFormatWithSymbol(
               allRewards.reduce((acc, { val }) => {
                 return acc + val;
               }, 0n),
@@ -127,7 +128,7 @@ export default class DealRewardsWithdraw extends BaseCommand<
           : "";
 
       commandObj.logToStderr(
-        `${rewardsStr}${totalStr}were withdrawn from the deal: ${dealId}`,
+        `\n${rewardsStr}${totalStr}were withdrawn from the deal: ${dealId}`,
       );
     }
   }
