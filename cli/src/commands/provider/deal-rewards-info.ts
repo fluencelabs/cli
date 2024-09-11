@@ -59,14 +59,11 @@ export default class DealRewardsInfo extends BaseCommand<
     const rewardAmount = await deal.getRewardAmount(unitId);
 
     commandObj.log(
-      `Deal reward amount:\n
-      provider: ${color.yellow(
-        await ptFormatWithSymbol(rewardAmount[0]),
-      )}\n
-      staker: ${color.yellow(
-          await ptFormatWithSymbol(rewardAmount[1]),
+      `Provider reward: ${color.yellow(
+        await ptFormatWithSymbol(rewardAmount.providerReward),
+      )}\n\nStaker reward: ${color.yellow(
+        await ptFormatWithSymbol(rewardAmount.stakerReward),
       )}`,
-
     );
   }
 }

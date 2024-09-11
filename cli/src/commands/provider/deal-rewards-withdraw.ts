@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { color } from "@oclif/color";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -26,10 +24,13 @@ import {
   DEAL_IDS_FLAG_NAME,
   PT_SYMBOL,
 } from "../../lib/const.js";
-import { getDealClient, sign } from "../../lib/dealClient.js";
+import { getDealClient, getEventValue, sign } from "../../lib/dealClient.js";
+import { bigintToStr } from "../../lib/helpers/typesafeStringify.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
+
+const REWARD_WITHDRAWN_EVENT = "RewardWithdrawn";
 
 export default class DealRewardsWithdraw extends BaseCommand<
   typeof DealRewardsWithdraw
@@ -63,33 +64,70 @@ export default class DealRewardsWithdraw extends BaseCommand<
       const deal = dealClient.getDeal(dealId);
       const workers = await deal.getWorkers();
 
-      const rewardSum = (
-        await Promise.all(
-          workers.map(({ onchainId }) => {
-            return deal.getRewardAmount(onchainId);
-          }),
-        )
-      ).reduce((acc, reward) => {
-        return [acc[0] + reward[0],
-                acc[1] + reward[1]];
-      }, [0n, 0n]);
+      let providerRewards = 0n;
+      let stakerRewards = 0n;
 
       for (const { onchainId } of workers) {
-        await sign({
+        const txReceipt = await sign({
           title: `Withdraw rewards for worker ${onchainId}`,
           method: deal.withdrawRewards,
           args: [onchainId],
         });
+
+        const providerReward = getEventValue({
+          txReceipt,
+          contract: deal,
+          eventName: REWARD_WITHDRAWN_EVENT,
+          value: "providerReward",
+        });
+
+        const stakerReward = getEventValue({
+          txReceipt,
+          contract: deal,
+          eventName: REWARD_WITHDRAWN_EVENT,
+          value: "stakerReward",
+        });
+
+        if (
+          typeof providerReward !== "bigint" ||
+          typeof stakerReward !== "bigint"
+        ) {
+          continue;
+        }
+
+        providerRewards = providerRewards + providerReward;
+        stakerRewards = stakerRewards + stakerReward;
       }
 
+      const allRewards = [
+        { name: "Provider", val: providerRewards },
+        { name: "Staker", val: stakerRewards },
+      ].filter(({ val }) => {
+        return val > 0n;
+      });
+
+      const rewardsStr =
+        allRewards.length === 0
+          ? "Rewards "
+          : `${(
+              await Promise.all(
+                allRewards.map(async ({ name, val }) => {
+                  return `${name} rewards: ${await ptFormatWithSymbol(val)}`;
+                }),
+              )
+            ).join("\n\n")}\n\n`;
+
+      const totalStr =
+        allRewards.length > 1
+          ? `Total: ${bigintToStr(
+              allRewards.reduce((acc, { val }) => {
+                return acc + val;
+              }, 0n),
+            )}\n\n`
+          : "";
+
       commandObj.logToStderr(
-        `Rewards\n
-         provider: ${color.yellow(
-          await ptFormatWithSymbol(rewardSum[0]),
-        )}\n
-         staker: ${color.yellow(
-            await ptFormatWithSymbol(rewardSum[0]),
-        )} were withdrawn from the deal: ${dealId}`,
+        `${rewardsStr}${totalStr}were withdrawn from the deal: ${dealId}`,
       );
     }
   }

@@ -1,9 +1,9 @@
 {
   "protocolVersion": 1,
   "nox": "fluencelabs/nox:0.26.1",
-  "chain-rpc": "fluencelabs/chain-rpc:0.18.7",
-  "chain-deploy-script": "fluencelabs/chain-deploy-script:0.18.7",
-  "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.18.7",
+  "chain-rpc": "fluencelabs/chain-rpc:fix-deal-rewards-double-reward-14ebe95-6237-1",
+  "chain-deploy-script": "fluencelabs/chain-deploy-script:fix-deal-rewards-double-reward-14ebe95-6237-1",
+  "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:fix-deal-rewards-double-reward-14ebe95-6237-1",
   "rust-toolchain": "nightly-2024-06-10",
   "npm": {
     "@fluencelabs/aqua-lib": "0.11.0",
