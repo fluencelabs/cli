@@ -15,10 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import assert from "node:assert";
+
+import type { IMarket } from "@fluencelabs/deal-ts-clients";
 import type { OfferDetail } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/types/schemes.js";
 import { color } from "@oclif/color";
 import type { TransactionReceipt } from "ethers";
-import chunk from "lodash-es/chunk.js";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -40,14 +42,13 @@ import {
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
-  GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX,
 } from "../../const.js";
 import { dbg } from "../../dbg.js";
 import {
   getDealClient,
   getDealCliClient,
   getSignerAddress,
-  sign,
+  guessTxSizeAndSign,
   getEventValue,
 } from "../../dealClient.js";
 import { startSpinner, stopSpinner } from "../../helpers/spinner.js";
@@ -70,7 +71,6 @@ import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
-const GUESS_NUMBER_OF_CP_THAT_FIT_IN_ONE_TX = 50;
 
 export type OffersArgs = {
   [OFFER_FLAG_NAME]?: string | undefined;
@@ -152,8 +152,8 @@ export async function createOffers(flags: OffersArgs) {
       effectorPrefixesAndHash,
       minPricePerCuPerEpochBigInt,
       offerName,
-      minProtocolVersion,
-      maxProtocolVersion,
+      minProtocolVersion = versions.protocolVersion,
+      maxProtocolVersion = versions.protocolVersion,
     } = offer;
 
     function getOfferIdRes(txReceipt: TransactionReceipt) {
@@ -180,69 +180,59 @@ export async function createOffers(flags: OffersArgs) {
     const REGISTER_OFFER_TITLE = `Register offer: ${offerName}`;
 
     try {
-      if (
-        allCUs.length <= GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX &&
-        computePeersFromProviderConfig.length <=
-          GUESS_NUMBER_OF_CP_THAT_FIT_IN_ONE_TX
-      ) {
-        const offerRegisterTxReceipt = await sign({
-          validateAddress: assertProviderIsRegistered,
-          title: REGISTER_OFFER_TITLE,
-          method: market.registerMarketOffer,
-          args: [
+      const {
+        sliceIndex: registeredCUsCount,
+        registeredValues: registeredCPs,
+        txReceipt: offerRegisterTxReceipt,
+      } = await guessTxSizeAndSign({
+        sliceValuesToRegister: sliceCPsByNumberOfCUs(
+          computePeersFromProviderConfig,
+        ),
+        sliceIndex: allCUs.length,
+        getArgs(computePeersToRegister) {
+          return [
             minPricePerCuPerEpochBigInt,
             usdcAddress,
             effectorPrefixesAndHash,
-            computePeersFromProviderConfig,
-            minProtocolVersion ?? versions.protocolVersion,
-            maxProtocolVersion ?? versions.protocolVersion,
-          ],
-        });
+            computePeersToRegister,
+            minProtocolVersion,
+            maxProtocolVersion,
+          ];
+        },
+        getTitle() {
+          return REGISTER_OFFER_TITLE;
+        },
+        method: market.registerMarketOffer,
+        validateAddress: assertProviderIsRegistered,
+      });
 
-        registeredMarketOffers.push(getOfferIdRes(offerRegisterTxReceipt));
-      } else {
-        const offerRegisterTxReceipt = await sign({
-          validateAddress: assertProviderIsRegistered,
-          title: REGISTER_OFFER_TITLE,
-          method: market.registerMarketOffer,
-          args: [
-            minPricePerCuPerEpochBigInt,
-            usdcAddress,
-            effectorPrefixesAndHash,
-            [],
-            minProtocolVersion ?? versions.protocolVersion,
-            maxProtocolVersion ?? versions.protocolVersion,
-          ],
-        });
+      let totalRegisteredCPs = registeredCPs.length;
+      const offerIdRes = getOfferIdRes(offerRegisterTxReceipt);
+      registeredMarketOffers.push(offerIdRes);
 
-        const offerIdRes = getOfferIdRes(offerRegisterTxReceipt);
-        registeredMarketOffers.push(offerIdRes);
+      if ("error" in offerIdRes || registeredCUsCount === allCUs.length) {
+        continue;
+      }
 
-        if ("error" in offerIdRes) {
-          continue;
-        }
+      const { offerId } = offerIdRes.result;
 
-        const { offerId } = offerIdRes.result;
+      await addRemainingCUsToCPs({
+        allCPs: computePeersFromProviderConfig,
+        registeredCPs,
+        offerId,
+        market,
+        offerName,
+      });
 
-        for (const cp of computePeersFromProviderConfig) {
-          for (const [i, unitIds] of Object.entries(
-            chunk(cp.unitIds, GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX),
-          )) {
-            if (i === "0") {
-              await sign({
-                title: `Add compute peer ${cp.name} (${cp.peerIdBase58})\nto offer ${offerName} (${offerId})`,
-                method: market.addComputePeers,
-                args: [offerId, [{ ...cp, unitIds }]],
-              });
-            } else {
-              await sign({
-                title: `Add ${numToStr(unitIds.length)} compute units\nto compute peer ${cp.name} (${cp.peerIdBase58})\nfor offer ${offerName} (${offerId})`,
-                method: market.addComputeUnits,
-                args: [cp.peerId, unitIds],
-              });
-            }
-          }
-        }
+      while (totalRegisteredCPs < computePeersFromProviderConfig.length) {
+        totalRegisteredCPs =
+          totalRegisteredCPs +
+          (await addCPs({
+            CPs: computePeersFromProviderConfig.slice(totalRegisteredCPs),
+            offerId,
+            market,
+            offerName,
+          }));
       }
     } catch (e) {
       commandObj.warn(
@@ -321,6 +311,150 @@ Offers ${color.yellow(offersStr)} successfully created!
 
 ${await offersInfoToString([offerInfoErrors, offersInfo])}
 `);
+}
+
+async function addCPs({
+  CPs,
+  offerId,
+  market,
+  offerName,
+}: {
+  CPs: CPFromProviderConfig[];
+  offerId: string;
+  market: IMarket;
+  offerName: string;
+}) {
+  const CUsToRegisterCount = CPs.flatMap(({ unitIds }) => {
+    return unitIds;
+  }).length;
+
+  const { registeredValues: registeredCPs } = await guessTxSizeAndSign({
+    sliceValuesToRegister: sliceCPsByNumberOfCUs(CPs),
+    sliceIndex: CUsToRegisterCount,
+    getArgs(CPsToRegister) {
+      return [offerId, CPsToRegister];
+    },
+    getTitle({ valuesToRegister: CPsToRegister }) {
+      return `Add compute peers:${CPsToRegister.map(
+        ({ name, peerIdBase58 }) => {
+          return `${name} (${peerIdBase58})`;
+        },
+      ).join("\n")}\n\nto offer ${offerName} (${offerId})`;
+    },
+    method: market.addComputePeers,
+  });
+
+  await addRemainingCUsToCPs({
+    allCPs: CPs,
+    registeredCPs,
+    offerId,
+    market,
+    offerName,
+  });
+
+  return registeredCPs.length;
+}
+
+async function addRemainingCUsToCPs({
+  allCPs,
+  registeredCPs,
+  offerId,
+  market,
+  offerName,
+}: {
+  allCPs: CPFromProviderConfig[];
+  registeredCPs: CPFromProviderConfig[];
+  offerId: string;
+  market: IMarket;
+  offerName: string;
+}) {
+  const lastRegisteredCP = registeredCPs[registeredCPs.length - 1];
+  const lastRegisteredCPFromAllCPs = allCPs[registeredCPs.length - 1];
+
+  assert(
+    lastRegisteredCP !== undefined && lastRegisteredCPFromAllCPs !== undefined,
+    "Unreachable. lastRegisteredCP or lastRegisteredCPFromAllCPs can't be undefined here",
+  );
+
+  const remainingCUsArr = lastRegisteredCPFromAllCPs.unitIds.slice(
+    lastRegisteredCP.unitIds.length,
+  );
+
+  const { peerId, peerIdBase58, name: cpName } = lastRegisteredCPFromAllCPs;
+  let totalRegisteredCUsCount = 0;
+
+  while (totalRegisteredCUsCount < remainingCUsArr.length) {
+    totalRegisteredCUsCount =
+      totalRegisteredCUsCount +
+      (await addCUs({
+        CUs: remainingCUsArr.slice(totalRegisteredCUsCount),
+        offerId,
+        market,
+        offerName,
+        cpName,
+        peerId,
+        peerIdBase58,
+      }));
+  }
+}
+
+async function addCUs({
+  CUs,
+  offerId,
+  market,
+  offerName,
+  cpName,
+  peerId,
+  peerIdBase58,
+}: {
+  CUs: Uint8Array[];
+  offerId: string;
+  market: IMarket;
+  offerName: string;
+  cpName: string;
+  peerIdBase58: string;
+  peerId: Uint8Array;
+}) {
+  const { sliceIndex: registeredCUsCount } = await guessTxSizeAndSign({
+    sliceValuesToRegister(sliceIndex) {
+      return CUs.slice(0, sliceIndex);
+    },
+    sliceIndex: CUs.length,
+    getArgs(CUsToRegister) {
+      return [peerId, CUsToRegister];
+    },
+    getTitle({ sliceCount: numberOfCUsForAddCU }) {
+      return `Add ${numToStr(numberOfCUsForAddCU)} compute units\nto compute peer ${cpName} (${peerIdBase58})\nfor offer ${offerName} (${offerId})`;
+    },
+    method: market.addComputeUnits,
+  });
+
+  return registeredCUsCount;
+}
+
+function sliceCPsByNumberOfCUs(computePeers: CPFromProviderConfig[]) {
+  return (sliceIndex: number): CPFromProviderConfig[] => {
+    const res: CPFromProviderConfig[] = [];
+    let resN = 0;
+
+    for (const cp of computePeers) {
+      const resCP: CPFromProviderConfig = { ...cp, unitIds: [] };
+
+      for (const unitId of cp.unitIds) {
+        resCP.unitIds.push(unitId);
+        resN++;
+
+        if (resN === sliceIndex) {
+          res.push(resCP);
+          return res;
+        }
+      }
+
+      res.push(resCP);
+    }
+
+    return res;
+  };
 }
 
 export async function offersInfoToString([
@@ -529,6 +663,10 @@ async function ensureOfferConfigs() {
     ),
   );
 }
+
+type CPFromProviderConfig = Awaited<
+  ReturnType<typeof ensureOfferConfigs>
+>[number]["computePeersFromProviderConfig"][number];
 
 type OfferNameAndId = {
   offerName?: string;

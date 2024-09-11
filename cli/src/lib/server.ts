@@ -23,7 +23,6 @@ import express from "express";
 
 import {
   jsonStringify,
-  jsonReviver,
   type CLIToConnectorMsg,
   type CLIToConnectorFullMsg,
   type TransactionPayload,
@@ -63,7 +62,7 @@ async function initServer() {
 
   return new Promise((res) => {
     const app = express();
-    app.use(express.json({ reviver: jsonReviver }));
+    app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(express.static(cliConnectorPath));
 

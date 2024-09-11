@@ -685,3 +685,62 @@ export async function batchRead<T>(rpcReadCalls: Array<() => Promise<T>>) {
 
   return rpcResults;
 }
+
+export async function guessTxSizeAndSign<
+  T,
+  A extends Array<unknown> = Array<unknown>,
+  R = unknown,
+  S extends Exclude<StateMutability, "view"> = "payable",
+>({
+  sliceValuesToRegister,
+  sliceIndex: sliceIndexArg,
+  getArgs,
+  getTitle,
+  ...signArgs
+}: {
+  sliceValuesToRegister: (sliceIndex: number) => Array<T>;
+  sliceIndex: number;
+} & Omit<SignArgs<A, R, S>, "args" | "title"> & {
+    getArgs: (
+      valuesToRegister: T[],
+    ) => Parameters<TypedContractMethod<A, R, S>>;
+    getTitle: (arg: { valuesToRegister: T[]; sliceCount: number }) => string;
+  }) {
+  let valuesToRegister;
+  let sliceIndex = sliceIndexArg;
+  let isValidTx = false;
+  const { providerOrWallet } = await getDealClient();
+
+  do {
+    valuesToRegister = sliceValuesToRegister(sliceIndex);
+
+    try {
+      await providerOrWallet.estimateGas(
+        await populateTx(
+          signArgs.method,
+          ...getArgs(valuesToRegister),
+        ).populate(),
+      );
+
+      isValidTx = true;
+    } catch (e) {
+      sliceIndex = Math.floor(sliceIndex / 2);
+
+      if (sliceIndex === 0) {
+        throw e;
+      }
+    }
+  } while (!isValidTx);
+
+  const txReceipt = await sign({
+    ...signArgs,
+    title: getTitle({ sliceCount: sliceIndex, valuesToRegister }),
+    args: getArgs(valuesToRegister),
+  });
+
+  return {
+    txReceipt,
+    sliceIndex,
+    registeredValues: valuesToRegister,
+  };
+}

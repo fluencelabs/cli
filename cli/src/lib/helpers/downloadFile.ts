@@ -21,6 +21,7 @@ import { dirname, isAbsolute, join, resolve } from "node:path";
 
 import { color } from "@oclif/color";
 
+import { bufferToHex } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { getConfigPath } from "../configs/initConfig.js";
 import {
@@ -36,8 +37,6 @@ import {
   ensureFluenceSpellsDir,
   projectRootDir,
 } from "../paths.js";
-
-import { bufferToHex } from "./typesafeStringify.js";
 
 function getHashOfString(str: string): Promise<string> {
   const md5Hash = crypto.createHash("md5");

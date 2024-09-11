@@ -135,20 +135,26 @@ export function getIsUnion<T>(
   };
 }
 
-const UINT8_ARRAY_PREFIX = "$$Uint8Array:";
-const BIGINT_PREFIX = "$$BigInt:";
+export function bufferToHex(buffer: Buffer): string {
+  // eslint-disable-next-line no-restricted-syntax
+  return buffer.toString("hex");
+}
+
+export function uint8ArrayToHex(uint8Array: Uint8Array): string {
+  return `0x${bufferToHex(Buffer.from(uint8Array))}`;
+}
 
 export function jsonStringify(unknown: unknown, noSpace = false): string {
   return JSON.stringify(
     unknown,
     (_key, value: unknown) => {
       if (value instanceof Uint8Array) {
-        return `${UINT8_ARRAY_PREFIX}${JSON.stringify([...value])}`;
+        return uint8ArrayToHex(value);
       }
 
       if (typeof value === "bigint") {
         // eslint-disable-next-line no-restricted-syntax
-        return `${BIGINT_PREFIX}${value.toString()}`;
+        return value.toString();
       }
 
       if (typeof value === "function") {
@@ -159,27 +165,6 @@ export function jsonStringify(unknown: unknown, noSpace = false): string {
     },
     noSpace ? undefined : 2,
   );
-}
-
-export function jsonReviver(_key: string, value: unknown) {
-  if (typeof value !== "string") {
-    return value;
-  }
-
-  if (value.startsWith(UINT8_ARRAY_PREFIX)) {
-    // @ts-expect-error since we created it in the first place it has to be valid
-    return new Uint8Array(JSON.parse(value.slice(UINT8_ARRAY_PREFIX.length)));
-  }
-
-  if (value.startsWith(BIGINT_PREFIX)) {
-    return BigInt(value.slice(BIGINT_PREFIX.length));
-  }
-
-  return value;
-}
-
-export function jsonParse(string: string): unknown {
-  return JSON.parse(string, jsonReviver);
 }
 
 export type Account = {
