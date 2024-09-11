@@ -70,21 +70,26 @@ export default class DealRewardsWithdraw extends BaseCommand<
           }),
         )
       ).reduce((acc, reward) => {
-        return acc + reward;
-      }, 0n);
+        return [acc[0] + reward[0],
+                acc[1] + reward[1]];
+      }, [0n, 0n]);
 
       for (const { onchainId } of workers) {
         await sign({
-          title: `Withdraw rewards for compute unit ${onchainId}`,
+          title: `Withdraw rewards for worker ${onchainId}`,
           method: deal.withdrawRewards,
           args: [onchainId],
         });
       }
 
       commandObj.logToStderr(
-        `Reward ${color.yellow(
-          await ptFormatWithSymbol(rewardSum),
-        )} was withdrawn from the deal: ${dealId}`,
+        `Rewards\n
+         provider: ${color.yellow(
+          await ptFormatWithSymbol(rewardSum[0]),
+        )}\n
+         staker: ${color.yellow(
+            await ptFormatWithSymbol(rewardSum[0]),
+        )} were withdrawn from the deal: ${dealId}`,
       );
     }
   }
