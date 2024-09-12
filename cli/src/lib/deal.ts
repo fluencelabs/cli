@@ -216,13 +216,19 @@ export async function createAndMatchDealsForPeerIds({
       continue;
     }
 
-    const dealAddress = await dealCreate(dealCreateArgs);
+    try {
+      const dealAddress = await dealCreate(dealCreateArgs);
 
-    await sign({
-      title: `Match deal ${dealAddress} with compute units:\n\n${CUs.join("\n")}\n\nfrom offer ${offerId}`,
-      method: market.matchDeal,
-      args: [dealAddress, [offerId], [[CUs]]],
-    });
+      await sign({
+        title: `Match deal ${dealAddress} with compute units:\n\n${CUs.join("\n")}\n\nfrom offer ${offerId}`,
+        method: market.matchDeal,
+        args: [dealAddress, [offerId], [[CUs]]],
+      });
+    } catch (e) {
+      commandObj.error(
+        `Couldn't create or match deal for peer ${color.yellow(peerId)}: ${stringifyUnknown(e)}`,
+      );
+    }
   }
 }
 
