@@ -826,8 +826,8 @@ FLAGS
                                                    --release
       --no-build                                   Don't build the project before running the command
       --no-input                                   Don't interactively ask for any input from the user
-      --peer-ids=<value>                           Comma separated list of peer ids to deploy to. Creates one deal per
-                                                   each free CU of the peer. Skips off-chain matching
+      --peer-ids=<value>                           Comma separated list of peer ids to deploy to. Creates 1 worker for
+                                                   each peer with 'cuCountPerWorker' number of compute units
       --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local env
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is
