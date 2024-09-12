@@ -167,7 +167,7 @@ export async function dealCreate({
   return dealId;
 }
 
-export async function createAndMatchDealsWithAllCUsOfPeerIds({
+export async function createAndMatchDealsForPeerIds({
   peerIdsFromFlags,
   ...dealCreateArgs
 }: Parameters<typeof dealCreate>[0] & { peerIdsFromFlags: string }) {
@@ -205,38 +205,24 @@ export async function createAndMatchDealsWithAllCUsOfPeerIds({
     }),
   );
 
-  for (const { computeUnits, offerId, peerId } of offersWithCUs) {
-    for (const unitId of computeUnits) {
-      const dealAddress = await dealCreate({
-        ...dealCreateArgs,
-        maxWorkersPerProvider: 1,
-        targetWorkers: 1,
-        minWorkers: 1,
-      });
+  for (const { offerId, computeUnits, peerId } of offersWithCUs) {
+    const CUs = computeUnits.slice(0, dealCreateArgs.cuCountPerWorker);
 
-      try {
-        const matchDealTxReceipt = await sign({
-          title: `Match deal ${dealAddress} with CU ${unitId} from offer ${offerId}`,
-          method: market.matchDeal,
-          args: [dealAddress, [offerId], [[[unitId]]]],
-        });
+    if (CUs.length < dealCreateArgs.cuCountPerWorker) {
+      commandObj.warn(
+        `cuCountPerWorker for this deployment is ${color.yellow(dealCreateArgs.cuCountPerWorker)} but there are only ${color.yellow(CUs.length)} compute units without deals available for the peer ${color.yellow(peerId)}. Aborting deal creation for this peer`,
+      );
 
-        const pats = getEventValues({
-          contract: market,
-          txReceipt: matchDealTxReceipt,
-          eventName: "ComputeUnitsMatched",
-          value: "unitId",
-        });
-
-        dbg(`got pats: ${stringifyUnknown(pats)}`);
-
-        commandObj.logToStderr(
-          `CU ${color.yellow(unitId)} of peer ${peerId} joined the deal ${dealAddress}`,
-        );
-      } catch (e) {
-        commandObj.warn(stringifyUnknown(e));
-      }
+      continue;
     }
+
+    const dealAddress = await dealCreate(dealCreateArgs);
+
+    await sign({
+      title: `Match deal ${dealAddress} with compute units:\n\n${CUs.join("\n")}\n\nfrom offer ${offerId}`,
+      method: market.matchDeal,
+      args: [dealAddress, [offerId], [[CUs]]],
+    });
   }
 }
 
