@@ -710,17 +710,19 @@ export async function guessTxSizeAndSign<
   let sliceIndex = sliceIndexArg;
   let isValidTx = false;
   const { providerOrWallet } = await getDealClient();
+  const address = await getSignerAddress();
 
   do {
     valuesToRegister = sliceValuesToRegister(sliceIndex);
 
     try {
-      await providerOrWallet.estimateGas(
-        await populateTx(
-          signArgs.method,
-          ...getArgs(valuesToRegister),
-        ).populate(),
-      );
+      const populatedTx = await populateTx(
+        signArgs.method,
+        ...getArgs(valuesToRegister),
+      ).populate();
+
+      populatedTx.from = address;
+      await providerOrWallet.estimateGas(populatedTx);
 
       isValidTx = true;
     } catch (e) {
