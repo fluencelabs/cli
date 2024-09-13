@@ -335,7 +335,7 @@ async function addCPs({
       return [offerId, CPsToRegister];
     },
     getTitle({ valuesToRegister: CPsToRegister }) {
-      return `Add compute peers:${CPsToRegister.map(
+      return `Add compute peers:\n${CPsToRegister.map(
         ({ name, peerIdBase58 }) => {
           return `${name} (${peerIdBase58})`;
         },
