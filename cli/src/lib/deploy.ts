@@ -48,7 +48,7 @@ import {
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
-import { createAndMatchDealsWithAllCUsOfPeerIds } from "./deal.js";
+import { createAndMatchDealsForPeerIds } from "./deal.js";
 import { getReadonlyDealClient } from "./dealClient.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -74,7 +74,7 @@ export const DEPLOY_FLAGS = {
   }),
   "peer-ids": Flags.string({
     description:
-      "Comma separated list of peer ids to deploy to. Creates one deal per each free CU of the peer. Skips off-chain matching",
+      "Comma separated list of peer ids to deploy to. Creates 1 worker for each peer with 'cuCountPerWorker' number of compute units",
   }),
 };
 
@@ -288,7 +288,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
     if (dealState === "notMatched" || dealState === "notEnoughWorkers") {
       try {
         if (flags["peer-ids"] !== undefined) {
-          await createAndMatchDealsWithAllCUsOfPeerIds({
+          await createAndMatchDealsForPeerIds({
             ...dealCreateArgs,
             peerIdsFromFlags: flags["peer-ids"],
           });

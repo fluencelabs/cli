@@ -247,6 +247,8 @@ export async function deployDealAndWaitUntilDeployed(
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
+
+  return dealId;
 }
 
 export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
