@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.20.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.0...fluence-cli-v0.20.1) (2024-09-13)
+
+
+### Features
+
+* create one deal per peer with cuCountPerWorker number of compute units ([#1031](https://github.com/fluencelabs/cli/issues/1031)) ([cb2c1aa](https://github.com/fluencelabs/cli/commit/cb2c1aa4c7453d318aeb71a9b4a48bb5fa5bfe62))
+* **deals:** support split deal rewards ([#1027](https://github.com/fluencelabs/cli/issues/1027)) ([2a96f20](https://github.com/fluencelabs/cli/commit/2a96f200662251626b05bac79dfdeb7ad0c61e25))
+
 ## [0.20.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.19.2...fluence-cli-v0.20.0) (2024-09-09)
 
 
