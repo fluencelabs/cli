@@ -29,6 +29,7 @@ import {
   type FluenceEnv,
   type FluenceEnvOld,
 } from "../../const.js";
+import { numToStr } from "../../helpers/typesafeStringify.js";
 import { getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -99,7 +100,7 @@ const getDefault = (fluenceEnv: FluenceEnv | undefined): GetDefaultConfig => {
   return () => {
     return `# Defines project preferences
 # config version
-version: 0
+version: ${numToStr(latestSchemaObj.properties.version.const)}
 
 # Fluence environment to connect to
 ${fluenceEnv === undefined ? `# fluenceEnv: ${DEFAULT_PUBLIC_FLUENCE_ENV}` : `fluenceEnv: "${fluenceEnv}"`}

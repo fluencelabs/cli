@@ -39,6 +39,7 @@ import {
   type FluenceEnvOld,
   type FluenceEnv,
 } from "../../const.js";
+import { numToStr } from "../../helpers/typesafeStringify.js";
 import { getFluenceDir } from "../../paths.js";
 import { fluenceEnvOldPrompt } from "../../resolveFluenceEnv.js";
 import {
@@ -374,12 +375,14 @@ const configSchemaV2 = {
   required: ["version"],
 } as const satisfies JSONSchemaType<ConfigV2>;
 
-const latestSchema: JSONSchemaType<ConfigV2> = {
+const latestSchemaObj = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FULL_FILE_NAME}`,
   title: WORKERS_CONFIG_FULL_FILE_NAME,
   description: `A result of app deployment. This file is created automatically after successful deployment using \`${CLI_NAME} workers deploy\` command`,
   ...configSchemaV2,
-};
+} as const satisfies JSONSchemaType<LatestConfig>;
+
+const latestSchema: JSONSchemaType<LatestConfig> = latestSchemaObj;
 
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
@@ -503,7 +506,7 @@ const getDefault: GetDefaultConfig = () => {
 # This file is updated automatically after successful deployment using \`fluence workers deploy\` command
 
 # config version
-version: 0
+version: ${numToStr(latestSchemaObj.properties.version.const)}
 
 # deals:
 # # A map of created deals
