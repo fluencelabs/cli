@@ -25,5 +25,16 @@ export type ChainFlags = {
 export let chainFlags: ChainFlags = {};
 
 export function setChainFlags(flags: ChainFlags) {
-  chainFlags = flags;
+  let env = flags[ENV_FLAG_NAME];
+
+  if (env === "kras") {
+    env = "mainnet";
+  } else if (env === "dar") {
+    env = "testnet";
+  }
+
+  chainFlags = {
+    ...flags,
+    ...(env === undefined ? {} : { [ENV_FLAG_NAME]: env }),
+  };
 }

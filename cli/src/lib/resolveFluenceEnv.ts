@@ -101,10 +101,18 @@ export async function fluenceEnvOldPrompt(
 }
 
 async function ensureValidFluenceEnvFlag(
-  envFlag: string | undefined,
+  envFlagArg: string | undefined,
 ): Promise<FluenceEnv | undefined> {
-  if (envFlag === undefined) {
+  if (envFlagArg === undefined) {
     return undefined;
+  }
+
+  let envFlag = envFlagArg;
+
+  if (envFlag === "kras") {
+    envFlag = "mainnet";
+  } else if (envFlag === "dar") {
+    envFlag = "testnet";
   }
 
   if (!isFluenceEnv(envFlag)) {
