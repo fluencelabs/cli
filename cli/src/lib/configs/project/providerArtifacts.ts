@@ -29,6 +29,7 @@ import {
   type FluenceEnv,
   fluenceOldEnvToNewEnv,
 } from "../../const.js";
+import { numToStr } from "../../helpers/typesafeStringify.js";
 import {
   ensureProviderArtifactsConfigPath,
   getFluenceDir,
@@ -205,11 +206,13 @@ const configSchemaV3 = {
   required: ["version", "offers"],
 } as const satisfies JSONSchemaType<ConfigV3>;
 
-const latestSchema: JSONSchemaType<LatestConfig> = {
+const latestSchemaObj = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_ARTIFACTS_CONFIG_FILE_NAME}`,
   title: PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   ...configSchemaV3,
-};
+} as const satisfies JSONSchemaType<ConfigV3>;
+
+const latestSchema: JSONSchemaType<LatestConfig> = latestSchemaObj;
 
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
@@ -354,7 +357,7 @@ export async function initNewProviderArtifactsConfig() {
 
 function getDefault() {
   return `
-version: 0
+version: ${numToStr(latestSchemaObj.properties.version.const)}
 offers: {}
 `;
 }
