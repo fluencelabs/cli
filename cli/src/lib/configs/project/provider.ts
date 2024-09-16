@@ -875,7 +875,7 @@ const DEFAULT_RPC_ENDPOINT_PORT = 9389;
 const DEFAULT_PROMETHEUS_ENDPOINT_HOST = "0.0.0.0";
 const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
 const DEFAULT_REPORT_HASHRATE = false;
-const DEFAULT_LOG_LEVEL = "info";
+const DEFAULT_LOG_LEVEL = "debug";
 const DEFAULT_STATE_PATH = "./state";
 const DEFAULT_UTILITY_THREAD_IDS = [1];
 
@@ -2035,8 +2035,8 @@ function camelCaseKeysToKebabCase(val: unknown): unknown {
 }
 
 const EXTERNAL_API_MULTIADDRS: Record<ChainENV, string> = {
-  kras: "/dns4/ipfs.kras.fluence.dev/tcp/5020",
-  dar: "/dns4/ipfs.dar.fluence.dev/tcp/5020",
+  mainnet: "/dns4/ipfs.kras.fluence.dev/tcp/5020",
+  testnet: "/dns4/ipfs.dar.fluence.dev/tcp/5020",
   stage: "/dns4/ipfs.fluence.dev/tcp/5001",
   local: LOCAL_IPFS_ADDRESS,
 };

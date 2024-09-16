@@ -16,68 +16,16 @@
  */
 
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { CHAIN_IDS, CHAIN_URLS, BLOCK_SCOUT_URLS } from "@repo/common";
+import { CHAIN_IDS, CHAIN_URLS } from "@repo/common";
+import { fluence, fluenceStage, fluenceTestnet } from "viem/chains";
 
 export const config = getDefaultConfig({
   appName: "Fluence CLI Connector",
   projectId: "YOUR_PROJECT_ID",
   chains: [
-    {
-      id: CHAIN_IDS.kras,
-      name: "kras",
-      nativeCurrency: {
-        decimals: 18,
-        name: "Fluence",
-        symbol: "FLT",
-      },
-      rpcUrls: {
-        default: { http: [CHAIN_URLS.kras] },
-      },
-      blockExplorers: {
-        default: {
-          name: "BlockScout",
-          url: BLOCK_SCOUT_URLS.kras,
-        },
-      },
-    },
-    {
-      id: CHAIN_IDS.dar,
-      name: "dar",
-      nativeCurrency: {
-        decimals: 18,
-        name: "Fluence",
-        symbol: "tFLT",
-      },
-      rpcUrls: {
-        default: { http: [CHAIN_URLS.dar] },
-      },
-      blockExplorers: {
-        default: {
-          name: "BlockScout",
-          url: BLOCK_SCOUT_URLS.dar,
-        },
-      },
-      testnet: true,
-    },
-    {
-      id: CHAIN_IDS.stage,
-      name: "stage",
-      nativeCurrency: {
-        decimals: 18,
-        name: "Fluence",
-        symbol: "tFLT",
-      },
-      rpcUrls: {
-        default: { http: [CHAIN_URLS.stage] },
-      },
-      blockExplorers: {
-        default: {
-          name: "BlockScout",
-          url: BLOCK_SCOUT_URLS.stage,
-        },
-      },
-      testnet: true,
-    },
+    fluenceStage,
+    fluenceTestnet,
+    fluence,
     {
       id: CHAIN_IDS.local,
       name: "local",

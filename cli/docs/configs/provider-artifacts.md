@@ -15,53 +15,15 @@ Created offers
 
 ### Properties
 
-| Property | Type              | Required | Description    |
-|----------|-------------------|----------|----------------|
-| `custom` | [object](#custom) | No       | Created offers |
-| `dar`    | [object](#dar)    | No       | Created offers |
-| `kras`   | [object](#kras)   | No       | Created offers |
-| `local`  | [object](#local)  | No       | Created offers |
-| `stage`  | [object](#stage)  | No       | Created offers |
+| Property  | Type               | Required | Description    |
+|-----------|--------------------|----------|----------------|
+| `custom`  | [object](#custom)  | No       | Created offers |
+| `local`   | [object](#local)   | No       | Created offers |
+| `mainnet` | [object](#mainnet) | No       | Created offers |
+| `stage`   | [object](#stage)   | No       | Created offers |
+| `testnet` | [object](#testnet) | No       | Created offers |
 
 ### custom
-
-Created offers
-
-#### Properties
-
-| Property  | Type               | Required | Description |
-|-----------|--------------------|----------|-------------|
-| `noxName` | [object](#noxname) | No       |             |
-
-#### noxName
-
-##### Properties
-
-| Property          | Type   | Required | Description      |
-|-------------------|--------|----------|------------------|
-| `id`              | string | **Yes**  | Offer id         |
-| `providerAddress` | string | **Yes**  | Provider address |
-
-### dar
-
-Created offers
-
-#### Properties
-
-| Property  | Type               | Required | Description |
-|-----------|--------------------|----------|-------------|
-| `noxName` | [object](#noxname) | No       |             |
-
-#### noxName
-
-##### Properties
-
-| Property          | Type   | Required | Description      |
-|-------------------|--------|----------|------------------|
-| `id`              | string | **Yes**  | Offer id         |
-| `providerAddress` | string | **Yes**  | Provider address |
-
-### kras
 
 Created offers
 
@@ -99,7 +61,45 @@ Created offers
 | `id`              | string | **Yes**  | Offer id         |
 | `providerAddress` | string | **Yes**  | Provider address |
 
+### mainnet
+
+Created offers
+
+#### Properties
+
+| Property  | Type               | Required | Description |
+|-----------|--------------------|----------|-------------|
+| `noxName` | [object](#noxname) | No       |             |
+
+#### noxName
+
+##### Properties
+
+| Property          | Type   | Required | Description      |
+|-------------------|--------|----------|------------------|
+| `id`              | string | **Yes**  | Offer id         |
+| `providerAddress` | string | **Yes**  | Provider address |
+
 ### stage
+
+Created offers
+
+#### Properties
+
+| Property  | Type               | Required | Description |
+|-----------|--------------------|----------|-------------|
+| `noxName` | [object](#noxname) | No       |             |
+
+#### noxName
+
+##### Properties
+
+| Property          | Type   | Required | Description      |
+|-------------------|--------|----------|------------------|
+| `id`              | string | **Yes**  | Offer id         |
+| `providerAddress` | string | **Yes**  | Provider address |
+
+### testnet
 
 Created offers
 

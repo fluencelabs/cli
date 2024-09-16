@@ -26,8 +26,6 @@ import sum from "lodash-es/sum.js";
 import xbytes from "xbytes";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { DEFAULT_PUBLIC_FLUENCE_ENV } from "../common.js";
-
 import { importAquaCompiler } from "./aqua.js";
 import { buildModules } from "./buildModules.js";
 import { commandObj, isInteractive } from "./commandObj.js";
@@ -593,7 +591,6 @@ async function getDeploymentNames(
 
 const emptyDeal: Deal = {
   dealId: "",
-  chainNetwork: DEFAULT_PUBLIC_FLUENCE_ENV,
   chainNetworkId: 0,
   dealIdOriginal: "",
   definition: "",

@@ -25,8 +25,10 @@ import { envConfig } from "./configs/globalConfigs.js";
 import {
   ENV_FLAG_NAME,
   FLUENCE_ENVS,
+  FLUENCE_ENVS_OLD,
   isFluenceEnv,
   type FluenceEnv,
+  type FluenceEnvOld,
 } from "./const.js";
 import { list } from "./prompt.js";
 
@@ -80,11 +82,39 @@ export async function fluenceEnvPrompt(
   });
 }
 
+export async function fluenceEnvOldPrompt(
+  message = "Select old Fluence Environment that you used",
+  defaultVal: FluenceEnvOld = "kras",
+): Promise<FluenceEnvOld> {
+  return list({
+    message,
+    options: [...FLUENCE_ENVS_OLD],
+    oneChoiceMessage() {
+      throw new Error("Unreachable. There are multiple envs");
+    },
+    onNoChoices() {
+      throw new Error("Unreachable. There are multiple envs");
+    },
+    default: defaultVal,
+    flagName: ENV_FLAG_NAME,
+  });
+}
+
 async function ensureValidFluenceEnvFlag(
-  envFlag: string | undefined,
+  envFlagArg: string | undefined,
 ): Promise<FluenceEnv | undefined> {
-  if (envFlag === undefined) {
+  if (envFlagArg === undefined) {
     return undefined;
+  }
+
+  let envFlag = envFlagArg;
+
+  if (envFlag === "kras") {
+    commandObj.warn(`'kras' is deprecated, use 'mainnet' instead`);
+    envFlag = "mainnet";
+  } else if (envFlag === "dar") {
+    commandObj.warn(`'dar' is deprecated, use 'testnet' instead`);
+    envFlag = "testnet";
   }
 
   if (!isFluenceEnv(envFlag)) {

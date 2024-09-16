@@ -116,8 +116,8 @@ export async function ensureCustomAddrsAndPeerIds() {
 }
 
 const ADDR_MAP: Record<PublicFluenceEnv, Array<AddrAndPeerId>> = {
-  kras,
-  dar: testNet,
+  mainnet: kras,
+  testnet: testNet,
   stage,
 };
 
