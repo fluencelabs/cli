@@ -21,9 +21,11 @@ import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
 
 import {
-  CHAIN_ENV,
-  type ChainENV,
+  CHAIN_ENV_OLD,
+  type ChainENVOld,
+  chainEnvOldToNew,
   DEFAULT_PUBLIC_FLUENCE_ENV,
+  isChainEnvOld,
 } from "../../../common.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
@@ -33,11 +35,12 @@ import {
   CLI_NAME,
   DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_WORKER_NAME,
-  type FluenceEnv,
   FLUENCE_ENVS,
+  type FluenceEnvOld,
+  type FluenceEnv,
 } from "../../const.js";
 import { getFluenceDir } from "../../paths.js";
-import { fluenceEnvPrompt } from "../../resolveFluenceEnv.js";
+import { fluenceEnvOldPrompt } from "../../resolveFluenceEnv.js";
 import {
   getReadonlyConfigInitFunction,
   getConfigInitFunction,
@@ -70,15 +73,15 @@ const workerInfoSchema = {
   additionalProperties: false,
 } as const satisfies JSONSchemaType<WorkerInfo>;
 
-export type Deal = WorkerInfo & {
+type DealV1 = WorkerInfo & {
   dealId: string;
   dealIdOriginal: string;
   chainNetworkId: number;
-  chainNetwork?: ChainENV;
+  chainNetwork?: ChainENVOld;
   matched?: boolean;
 };
 
-export type Host = WorkerInfo & {
+type HostV1 = WorkerInfo & {
   relayId: string;
   dummyDealId: string;
   installation_spells: {
@@ -90,11 +93,11 @@ export type Host = WorkerInfo & {
 
 type ConfigV0 = {
   version: 0;
-  deals?: Record<string, Deal>;
-  hosts?: Record<string, Host>;
+  deals?: Record<string, DealV1>;
+  hosts?: Record<string, HostV1>;
 };
 
-const hostSchema: JSONSchemaType<Host> = {
+const hostSchemaV1: JSONSchemaType<HostV1> = {
   ...workerInfoSchema,
   description:
     "Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua",
@@ -144,7 +147,7 @@ const hostSchema: JSONSchemaType<Host> = {
   ],
 } as const;
 
-const dealSchema: JSONSchemaType<Deal> = {
+const dealSchemaV1: JSONSchemaType<DealV1> = {
   ...workerInfoSchema,
   description:
     "Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua",
@@ -162,7 +165,7 @@ const dealSchema: JSONSchemaType<Deal> = {
     },
     chainNetwork: {
       type: "string",
-      enum: CHAIN_ENV,
+      enum: CHAIN_ENV_OLD,
       description:
         "DEPRECATED. Blockchain network name that was used when deploying workers",
       nullable: true,
@@ -185,52 +188,49 @@ const dealSchema: JSONSchemaType<Deal> = {
   ],
 } as const;
 
-const mapOfDealsSchema = {
+const mapOfDealsSchemaV1 = {
   type: "object",
   description: "A map of created deals",
-  additionalProperties: dealSchema,
+  additionalProperties: dealSchemaV1,
   properties: {
-    Worker_deployed_using_deals: dealSchema,
+    Worker_deployed_using_deals: dealSchemaV1,
   },
   required: [],
   nullable: true,
-} as const satisfies JSONSchemaType<Record<string, Deal>>;
+} as const satisfies JSONSchemaType<Record<string, DealV1>>;
 
-const mapOfHostsSchema = {
+const mapOfHostsSchemaV1 = {
   type: "object",
   description: "A map of directly deployed workers",
-  additionalProperties: hostSchema,
+  additionalProperties: hostSchemaV1,
   properties: {
-    Worker_deployed_using_direct_hosting: hostSchema,
+    Worker_deployed_using_direct_hosting: hostSchemaV1,
   },
   required: [],
   nullable: true,
-} as const satisfies JSONSchemaType<Record<string, Host>>;
+} as const satisfies JSONSchemaType<Record<string, HostV1>>;
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   additionalProperties: false,
   properties: {
     version: { type: "integer", const: 0 },
-    deals: mapOfDealsSchema,
-    hosts: mapOfHostsSchema,
+    deals: mapOfDealsSchemaV1,
+    hosts: mapOfHostsSchemaV1,
   },
   required: ["version"],
 } as const;
 
-type Deals = Partial<Record<FluenceEnv, Record<string, Deal>>>;
-type Hosts = Partial<Record<FluenceEnv, Record<string, Host>>>;
+type DealsV1 = Partial<Record<FluenceEnvOld, Record<string, DealV1>>>;
+type HostsV1 = Partial<Record<FluenceEnvOld, Record<string, HostV1>>>;
 
 type ConfigV1 = {
   version: 1;
-  deals?: Deals;
-  hosts?: Hosts;
+  deals?: DealsV1;
+  hosts?: HostsV1;
 };
 
 const configSchemaV1: JSONSchemaType<ConfigV1> = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FULL_FILE_NAME}`,
-  title: WORKERS_CONFIG_FULL_FILE_NAME,
-  description: `A result of app deployment. This file is created automatically after successful deployment using \`${CLI_NAME} workers deploy\` command`,
   type: "object",
   additionalProperties: false,
   required: ["version"],
@@ -244,11 +244,11 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       nullable: true,
       required: [],
       properties: {
-        custom: mapOfDealsSchema,
-        dar: mapOfDealsSchema,
-        kras: mapOfDealsSchema,
-        local: mapOfDealsSchema,
-        stage: mapOfDealsSchema,
+        custom: mapOfDealsSchemaV1,
+        dar: mapOfDealsSchemaV1,
+        kras: mapOfDealsSchemaV1,
+        local: mapOfDealsSchemaV1,
+        stage: mapOfDealsSchemaV1,
       },
     },
     hosts: {
@@ -259,17 +259,135 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       nullable: true,
       required: [],
       properties: {
-        custom: mapOfHostsSchema,
-        dar: mapOfHostsSchema,
-        kras: mapOfHostsSchema,
-        local: mapOfHostsSchema,
-        stage: mapOfHostsSchema,
+        custom: mapOfHostsSchemaV1,
+        dar: mapOfHostsSchemaV1,
+        kras: mapOfHostsSchemaV1,
+        local: mapOfHostsSchemaV1,
+        stage: mapOfHostsSchemaV1,
       },
     },
   },
 };
 
+type DealV2 = WorkerInfo & {
+  dealId: string;
+  dealIdOriginal: string;
+  chainNetworkId: number;
+  matched?: boolean;
+};
+
+type DealsV2 = Partial<Record<FluenceEnv, Record<string, DealV2>>>;
+type HostsV2 = Partial<Record<FluenceEnv, Record<string, HostV1>>>;
+
+type ConfigV2 = {
+  version: 2;
+  deals?: DealsV2;
+  hosts?: HostsV2;
+};
+
+const dealSchemaV2 = {
+  ...workerInfoSchema,
+  description:
+    "Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua",
+  properties: {
+    ...workerInfoSchema.properties,
+    dealId: {
+      type: "string",
+      description:
+        "Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua",
+    },
+    dealIdOriginal: {
+      type: "string",
+      description:
+        "Blockchain transaction id that you get when deploy workers. Can be used in aqua to get worker and host ids. Check out example in the aqua generated in the default template",
+    },
+    chainNetwork: {
+      type: "string",
+      enum: CHAIN_ENV_OLD,
+      description:
+        "DEPRECATED. Blockchain network name that was used when deploying workers",
+      nullable: true,
+    },
+    chainNetworkId: {
+      type: "integer",
+      description: "Blockchain network id that was used when deploying workers",
+    },
+    matched: {
+      type: "boolean",
+      description: "Is deal matched",
+      nullable: true,
+    },
+  },
+  required: [
+    ...workerInfoSchema.required,
+    "dealId",
+    "dealIdOriginal",
+    "chainNetworkId",
+  ],
+} as const satisfies JSONSchemaType<DealV2>;
+
+const mapOfDealsSchemaV2 = {
+  type: "object",
+  description: "A map of created deals",
+  additionalProperties: dealSchemaV2,
+  properties: {
+    Worker_deployed_using_deals: dealSchemaV2,
+  },
+  required: [],
+  nullable: true,
+} as const satisfies JSONSchemaType<Record<string, DealV2>>;
+
+const configSchemaV2 = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    version: { type: "integer", const: 2, description: "Config version" },
+    deals: {
+      type: "object",
+      description:
+        "Info about deals created when deploying workers that is stored by environment that you deployed to",
+      additionalProperties: false,
+      nullable: true,
+      properties: {
+        testnet: mapOfDealsSchemaV2,
+        custom: mapOfDealsSchemaV2,
+        mainnet: mapOfDealsSchemaV2,
+        local: mapOfDealsSchemaV2,
+        stage: mapOfDealsSchemaV2,
+      },
+    },
+    hosts: {
+      description:
+        "Info about directly deployed workers that is stored by environment that you deployed to",
+      type: "object",
+      additionalProperties: false,
+      nullable: true,
+      properties: {
+        testnet: mapOfHostsSchemaV1,
+        custom: mapOfHostsSchemaV1,
+        mainnet: mapOfHostsSchemaV1,
+        local: mapOfHostsSchemaV1,
+        stage: mapOfHostsSchemaV1,
+      },
+    },
+  },
+  required: ["version"],
+} as const satisfies JSONSchemaType<ConfigV2>;
+
+const latestSchema: JSONSchemaType<ConfigV2> = {
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FULL_FILE_NAME}`,
+  title: WORKERS_CONFIG_FULL_FILE_NAME,
+  description: `A result of app deployment. This file is created automatically after successful deployment using \`${CLI_NAME} workers deploy\` command`,
+  ...configSchemaV2,
+};
+
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
+const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
+
+export type Deal = DealV2;
+export type Host = HostV1;
+export type Deals = DealsV2;
+export type Hosts = HostsV2;
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -283,28 +401,27 @@ const migrations: Migrations<Config> = [
 
     const configPath = join(getFluenceDir(), WORKERS_CONFIG_FULL_FILE_NAME);
 
-    const deals: Deals = {};
+    const deals: DealsV1 = {};
 
     for (const [workerName, deal] of Object.entries(config.deals ?? {})) {
-      const env = await fluenceEnvPrompt(
+      const env = await fluenceEnvOldPrompt(
         `Select the environment that you used for deploying worker ${workerName} with dealId: ${deal.dealId} at ${configPath}`,
-        deal.chainNetwork,
       );
 
       let dealsForEnv = deals[env];
 
       if (dealsForEnv === undefined) {
         dealsForEnv = {};
-        deals[deal.chainNetwork ?? DEFAULT_PUBLIC_FLUENCE_ENV] = dealsForEnv;
+        deals[deal.chainNetwork ?? "dar"] = dealsForEnv;
       }
 
       dealsForEnv[workerName] = deal;
     }
 
-    const hosts: Hosts = {};
+    const hosts: HostsV1 = {};
 
     for (const [workerName, host] of Object.entries(config.hosts ?? {})) {
-      const env = await fluenceEnvPrompt(
+      const env = await fluenceEnvOldPrompt(
         `Select the environment that you used for deploying worker ${workerName} with dummyDealId: ${host.dummyDealId} at ${configPath}`,
         "custom",
       );
@@ -325,16 +442,57 @@ const migrations: Migrations<Config> = [
       ...(isEmpty(hosts) ? {} : { hosts }),
     };
   },
+  async (config: Config): Promise<ConfigV2> => {
+    if (!validateConfigSchemaV1(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV0.errors,
+        )}`,
+      );
+    }
+
+    const newConfig: ConfigV2 = { version: 2 };
+
+    for (const [env, configPerEnv] of Object.entries(config.deals ?? {})) {
+      if (!isChainEnvOld(env)) {
+        throw new Error(
+          `Unreachable. Migration error. Unknown env ${env} in ${WORKERS_CONFIG_FULL_FILE_NAME}`,
+        );
+      }
+
+      if (newConfig.deals === undefined) {
+        newConfig.deals = {};
+      }
+
+      newConfig.deals[chainEnvOldToNew(env)] = configPerEnv;
+    }
+
+    for (const [env, configPerEnv] of Object.entries(config.hosts ?? {})) {
+      if (!isChainEnvOld(env)) {
+        throw new Error(
+          `Unreachable. Migration error. Unknown env ${env} in ${WORKERS_CONFIG_FULL_FILE_NAME}`,
+        );
+      }
+
+      if (newConfig.hosts === undefined) {
+        newConfig.hosts = {};
+      }
+
+      newConfig.hosts[chainEnvOldToNew(env)] = configPerEnv;
+    }
+
+    return newConfig;
+  },
 ];
 
-type Config = ConfigV0 | ConfigV1;
-type LatestConfig = ConfigV1;
+type Config = ConfigV0 | ConfigV1 | ConfigV2;
+type LatestConfig = ConfigV2;
 export type WorkersConfig = InitializedConfig<LatestConfig>;
 export type WorkersConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0, configSchemaV1],
-  latestSchema: configSchemaV1,
+  allSchemas: [configSchemaV0, configSchemaV1, latestSchema],
+  latestSchema,
   migrations,
   name: WORKERS_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath: getFluenceDir,
@@ -391,4 +549,4 @@ export const initNewWorkersConfigReadonly = getReadonlyConfigInitFunction(
   getDefault,
 );
 
-export const workersSchema: JSONSchemaType<LatestConfig> = configSchemaV1;
+export const workersSchema: JSONSchemaType<LatestConfig> = latestSchema;

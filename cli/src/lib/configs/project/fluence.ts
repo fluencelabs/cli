@@ -1266,7 +1266,7 @@ const migrations: Migrations<Config> = [
     // if some kind of custom network was previously set - migrate it to the new format
     if (Array.isArray(relays) || chainNetwork !== undefined) {
       customFluenceEnv = {
-        contractsEnv: chainNetwork ?? "dar",
+        contractsEnv: chainNetwork ?? DEFAULT_PUBLIC_FLUENCE_ENV,
         relays:
           relays === undefined || typeof relays === "string"
             ? await resolveRelays()

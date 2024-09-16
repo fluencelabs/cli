@@ -25,8 +25,10 @@ import { envConfig } from "./configs/globalConfigs.js";
 import {
   ENV_FLAG_NAME,
   FLUENCE_ENVS,
+  FLUENCE_ENVS_OLD,
   isFluenceEnv,
   type FluenceEnv,
+  type FluenceEnvOld,
 } from "./const.js";
 import { list } from "./prompt.js";
 
@@ -69,6 +71,24 @@ export async function fluenceEnvPrompt(
   return list({
     message,
     options: [...FLUENCE_ENVS],
+    oneChoiceMessage() {
+      throw new Error("Unreachable. There are multiple envs");
+    },
+    onNoChoices() {
+      throw new Error("Unreachable. There are multiple envs");
+    },
+    default: defaultVal,
+    flagName: ENV_FLAG_NAME,
+  });
+}
+
+export async function fluenceEnvOldPrompt(
+  message = "Select old Fluence Environment that you used",
+  defaultVal: FluenceEnvOld = "kras",
+): Promise<FluenceEnvOld> {
+  return list({
+    message,
+    options: [...FLUENCE_ENVS_OLD],
     oneChoiceMessage() {
       throw new Error("Unreachable. There are multiple envs");
     },

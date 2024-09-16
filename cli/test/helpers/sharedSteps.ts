@@ -89,9 +89,9 @@ export async function getMultiaddrs(cwd: string): Promise<Node[]> {
 
   multiaddrs = sortBy(
     {
-      kras,
+      mainnet: kras,
       stage,
-      dar: testNet,
+      testnet: testNet,
       local,
     }[fluenceEnv],
     ["peerId"],

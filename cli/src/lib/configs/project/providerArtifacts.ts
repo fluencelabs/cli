@@ -19,21 +19,22 @@ import { join } from "path";
 
 import type { JSONSchemaType } from "ajv";
 
-import { DEFAULT_PUBLIC_FLUENCE_ENV } from "../../../common.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   TOP_LEVEL_SCHEMA_ID,
   PROVIDER_ARTIFACTS_CONFIG_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  type FluenceEnvOld,
+  isFluenceEnvOld,
   type FluenceEnv,
-  isFluenceEnv,
+  fluenceOldEnvToNewEnv,
 } from "../../const.js";
 import {
   ensureProviderArtifactsConfigPath,
   getFluenceDir,
 } from "../../paths.js";
 import { input } from "../../prompt.js";
-import { fluenceEnvPrompt } from "../../resolveFluenceEnv.js";
+import { fluenceEnvOldPrompt } from "../../resolveFluenceEnv.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -83,7 +84,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 
 type ConfigV1 = {
   version: 1;
-  offers: Partial<Record<FluenceEnv, Record<string, OfferConfigV0>>>;
+  offers: Partial<Record<FluenceEnvOld, Record<string, OfferConfigV0>>>;
 };
 
 const offersConfigV1 = {
@@ -126,7 +127,7 @@ type OfferConfigV2 = {
 
 type ConfigV2 = {
   version: 2;
-  offers: Partial<Record<FluenceEnv, Record<string, OfferConfigV2>>>;
+  offers: Partial<Record<FluenceEnvOld, Record<string, OfferConfigV2>>>;
 };
 
 const offerConfigV2 = {
@@ -154,8 +155,6 @@ const offersConfigV2 = {
 } as const satisfies JSONSchemaType<Record<string, OfferConfigV2>>;
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_ARTIFACTS_CONFIG_FILE_NAME}`,
-  title: PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   description: `Defines artifacts created by the provider`,
   type: "object",
   additionalProperties: false,
@@ -178,8 +177,43 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
   required: ["version", "offers"],
 };
 
+type ConfigV3 = {
+  version: 3;
+  offers: Partial<Record<FluenceEnv, Record<string, OfferConfigV2>>>;
+};
+
+const configSchemaV3 = {
+  description: `Defines artifacts created by the provider`,
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    version: { type: "integer", const: 3, description: "Config version" },
+    offers: {
+      type: "object",
+      description: "Created offers",
+      additionalProperties: false,
+      properties: {
+        testnet: offersConfigV2,
+        custom: offersConfigV2,
+        mainnet: offersConfigV2,
+        local: offersConfigV2,
+        stage: offersConfigV2,
+      },
+      required: [],
+    },
+  },
+  required: ["version", "offers"],
+} as const satisfies JSONSchemaType<ConfigV3>;
+
+const latestSchema: JSONSchemaType<LatestConfig> = {
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_ARTIFACTS_CONFIG_FILE_NAME}`,
+  title: PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  ...configSchemaV3,
+};
+
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
+const validateConfigSchemaV2 = ajv.compile(configSchemaV2);
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -199,9 +233,8 @@ const migrations: Migrations<Config> = [
     const offers: ConfigV1["offers"] = {};
 
     for (const [offerName, offer] of Object.entries(config.offers)) {
-      const env = await fluenceEnvPrompt(
+      const env = await fluenceEnvOldPrompt(
         `Select the environment that you used for creating offer ${offerName} with offerId: ${offer.id} at ${configPath}`,
-        DEFAULT_PUBLIC_FLUENCE_ENV,
       );
 
       const dealsForEnv = offers[env] ?? {};
@@ -231,7 +264,7 @@ const migrations: Migrations<Config> = [
     };
 
     for (const [env, configPerEnv] of Object.entries(config.offers)) {
-      if (!isFluenceEnv(env)) {
+      if (!isFluenceEnvOld(env)) {
         throw new Error(
           `Unreachable. Migration error. Unknown env ${env} in ${PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME}`,
         );
@@ -252,18 +285,48 @@ const migrations: Migrations<Config> = [
 
     return newConfig;
   },
+  async (config: Config): Promise<ConfigV3> => {
+    if (!validateConfigSchemaV2(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV0.errors,
+        )}`,
+      );
+    }
+
+    const newConfig: ConfigV3 = {
+      version: 3,
+      offers: {},
+    };
+
+    for (const [env, configPerEnv] of Object.entries(config.offers)) {
+      if (Object.keys(configPerEnv).length === 0) {
+        continue;
+      }
+
+      if (!isFluenceEnvOld(env)) {
+        throw new Error(
+          `Unreachable. Migration error. Unknown env ${env} in ${PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME}`,
+        );
+      }
+
+      newConfig.offers[fluenceOldEnvToNewEnv(env)] = configPerEnv;
+    }
+
+    return newConfig;
+  },
 ];
 
-type Config = ConfigV0 | ConfigV1 | ConfigV2;
-type LatestConfig = ConfigV2;
+type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3;
+type LatestConfig = ConfigV3;
 export type ProviderArtifactsConfig = InitializedConfig<LatestConfig>;
 export type ProviderArtifactsConfigReadonly =
   InitializedReadonlyConfig<LatestConfig>;
 
 function getInitConfigOptions(): InitConfigOptions<Config, LatestConfig> {
   return {
-    allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
-    latestSchema: configSchemaV2,
+    allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2, latestSchema],
+    latestSchema,
     migrations,
     name: PROVIDER_ARTIFACTS_CONFIG_FILE_NAME,
     getConfigOrConfigDirPath: () => {
@@ -297,4 +360,4 @@ offers: {}
 }
 
 export const providerArtifactsSchema: JSONSchemaType<LatestConfig> =
-  configSchemaV2;
+  latestSchema;

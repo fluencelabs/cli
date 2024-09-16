@@ -19,9 +19,9 @@ import "@total-typescript/ts-reset";
 import type { TransactionRequest } from "ethers";
 
 export const CHAIN_IDS = {
-  dar: 52164803,
+  testnet: 52164803,
   stage: 123420000220,
-  kras: 9999999,
+  mainnet: 9999999,
   local: 31337,
 } as const satisfies Record<ChainENV, number>;
 
@@ -30,22 +30,41 @@ export const isChainId = getIsUnion(Object.values(CHAIN_IDS));
 
 export const CHAIN_RPC_PORT = "8545";
 
-export const DEFAULT_PUBLIC_FLUENCE_ENV = "dar";
+export const DEFAULT_PUBLIC_FLUENCE_ENV = "testnet";
 export const PUBLIC_FLUENCE_ENV = [
   DEFAULT_PUBLIC_FLUENCE_ENV,
-  "kras",
+  "mainnet",
   "stage",
 ] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsUnion(PUBLIC_FLUENCE_ENV);
 
+export const PUBLIC_FLUENCE_ENV_OLD = ["kras", "dar", "stage"] as const;
+export type PublicFluenceEnvOld = (typeof PUBLIC_FLUENCE_ENV_OLD)[number];
+export const isPublicFluenceEnvOld = getIsUnion(PUBLIC_FLUENCE_ENV_OLD);
+
 export const CHAIN_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
 export type ChainENV = (typeof CHAIN_ENV)[number];
 export const isChainEnv = getIsUnion(CHAIN_ENV);
 
+export const CHAIN_ENV_OLD = [...PUBLIC_FLUENCE_ENV_OLD, "local"] as const;
+export type ChainENVOld = (typeof CHAIN_ENV_OLD)[number];
+export const isChainEnvOld = getIsUnion(CHAIN_ENV_OLD);
+
+export function chainEnvOldToNew(env: ChainENVOld): ChainENV {
+  return (
+    {
+      stage: "stage",
+      dar: "testnet",
+      kras: "mainnet",
+      local: "local",
+    } as const satisfies Record<ChainENVOld, ChainENV>
+  )[env];
+}
+
 export const CHAIN_URLS_WITHOUT_LOCAL = {
-  kras: "https://rpc.mainnet.fluence.dev",
-  dar: "https://rpc.testnet.fluence.dev",
+  mainnet: "https://rpc.mainnet.fluence.dev",
+  testnet: "https://rpc.testnet.fluence.dev",
   stage: "https://rpc.stage.fluence.dev",
 } as const satisfies Record<Exclude<ChainENV, "local">, string>;
 
@@ -55,8 +74,8 @@ export const CHAIN_URLS = {
 } as const satisfies Record<ChainENV, string>;
 
 export const BLOCK_SCOUT_URLS = {
-  kras: "https://blockscout.kras.fluence.dev/",
-  dar: "https://blockscout.testnet.fluence.dev/",
+  mainnet: "https://blockscout.mainnet.fluence.dev/",
+  testnet: "https://blockscout.testnet.fluence.dev/",
   stage: "https://blockscout.stage.fluence.dev/",
 } as const satisfies Record<Exclude<ChainENV, "local">, string>;
 

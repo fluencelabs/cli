@@ -118,6 +118,27 @@ export const WC_METADATA = {
 export const FLUENCE_ENVS = [...CHAIN_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsUnion(FLUENCE_ENVS);
+export const FLUENCE_ENVS_OLD = [
+  "stage",
+  "dar",
+  "kras",
+  "local",
+  "custom",
+] as const;
+export type FluenceEnvOld = (typeof FLUENCE_ENVS_OLD)[number];
+export const isFluenceEnvOld = getIsUnion(FLUENCE_ENVS_OLD);
+
+export function fluenceOldEnvToNewEnv(env: FluenceEnvOld): FluenceEnv {
+  return (
+    {
+      stage: "stage",
+      dar: "testnet",
+      kras: "mainnet",
+      local: "local",
+      custom: "custom",
+    } as const satisfies Record<FluenceEnvOld, FluenceEnv>
+  )[env];
+}
 
 export const IPFS_CONTAINER_NAME = "ipfs";
 export const IPFS_PORT = "5001";
@@ -140,8 +161,8 @@ export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
 };
 
 export const WS_CHAIN_URLS: Record<ChainENV, string> = {
-  kras: "wss://ws.mainnet.fluence.dev",
-  dar: "wss://ws.testnet.fluence.dev",
+  mainnet: "wss://ws.mainnet.fluence.dev",
+  testnet: "wss://ws.testnet.fluence.dev",
   stage: "wss://ws.stage.fluence.dev",
   local: `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
 };
