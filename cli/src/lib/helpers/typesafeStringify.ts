@@ -34,14 +34,6 @@ export function bufferToBase64(buffer: Buffer): string {
   return buffer.toString("base64");
 }
 
-export function bufferToHex(buffer: Buffer): string {
-  return buffer.toString("hex");
-}
-
-export function uint8ArrayToHex(uint8Array: Uint8Array): string {
-  return `0x${bufferToHex(Buffer.from(uint8Array))}`;
-}
-
 export function bufferToStr(buffer: Buffer): string {
   return buffer.toString();
 }

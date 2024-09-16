@@ -20,7 +20,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { Buffer } from "buffer";
 
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { ChainId, CLIToConnectorFullMsg, jsonParse } from "@repo/common";
+import { ChainId, CLIToConnectorFullMsg } from "@repo/common";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import React from "react";
 import { useState, useEffect } from "react";
@@ -54,7 +54,7 @@ export function AppWrapper() {
     eventSource.onmessage = ({ data }) => {
       // We are sure CLI returns what we expect so there is no need to validate
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { chainId: chainIdFromCLI } = jsonParse(
+      const { chainId: chainIdFromCLI } = JSON.parse(
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         data as string,
       ) as CLIToConnectorFullMsg;

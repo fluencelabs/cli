@@ -22,7 +22,6 @@ import {
   type CLIToConnectorFullMsg,
   type TransactionPayload,
   type ConnectorToCLIMessage,
-  jsonParse,
   jsonStringify,
   LOCAL_NET_WALLET_KEYS,
   CHAIN_IDS,
@@ -133,7 +132,7 @@ export function App({
     events.onmessage = ({ data }) => {
       // We are sure CLI returns what we expect so there is no need to validate
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { chainId: chainIdFromCLI, msg } = jsonParse(
+      const { chainId: chainIdFromCLI, msg } = JSON.parse(
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         data as string,
       ) as CLIToConnectorFullMsg;

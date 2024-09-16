@@ -20,6 +20,7 @@ import { color } from "@oclif/color";
 import chunk from "lodash-es/chunk.js";
 import omit from "lodash-es/omit.js";
 
+import { uint8ArrayToHex } from "../../../common.js";
 import { commandObj } from "../../commandObj.js";
 import { initNewProviderArtifactsConfig } from "../../configs/project/providerArtifacts.js";
 import {
@@ -34,7 +35,7 @@ import {
   BATCH_SIZE,
   populateTx,
 } from "../../dealClient.js";
-import { numToStr, uint8ArrayToHex } from "../../helpers/typesafeStringify.js";
+import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
