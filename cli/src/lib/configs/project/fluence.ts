@@ -26,8 +26,10 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import {
   CHAIN_ENV,
-  DEFAULT_PUBLIC_FLUENCE_ENV,
+  CHAIN_ENV_OLD,
   type ChainENV,
+  type ChainENVOld,
+  chainEnvOldToNew,
 } from "../../../common.js";
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import { versions } from "../../../versions.js";
@@ -254,7 +256,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   hosts?: Record<string, Host>;
   workers?: Record<string, Worker>;
   deals?: Record<string, Deal>;
-  chainNetwork?: ChainENV;
+  chainNetwork?: ChainENVOld;
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
@@ -497,8 +499,8 @@ const configSchemaV2Obj = {
     chainNetwork: {
       type: "string",
       description: "The network in which the transactions will be carried out",
-      enum: CHAIN_ENV,
-      default: DEFAULT_PUBLIC_FLUENCE_ENV,
+      enum: CHAIN_ENV_OLD,
+      default: "dar",
       nullable: true,
     },
     spells: {
@@ -547,7 +549,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = configSchemaV2Obj;
 type ConfigV3 = Omit<ConfigV2, "version" | "relays" | "chainNetwork"> & {
   version: 3;
   customFluenceEnv?: {
-    contractsEnv: ChainENV;
+    contractsEnv: ChainENVOld;
     relays: Array<string>;
   };
 };
@@ -575,7 +577,7 @@ const configSchemaV3Obj = {
         contractsEnv: {
           type: "string",
           description: `Contracts environment to use for this fluence network to sign contracts on the blockchain`,
-          enum: CHAIN_ENV,
+          enum: CHAIN_ENV_OLD,
         },
         relays: {
           type: "array",
@@ -1000,7 +1002,36 @@ const configSchemaV9Obj = {
 
 const configSchemaV9: JSONSchemaType<ConfigV9> = configSchemaV9Obj;
 
-const latestSchemaObj = configSchemaV9Obj;
+type ConfigV10 = Omit<ConfigV9, "version" | "customFluenceEnv"> & {
+  version: 10;
+  customFluenceEnv?: Omit<
+    NonNullable<ConfigV9["customFluenceEnv"]>,
+    "contractsEnv"
+  > & {
+    contractsEnv: ChainENV;
+  };
+};
+
+const configSchemaV10Obj = {
+  ...configSchemaV9Obj,
+  properties: {
+    ...configSchemaV9Obj.properties,
+    version: { type: "integer", const: 10 },
+    customFluenceEnv: {
+      ...configSchemaV9Obj.properties.customFluenceEnv,
+      properties: {
+        ...configSchemaV9Obj.properties.customFluenceEnv.properties,
+        contractsEnv: {
+          type: "string",
+          description: `Contracts environment to use for this fluence network to sign contracts on the blockchain`,
+          enum: [...CHAIN_ENV],
+        },
+      },
+    },
+  },
+} as const satisfies JSONSchemaType<ConfigV10>;
+
+const latestSchemaObj = configSchemaV10Obj;
 
 const latestSchema: JSONSchemaType<LatestConfig> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
@@ -1205,6 +1236,7 @@ const validateConfigSchemaV5 = ajv.compile(configSchemaV5);
 const validateConfigSchemaV6 = ajv.compile(configSchemaV6);
 const validateConfigSchemaV7 = ajv.compile(configSchemaV7);
 const validateConfigSchemaV8 = ajv.compile(configSchemaV8);
+const validateConfigSchemaV9 = ajv.compile(configSchemaV9);
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -1266,7 +1298,7 @@ const migrations: Migrations<Config> = [
     // if some kind of custom network was previously set - migrate it to the new format
     if (Array.isArray(relays) || chainNetwork !== undefined) {
       customFluenceEnv = {
-        contractsEnv: chainNetwork ?? DEFAULT_PUBLIC_FLUENCE_ENV,
+        contractsEnv: chainNetwork ?? "dar",
         relays:
           relays === undefined || typeof relays === "string"
             ? await resolveRelays()
@@ -1454,6 +1486,30 @@ const migrations: Migrations<Config> = [
           }),
     };
   },
+  async (config: Config): Promise<ConfigV10> => {
+    if (!validateConfigSchemaV9(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV9.errors,
+        )}`,
+      );
+    }
+
+    const { customFluenceEnv, ...rest } = config;
+
+    return {
+      ...rest,
+      version: 10,
+      ...(customFluenceEnv === undefined
+        ? {}
+        : {
+            customFluenceEnv: {
+              ...customFluenceEnv,
+              contractsEnv: chainEnvOldToNew(customFluenceEnv.contractsEnv),
+            },
+          }),
+    };
+  },
 ];
 
 type Config =
@@ -1466,8 +1522,9 @@ type Config =
   | ConfigV6
   | ConfigV7
   | ConfigV8
-  | ConfigV9;
-type LatestConfig = ConfigV9;
+  | ConfigV9
+  | ConfigV10;
+type LatestConfig = ConfigV10;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 export type FluenceConfigWithServices = FluenceConfig & {
@@ -1712,6 +1769,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
     configSchemaV7,
     configSchemaV8,
     configSchemaV9,
+    latestSchema,
   ],
   latestSchema,
   migrations,
