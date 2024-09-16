@@ -76,10 +76,10 @@ Custom Fluence environment to use when connecting to Fluence network
 
 ### Properties
 
-| Property       | Type     | Required | Description                                                                                                                                     |
-|----------------|----------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| `contractsEnv` | string   | **Yes**  | Contracts environment to use for this fluence network to sign contracts on the blockchain Possible values are: `dar`, `kras`, `stage`, `local`. |
-| `relays`       | string[] | **Yes**  | List of custom relay multiaddresses to use when connecting to Fluence network                                                                   |
+| Property       | Type     | Required | Description                                                                                                                                            |
+|----------------|----------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `contractsEnv` | string   | **Yes**  | Contracts environment to use for this fluence network to sign contracts on the blockchain Possible values are: `testnet`, `mainnet`, `stage`, `local`. |
+| `relays`       | string[] | **Yes**  | List of custom relay multiaddresses to use when connecting to Fluence network                                                                          |
 
 ## deployments
 

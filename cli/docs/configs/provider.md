@@ -58,7 +58,7 @@ Logs configuration
 
 | Property         | Type    | Required | Description                     |
 |------------------|---------|----------|---------------------------------|
-| `logLevel`       | string  | No       | Log level. Default: info        |
+| `logLevel`       | string  | No       | Log level. Default: debug       |
 | `reportHashrate` | boolean | No       | Report hashrate. Default: false |
 
 ### prometheusEndpoint
@@ -138,7 +138,7 @@ Logs configuration
 
 | Property         | Type    | Required | Description                     |
 |------------------|---------|----------|---------------------------------|
-| `logLevel`       | string  | No       | Log level. Default: info        |
+| `logLevel`       | string  | No       | Log level. Default: debug       |
 | `reportHashrate` | boolean | No       | Report hashrate. Default: false |
 
 ##### prometheusEndpoint
