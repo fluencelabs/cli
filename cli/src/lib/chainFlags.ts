@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { commandObj } from "./commandObj.js";
 import { ENV_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "./const.js";
 
 export type ChainFlags = {
@@ -28,8 +29,10 @@ export function setChainFlags(flags: ChainFlags) {
   let env = flags[ENV_FLAG_NAME];
 
   if (env === "kras") {
+    commandObj.warn(`'kras' is deprecated, use 'mainnet' instead`);
     env = "mainnet";
   } else if (env === "dar") {
+    commandObj.warn(`'dar' is deprecated, use 'testnet' instead`);
     env = "testnet";
   }
 

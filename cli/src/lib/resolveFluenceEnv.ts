@@ -110,8 +110,10 @@ async function ensureValidFluenceEnvFlag(
   let envFlag = envFlagArg;
 
   if (envFlag === "kras") {
+    commandObj.warn(`'kras' is deprecated, use 'mainnet' instead`);
     envFlag = "mainnet";
   } else if (envFlag === "dar") {
+    commandObj.warn(`'dar' is deprecated, use 'testnet' instead`);
     envFlag = "testnet";
   }
 
