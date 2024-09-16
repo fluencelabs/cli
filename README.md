@@ -37,7 +37,7 @@ curl -qsL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | ba
 
 ### Update
 
-To select `fluence` version compatible with certain network (`testnet`, `stage`, `mainnet`) run:
+To select `fluence` version compatible with certain network (`stage`, `testnet`, `mainnet`) run:
 
 ```shell
 fluence update <network>
