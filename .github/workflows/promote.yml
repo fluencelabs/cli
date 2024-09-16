@@ -12,6 +12,7 @@ on:
           - testnet  # version compatible with current testnet env
           - stable   # latest stable version (same as mainnet)
           - mainnet  # version compatible with current mainnet env
+          - unstable # version used by all CI jobs; TODO: publish automatically on every release
         required: true
 
 env:
