@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.20.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.1...fluence-cli-v0.20.2) (2024-09-16)
+
+
+### Features
+
+* estimate gas before sending tx ([#1033](https://github.com/fluencelabs/cli/issues/1033)) ([366e48e](https://github.com/fluencelabs/cli/commit/366e48ec1ef23b23516f357a7191b75b2e1825d3))
+* migrate kras and dar to mainnet and testnet ([#1038](https://github.com/fluencelabs/cli/issues/1038)) ([fa332a3](https://github.com/fluencelabs/cli/commit/fa332a38e63543d90d5c4cdc556bbc3d429da868))
+
+
+### Bug Fixes
+
+* bump deal-ts-clients 0.19.4 ([#1034](https://github.com/fluencelabs/cli/issues/1034)) ([2e5af62](https://github.com/fluencelabs/cli/commit/2e5af62195ae9eb4b0251f291e81ba68e611badb))
+* bump deal-ts-clients 0.19.5 ([#1036](https://github.com/fluencelabs/cli/issues/1036)) ([b857da8](https://github.com/fluencelabs/cli/commit/b857da8eb4c77e91e7a90be50868e969bd0431c4))
+* bump deal-ts-clients 0.19.6 ([#1037](https://github.com/fluencelabs/cli/issues/1037)) ([6a36182](https://github.com/fluencelabs/cli/commit/6a36182ab5bd01c666863b9877c27e5ca8e9ec05))
+* versions in configs ([#1040](https://github.com/fluencelabs/cli/issues/1040)) ([d731360](https://github.com/fluencelabs/cli/commit/d7313603c9b3438548f13f8c3582f2fce9951806))
+
 ## [0.20.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.0...fluence-cli-v0.20.1) (2024-09-13)
 
 
