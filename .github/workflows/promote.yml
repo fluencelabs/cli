@@ -8,12 +8,10 @@ on:
         type: choice
         options:
           - main     # latest build from main branch
-          - unstable # latest release of Fluence CLI
           - stage    # version compatible with current stage env
           - testnet  # version compatible with current testnet env
-          - stable   # latest stable version (same as kras)
-          - latest   # latest stable version (same as kras)
-          - kras     # version compatible with current kras env
+          - stable   # latest stable version (same as mainnet)
+          - mainnet  # version compatible with current mainnet env
         required: true
 
 env:
