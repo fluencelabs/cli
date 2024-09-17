@@ -2013,6 +2013,7 @@ function noxConfigYAMLToConfigToml(
     ccp,
     listenIp,
     metrics,
+    effectors,
     ...config
   }: LatestNoxConfigYAML,
   ccpConfig: LatestCCPConfigYAML,
@@ -2052,10 +2053,20 @@ function noxConfigYAMLToConfigToml(
     tokioDetailedMetricsEnabled: metrics?.tokioDetailedMetricsEnabled,
     metricsEnabled: metrics?.enabled,
     metricsTimerResolution: metrics?.timerResolution,
-
-    // TODO: set up properly in the schema
-    // systemCpuCount: 1,
-    // cpusRange: ranges[((config.tcpPort ?? 1) - 1) % ranges.length],
+    ...(effectors === undefined
+      ? {}
+      : {
+          effectors: Object.fromEntries(
+            Object.entries(effectors).map(
+              ([name, { wasmCID, allowedBinaries }]) => {
+                return [
+                  name,
+                  { wasmCID, allowedBinaries: allowedBinaries ?? {} },
+                ] as const;
+              },
+            ),
+          ),
+        }),
   }) as JsonMap;
 }
 
