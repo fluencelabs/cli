@@ -17,6 +17,7 @@
 
 import { color } from "@oclif/color";
 import Ajv from "ajv";
+import addFormats from "ajv-formats";
 
 import { jsonStringify } from "../common.js";
 
@@ -26,6 +27,8 @@ export const ajv = new Ajv.default({
   allowUnionTypes: true,
   code: { esm: true },
 });
+
+addFormats.default(ajv);
 
 type AjvErrors =
   | Ajv.ErrorObject<string, Record<string, unknown>>[]

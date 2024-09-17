@@ -39,7 +39,7 @@ import {
   validateAddress,
   validateProtocolVersion,
 } from "../../chain/chainValidators.js";
-import { commandObj } from "../../commandObj.js";
+import { commandObj, isInteractive } from "../../commandObj.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
   DEFAULT_OFFER_NAME,
@@ -66,6 +66,7 @@ import {
   CHAIN_URLS_FOR_CONTAINERS,
   CLI_NAME,
   DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+  DEFAULT_VM_EFFECTOR_CID,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -86,7 +87,7 @@ import {
   ensureFluenceSecretsFilePath,
   ensureFluenceCCPConfigsDir,
 } from "../../paths.js";
-import { list } from "../../prompt.js";
+import { input, list } from "../../prompt.js";
 import { setEnvConfig } from "../globalConfigs.js";
 import {
   getReadonlyConfigInitFunction,
@@ -175,7 +176,7 @@ export type OfferV0 = {
 
 type Effector = {
   wasmCID: string;
-  allowedBinaries: Record<string, string>;
+  allowedBinaries?: Record<string, string>;
 };
 
 type NoxConfigYAMLV0 = {
@@ -231,9 +232,10 @@ const effectorSchema = {
         curl: { type: "string" },
       },
       required: [],
+      nullable: true,
     },
   },
-  required: ["wasmCID", "allowedBinaries"],
+  required: ["wasmCID"],
 } as const satisfies JSONSchemaType<Effector>;
 
 const noxConfigYAMLSchemaV0 = {
@@ -721,6 +723,7 @@ const noxConfigYAMLSchemaV1 = {
     listenIp: {
       nullable: true,
       type: "string",
+      format: "ipv4",
       description: `IP to listen on`,
     },
     externalMultiaddresses: {
@@ -804,11 +807,13 @@ const noxConfigYAMLSchemaV1 = {
             publicIp: {
               nullable: false,
               type: "string",
+              format: "ipv4",
               description: `Public IP address to assign the VM. Must be publicly accessible.`,
             },
             vmIp: {
               nullable: true,
               type: "string",
+              format: "ipv4",
               description: `Internal IP address to assign the VM`,
             },
             portRange: {
@@ -1317,11 +1322,22 @@ const latestConfigSchema: JSONSchemaType<LatestConfig> = {
   ...latestConfigSchemaObj,
 };
 
-function getDefault(args: Omit<ProviderConfigArgs, "name">) {
+const ipValidator = ajv.compile({
+  type: "string",
+  format: "ipv4",
+});
+
+function validateIp(value: string) {
+  return ipValidator(value) ? true : "Must be a valid IPv4 address";
+}
+
+function getDefault(args: ProviderConfigArgs) {
   return async () => {
     const { yamlDiffPatch } = await import("yaml-diff-patch");
     const chainEnv = await ensureChainEnv();
     setEnvConfig(await initNewEnvConfig(chainEnv));
+    const isLocal = chainEnv === "local";
+    const hasVM = !isLocal && args["no-vm"] !== true;
 
     const userProvidedConfig: UserProvidedConfig = {
       providerName: "defaultProvider",
@@ -1329,10 +1345,9 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
         effectors: {
           curl: {
             wasmCID: DEFAULT_CURL_EFFECTOR_CID,
-            allowedBinaries: {
-              curl: "/usr/bin/curl",
-            },
+            allowedBinaries: { curl: "/usr/bin/curl" },
           },
+          ...(hasVM ? { vm: { wasmCID: DEFAULT_VM_EFFECTOR_CID } } : {}),
         },
       },
       computePeers: {},
@@ -1340,17 +1355,51 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       capacityCommitments: {},
     };
 
-    // For now we remove interactive mode cause it's too complex and unnecessary
-    // if (envConfig?.fluenceEnv === "local") {
+    const numberOfNoxes =
+      args.noxes ??
+      (isInteractive && !isLocal
+        ? Number(
+            await input({
+              message: `Enter number of compute peers you want to set up`,
+              validate(value) {
+                return Number.isInteger(Number(value)) && Number(value) > 0
+                  ? true
+                  : "Must be a positive integer";
+              },
+            }),
+          )
+        : DEFAULT_NUMBER_OF_LOCAL_NET_NOXES);
 
-    userProvidedConfig.computePeers = Object.fromEntries(
-      times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
-        return [
-          `nox-${numToStr(i)}`,
-          { computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX },
-        ] as const;
-      }),
-    );
+    const computePeerEntries: [string, LatestComputePeer][] = [];
+
+    for (const i of times(numberOfNoxes)) {
+      const peerConfig = hasVM
+        ? {
+            nox: {
+              vm: {
+                network: {
+                  publicIp: isInteractive
+                    ? await input({
+                        message: `Enter public IP address for nox-${numToStr(i)}`,
+                        validate: validateIp,
+                      })
+                    : "",
+                },
+              },
+            },
+          }
+        : {};
+
+      computePeerEntries.push([
+        `nox-${numToStr(i)}`,
+        {
+          computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+          ...peerConfig,
+        },
+      ] as const);
+    }
+
+    userProvidedConfig.computePeers = Object.fromEntries(computePeerEntries);
 
     userProvidedConfig.capacityCommitments = Object.fromEntries(
       Object.keys(userProvidedConfig.computePeers).map((noxName) => {
@@ -1368,14 +1417,12 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       [DEFAULT_OFFER_NAME]: {
         ...defaultNumberProperties,
         computePeers: Object.keys(userProvidedConfig.computePeers),
-        effectors: [DEFAULT_CURL_EFFECTOR_CID],
+        effectors: [
+          DEFAULT_CURL_EFFECTOR_CID,
+          ...(hasVM ? [DEFAULT_VM_EFFECTOR_CID] : []),
+        ],
       },
     };
-
-    // } else {
-    //   await addComputePeers(args.noxes, userProvidedConfig);
-    //   await addOffers(userProvidedConfig);
-    // }
 
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
@@ -1504,6 +1551,7 @@ function migrateChainConfigV0ToV1(
   );
 }
 
+type LatestComputePeer = ComputePeerV1;
 type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3;
 type LatestConfig = ConfigV3;
 type LatestCCPConfigYAML = CCPConfigYAMLV1;
@@ -1631,15 +1679,36 @@ export async function validateEffectors(
               computePeer.nox,
             );
 
-            const computePeerEffectorsString = jsonStringify(
-              [
-                ...Object.values(noxConfig.effectors ?? {}).map(
-                  ({ wasmCID }) => {
-                    return wasmCID;
-                  },
-                ),
-              ].sort(),
+            const computePeerEffectors = [
+              ...Object.values(noxConfig.effectors ?? {}).map(({ wasmCID }) => {
+                return wasmCID;
+              }),
+            ].sort();
+
+            const hasDefaultVmEffector = computePeerEffectors.includes(
+              DEFAULT_VM_EFFECTOR_CID,
             );
+
+            if (
+              noxConfig.vm?.network.publicIp !== undefined &&
+              !hasDefaultVmEffector
+            ) {
+              return `Compute peer ${color.yellow(
+                computePeerName,
+              )} has a defined publicIp property:\n\nvm:\n  network:\n    publicIp: ${noxConfig.vm.network.publicIp}\n\nso it is expected to also have a vm effector:\n\neffectors:\n  vm:\n    wasmCID: ${DEFAULT_VM_EFFECTOR_CID}`;
+            }
+
+            if (
+              noxConfig.vm?.network.publicIp === undefined &&
+              hasDefaultVmEffector
+            ) {
+              return `Compute peer ${color.yellow(
+                computePeerName,
+              )} has a vm effector:\n\neffectors:\n  vm:\n    wasmCID: ${DEFAULT_VM_EFFECTOR_CID}\n\nso it is expected to also have a defined publicIp property:\n\nvm:\n  network:\n    publicIp: <public_ip>`;
+            }
+
+            const computePeerEffectorsString =
+              jsonStringify(computePeerEffectors);
 
             if (computePeerEffectorsString !== offerEffectorsString) {
               return `Offer ${color.yellow(
@@ -1662,13 +1731,7 @@ export async function validateEffectors(
     return typeof result === "string";
   });
 
-  if (errors.length > 0) {
-    return `Each offer must contain computePeers with matching effectors. Found not matching ones:\n\n${errors.join(
-      "\n\n",
-    )}`;
-  }
-
-  return true;
+  return errors.length > 0 ? errors.join("\n\n") : true;
 }
 
 function validateNoDuplicateNoxNamesInOffers(

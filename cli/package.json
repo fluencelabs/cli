@@ -74,6 +74,7 @@
     "@oclif/plugin-update": "4.2.11",
     "@total-typescript/ts-reset": "0.5.1",
     "ajv": "8.13.0",
+    "ajv-formats": "^3.0.1",
     "chokidar": "3.6.0",
     "countly-sdk-nodejs": "22.6.0",
     "debug": "4.3.4",

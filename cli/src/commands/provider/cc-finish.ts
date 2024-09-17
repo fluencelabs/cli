@@ -25,12 +25,8 @@ import {
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-// Deprecated alias for provider cc-finish
-export default class CCCollateralWithdraw extends BaseCommand<
-  typeof CCCollateralWithdraw
-> {
-  static override hidden = true;
-  static override aliases = ["provider:ccw"];
+export default class CCFinish extends BaseCommand<typeof CCFinish> {
+  static override aliases = ["provider:ccf"];
   static override description = `Move resources from deals, withdraw ${FLT_SYMBOL} collateral from capacity commitments, remove compute units from capacity commitments and finish capacity commitments`;
   static override flags = {
     ...baseFlags,
@@ -40,11 +36,7 @@ export default class CCCollateralWithdraw extends BaseCommand<
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(
-      this,
-      await this.parse(CCCollateralWithdraw),
-    );
-
+    const { flags } = await initCli(this, await this.parse(CCFinish));
     await collateralWithdraw(flags);
   }
 }
