@@ -16,6 +16,7 @@
  */
 
 import { color } from "@oclif/color";
+import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -36,6 +37,10 @@ export default class Init extends BaseCommand<typeof Init> {
     ...baseFlags,
     ...NOXES_FLAG,
     ...CHAIN_FLAGS,
+    "no-vm": Flags.boolean({
+      description: `Generate ${PROVIDER_CONFIG_FULL_FILE_NAME} without vm configuration`,
+      default: false,
+    }),
   };
 
   async run(): Promise<void> {

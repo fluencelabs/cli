@@ -35,6 +35,7 @@ import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import { validateProtocolVersion } from "../../chain/chainValidators.js";
+import { commandObj } from "../../commandObj.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
   MAX_HEAP_SIZE_DESCRIPTION,
@@ -286,7 +287,7 @@ const dealSchemaObj = {
       minimum: 1,
       maximum: 1,
       default: 1,
-      description: `Number of compute units you require. 1 compute unit = ${COMPUTE_UNIT_MEMORY_STR}. Currently the only allowed value is 1. This will change in the future. Default: 1`,
+      description: `DEPRECATED. USE cuCountPerWorker INSTEAD. Number of compute units you require. 1 compute unit = ${COMPUTE_UNIT_MEMORY_STR}. Currently the only allowed value is 1. This will change in the future. Default: 1`,
       nullable: true,
     },
     targetWorkers: {
@@ -1733,6 +1734,26 @@ async function validateProtocolVersions(config: LatestConfig) {
   return true;
 }
 
+function warnComputeUnitsIsDeprecated(config: LatestConfig): true {
+  const deploymentsWithWarning = Object.entries(
+    config.deployments ?? {},
+  ).filter(([, deployment]) => {
+    return "computeUnits" in deployment;
+  });
+
+  if (deploymentsWithWarning.length > 0) {
+    commandObj.warn(
+      `'computeUnits' property is deprecated. Use 'cuCountPerWorker' instead. Deployment(s): ${deploymentsWithWarning
+        .map(([deploymentName]) => {
+          return deploymentName;
+        })
+        .join(", ")}`,
+    );
+  }
+
+  return true;
+}
+
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   return validateBatchAsync(
     validateNotBothBlacklistAndWhitelist(config),
@@ -1754,6 +1775,7 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
     validateVersionsIsExact("marineVersion", config.marineVersion),
     validateVersionsIsExact("mreplVersion", config.mreplVersion),
     validateProtocolVersions(config),
+    warnComputeUnitsIsDeprecated(config),
   );
 };
 

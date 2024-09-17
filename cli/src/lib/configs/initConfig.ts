@@ -306,16 +306,21 @@ export function getReadonlyConfigInitFunction<
     let { configPath } = getConfigPathResult;
 
     const Ajv = (await import("ajv")).default;
+    const addFormats = (await import("ajv-formats")).default.default;
 
-    const validateAllConfigVersions = new Ajv.default({
-      allowUnionTypes: true,
-    }).compile<Config>({
+    const validateAllConfigVersions = addFormats(
+      new Ajv.default({
+        allowUnionTypes: true,
+      }),
+    ).compile<Config>({
       oneOf: allSchemas,
     });
 
-    const validateLatestConfig = new Ajv.default({
-      allowUnionTypes: true,
-    }).compile<LatestConfig>(latestSchema);
+    const validateLatestConfig = addFormats(
+      new Ajv.default({
+        allowUnionTypes: true,
+      }),
+    ).compile<LatestConfig>(latestSchema);
 
     const schemaPathCommentStart = "# yaml-language-server: $schema=";
 

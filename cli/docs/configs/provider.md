@@ -249,8 +249,8 @@ Effector configuration
 
 | Property          | Type                       | Required | Description              |
 |-------------------|----------------------------|----------|--------------------------|
-| `allowedBinaries` | [object](#allowedbinaries) | **Yes**  | Allowed binaries         |
 | `wasmCID`         | string                     | **Yes**  | Wasm CID of the effector |
+| `allowedBinaries` | [object](#allowedbinaries) | No       | Allowed binaries         |
 
 **allowedBinaries**
 
@@ -440,8 +440,8 @@ Effector configuration
 
 | Property          | Type                       | Required | Description              |
 |-------------------|----------------------------|----------|--------------------------|
-| `allowedBinaries` | [object](#allowedbinaries) | **Yes**  | Allowed binaries         |
 | `wasmCID`         | string                     | **Yes**  | Wasm CID of the effector |
+| `allowedBinaries` | [object](#allowedbinaries) | No       | Allowed binaries         |
 
 ##### allowedBinaries
 

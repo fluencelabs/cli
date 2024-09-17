@@ -217,13 +217,23 @@ export async function createAndMatchDealsForPeerIds({
     }
 
     try {
-      const dealAddress = await dealCreate(dealCreateArgs);
+      const dealAddress = await dealCreate({
+        ...dealCreateArgs,
+        targetWorkers: 1,
+        minWorkers: 1,
+      });
+
+      commandObj.logToStderr(`Deal ${color.yellow(dealAddress)} created`);
 
       await sign({
         title: `Match deal ${dealAddress} with compute units:\n\n${CUs.join("\n")}\n\nfrom offer ${offerId}`,
         method: market.matchDeal,
         args: [dealAddress, [offerId], [[CUs]]],
       });
+
+      commandObj.logToStderr(
+        `Deal ${color.yellow(dealAddress)} matched with peer ${color.yellow(peerId)}. Offer: ${color.yellow(offerId)} (${color.yellow(CUs.length)} compute units)`,
+      );
     } catch (e) {
       commandObj.error(
         `Couldn't create or match deal for peer ${color.yellow(peerId)}: ${stringifyUnknown(e)}`,

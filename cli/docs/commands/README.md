@@ -43,8 +43,8 @@
 * [`fluence module pack [PATH]`](#fluence-module-pack-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider cc-activate`](#fluence-provider-cc-activate)
-* [`fluence provider cc-collateral-withdraw`](#fluence-provider-cc-collateral-withdraw)
 * [`fluence provider cc-create`](#fluence-provider-cc-create)
+* [`fluence provider cc-finish`](#fluence-provider-cc-finish)
 * [`fluence provider cc-info`](#fluence-provider-cc-info)
 * [`fluence provider cc-remove`](#fluence-provider-cc-remove)
 * [`fluence provider cc-rewards-withdraw`](#fluence-provider-cc-rewards-withdraw)
@@ -1257,39 +1257,6 @@ ALIASES
 
 _See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.20.2/src/commands/provider/cc-activate.ts)_
 
-## `fluence provider cc-collateral-withdraw`
-
-Withdraw FLT collateral from capacity commitments
-
-```
-USAGE
-  $ fluence provider cc-collateral-withdraw [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
-    [--env <testnet | mainnet | stage | local | custom>] [--priv-key <private-key>] [--max-cus <value>]
-
-FLAGS
-  --cc-ids=<value>                                    Comma separated capacity commitment IDs
-  --env=<testnet | mainnet | stage | local | custom>  Fluence Environment to use when running the command
-  --max-cus=<value>                                   [default: 32] Maximum number of compute units to put in a batch
-                                                      when signing a transaction
-  --no-input                                          Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                           Comma-separated names of noxes from provider.yaml. To use all of
-                                                      your noxes: --nox-names all
-  --offers=<offer-1,offer-2>                          Comma-separated list of offer names. To use all of your offers:
-                                                      --offers all
-  --priv-key=<private-key>                            !WARNING! for debug purposes only. Passing private keys through
-                                                      flags is unsecure. On local env
-                                                      0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                      is used by default when CLI is used in non-interactive mode
-
-DESCRIPTION
-  Withdraw FLT collateral from capacity commitments
-
-ALIASES
-  $ fluence provider ccw
-```
-
-_See code: [src/commands/provider/cc-collateral-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.20.2/src/commands/provider/cc-collateral-withdraw.ts)_
-
 ## `fluence provider cc-create`
 
 Create Capacity commitment
@@ -1319,6 +1286,40 @@ ALIASES
 ```
 
 _See code: [src/commands/provider/cc-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.20.2/src/commands/provider/cc-create.ts)_
+
+## `fluence provider cc-finish`
+
+Move resources from deals, withdraw FLT collateral from capacity commitments, remove compute units from capacity commitments and finish capacity commitments
+
+```
+USAGE
+  $ fluence provider cc-finish [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
+    [--env <testnet | mainnet | stage | local | custom>] [--priv-key <private-key>] [--max-cus <value>]
+
+FLAGS
+  --cc-ids=<value>                                    Comma separated capacity commitment IDs
+  --env=<testnet | mainnet | stage | local | custom>  Fluence Environment to use when running the command
+  --max-cus=<value>                                   [default: 32] Maximum number of compute units to put in a batch
+                                                      when signing a transaction
+  --no-input                                          Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                           Comma-separated names of noxes from provider.yaml. To use all of
+                                                      your noxes: --nox-names all
+  --offers=<offer-1,offer-2>                          Comma-separated list of offer names. To use all of your offers:
+                                                      --offers all
+  --priv-key=<private-key>                            !WARNING! for debug purposes only. Passing private keys through
+                                                      flags is unsecure. On local env
+                                                      0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                      is used by default when CLI is used in non-interactive mode
+
+DESCRIPTION
+  Move resources from deals, withdraw FLT collateral from capacity commitments, remove compute units from capacity
+  commitments and finish capacity commitments
+
+ALIASES
+  $ fluence provider ccf
+```
+
+_See code: [src/commands/provider/cc-finish.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.20.2/src/commands/provider/cc-finish.ts)_
 
 ## `fluence provider cc-info`
 
@@ -1589,11 +1590,12 @@ Init provider config. Creates a provider.yaml file
 ```
 USAGE
   $ fluence provider init [--no-input] [--noxes <value>] [--env <testnet | mainnet | stage | local | custom>]
-    [--priv-key <private-key>]
+    [--priv-key <private-key>] [--no-vm]
 
 FLAGS
   --env=<testnet | mainnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                          Don't interactively ask for any input from the user
+  --no-vm                                             Generate provider.yaml without vm configuration
   --noxes=<value>                                     Number of Compute Peers to generate when a new provider.yaml is
                                                       created
   --priv-key=<private-key>                            !WARNING! for debug purposes only. Passing private keys through

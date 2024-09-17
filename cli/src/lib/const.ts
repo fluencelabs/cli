@@ -78,6 +78,9 @@ export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
 export const DEFAULT_CURL_EFFECTOR_CID =
   "bafybeicorj3sl6fhqpuubmt5r2n7plkjkmto6jxqckgte2624dj5zvzufm";
 
+export const DEFAULT_VM_EFFECTOR_CID =
+  "bafkreidfw2so3evkkkky7bodnamzg32zweunfkthna362r7e6a63cnqxiy";
+
 const byteUnits = [
   "kB",
   "KB",

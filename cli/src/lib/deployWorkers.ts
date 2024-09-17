@@ -945,8 +945,9 @@ async function resolveDeployment({
   );
 
   const workerMemory =
-    ("computeUnits" in deploymentConfig ? deploymentConfig.computeUnits : 1) *
-    COMPUTE_UNIT_MEMORY;
+    ("cuCountPerWorker" in deploymentConfig
+      ? deploymentConfig.cuCountPerWorker
+      : 1) * COMPUTE_UNIT_MEMORY;
 
   if (specifiedServicesMemoryLimit > workerMemory) {
     throwMemoryExceedsError(

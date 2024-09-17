@@ -149,7 +149,7 @@ export async function validateCIDs(
   );
 
   if (errors.length > 0) {
-    return `Invalid CIDs:\n\n${errors.join("\n\n")}`;
+    return `\nInvalid CIDs:\n\n${errors.join("\n\n")}`;
   }
 
   return true;

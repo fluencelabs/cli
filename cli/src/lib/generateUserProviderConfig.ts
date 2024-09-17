@@ -59,6 +59,7 @@ const DEFAULT_NUMBER_OF_NOXES = 3;
 
 export type ProviderConfigArgs = {
   noxes?: number | undefined;
+  "no-vm"?: boolean | undefined;
 };
 
 export async function addComputePeers(
