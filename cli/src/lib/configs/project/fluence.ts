@@ -36,7 +36,6 @@ import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import { validateProtocolVersion } from "../../chain/chainValidators.js";
 import {
-  COMPUTE_UNIT_MEMORY_STR,
   MAX_HEAP_SIZE_DESCRIPTION,
   AQUA_DIR_NAME,
   AQUA_LIB_NPM_DEPENDENCY,
@@ -225,7 +224,6 @@ type FluenceConfigSpell = {
 } & OverridableSpellProperties;
 
 type Deal = {
-  computeUnits?: 1;
   minWorkers?: number;
   targetWorkers?: number;
   maxWorkersPerProvider?: number;
@@ -281,14 +279,6 @@ const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
 const dealSchemaObj = {
   type: "object",
   properties: {
-    computeUnits: {
-      type: "integer",
-      minimum: 1,
-      maximum: 1,
-      default: 1,
-      description: `Number of compute units you require. 1 compute unit = ${COMPUTE_UNIT_MEMORY_STR}. Currently the only allowed value is 1. This will change in the future. Default: 1`,
-      nullable: true,
-    },
     targetWorkers: {
       type: "integer",
       description: "Max workers in the deal",
