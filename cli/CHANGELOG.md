@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.2...fluence-cli-v0.20.3) (2024-09-17)
+
+
+### Features
+
+* support vm effector by default, rename cc-collateral-withdraw to cc-finish ([#1042](https://github.com/fluencelabs/cli/issues/1042)) ([07c2cd5](https://github.com/fluencelabs/cli/commit/07c2cd534a1947b83e3179f55e4f5b35466aff69))
+
 ## [0.20.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.1...fluence-cli-v0.20.2) (2024-09-16)
 
 
