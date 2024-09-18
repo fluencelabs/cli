@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.4...fluence-cli-v0.20.5) (2024-09-18)
+
+
+### Bug Fixes
+
+* raw config merge fix, testnet -&gt; dar for deal-ts-client fix ([#1048](https://github.com/fluencelabs/cli/issues/1048)) ([049e1ab](https://github.com/fluencelabs/cli/commit/049e1abcbd0762ddd27dd7a69803aeeaf132c8ad))
+
 ## [0.20.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.3...fluence-cli-v0.20.4) (2024-09-17)
 
 
