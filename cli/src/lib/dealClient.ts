@@ -121,7 +121,7 @@ export async function getDealMatcherClient() {
   if (dealMatcherClient === undefined) {
     const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
     const env = await ensureChainEnv();
-    dealMatcherClient = new DealMatcherClient(env);
+    dealMatcherClient = new DealMatcherClient(env === "testnet" ? "dar" : env);
   }
 
   return dealMatcherClient;
@@ -139,7 +139,7 @@ export async function getDealExplorerClient() {
     const env = await ensureChainEnv();
 
     dealExplorerClient = await DealExplorerClient.create(
-      env,
+      env === "testnet" ? "dar" : env,
       undefined,
       provider,
     );
@@ -162,8 +162,12 @@ export async function getDealCliClient() {
 
 async function createDealClient(signerOrProvider: Provider | Signer) {
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const chainEnv = await ensureChainEnv();
-  const client = new DealClient(signerOrProvider, chainEnv);
+  const env = await ensureChainEnv();
+
+  const client = new DealClient(
+    signerOrProvider,
+    env === "testnet" ? "dar" : env,
+  );
 
   await setTryTimeout(
     "check if blockchain client is connected",

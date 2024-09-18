@@ -2006,9 +2006,12 @@ function resolveCCPConfigYAML(
 }
 
 function getObjByKey(obj: Record<string, unknown>, key: string): object {
-  return key in obj && typeof obj[key] === "object" && obj[key] !== null
-    ? obj[key]
-    : {};
+  if (!(key in obj)) {
+    return {};
+  }
+
+  const value = obj[key];
+  return typeof value === "object" && value !== null ? value : {};
 }
 
 function noxConfigYAMLToConfigToml(
@@ -2137,7 +2140,10 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const contractAddresses = DealClient.getContractAddresses(env);
+
+  const contractAddresses = DealClient.getContractAddresses(
+    env === "testnet" ? "dar" : env,
+  );
 
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
