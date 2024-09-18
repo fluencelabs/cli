@@ -2027,13 +2027,13 @@ function noxConfigYAMLToConfigToml(
   env: ChainENV,
 ) {
   const chainConfig = {
-    ...getObjByKey(config, "chain_config"),
     httpEndpoint: chain.httpEndpoint,
     diamondContractAddress: diamondContract,
     networkId: chain.networkId,
     walletKey: walletPrivateKey,
     defaultBaseFee: chain.defaultBaseFee,
     defaultPriorityFee: chain.defaultPriorityFee,
+    ...getObjByKey(config, "chain_config"),
   };
 
   // Would be too hard to properly type this
@@ -2044,8 +2044,8 @@ function noxConfigYAMLToConfigToml(
       ? {}
       : {
           listenConfig: {
-            ...getObjByKey(config, "listen_config"),
             listenIp,
+            ...getObjByKey(config, "listen_config"),
           },
         }),
     chainConfig,
@@ -2053,7 +2053,6 @@ function noxConfigYAMLToConfigToml(
       ? {}
       : {
           chainListenerConfig: {
-            ...getObjByKey(config, "chain_listener_config"),
             wsEndpoint: chain.wsEndpoint,
             ccpEndpoint:
               ccp?.ccpEndpoint ??
@@ -2063,6 +2062,7 @@ function noxConfigYAMLToConfigToml(
                 ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT,
               )}`,
             proofPollPeriod: ccp?.proofPollPeriod,
+            ...getObjByKey(config, "chain_listener_config"),
           },
         }),
     tokioMetricsEnabled: metrics?.tokioMetricsEnabled,
