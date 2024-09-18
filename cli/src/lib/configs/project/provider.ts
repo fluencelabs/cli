@@ -2005,7 +2005,14 @@ function resolveCCPConfigYAML(
   return mergeConfigYAMLWithRawConfig(config, computePeerCCPConfig);
 }
 
-// const ranges = ["1-2", "3-4", "5-6"];
+function getObjByKey(obj: Record<string, unknown>, key: string): object {
+  if (!(key in obj)) {
+    return {};
+  }
+
+  const value = obj[key];
+  return typeof value === "object" && value !== null ? value : {};
+}
 
 function noxConfigYAMLToConfigToml(
   {
@@ -2026,13 +2033,21 @@ function noxConfigYAMLToConfigToml(
     walletKey: walletPrivateKey,
     defaultBaseFee: chain.defaultBaseFee,
     defaultPriorityFee: chain.defaultPriorityFee,
+    ...getObjByKey(config, "chain_config"),
   };
 
   // Would be too hard to properly type this
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return camelCaseKeysToSnakeCase({
     ...config,
-    ...(listenIp === undefined ? {} : { listenConfig: { listenIp } }),
+    ...(listenIp === undefined
+      ? {}
+      : {
+          listenConfig: {
+            listenIp,
+            ...getObjByKey(config, "listen_config"),
+          },
+        }),
     chainConfig,
     ...(env === "local"
       ? {}
@@ -2047,6 +2062,7 @@ function noxConfigYAMLToConfigToml(
                 ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT,
               )}`,
             proofPollPeriod: ccp?.proofPollPeriod,
+            ...getObjByKey(config, "chain_listener_config"),
           },
         }),
     tokioMetricsEnabled: metrics?.tokioMetricsEnabled,
@@ -2124,7 +2140,10 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const contractAddresses = DealClient.getContractAddresses(env);
+
+  const contractAddresses = DealClient.getContractAddresses(
+    env === "testnet" ? "dar" : env,
+  );
 
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,

@@ -42,7 +42,7 @@ export default class Info extends BaseCommand<typeof Info> {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { default: contracts }: { default: unknown } = await import(
-      `@fluencelabs/deal-ts-clients/dist/deployments/${chainEnv}.json`,
+      `@fluencelabs/deal-ts-clients/dist/deployments/${chainEnv === "testnet" ? "dar" : chainEnv}.json`,
       {
         assert: { type: "json" },
       }
