@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.3...fluence-cli-v0.20.4) (2024-09-17)
+
+
+### Features
+
+* update @fluencelabs/fluence-network-environment@1.2.3 ([#1044](https://github.com/fluencelabs/cli/issues/1044)) ([fe79472](https://github.com/fluencelabs/cli/commit/fe7947278bfb9fceb6daebaac2126d0f3a7fe108))
+
 ## [0.20.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.2...fluence-cli-v0.20.3) (2024-09-17)
 
 
