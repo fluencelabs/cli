@@ -2005,7 +2005,11 @@ function resolveCCPConfigYAML(
   return mergeConfigYAMLWithRawConfig(config, computePeerCCPConfig);
 }
 
-// const ranges = ["1-2", "3-4", "5-6"];
+function getObjByKey(obj: Record<string, unknown>, key: string): object {
+  return key in obj && typeof obj[key] === "object" && obj[key] !== null
+    ? obj[key]
+    : {};
+}
 
 function noxConfigYAMLToConfigToml(
   {
@@ -2020,6 +2024,7 @@ function noxConfigYAMLToConfigToml(
   env: ChainENV,
 ) {
   const chainConfig = {
+    ...getObjByKey(config, "chain_config"),
     httpEndpoint: chain.httpEndpoint,
     diamondContractAddress: diamondContract,
     networkId: chain.networkId,
@@ -2032,12 +2037,20 @@ function noxConfigYAMLToConfigToml(
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return camelCaseKeysToSnakeCase({
     ...config,
-    ...(listenIp === undefined ? {} : { listenConfig: { listenIp } }),
+    ...(listenIp === undefined
+      ? {}
+      : {
+          listenConfig: {
+            ...getObjByKey(config, "listen_config"),
+            listenIp,
+          },
+        }),
     chainConfig,
     ...(env === "local"
       ? {}
       : {
           chainListenerConfig: {
+            ...getObjByKey(config, "chain_listener_config"),
             wsEndpoint: chain.wsEndpoint,
             ccpEndpoint:
               ccp?.ccpEndpoint ??
