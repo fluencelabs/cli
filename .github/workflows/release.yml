@@ -16,8 +16,8 @@ jobs:
     outputs:
       releases-created: ${{ steps.release.outputs.releases_created }}
 
-      fluence-cli-release-created: ${{ steps.release.outputs['release_created'] }}
-      fluence-cli-tag-name: ${{ steps.release.outputs['tag_name'] }}
+      fluence-cli-release-created: ${{ steps.release.outputs['cli--release_created'] }}
+      fluence-cli-tag-name: ${{ steps.release.outputs['cli--tag_name'] }}
 
     steps:
       - name: Set release-please config
