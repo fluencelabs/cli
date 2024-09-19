@@ -17,12 +17,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { collateralWithdraw } from "../../lib/chain/commitment.js";
-import {
-  CHAIN_FLAGS,
-  FLT_SYMBOL,
-  CC_FLAGS,
-  MAX_CUS_FLAG,
-} from "../../lib/const.js";
+import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CCFinish extends BaseCommand<typeof CCFinish> {
@@ -32,7 +27,6 @@ export default class CCFinish extends BaseCommand<typeof CCFinish> {
     ...baseFlags,
     ...CC_FLAGS,
     ...CHAIN_FLAGS,
-    ...MAX_CUS_FLAG,
   };
 
   async run(): Promise<void> {

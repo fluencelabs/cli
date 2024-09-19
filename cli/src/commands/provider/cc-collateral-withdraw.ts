@@ -17,12 +17,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { collateralWithdraw } from "../../lib/chain/commitment.js";
-import {
-  CHAIN_FLAGS,
-  FLT_SYMBOL,
-  CC_FLAGS,
-  MAX_CUS_FLAG,
-} from "../../lib/const.js";
+import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 // Deprecated alias for provider cc-finish
@@ -36,7 +31,6 @@ export default class CCCollateralWithdraw extends BaseCommand<
     ...baseFlags,
     ...CC_FLAGS,
     ...CHAIN_FLAGS,
-    ...MAX_CUS_FLAG,
   };
 
   async run(): Promise<void> {

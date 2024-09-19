@@ -208,7 +208,6 @@ export async function createOffers(flags: OffersArgs) {
         validateAddress: assertProviderIsRegistered,
       });
 
-      let totalRegisteredCPs = registeredCPs.length;
       const offerIdRes = getOfferIdRes(offerRegisterTxReceipt);
       registeredMarketOffers.push(offerIdRes);
 
@@ -226,16 +225,13 @@ export async function createOffers(flags: OffersArgs) {
         offerName,
       });
 
-      while (totalRegisteredCPs < computePeersFromProviderConfig.length) {
-        totalRegisteredCPs =
-          totalRegisteredCPs +
-          (await addCPs({
-            CPs: computePeersFromProviderConfig.slice(totalRegisteredCPs),
-            offerId,
-            market,
-            offerName,
-          }));
-      }
+      await addAllCPs({
+        computePeersFromProviderConfig,
+        offerId,
+        market,
+        offerName,
+        registeredCPsLength: registeredCPs.length,
+      });
     } catch (e) {
       commandObj.warn(
         `Error when creating offer ${offerName}: ${stringifyUnknown(e)}`,
@@ -313,6 +309,33 @@ Offers ${color.yellow(offersStr)} successfully created!
 
 ${await offersInfoToString([offerInfoErrors, offersInfo])}
 `);
+}
+
+export async function addAllCPs({
+  computePeersFromProviderConfig,
+  offerId,
+  market,
+  offerName,
+  registeredCPsLength = 0,
+}: {
+  computePeersFromProviderConfig: CPFromProviderConfig[];
+  offerId: string;
+  market: IMarket;
+  offerName: string;
+  registeredCPsLength?: number;
+}) {
+  let totalRegisteredCPs = registeredCPsLength;
+
+  while (totalRegisteredCPs < computePeersFromProviderConfig.length) {
+    totalRegisteredCPs =
+      totalRegisteredCPs +
+      (await addCPs({
+        CPs: computePeersFromProviderConfig.slice(totalRegisteredCPs),
+        offerId,
+        market,
+        offerName,
+      }));
+  }
 }
 
 async function addCPs({

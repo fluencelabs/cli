@@ -258,7 +258,7 @@ export function App({
           </ol>
         </details>
       )}
-      {transactionPayload !== null && isConnected && (
+      {!isExpectingAddress && transactionPayload !== null && isConnected && (
         <h1>{transactionPayload.title}</h1>
       )}
       <ConnectButton
@@ -291,19 +291,21 @@ export function App({
               Send account address to CLI
             </button>
           )}
-          {transactionPayload !== null && isCorrectChainIdSet && (
-            <button
-              type="button"
-              className={`button${isSendTxButtonEnabled ? "" : " button_disabled"}`}
-              onClick={() => {
-                if (isSendTxButtonEnabled) {
-                  respond({ tag: "sendTransaction", address });
-                }
-              }}
-            >
-              Send transaction
-            </button>
-          )}
+          {!isExpectingAddress &&
+            transactionPayload !== null &&
+            isCorrectChainIdSet && (
+              <button
+                type="button"
+                className={`button${isSendTxButtonEnabled ? "" : " button_disabled"}`}
+                onClick={() => {
+                  if (isSendTxButtonEnabled) {
+                    respond({ tag: "sendTransaction", address });
+                  }
+                }}
+              >
+                Send transaction
+              </button>
+            )}
           {wasSwitchChainDialogShown && (
             <button
               type="button"

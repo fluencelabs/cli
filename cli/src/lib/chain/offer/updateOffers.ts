@@ -17,10 +17,8 @@
 
 import type { ComputeUnit } from "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/types/schemes.js";
 import { color } from "@oclif/color";
-import chunk from "lodash-es/chunk.js";
 import omit from "lodash-es/omit.js";
 
-import { uint8ArrayToHex } from "../../../common.js";
 import { commandObj } from "../../commandObj.js";
 import { initNewProviderArtifactsConfig } from "../../configs/project/providerArtifacts.js";
 import {
@@ -28,13 +26,7 @@ import {
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   PT_SYMBOL,
 } from "../../const.js";
-import { GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX } from "../../const.js";
-import {
-  getDealClient,
-  signBatch,
-  BATCH_SIZE,
-  populateTx,
-} from "../../dealClient.js";
+import { getDealClient, signBatch, populateTx } from "../../dealClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
@@ -51,6 +43,7 @@ import {
   resolveOffersFromProviderConfig,
   type EnsureOfferConfig,
   getOffersInfo,
+  addAllCPs,
 } from "./offer.js";
 
 type PeersOnChain = {
@@ -236,10 +229,10 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         peersOnChain,
       )) satisfies Txs;
 
+      await addMissingComputePeers(offer, peersOnChain);
+
       const txs = (
         await Promise.all([
-          populatePeersToAddTxs(offer, peersOnChain),
-
           populateEffectorsRemoveTx(offer, effectorsOnChain),
           populateEffectorsAddTx(offer, effectorsOnChain),
 
@@ -312,10 +305,11 @@ async function populatePeersToRemoveTxs(
       return [
         ...computeUnits.map((computeUnit, index) => {
           return {
-            description:
-              index === 0
-                ? `\nRemoving peer ${peerIdBase58} with compute units:\n${computeUnit.id}`
-                : computeUnit.id,
+            ...(index === 0
+              ? {
+                  description: `\nRemoving peer ${peerIdBase58} with ${numToStr(computeUnits.length)} compute units`,
+                }
+              : {}),
             tx: populateTx(market.removeComputeUnit, computeUnit.id),
           };
         }),
@@ -468,10 +462,11 @@ async function populateCUToRemoveTxs(
   return computeUnitsToRemove.flatMap(({ peerIdBase58, computeUnits }) => {
     return computeUnits.map((computeUnit, index) => {
       return {
-        description:
-          index === 0
-            ? `\nRemoving compute units from peer ${peerIdBase58}:\n${computeUnit}`
-            : computeUnit,
+        ...(index === 0
+          ? {
+              description: `\nRemoving ${numToStr(computeUnits.length)} compute units from peer ${peerIdBase58}`,
+            }
+          : {}),
         tx: populateTx(market.removeComputeUnit, computeUnit),
       };
     });
@@ -520,24 +515,21 @@ async function populateCUToAddTxs(
   );
 
   return computeUnitsToAdd.flatMap(({ hexPeerId, unitIds, peerIdBase58 }) => {
-    return chunk(
-      unitIds,
-      Math.floor(GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX / BATCH_SIZE),
-    ).map((CUIds, i) => {
+    return unitIds.map((CUId, i) => {
       return {
         ...(i === 0
           ? {
               description: `\nAdding ${numToStr(unitIds.length)} compute units to peer ${peerIdBase58}`,
             }
           : {}),
-        tx: populateTx(market.addComputeUnits, hexPeerId, CUIds),
+        tx: populateTx(market.addComputeUnits, hexPeerId, [CUId]),
       };
     });
   });
 }
 
-async function populatePeersToAddTxs(
-  { computePeersFromProviderConfig, offerId }: OnChainOffer,
+async function addMissingComputePeers(
+  { computePeersFromProviderConfig, offerId, offerName }: OnChainOffer,
   peersOnChain: PeersOnChain,
 ) {
   const { dealClient } = await getDealClient();
@@ -551,22 +543,12 @@ async function populatePeersToAddTxs(
     },
   );
 
-  return computePeersToAdd.length === 0
-    ? []
-    : [
-        {
-          description: computePeersToAdd
-            .map(({ peerIdBase58, unitIds }) => {
-              return `\nAdding peer ${peerIdBase58} with compute units:\n${unitIds
-                .map((unitId) => {
-                  return uint8ArrayToHex(Buffer.from(unitId));
-                })
-                .join("\n")}`;
-            })
-            .join("\n"),
-          tx: populateTx(market.addComputePeers, offerId, computePeersToAdd),
-        },
-      ];
+  return addAllCPs({
+    computePeersFromProviderConfig: computePeersToAdd,
+    offerId,
+    market,
+    offerName,
+  });
 }
 
 function printOffersToUpdateInfo(
