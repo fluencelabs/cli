@@ -61,10 +61,11 @@ import {
 } from "../../helpers/utils.js";
 import { checkboxes } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
+import { getProtocolVersions } from "../chainValidators.js";
 import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
-  peerIdToUint8Array,
+  peerIdBase58ToUint8Array,
 } from "../conversions.js";
 import { ptParse } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
@@ -74,6 +75,7 @@ const OFFER_ID_PROPERTY = "offerId";
 
 export type OffersArgs = {
   [OFFER_FLAG_NAME]?: string | undefined;
+  [OFFER_IDS_FLAG_NAME]?: string | undefined;
   force?: boolean | undefined;
 };
 
@@ -530,7 +532,109 @@ async function formatOfferInfo(
 export async function resolveOffersFromProviderConfig(
   flags: OffersArgs,
 ): Promise<EnsureOfferConfig[]> {
+  if (
+    flags[OFFER_FLAG_NAME] !== undefined &&
+    flags[OFFER_IDS_FLAG_NAME] !== undefined
+  ) {
+    commandObj.error(
+      `You can't use both ${color.yellow(
+        `--${OFFER_FLAG_NAME}`,
+      )} and ${color.yellow(
+        `--${OFFER_IDS_FLAG_NAME}`,
+      )} flags at the same time. Please pick one of them`,
+    );
+  }
+
   const allOffers = await ensureOfferConfigs();
+
+  if (flags[OFFER_IDS_FLAG_NAME] !== undefined) {
+    const offerIdsFromFlags = commaSepStrToArr(flags[OFFER_IDS_FLAG_NAME]);
+    const offerIdsFromFlagsSet = new Set(offerIdsFromFlags);
+
+    const offersDefinedLocally = allOffers.filter(({ offerId }) => {
+      return offerId !== undefined && offerIdsFromFlagsSet.has(offerId);
+    });
+
+    const offersDefinedLocallySet = new Set(
+      offersDefinedLocally.map(({ offerId }) => {
+        return offerId;
+      }),
+    );
+
+    const offerIdsNotDefinedLocally = offerIdsFromFlags.filter((offerId) => {
+      return !offersDefinedLocallySet.has(offerId);
+    });
+
+    const [offerInfosErrors, offerInfos] = await getOffersInfo(
+      offerIdsNotDefinedLocally.map((offerId) => {
+        return { offerId };
+      }),
+    );
+
+    if (offerInfosErrors.length > 0) {
+      commandObj.warn(
+        `Wasn't able to get info about the following offers from indexer:\n\n${offerInfosErrors
+          .map(({ offerId }) => {
+            return offerId;
+          })
+          .join("\n")}`,
+      );
+    }
+
+    const protocolVersionsFromChain = await getProtocolVersions();
+
+    const offersNotDefinedLocally = await Promise.all(
+      offerInfos.map(async ({ offerId, offerIndexerInfo }) => {
+        return {
+          offerName: `Offer ${offerId}`,
+          minPricePerCuPerEpochBigInt: await ptParse(
+            offerIndexerInfo.pricePerEpoch,
+          ),
+          effectorPrefixesAndHash: await Promise.all(
+            offerIndexerInfo.effectors.map(({ cid }) => {
+              return cidStringToCIDV1Struct(cid);
+            }),
+          ),
+          effectors: offerIndexerInfo.effectors.map(({ cid }) => {
+            return cid;
+          }),
+          computePeersFromProviderConfig: await Promise.all(
+            offerIndexerInfo.peers.map(async ({ computeUnits, id }, i) => {
+              const peerIdBase58 = await peerIdHexStringToBase58String(id);
+              return {
+                name: `Peer #${numToStr(i)}`,
+                peerIdBase58,
+                peerId: await peerIdBase58ToUint8Array(peerIdBase58),
+                unitIds: computeUnits.map(({ id }) => {
+                  return new Uint8Array(Buffer.from(id.slice(2), "hex"));
+                }),
+                owner: offerIndexerInfo.providerId,
+              };
+            }),
+          ),
+          offerId,
+          minProtocolVersion: Number(
+            protocolVersionsFromChain.minProtocolVersion,
+          ),
+          maxProtocolVersion: Number(
+            protocolVersionsFromChain.maxProtocolVersion,
+          ),
+        };
+      }),
+    );
+
+    return offerIdsFromFlags.flatMap((offerId) => {
+      const offer =
+        offersDefinedLocally.find((o) => {
+          return o.offerId === offerId;
+        }) ??
+        offersNotDefinedLocally.find((o) => {
+          return o.offerId === offerId;
+        });
+
+      return offer === undefined ? [] : [offer];
+    });
+  }
 
   if (flags[OFFER_FLAG_NAME] === ALL_FLAG_VALUE) {
     return allOffers;
@@ -630,7 +734,7 @@ async function ensureOfferConfigs() {
               return {
                 name,
                 peerIdBase58: peerId,
-                peerId: await peerIdToUint8Array(peerId),
+                peerId: await peerIdBase58ToUint8Array(peerId),
                 unitIds: times(computeUnits).map(() => {
                   return ethers.randomBytes(32);
                 }),

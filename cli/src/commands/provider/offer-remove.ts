@@ -17,7 +17,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { removeOffers } from "../../lib/chain/offer/updateOffers.js";
-import { CHAIN_FLAGS, OFFER_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS, OFFER_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class OfferRemove extends BaseCommand<typeof OfferRemove> {
@@ -25,7 +25,7 @@ export default class OfferRemove extends BaseCommand<typeof OfferRemove> {
   static override description = "Remove offers";
   static override flags = {
     ...baseFlags,
-    ...OFFER_FLAG,
+    ...OFFER_FLAGS,
     ...CHAIN_FLAGS,
   };
 

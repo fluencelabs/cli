@@ -20,7 +20,7 @@ import type { CIDV1Struct } from "@fluencelabs/deal-ts-clients/dist/typechain-ty
 const PREFIX = new Uint8Array([0, 36, 8, 1, 18, 32]);
 const BASE_58_PREFIX = "z";
 
-export async function peerIdToUint8Array(peerId: string) {
+export async function peerIdBase58ToUint8Array(peerIdBase58: string) {
   const [{ digest }, { base58btc }] = await Promise.all([
     import("multiformats"),
 
@@ -28,7 +28,7 @@ export async function peerIdToUint8Array(peerId: string) {
   ]);
 
   return digest
-    .decode(base58btc.decode(BASE_58_PREFIX + peerId))
+    .decode(base58btc.decode(BASE_58_PREFIX + peerIdBase58))
     .bytes.subarray(PREFIX.length);
 }
 

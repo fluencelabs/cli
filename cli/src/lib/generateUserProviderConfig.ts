@@ -31,7 +31,7 @@ import {
   defaultNumberProperties,
   type CurrencyProperty,
   currencyProperties,
-  DEFAULT_CC_REWARD_DELEGATION_RATE,
+  DEFAULT_CC_STAKER_REWARD,
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "./const.js";
@@ -108,7 +108,7 @@ export async function addComputePeers(
 
     const capacityCommitmentStakerReward = await input({
       message: `Enter capacity commitment staker reward (in %)`,
-      default: numToStr(DEFAULT_CC_REWARD_DELEGATION_RATE),
+      default: numToStr(DEFAULT_CC_STAKER_REWARD),
       validate: validatePercent,
     });
 
