@@ -71,32 +71,38 @@ export async function validateAddress(
   return `Must be a valid address. Got: ${color.yellow(stringifyUnknown(input))}`;
 }
 
-async function getProtocolVersions() {
-  let minProtocolVersion = BigInt(versions.protocolVersion);
-  let maxProtocolVersion = minProtocolVersion;
+let protocolVersions:
+  | undefined
+  | Promise<{ minProtocolVersion: bigint; maxProtocolVersion: bigint }>;
 
-  if ((await ensureChainEnv()) !== "local") {
-    const { readonlyDealClient } = await getReadonlyDealClient();
-    const core = readonlyDealClient.getCore();
+export async function getProtocolVersions() {
+  if (protocolVersions === undefined) {
+    protocolVersions = (async () => {
+      let minProtocolVersion = BigInt(versions.protocolVersion);
+      let maxProtocolVersion = minProtocolVersion;
 
-    [minProtocolVersion, maxProtocolVersion] = await Promise.all([
-      core.minProtocolVersion(),
-      core.maxProtocolVersion(),
-    ]);
+      if ((await ensureChainEnv()) !== "local") {
+        const { readonlyDealClient } = await getReadonlyDealClient();
+        const core = readonlyDealClient.getCore();
+
+        [minProtocolVersion, maxProtocolVersion] = await Promise.all([
+          core.minProtocolVersion(),
+          core.maxProtocolVersion(),
+        ]);
+      }
+
+      return { minProtocolVersion, maxProtocolVersion };
+    })();
   }
 
-  return { minProtocolVersion, maxProtocolVersion };
+  return protocolVersions;
 }
-
-let protocolVersions: undefined | ReturnType<typeof getProtocolVersions>;
 
 export async function validateProtocolVersion(
   protocolVersion: number,
 ): Promise<ValidationResult> {
-  protocolVersions =
-    protocolVersions === undefined ? getProtocolVersions() : protocolVersions;
-
-  const { minProtocolVersion, maxProtocolVersion } = await protocolVersions;
+  const { minProtocolVersion, maxProtocolVersion } =
+    await getProtocolVersions();
 
   if (
     protocolVersion < minProtocolVersion ||

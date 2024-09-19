@@ -63,7 +63,7 @@ import {
 
 import {
   peerIdHexStringToBase58String,
-  peerIdToUint8Array,
+  peerIdBase58ToUint8Array,
 } from "./conversions.js";
 import { fltFormatWithSymbol, fltParse } from "./currencies.js";
 
@@ -98,7 +98,9 @@ export async function getComputePeersWithCC(
   const computePeersWithChainInfo = (
     await Promise.all(
       computePeers.map(async (computePeer) => {
-        const peerIdUint8Array = await peerIdToUint8Array(computePeer.peerId);
+        const peerIdUint8Array = await peerIdBase58ToUint8Array(
+          computePeer.peerId,
+        );
 
         const commitmentCreatedEvent =
           commitmentCreatedEvents[computePeer.peerId];
@@ -225,7 +227,7 @@ export async function createCommitments(flags: {
           let peerIdUint8Arr;
 
           try {
-            peerIdUint8Arr = await peerIdToUint8Array(peerId);
+            peerIdUint8Arr = await peerIdBase58ToUint8Array(peerId);
           } catch (e) {
             return {
               error: `Invalid peerId: ${peerId}. Error: ${stringifyUnknown(e)}`,

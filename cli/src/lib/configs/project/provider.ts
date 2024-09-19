@@ -57,7 +57,7 @@ import {
   IPFS_PORT,
   defaultNumberProperties,
   DEFAULT_CC_DURATION,
-  DEFAULT_CC_REWARD_DELEGATION_RATE,
+  DEFAULT_CC_STAKER_REWARD,
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
   WS_CHAIN_URLS,
@@ -128,7 +128,7 @@ const capacityCommitmentSchemaV0 = {
       minimum: 0,
       maximum: 100,
       description: "Reward delegation rate in percent",
-      default: DEFAULT_CC_REWARD_DELEGATION_RATE,
+      default: DEFAULT_CC_STAKER_REWARD,
     },
   },
 } as const satisfies JSONSchemaType<CapacityCommitmentV0>;
@@ -161,7 +161,7 @@ const capacityCommitmentSchemaV1 = {
       minimum: 0,
       maximum: 100,
       description: "Staker reward in percent",
-      default: DEFAULT_CC_REWARD_DELEGATION_RATE,
+      default: DEFAULT_CC_STAKER_REWARD,
     },
   },
 } as const satisfies JSONSchemaType<CapacityCommitmentV1>;
@@ -1407,7 +1407,7 @@ function getDefault(args: ProviderConfigArgs) {
           noxName,
           {
             duration: DEFAULT_CC_DURATION,
-            stakerReward: DEFAULT_CC_REWARD_DELEGATION_RATE,
+            stakerReward: DEFAULT_CC_STAKER_REWARD,
           },
         ] as const;
       }),

@@ -1673,12 +1673,14 @@ Remove offers
 
 ```
 USAGE
-  $ fluence provider offer-remove [--no-input] [--offers <offer-1,offer-2>] [--env <testnet | mainnet | stage | local |
-    custom>] [--priv-key <private-key>]
+  $ fluence provider offer-remove [--no-input] [--offers <offer-1,offer-2> | --offer-ids <id-1,id-2>] [--env <testnet |
+    mainnet | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --env=<testnet | mainnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                          Don't interactively ask for any input from the user
+  --offer-ids=<id-1,id-2>                             Comma-separated list of offer ids. Can't be used together with
+                                                      --offers flag
   --offers=<offer-1,offer-2>                          Comma-separated list of offer names. To use all of your offers:
                                                       --offers all
   --priv-key=<private-key>                            !WARNING! for debug purposes only. Passing private keys through

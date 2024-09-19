@@ -863,7 +863,7 @@ export const READMEs: Record<Template, string> = {
 
 export const DEFAULT_OFFER_NAME = "defaultOffer";
 
-export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
+export const DEFAULT_CC_STAKER_REWARD = 20;
 export const DEFAULT_CC_DURATION = "100 days";
 export const DURATION_EXAMPLE =
   "in human-readable format. Example: 1 months 1 days";

@@ -23,7 +23,7 @@ import { versions } from "../versions.js";
 
 import {
   cidStringToCIDV1Struct,
-  peerIdToUint8Array,
+  peerIdBase58ToUint8Array,
 } from "./chain/conversions.js";
 import { ptFormatWithSymbol, ptParse } from "./chain/currencies.js";
 import { commandObj } from "./commandObj.js";
@@ -178,7 +178,7 @@ export async function createAndMatchDealsForPeerIds({
 
   const offersWithCUs = await Promise.all(
     peerIds.map(async (peerId) => {
-      const peerIdUint8Array = await peerIdToUint8Array(peerId);
+      const peerIdUint8Array = await peerIdBase58ToUint8Array(peerId);
 
       const computeUnits = (
         await Promise.all(
