@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.6](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.5...fluence-cli-v0.20.6) (2024-09-19)
+
+
+### Features
+
+* offer-remove --offer-ids flag support, set default stakerReward to 20 ([#1051](https://github.com/fluencelabs/cli/issues/1051)) ([0ca2bd3](https://github.com/fluencelabs/cli/commit/0ca2bd3ef51de7ad24488f03d5965696cf020f9f))
+
 ## [0.20.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.4...fluence-cli-v0.20.5) (2024-09-18)
 
 
