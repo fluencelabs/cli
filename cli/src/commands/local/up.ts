@@ -49,6 +49,7 @@ import {
 } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
+import { stringifyUnknown } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
@@ -97,10 +98,17 @@ export default class Up extends BaseCommand<typeof Up> {
 
   async run(): Promise<void> {
     const env: FluenceEnv = "local";
-    const envConfig = await initNewEnvConfig(env);
-    envConfig.fluenceEnv = env;
-    await envConfig.$commit();
-    setEnvConfig(envConfig);
+
+    try {
+      const envConfig = await initNewEnvConfig(env);
+      envConfig.fluenceEnv = env;
+      await envConfig.$commit();
+      setEnvConfig(envConfig);
+    } catch (e) {
+      this.error(
+        `Make sure to init fluence project first. Error: ${stringifyUnknown(e)}`,
+      );
+    }
 
     const { flags, maybeFluenceConfig } = await initCli(
       this,

@@ -651,7 +651,7 @@ Withdraw FLT collateral from capacity commitment
 ```
 USAGE
   $ fluence delegator collateral-withdraw [IDS] [--no-input] [--env <testnet | mainnet | stage | local | custom>] [--priv-key
-    <private-key>] [--max-cus <value>] [--finish]
+    <private-key>] [--finish]
 
 ARGUMENTS
   IDS  Comma separated capacity commitment IDs
@@ -659,8 +659,6 @@ ARGUMENTS
 FLAGS
   --env=<testnet | mainnet | stage | local | custom>  Fluence Environment to use when running the command
   --finish                                            Finish capacity commitment after collateral withdrawal
-  --max-cus=<value>                                   [default: 32] Maximum number of compute units to put in a batch
-                                                      when signing a transaction
   --no-input                                          Don't interactively ask for any input from the user
   --priv-key=<private-key>                            !WARNING! for debug purposes only. Passing private keys through
                                                       flags is unsecure. On local env
@@ -1294,13 +1292,11 @@ Move resources from deals, withdraw FLT collateral from capacity commitments, re
 ```
 USAGE
   $ fluence provider cc-finish [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
-    [--env <testnet | mainnet | stage | local | custom>] [--priv-key <private-key>] [--max-cus <value>]
+    [--env <testnet | mainnet | stage | local | custom>] [--priv-key <private-key>]
 
 FLAGS
   --cc-ids=<value>                                    Comma separated capacity commitment IDs
   --env=<testnet | mainnet | stage | local | custom>  Fluence Environment to use when running the command
-  --max-cus=<value>                                   [default: 32] Maximum number of compute units to put in a batch
-                                                      when signing a transaction
   --no-input                                          Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                           Comma-separated names of noxes from provider.yaml. To use all of
                                                       your noxes: --nox-names all

@@ -24,8 +24,6 @@ import {
   CHAIN_FLAGS,
   FINISH_COMMITMENT_FLAG_NAME,
   FLT_SYMBOL,
-  MAX_CUS_FLAG,
-  MAX_CUS_FLAG_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -37,7 +35,6 @@ export default class CollateralWithdraw extends BaseCommand<
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-    ...MAX_CUS_FLAG,
     [FINISH_COMMITMENT_FLAG_NAME]: Flags.boolean({
       description: `Finish capacity commitment after collateral withdrawal`,
       default: false,
@@ -57,7 +54,6 @@ export default class CollateralWithdraw extends BaseCommand<
 
     await collateralWithdraw({
       [CC_IDS_FLAG_NAME]: args.IDS,
-      [MAX_CUS_FLAG_NAME]: flags[MAX_CUS_FLAG_NAME],
       [FINISH_COMMITMENT_FLAG_NAME]: flags[FINISH_COMMITMENT_FLAG_NAME],
     });
   }

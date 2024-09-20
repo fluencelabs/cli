@@ -471,8 +471,6 @@ export function populateTx<T extends unknown[]>(
   };
 }
 
-export const BATCH_SIZE = 10;
-
 let batchTxMessage: string | undefined;
 
 export async function signBatch(
@@ -507,8 +505,6 @@ export async function signBatch(
     throw new Error("All transactions must be to the same address");
   }
 
-  const populatedTxsChunked = chunk(populatedTxsWithDebugInfo, BATCH_SIZE);
-
   const { IMulticall__factory } = await import("@fluencelabs/deal-ts-clients");
   const { providerOrWallet } = await getDealClient();
 
@@ -518,30 +514,41 @@ export async function signBatch(
   );
 
   const receipts = [];
+  let sliceIndexStart = 0;
 
-  for (const txs of populatedTxsChunked) {
-    batchTxMessage = txs
-      .map(({ debugInfo }) => {
-        return methodCallToString(debugInfo);
-      })
-      .join("\n");
+  while (sliceIndexStart < populatedTxsWithDebugInfo.length) {
+    const res = await guessTxSizeAndSign({
+      sliceValuesToRegister(sliceIndex) {
+        return populatedTxsWithDebugInfo.slice(
+          sliceIndexStart,
+          sliceIndexStart + sliceIndex,
+        );
+      },
+      sliceIndex: populatedTxsWithDebugInfo.length - sliceIndexStart,
+      method: multicall,
+      validateAddress,
+      async getArgs(valuesToRegister) {
+        return [
+          await Promise.all(
+            valuesToRegister.map(async ({ populate }) => {
+              return (await populate()).data;
+            }),
+          ),
+        ];
+      },
+      getTitle({ valuesToRegister }) {
+        batchTxMessage = valuesToRegister
+          .map(({ debugInfo }) => {
+            return methodCallToString(debugInfo);
+          })
+          .join("\n");
 
-    receipts.push(
-      await doSign(async () => {
-        return {
-          title: title,
-          method: multicall,
-          args: [
-            await Promise.all(
-              txs.map(async ({ populate }) => {
-                return (await populate()).data;
-              }),
-            ),
-          ],
-          validateAddress,
-        } as const;
-      }),
-    );
+        return title;
+      },
+    });
+
+    receipts.push(res.txReceipt);
+    sliceIndexStart = sliceIndexStart + res.sliceIndex;
   }
 
   return receipts;
@@ -707,7 +714,9 @@ export async function guessTxSizeAndSign<
 } & Omit<SignArgs<A, R, S>, "args" | "title"> & {
     getArgs: (
       valuesToRegister: T[],
-    ) => Parameters<TypedContractMethod<A, R, S>>;
+    ) =>
+      | Parameters<TypedContractMethod<A, R, S>>
+      | Promise<Parameters<TypedContractMethod<A, R, S>>>;
     getTitle: (arg: { valuesToRegister: T[]; sliceCount: number }) => string;
   }) {
   let valuesToRegister;
@@ -722,7 +731,7 @@ export async function guessTxSizeAndSign<
     try {
       const populatedTx = await populateTx(
         signArgs.method,
-        ...getArgs(valuesToRegister),
+        ...(await getArgs(valuesToRegister)),
       ).populate();
 
       populatedTx.from = address;
@@ -741,7 +750,7 @@ export async function guessTxSizeAndSign<
   const txReceipt = await sign({
     ...signArgs,
     title: getTitle({ sliceCount: sliceIndex, valuesToRegister }),
-    args: getArgs(valuesToRegister),
+    args: await getArgs(valuesToRegister),
   });
 
   return {

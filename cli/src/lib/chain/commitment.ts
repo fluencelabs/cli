@@ -17,7 +17,6 @@
 
 import { type ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
-import chunk from "lodash-es/chunk.js";
 import isUndefined from "lodash-es/isUndefined.js";
 import omitBy from "lodash-es/omitBy.js";
 import parse from "parse-duration";
@@ -31,10 +30,7 @@ import {
   NOX_NAMES_FLAG_NAME,
   OFFER_FLAG_NAME,
   CC_IDS_FLAG_NAME,
-  MAX_CUS_FLAG_NAME,
-  DEFAULT_MAX_CUS,
   FINISH_COMMITMENT_FLAG_NAME,
-  GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
@@ -46,7 +42,6 @@ import {
   getReadonlyDealClient,
   sign,
   getDealExplorerClient,
-  BATCH_SIZE,
 } from "../dealClient.js";
 import { bigintSecondsToDate } from "../helpers/bigintOps.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
@@ -445,7 +440,6 @@ export async function removeCommitments(flags: CCFlags) {
 
 export async function collateralWithdraw(
   flags: CCFlags & {
-    [MAX_CUS_FLAG_NAME]: number;
     [FINISH_COMMITMENT_FLAG_NAME]?: boolean;
   },
 ) {
@@ -520,11 +514,12 @@ export async function collateralWithdraw(
     const moveResourcesFromDealTxs = Object.entries(
       unitIdsByOnChainWorkerId,
     ).flatMap(([onchainWorkerId, unitIds]) => {
-      return chunk(
-        unitIds,
-        Math.floor(GUESS_NUMBER_OF_CU_THAT_FIT_IN_ONE_TX / BATCH_SIZE),
-      ).map((units) => {
-        return populateTx(market.moveResourcesFromDeal, units, onchainWorkerId);
+      return unitIds.map((unit) => {
+        return populateTx(
+          market.moveResourcesFromDeal,
+          [unit],
+          onchainWorkerId,
+        );
       });
     });
 
@@ -566,40 +561,15 @@ export async function collateralWithdraw(
       continue;
     }
 
-    try {
-      if (unitIds.length < flags[MAX_CUS_FLAG_NAME]) {
-        await signBatch(
-          `Remove the following compute units from capacity commitments:\n\n${[...unitIds].join("\n")}\n\nand finish commitment ${commitmentId}`,
-          [
-            populateTx(capacity.removeCUFromCC, commitmentId, [...unitIds]),
-            populateTx(capacity.finishCommitment, commitmentId),
-          ],
-        );
-      } else {
-        for (const unitIdsBatch of chunk(
-          [...unitIds],
-          flags[MAX_CUS_FLAG_NAME],
-        )) {
-          await sign({
-            title: `Remove the following compute units from capacity commitments:\n\n${[...unitIdsBatch].join("\n")}`,
-            method: capacity.removeCUFromCC,
-            args: [commitmentId, [...unitIdsBatch]],
-          });
-        }
-
-        await sign({
-          title: `Finish capacity commitment ${commitmentId}`,
-          method: capacity.finishCommitment,
-          args: [commitmentId],
-        });
-      }
-    } catch (error) {
-      commandObj.warn(
-        `If you see a problem with gas usage, try passing a lower then ${numToStr(DEFAULT_MAX_CUS)} number to --${MAX_CUS_FLAG_NAME} flag`,
-      );
-
-      throw error;
-    }
+    await signBatch(
+      `Remove compute units from capacity commitments and finish commitment ${commitmentId}`,
+      [
+        ...unitIds.map((unitId) => {
+          return populateTx(capacity.removeCUFromCC, commitmentId, [unitId]);
+        }),
+        populateTx(capacity.finishCommitment, commitmentId),
+      ],
+    );
   }
 }
 
