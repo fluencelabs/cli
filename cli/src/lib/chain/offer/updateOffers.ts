@@ -43,7 +43,7 @@ import {
   resolveOffersFromProviderConfig,
   type EnsureOfferConfig,
   getOffersInfo,
-  addAllCPs,
+  addRemainingCPs,
 } from "./offer.js";
 
 type PeersOnChain = {
@@ -535,20 +535,13 @@ async function addMissingComputePeers(
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
 
-  const computePeersToAdd = computePeersFromProviderConfig.filter(
-    ({ peerIdBase58 }) => {
-      return !peersOnChain.some((p) => {
-        return p.peerIdBase58 === peerIdBase58;
-      });
-    },
-  );
-
-  return addAllCPs({
-    computePeersFromProviderConfig: computePeersToAdd,
-    offerId,
-    market,
-    offerName,
+  const allCPs = computePeersFromProviderConfig.filter(({ peerIdBase58 }) => {
+    return !peersOnChain.some((p) => {
+      return p.peerIdBase58 === peerIdBase58;
+    });
   });
+
+  return addRemainingCPs({ allCPs, offerId, market, offerName });
 }
 
 function printOffersToUpdateInfo(

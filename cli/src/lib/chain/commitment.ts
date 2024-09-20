@@ -514,7 +514,7 @@ export async function collateralWithdraw(
     const moveResourcesFromDealTxs = Object.entries(
       unitIdsByOnChainWorkerId,
     ).flatMap(([onchainWorkerId, unitIds]) => {
-      return unitIds.flatMap((unit) => {
+      return unitIds.map((unit) => {
         return populateTx(
           market.moveResourcesFromDeal,
           [unit],

@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import assert from "node:assert";
-
 import type { IMarket } from "@fluencelabs/deal-ts-clients";
 import type { OfferDetail } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/types/schemes.js";
 import { color } from "@oclif/color";
@@ -150,7 +148,7 @@ export async function createOffers(flags: OffersArgs) {
 
   for (const offer of offers) {
     const {
-      computePeersFromProviderConfig,
+      computePeersFromProviderConfig: allCPs,
       effectorPrefixesAndHash,
       minPricePerCuPerEpochBigInt,
       offerName,
@@ -175,7 +173,7 @@ export async function createOffers(flags: OffersArgs) {
           };
     }
 
-    const allCUs = computePeersFromProviderConfig.flatMap(({ unitIds }) => {
+    const allCUs = allCPs.flatMap(({ unitIds }) => {
       return unitIds;
     });
 
@@ -184,12 +182,10 @@ export async function createOffers(flags: OffersArgs) {
     try {
       const {
         sliceIndex: registeredCUsCount,
-        registeredValues: registeredCPs,
+        registeredValues: addedCPs,
         txReceipt: offerRegisterTxReceipt,
       } = await guessTxSizeAndSign({
-        sliceValuesToRegister: sliceCPsByNumberOfCUs(
-          computePeersFromProviderConfig,
-        ),
+        sliceValuesToRegister: sliceCPsByNumberOfCUs(allCPs),
         sliceIndex: allCUs.length,
         getArgs(computePeersToRegister) {
           return [
@@ -216,22 +212,8 @@ export async function createOffers(flags: OffersArgs) {
       }
 
       const { offerId } = offerIdRes.result;
-
-      await addRemainingCUsToCPs({
-        allCPs: computePeersFromProviderConfig,
-        registeredCPs,
-        offerId,
-        market,
-        offerName,
-      });
-
-      await addAllCPs({
-        computePeersFromProviderConfig,
-        offerId,
-        market,
-        offerName,
-        registeredCPsLength: registeredCPs.length,
-      });
+      await addRemainingCUs({ allCPs, addedCPs, offerId, market, offerName });
+      await addRemainingCPs({ allCPs, addedCPs, offerId, market, offerName });
     } catch (e) {
       commandObj.warn(
         `Error when creating offer ${offerName}: ${stringifyUnknown(e)}`,
@@ -311,95 +293,67 @@ ${await offersInfoToString([offerInfoErrors, offersInfo])}
 `);
 }
 
-export async function addAllCPs({
-  computePeersFromProviderConfig,
-  offerId,
-  market,
-  offerName,
-  registeredCPsLength = 0,
-}: {
-  computePeersFromProviderConfig: CPFromProviderConfig[];
+type AddRemainingCPsOrCUsArgs = {
+  allCPs: CPFromProviderConfig[];
+  addedCPs: CPFromProviderConfig[];
   offerId: string;
   market: IMarket;
   offerName: string;
-  registeredCPsLength?: number;
-}) {
-  let totalRegisteredCPs = registeredCPsLength;
+};
 
-  while (totalRegisteredCPs < computePeersFromProviderConfig.length) {
-    totalRegisteredCPs =
-      totalRegisteredCPs +
-      (await addCPs({
-        CPs: computePeersFromProviderConfig.slice(totalRegisteredCPs),
-        offerId,
-        market,
-        offerName,
-      }));
+export async function addRemainingCPs({
+  allCPs,
+  addedCPs = [],
+  offerId,
+  market,
+  offerName,
+}: Omit<AddRemainingCPsOrCUsArgs, "addedCPs"> & {
+  addedCPs?: CPFromProviderConfig[];
+}) {
+  let totalAddedCPs = addedCPs.length;
+
+  while (totalAddedCPs < allCPs.length) {
+    const CUsToRegisterCount = allCPs.flatMap(({ unitIds }) => {
+      return unitIds;
+    }).length;
+
+    const { registeredValues: addedCPs } = await guessTxSizeAndSign({
+      sliceValuesToRegister: sliceCPsByNumberOfCUs(allCPs),
+      sliceIndex: CUsToRegisterCount,
+      getArgs(CPsToRegister) {
+        return [offerId, CPsToRegister];
+      },
+      getTitle({ valuesToRegister: CPsToRegister }) {
+        return `Add compute peers:\n${CPsToRegister.map(
+          ({ name, peerIdBase58 }) => {
+            return `${name} (${peerIdBase58})`;
+          },
+        ).join("\n")}\n\nto offer ${offerName} (${offerId})`;
+      },
+      method: market.addComputePeers,
+    });
+
+    await addRemainingCUs({ allCPs, addedCPs, offerId, market, offerName });
+    totalAddedCPs = totalAddedCPs + addedCPs.length;
   }
 }
 
-async function addCPs({
-  CPs,
-  offerId,
-  market,
-  offerName,
-}: {
-  CPs: CPFromProviderConfig[];
-  offerId: string;
-  market: IMarket;
-  offerName: string;
-}) {
-  const CUsToRegisterCount = CPs.flatMap(({ unitIds }) => {
-    return unitIds;
-  }).length;
-
-  const { registeredValues: registeredCPs } = await guessTxSizeAndSign({
-    sliceValuesToRegister: sliceCPsByNumberOfCUs(CPs),
-    sliceIndex: CUsToRegisterCount,
-    getArgs(CPsToRegister) {
-      return [offerId, CPsToRegister];
-    },
-    getTitle({ valuesToRegister: CPsToRegister }) {
-      return `Add compute peers:\n${CPsToRegister.map(
-        ({ name, peerIdBase58 }) => {
-          return `${name} (${peerIdBase58})`;
-        },
-      ).join("\n")}\n\nto offer ${offerName} (${offerId})`;
-    },
-    method: market.addComputePeers,
-  });
-
-  await addRemainingCUsToCPs({
-    allCPs: CPs,
-    registeredCPs,
-    offerId,
-    market,
-    offerName,
-  });
-
-  return registeredCPs.length;
-}
-
-async function addRemainingCUsToCPs({
+async function addRemainingCUs({
   allCPs,
-  registeredCPs,
+  addedCPs,
   offerId,
   market,
   offerName,
-}: {
-  allCPs: CPFromProviderConfig[];
-  registeredCPs: CPFromProviderConfig[];
-  offerId: string;
-  market: IMarket;
-  offerName: string;
-}) {
-  const lastRegisteredCP = registeredCPs[registeredCPs.length - 1];
-  const lastRegisteredCPFromAllCPs = allCPs[registeredCPs.length - 1];
+}: AddRemainingCPsOrCUsArgs) {
+  const lastRegisteredCP = addedCPs[addedCPs.length - 1];
+  const lastRegisteredCPFromAllCPs = allCPs[addedCPs.length - 1];
 
-  assert(
-    lastRegisteredCP !== undefined && lastRegisteredCPFromAllCPs !== undefined,
-    "Unreachable. lastRegisteredCP or lastRegisteredCPFromAllCPs can't be undefined here",
-  );
+  if (
+    lastRegisteredCP === undefined ||
+    lastRegisteredCPFromAllCPs === undefined
+  ) {
+    return;
+  }
 
   const remainingCUsArr = lastRegisteredCPFromAllCPs.unitIds.slice(
     lastRegisteredCP.unitIds.length,
@@ -409,52 +363,24 @@ async function addRemainingCUsToCPs({
   let totalRegisteredCUsCount = 0;
 
   while (totalRegisteredCUsCount < remainingCUsArr.length) {
-    totalRegisteredCUsCount =
-      totalRegisteredCUsCount +
-      (await addCUs({
-        CUs: remainingCUsArr.slice(totalRegisteredCUsCount),
-        offerId,
-        market,
-        offerName,
-        cpName,
-        peerId,
-        peerIdBase58,
-      }));
+    const CUs = remainingCUsArr.slice(totalRegisteredCUsCount);
+
+    const { sliceIndex: registeredCUsCount } = await guessTxSizeAndSign({
+      sliceValuesToRegister(sliceIndex) {
+        return CUs.slice(0, sliceIndex);
+      },
+      sliceIndex: CUs.length,
+      getArgs(CUsToRegister) {
+        return [peerId, CUsToRegister];
+      },
+      getTitle({ sliceCount: numberOfCUsForAddCU }) {
+        return `Add ${numToStr(numberOfCUsForAddCU)} compute units\nto compute peer ${cpName} (${peerIdBase58})\nfor offer ${offerName} (${offerId})`;
+      },
+      method: market.addComputeUnits,
+    });
+
+    totalRegisteredCUsCount = totalRegisteredCUsCount + registeredCUsCount;
   }
-}
-
-async function addCUs({
-  CUs,
-  offerId,
-  market,
-  offerName,
-  cpName,
-  peerId,
-  peerIdBase58,
-}: {
-  CUs: Uint8Array[];
-  offerId: string;
-  market: IMarket;
-  offerName: string;
-  cpName: string;
-  peerIdBase58: string;
-  peerId: Uint8Array;
-}) {
-  const { sliceIndex: registeredCUsCount } = await guessTxSizeAndSign({
-    sliceValuesToRegister(sliceIndex) {
-      return CUs.slice(0, sliceIndex);
-    },
-    sliceIndex: CUs.length,
-    getArgs(CUsToRegister) {
-      return [peerId, CUsToRegister];
-    },
-    getTitle({ sliceCount: numberOfCUsForAddCU }) {
-      return `Add ${numToStr(numberOfCUsForAddCU)} compute units\nto compute peer ${cpName} (${peerIdBase58})\nfor offer ${offerName} (${offerId})`;
-    },
-    method: market.addComputeUnits,
-  });
-
-  return registeredCUsCount;
 }
 
 function sliceCPsByNumberOfCUs(computePeers: CPFromProviderConfig[]) {
