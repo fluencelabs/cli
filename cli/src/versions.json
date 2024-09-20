@@ -1,8 +1,8 @@
 {
   "protocolVersion": 1,
   "nox": "fluencelabs/nox:0.26.1",
-  "chain-rpc": "fluencelabs/chain-rpc:0.19.6",
-  "chain-deploy-script": "fluencelabs/chain-deploy-script:0.19.6",
+  "chain-rpc": "fluencelabs/chain-rpc:0.19.8",
+  "chain-deploy-script": "fluencelabs/chain-deploy-script:0.19.8",
   "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.19.6",
   "rust-toolchain": "nightly-2024-06-10",
   "npm": {
