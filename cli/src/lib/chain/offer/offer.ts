@@ -177,8 +177,6 @@ export async function createOffers(flags: OffersArgs) {
       return unitIds;
     });
 
-    const REGISTER_OFFER_TITLE = `Register offer: ${offerName}`;
-
     try {
       const {
         sliceIndex: registeredCUsCount,
@@ -198,7 +196,7 @@ export async function createOffers(flags: OffersArgs) {
           ];
         },
         getTitle() {
-          return REGISTER_OFFER_TITLE;
+          return `Register offer: ${offerName}`;
         },
         method: market.registerMarketOffer,
         validateAddress: assertProviderIsRegistered,
@@ -313,12 +311,14 @@ export async function addRemainingCPs({
   let totalAddedCPs = addedCPs.length;
 
   while (totalAddedCPs < allCPs.length) {
-    const CUsToRegisterCount = allCPs.flatMap(({ unitIds }) => {
+    const remainingCPs = allCPs.slice(totalAddedCPs);
+
+    const CUsToRegisterCount = remainingCPs.flatMap(({ unitIds }) => {
       return unitIds;
     }).length;
 
     const { registeredValues: addedCPs } = await guessTxSizeAndSign({
-      sliceValuesToRegister: sliceCPsByNumberOfCUs(allCPs),
+      sliceValuesToRegister: sliceCPsByNumberOfCUs(remainingCPs),
       sliceIndex: CUsToRegisterCount,
       getArgs(CPsToRegister) {
         return [offerId, CPsToRegister];
@@ -333,7 +333,14 @@ export async function addRemainingCPs({
       method: market.addComputePeers,
     });
 
-    await addRemainingCUs({ allCPs, addedCPs, offerId, market, offerName });
+    await addRemainingCUs({
+      allCPs: remainingCPs,
+      addedCPs,
+      offerId,
+      market,
+      offerName,
+    });
+
     totalAddedCPs = totalAddedCPs + addedCPs.length;
   }
 }
