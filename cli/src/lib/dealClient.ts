@@ -515,14 +515,16 @@ export async function signBatch(
 
   const receipts = [];
   let sliceIndexStart = 0;
-  let sliceIndexEnd = populatedTxsWithDebugInfo.length;
 
   while (sliceIndexStart < populatedTxsWithDebugInfo.length) {
     const res = await guessTxSizeAndSign({
       sliceValuesToRegister(sliceIndex) {
-        return populatedTxsWithDebugInfo.slice(sliceIndexStart, sliceIndex);
+        return populatedTxsWithDebugInfo.slice(
+          sliceIndexStart,
+          sliceIndexStart + sliceIndex,
+        );
       },
-      sliceIndex: sliceIndexEnd,
+      sliceIndex: populatedTxsWithDebugInfo.length - sliceIndexStart,
       method: multicall,
       validateAddress,
       async getArgs(valuesToRegister) {
@@ -546,8 +548,7 @@ export async function signBatch(
     });
 
     receipts.push(res.txReceipt);
-    sliceIndexStart = res.sliceIndex;
-    sliceIndexEnd = populatedTxsWithDebugInfo.length;
+    sliceIndexStart = sliceIndexStart + res.sliceIndex;
   }
 
   return receipts;
