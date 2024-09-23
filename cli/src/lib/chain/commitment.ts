@@ -60,7 +60,7 @@ import {
   peerIdHexStringToBase58String,
   peerIdBase58ToUint8Array,
 } from "./conversions.js";
-import { fltFormatWithSymbol, fltParse } from "./currencies.js";
+import { fltFormatWithSymbol } from "./currencies.js";
 
 const HUNDRED_PERCENT = 100;
 
@@ -792,7 +792,7 @@ export async function getCommitmentInfoString(
   const { ethers } = await import("ethers");
 
   const staker =
-    ccInfo.delegator ?? ccInfo.ccFromExplorer?.delegatorAddress ?? undefined;
+    ccInfo.delegator ?? ccInfo.ccFromExplorer?.stakerAddress ?? undefined;
 
   const startEndCurrentEpoch =
     ccInfo.startEpoch === undefined || ccInfo.endEpoch === undefined
@@ -833,7 +833,7 @@ export async function getCommitmentInfoString(
           ? {}
           : {
               "Total CC rewards over time": await fltFormatWithSymbol(
-                await fltParse(ccInfo.ccFromExplorer.rewards.total),
+                ccInfo.ccFromExplorer.rewards.total,
               ),
               "In vesting / Available / Total claimed (Provider)": (
                 await Promise.all(
@@ -842,18 +842,18 @@ export async function getCommitmentInfoString(
                     ccInfo.ccFromExplorer.rewards.provider.availableToClaim,
                     ccInfo.ccFromExplorer.rewards.provider.claimed,
                   ].map((val) => {
-                    return fltFormatWithSymbol(BigInt(val));
+                    return fltFormatWithSymbol(val);
                   }),
                 )
               ).join(" / "),
               "In vesting / Available / Total claimed (Staker)": (
                 await Promise.all(
                   [
-                    ccInfo.ccFromExplorer.rewards.delegator.inVesting,
-                    ccInfo.ccFromExplorer.rewards.delegator.availableToClaim,
-                    ccInfo.ccFromExplorer.rewards.delegator.claimed,
+                    ccInfo.ccFromExplorer.rewards.staker.inVesting,
+                    ccInfo.ccFromExplorer.rewards.staker.availableToClaim,
+                    ccInfo.ccFromExplorer.rewards.staker.claimed,
                   ].map((val) => {
-                    return fltFormatWithSymbol(BigInt(val));
+                    return fltFormatWithSymbol(val);
                   }),
                 )
               ).join(" / "),

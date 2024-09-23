@@ -24,7 +24,6 @@ import { initNewProviderArtifactsConfig } from "../../configs/project/providerAr
 import {
   CLI_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
-  PT_SYMBOL,
 } from "../../const.js";
 import { getDealClient, signBatch, populateTx } from "../../dealClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
@@ -35,7 +34,7 @@ import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
 } from "../conversions.js";
-import { ptParse, ptFormatWithSymbol } from "../currencies.js";
+import { ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 import {
@@ -346,13 +345,12 @@ async function populateMinPricePerCuPerEpochTx({
 }: OnChainOffer) {
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
-  return (await ptParse(offerIndexerInfo.pricePerEpoch)) ===
-    minPricePerCuPerEpochBigInt
+  return offerIndexerInfo.pricePerEpoch === minPricePerCuPerEpochBigInt
     ? []
     : [
         {
           description: `\nchanging minPricePerCuPerEpoch from ${color.yellow(
-            `${offerIndexerInfo.pricePerEpoch} ${PT_SYMBOL}`,
+            await ptFormatWithSymbol(offerIndexerInfo.pricePerEpoch),
           )} to ${color.yellow(
             await ptFormatWithSymbol(minPricePerCuPerEpochBigInt),
           )}`,
