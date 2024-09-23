@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.21.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.6...fluence-cli-v0.21.0) (2024-09-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* use guessTxSizeAndSign in multicall ([#1053](https://github.com/fluencelabs/cli/issues/1053))
+
+### Features
+
+* removeCUFromCC only for units that are not already exited ([#1056](https://github.com/fluencelabs/cli/issues/1056)) ([4981e80](https://github.com/fluencelabs/cli/commit/4981e80a45d1aed1eba48e0c3d55c3e44904f7fa))
+* support indexer returning bigint ([#1055](https://github.com/fluencelabs/cli/issues/1055)) ([c71d0ba](https://github.com/fluencelabs/cli/commit/c71d0ba28622e9b4f3dc2da88e4ef67d2f2b3370))
+* use guessTxSizeAndSign in multicall ([#1053](https://github.com/fluencelabs/cli/issues/1053)) ([54ba2ea](https://github.com/fluencelabs/cli/commit/54ba2ead4f4e785d0134d34c682b68b4fdc4fe92))
+
 ## [0.20.6](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.5...fluence-cli-v0.20.6) (2024-09-19)
 
 
