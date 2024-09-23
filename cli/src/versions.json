@@ -1,9 +1,9 @@
 {
   "protocolVersion": 1,
   "nox": "fluencelabs/nox:0.26.1",
-  "chain-rpc": "fluencelabs/chain-rpc:0.19.6",
-  "chain-deploy-script": "fluencelabs/chain-deploy-script:0.19.6",
-  "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.19.6",
+  "chain-rpc": "docker.fluence.dev/chain-rpc:rewards-in-bigint-f64def8-6484-1",
+  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:rewards-in-bigint-f64def8-6484-1",
+  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:rewards-in-bigint-f64def8-6484-1",
   "rust-toolchain": "nightly-2024-06-10",
   "npm": {
     "@fluencelabs/aqua-lib": "0.11.0",
