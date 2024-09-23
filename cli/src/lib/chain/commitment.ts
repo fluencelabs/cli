@@ -480,15 +480,23 @@ export async function collateralWithdraw(
 
   for (const commitment of commitments) {
     const { commitmentId } = commitment;
-    const commitmentInfo = await capacity.getCommitment(commitmentId);
-    const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
+
+    const [unitIds, isExitedStatuses] =
+      await capacity.getUnitExitStatuses(commitmentId);
 
     const units = await batchRead(
-      unitIds.map((unitId) => {
+      unitIds.map((unitId, i) => {
         return async () => {
           return {
             unitId,
             unitInfo: await market.getComputeUnit(unitId),
+            isExited:
+              isExitedStatuses[i] ??
+              (() => {
+                throw new Error(
+                  `Unreachable. No exit status returned from getUnitExitStatuses for unit ${unitId}`,
+                );
+              })(),
           };
         };
       }),
@@ -564,9 +572,13 @@ export async function collateralWithdraw(
     await signBatch(
       `Remove compute units from capacity commitments and finish commitment ${commitmentId}`,
       [
-        ...unitIds.map((unitId) => {
-          return populateTx(capacity.removeCUFromCC, commitmentId, [unitId]);
-        }),
+        ...units
+          .filter(({ isExited }) => {
+            return !isExited;
+          })
+          .map(({ unitId }) => {
+            return populateTx(capacity.removeCUFromCC, commitmentId, [unitId]);
+          }),
         populateTx(capacity.finishCommitment, commitmentId),
       ],
     );
