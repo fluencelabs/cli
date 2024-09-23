@@ -36,7 +36,6 @@ import {
 import {
   ALL_FLAG_VALUE,
   CLI_NAME,
-  PT_SYMBOL,
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
@@ -65,7 +64,7 @@ import {
   peerIdHexStringToBase58String,
   peerIdBase58ToUint8Array,
 } from "../conversions.js";
-import { ptParse } from "../currencies.js";
+import { ptFormat, ptParse } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
@@ -465,7 +464,7 @@ async function formatOfferInfo(
       "Last Updated At": new Date(
         offerIndexerInfo.updatedAt * 1000,
       ).toISOString(),
-      "Price Per Epoch": `${offerIndexerInfo.pricePerEpoch} ${PT_SYMBOL}`,
+      "Price Per Epoch": await ptFormat(offerIndexerInfo.pricePerEpoch),
       Effectors: await Promise.all(
         offerIndexerInfo.effectors.map(({ cid }) => {
           return cid;
@@ -543,9 +542,7 @@ export async function resolveOffersFromProviderConfig(
       offerInfos.map(async ({ offerId, offerIndexerInfo }) => {
         return {
           offerName: `Offer ${offerId}`,
-          minPricePerCuPerEpochBigInt: await ptParse(
-            offerIndexerInfo.pricePerEpoch,
-          ),
+          minPricePerCuPerEpochBigInt: offerIndexerInfo.pricePerEpoch,
           effectorPrefixesAndHash: await Promise.all(
             offerIndexerInfo.effectors.map(({ cid }) => {
               return cidStringToCIDV1Struct(cid);
