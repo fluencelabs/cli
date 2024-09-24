@@ -1530,7 +1530,7 @@ Generate Config.toml files according to provider.yaml and secrets according to p
 ```
 USAGE
   $ fluence provider gen [--no-input] [--env <testnet | mainnet | stage | local | custom>] [--priv-key
-    <private-key>]
+    <private-key>] [--reset-secrets]
 
 FLAGS
   --env=<testnet | mainnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1539,6 +1539,8 @@ FLAGS
                                                       flags is unsecure. On local env
                                                       0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
                                                       is used by default when CLI is used in non-interactive mode
+  --reset-secrets                                     Remove nox secrets at .fluence/provider-secrets.yaml and
+                                                      .fluence/secrets to generate new ones
 
 DESCRIPTION
   Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
