@@ -104,6 +104,8 @@ export async function withdrawFromNox(flags: {
       },
     }));
 
+  const providerAddress = await getSignerAddress();
+
   for (const { walletKey, name } of computePeers) {
     setChainFlags({
       ...chainFlags,
@@ -112,22 +114,24 @@ export async function withdrawFromNox(flags: {
 
     const { amountBigInt, txReceipt } =
       amount === MAX_TOKEN_AMOUNT_KEYWORD
-        ? await withdrawMaxAmount()
-        : await withdrawSpecificAmount(await fltParse(amount));
+        ? await withdrawMaxAmount(providerAddress)
+        : await withdrawSpecificAmount(await fltParse(amount), providerAddress);
 
-    const formattedAmount = color.yellow(
-      await fltFormatWithSymbol(amountBigInt),
-    );
+    if (amountBigInt === undefined) {
+      continue;
+    }
 
     commandObj.logToStderr(
-      `Successfully withdrawn ${formattedAmount} from ${color.yellow(
+      `Successfully withdrawn ${color.yellow(
+        await fltFormatWithSymbol(amountBigInt),
+      )} from ${color.yellow(
         name,
-      )} with tx hash: ${color.yellow(txReceipt.hash)}`,
+      )} to ${color.yellow(providerAddress)} with tx hash: ${color.yellow(txReceipt.hash)}`,
     );
   }
 }
 
-async function withdrawMaxAmount() {
+async function withdrawMaxAmount(providerAddress: string) {
   const { providerOrWallet } = await getDealClient();
   const signerAddress = await getSignerAddress();
 
@@ -155,13 +159,21 @@ async function withdrawMaxAmount() {
   const totalBalance = await provider.getBalance(signerAddress);
   const amountBigInt = totalBalance - feeAmount;
 
+  if (amountBigInt <= 0n) {
+    commandObj.logToStderr(
+      `No ${FLT_SYMBOL} tokens to withdraw from ${signerAddress}`,
+    );
+
+    return {};
+  }
+
   return {
     txReceipt: await sendRawTransaction(
-      `Withdraw max amount of ${await fltFormatWithSymbol(amountBigInt)} to ${signerAddress}`,
+      `Withdraw max amount of ${await fltFormatWithSymbol(amountBigInt)} to ${providerAddress}`,
       {
-        to: signerAddress,
+        to: providerAddress,
         value: amountBigInt,
-        gasLimit: gasLimit,
+        gasLimit,
         maxFeePerGas: gasPrice.maxFeePerGas,
         maxPriorityFeePerGas: gasPrice.maxPriorityFeePerGas,
       },
@@ -170,12 +182,14 @@ async function withdrawMaxAmount() {
   };
 }
 
-async function withdrawSpecificAmount(amountBigInt: bigint) {
-  const to = await getSignerAddress();
+async function withdrawSpecificAmount(
+  amountBigInt: bigint,
+  providerAddress: string,
+) {
   return {
     txReceipt: await sendRawTransaction(
-      `Withdraw ${await fltFormatWithSymbol(amountBigInt)} to ${to}`,
-      { to, value: amountBigInt },
+      `Withdraw ${await fltFormatWithSymbol(amountBigInt)} to ${providerAddress}`,
+      { to: providerAddress, value: amountBigInt },
     ),
     amountBigInt,
   };
