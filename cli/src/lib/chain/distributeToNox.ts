@@ -117,17 +117,15 @@ export async function withdrawFromNox(flags: {
         ? await withdrawMaxAmount(providerAddress)
         : await withdrawSpecificAmount(await fltParse(amount), providerAddress);
 
-    if (amountBigInt === undefined) {
-      continue;
+    if (amountBigInt !== undefined) {
+      commandObj.logToStderr(
+        `Successfully withdrawn ${color.yellow(
+          await fltFormatWithSymbol(amountBigInt),
+        )} from ${color.yellow(
+          name,
+        )} to ${color.yellow(providerAddress)} with tx hash: ${color.yellow(txReceipt.hash)}`,
+      );
     }
-
-    commandObj.logToStderr(
-      `Successfully withdrawn ${color.yellow(
-        await fltFormatWithSymbol(amountBigInt),
-      )} from ${color.yellow(
-        name,
-      )} to ${color.yellow(providerAddress)} with tx hash: ${color.yellow(txReceipt.hash)}`,
-    );
   }
 }
 

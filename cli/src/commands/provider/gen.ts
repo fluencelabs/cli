@@ -78,11 +78,18 @@ export default class Gen extends BaseCommand<typeof Gen> {
     if (
       flags[RESET_NOX_SECRETS_FLAG_NAME] &&
       (await confirm({
-        message: `Are you sure you want${flags[NO_WITHDRAW_FLAG_NAME] ? "" : " to withdraw remaining tokens from your noxes,"} backup nox secrets ${color.yellow(providerSecretsConfigPath)} and ${color.yellow(fluenceSecretsDir)} (if they exist) to ${color.yellow(backupDirPath)} and generate new ones`,
-        default: true,
+        message: `Are you sure you want to backup nox secrets ${color.yellow(providerSecretsConfigPath)} and ${color.yellow(fluenceSecretsDir)} (if they exist) to ${color.yellow(backupDirPath)} and generate new ones`,
+        default: flags[RESET_NOX_SECRETS_FLAG_NAME],
       }))
     ) {
-      if (!flags[NO_WITHDRAW_FLAG_NAME]) {
+      if (
+        !flags[NO_WITHDRAW_FLAG_NAME] &&
+        (await confirm({
+          message:
+            "Do you want to withdraw remaining tokens from your noxes before continuing",
+          default: !flags[NO_WITHDRAW_FLAG_NAME],
+        }))
+      ) {
         try {
           await withdrawFromNox({
             "nox-names": ALL_FLAG_VALUE,
