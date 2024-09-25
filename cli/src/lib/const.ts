@@ -200,6 +200,7 @@ export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
 export const COUNTLY_DIR_NAME = "countly";
 export const SECRETS_DIR_NAME = "secrets";
+export const BACKUPS_DIR_NAME = "backups";
 export const CONFIGS_DIR_NAME = "configs";
 export const CCP_CONFIGS_DIR_NAME = "ccp-configs";
 

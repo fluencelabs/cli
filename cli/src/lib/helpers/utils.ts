@@ -16,6 +16,7 @@
  */
 
 import { AssertionError } from "node:assert";
+import { access } from "node:fs/promises";
 
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
@@ -239,4 +240,13 @@ export async function setTryTimeout<T, U>(
   }
 
   return errorHandler(error);
+}
+
+export async function pathExists(path: string) {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
 }

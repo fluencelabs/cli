@@ -60,6 +60,7 @@ import {
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   CCP_CONFIGS_DIR_NAME,
   SERVICE_CONFIGS_DIR_NAME,
+  BACKUPS_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -249,6 +250,10 @@ export function getFluenceSecretsDir(): string {
 
 async function ensureFluenceSecretsDir(): Promise<string> {
   return ensureDir(getFluenceSecretsDir());
+}
+
+export function getFluenceBackupsDir(): string {
+  return join(getFluenceDir(), BACKUPS_DIR_NAME);
 }
 
 export const ensureFluenceSecretsFilePath = async (

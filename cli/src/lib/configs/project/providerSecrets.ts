@@ -64,7 +64,7 @@ const secretesConfig = {
   required: ["networkKey", "signingWallet"],
 } as const satisfies JSONSchemaType<SecretsConfig>;
 
-const configSchemaV0: JSONSchemaType<ConfigV0> = {
+const configSchemaV0 = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME}`,
   title: PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   description: `Defines secrets config used for provider set up`,
@@ -83,7 +83,9 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     },
   },
   required: ["version", "noxes"],
-};
+} as const satisfies JSONSchemaType<ConfigV0>;
+
+const latestSchema = configSchemaV0 satisfies JSONSchemaType<LatestConfig>;
 
 const migrations: Migrations<Config> = [];
 
@@ -96,7 +98,7 @@ export type ProviderSecretesConfigReadonly =
 function getInitConfigOptions(): InitConfigOptions<Config, LatestConfig> {
   return {
     allSchemas: [configSchemaV0],
-    latestSchema: configSchemaV0,
+    latestSchema,
     migrations,
     name: PROVIDER_SECRETS_CONFIG_FILE_NAME,
     getConfigOrConfigDirPath: () => {
@@ -143,17 +145,11 @@ async function getDefault(providerConfig: ProviderConfigReadonly) {
     ),
   );
 
-  return `
-version: 0
-${yamlDiffPatch(
-  "",
-  {},
-  {
-    noxes,
-  },
-)}
-`;
+  return yamlDiffPatch(
+    "",
+    {},
+    { version: latestSchema.properties.version.const, noxes },
+  );
 }
 
-export const providerSecretsSchema: JSONSchemaType<LatestConfig> =
-  configSchemaV0;
+export const providerSecretsSchema: JSONSchemaType<LatestConfig> = latestSchema;

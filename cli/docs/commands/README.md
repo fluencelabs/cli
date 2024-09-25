@@ -1530,15 +1530,21 @@ Generate Config.toml files according to provider.yaml and secrets according to p
 ```
 USAGE
   $ fluence provider gen [--no-input] [--env <testnet | mainnet | stage | local | custom>] [--priv-key
-    <private-key>]
+    <private-key>] [--reset-nox-secrets] [--no-withdraw]
 
 FLAGS
   --env=<testnet | mainnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                          Don't interactively ask for any input from the user
+  --no-withdraw                                       Is used only when --reset-nox-secrets flag is present. Will not
+                                                      withdraw tokens from noxes (if you don't need it or it fails for
+                                                      some reason)
   --priv-key=<private-key>                            !WARNING! for debug purposes only. Passing private keys through
                                                       flags is unsecure. On local env
                                                       0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
                                                       is used by default when CLI is used in non-interactive mode
+  --reset-nox-secrets                                 Withdraw remaining tokens from your noxes, backup nox secrets from
+                                                      .fluence/provider-secrets.yaml and .fluence/secrets (if they
+                                                      exist) to .fluence/backups and generate new ones
 
 DESCRIPTION
   Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml

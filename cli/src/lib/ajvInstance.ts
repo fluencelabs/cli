@@ -21,8 +21,6 @@ import addFormats from "ajv-formats";
 
 import { jsonStringify } from "../common.js";
 
-import { numToStr } from "./helpers/typesafeStringify.js";
-
 export const ajv = new Ajv.default({
   allowUnionTypes: true,
   code: { esm: true },
@@ -35,14 +33,7 @@ type AjvErrors =
   | null
   | undefined;
 
-// TODO: attempt to make this error reliable DJX-538
-const NOT_USEFUL_AJV_ERROR =
-  "must match exactly one schema in oneOf\npassingSchemas: null\n";
-
-export async function validationErrorToString(
-  errors: AjvErrors,
-  latestConfigVersion?: string | number,
-) {
+export async function validationErrorToString(errors: AjvErrors) {
   if (errors === null || errors === undefined) {
     return "";
   }
@@ -56,29 +47,19 @@ export async function validationErrorToString(
         const paramsMessage = yamlDiffPatch("", {}, params);
         const prevError = errors[i - 1];
 
-        const isPreviousVersionError =
-          latestConfigVersion !== undefined &&
-          instancePath === "/version" &&
-          message === "must be equal to constant" &&
-          !paramsMessage.includes(
-            typeof latestConfigVersion === "string"
-              ? latestConfigVersion
-              : numToStr(latestConfigVersion),
-          );
-
         const isDuplicateError =
           prevError?.instancePath === instancePath &&
           jsonStringify(prevError.params) === jsonStringify(params) &&
           prevError.message === message;
 
-        if (isPreviousVersionError || isDuplicateError) {
+        if (isDuplicateError) {
           return "";
         }
 
         return `${instancePath === "" ? "" : `${color.yellow(instancePath)} `}${message ?? ""}${paramsMessage === "" ? "" : `\n${paramsMessage}`}`;
       })
       .filter((s) => {
-        return s !== "" && s !== NOT_USEFUL_AJV_ERROR;
+        return s !== "";
       })
       .join("\n")
   );

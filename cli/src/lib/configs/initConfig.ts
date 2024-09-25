@@ -21,11 +21,19 @@ import { dirname, join, relative } from "node:path";
 
 import { color } from "@oclif/color";
 import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
+import isInteger from "lodash-es/isInteger.js";
 
 import { jsonStringify } from "../../common.js";
 import { validationErrorToString } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
-import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
+import {
+  FS_OPTIONS,
+  SCHEMAS_DIR_NAME,
+  YAML_EXT,
+  YML_EXT,
+  DOCKER_COMPOSE_FILE_NAME,
+  CLI_NAME_FULL,
+} from "../const.js";
 import { removeProperties } from "../helpers/utils.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
@@ -87,7 +95,6 @@ const migrateConfig = async <
   validateLatestConfig,
   config,
   validate,
-  latestConfigVersion,
 }: MigrateConfigOptions<Config, LatestConfig>): Promise<{
   latestConfig: LatestConfig;
   configString: string;
@@ -115,10 +122,7 @@ const migrateConfig = async <
     return commandObj.error(
       `Couldn't migrate config ${color.yellow(
         configPath,
-      )}. ${await validationErrorToString(
-        validateLatestConfig.errors,
-        latestConfigVersion,
-      )}`,
+      )}. ${await validationErrorToString(validateLatestConfig.errors)}`,
     );
   }
 
@@ -162,16 +166,12 @@ const ensureConfigIsValidLatest = async <
   validateLatestConfig,
   config,
   validate,
-  latestConfigVersion,
 }: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
     return commandObj.error(
       `Invalid config ${color.yellow(
         configPath,
-      )}. ${await validationErrorToString(
-        validateLatestConfig.errors,
-        latestConfigVersion,
-      )}`,
+      )}. ${await validationErrorToString(validateLatestConfig.errors)}`,
     );
   }
 
@@ -308,14 +308,6 @@ export function getReadonlyConfigInitFunction<
     const Ajv = (await import("ajv")).default;
     const addFormats = (await import("ajv-formats")).default.default;
 
-    const validateAllConfigVersions = addFormats(
-      new Ajv.default({
-        allowUnionTypes: true,
-      }),
-    ).compile<Config>({
-      oneOf: allSchemas,
-    });
-
     const validateLatestConfig = addFormats(
       new Ajv.default({
         allowUnionTypes: true,
@@ -324,14 +316,37 @@ export function getReadonlyConfigInitFunction<
 
     const schemaPathCommentStart = "# yaml-language-server: $schema=";
 
-    const getSchemaPathComment = async (): Promise<string> => {
+    async function ensureSchemaAndSchemaPathComment(
+      schema: AnySchema,
+    ): Promise<string> {
       return `${schemaPathCommentStart}${await ensureSchema({
         name,
         configDirPath,
         getSchemaDirPath,
-        schema: validateLatestConfig.schema,
+        schema,
       })}`;
-    };
+    }
+
+    /**
+     * Add schema path comment (if it's missing) or replace it (if it's incorrect)
+     */
+    async function updateSchemaPathInConfigString(schema: AnySchema) {
+      if (name === DOCKER_COMPOSE_FILE_NAME) {
+        return;
+      }
+
+      const schemaPathComment = await ensureSchemaAndSchemaPathComment(schema);
+
+      configString = configString.startsWith(schemaPathCommentStart)
+        ? `${[schemaPathComment, ...configString.split("\n").slice(1)]
+            .join("\n")
+            .trim()}\n`
+        : `${schemaPathComment}\n${configString.trim()}\n`;
+
+      if (configString !== configString) {
+        await saveConfig(configPath, configString);
+      }
+    }
 
     const [{ parse }, { yamlDiffPatch }] = await Promise.all([
       import("yaml"),
@@ -366,19 +381,8 @@ export function getReadonlyConfigInitFunction<
         configPath = newConfigPath;
       }
 
-      // If config file exists, add schema path comment, if it's missing
-      // or replace it if it's incorrect
-      const schemaPathComment = await getSchemaPathComment();
-
-      configString = fileContent.startsWith(schemaPathCommentStart)
-        ? `${[schemaPathComment, ...fileContent.split("\n").slice(1)]
-            .join("\n")
-            .trim()}\n`
-        : `${schemaPathComment}\n${fileContent.trim()}\n`;
-
-      if (configString !== fileContent) {
-        await saveConfig(configPath, configString);
-      }
+      configString = fileContent;
+      await updateSchemaPathInConfigString(validateLatestConfig.schema);
     } catch {
       if (getDefaultConfig === undefined) {
         // If config file doesn't exist and there is no default config, return null
@@ -391,7 +395,9 @@ export function getReadonlyConfigInitFunction<
         "",
       )}.md`;
 
-      const schemaPathComment = await getSchemaPathComment();
+      const schemaPathComment = await ensureSchemaAndSchemaPathComment(
+        validateLatestConfig.schema,
+      );
 
       const description =
         typeof latestSchema["description"] === "string"
@@ -415,38 +421,96 @@ export function getReadonlyConfigInitFunction<
     }
 
     const config: unknown = parse(configString);
-
-    if (!validateAllConfigVersions(config)) {
-      return commandObj.error(
-        `Invalid config at ${color.yellow(
-          configPath,
-        )}. ${await validationErrorToString(
-          validateAllConfigVersions.errors,
-          latestConfigVersion,
-        )}`,
-      );
-    }
-
     let latestConfig: LatestConfig;
 
-    if (Number(config.version) < migrations.length) {
-      ({ latestConfig, configString } = await migrateConfig({
-        config,
-        configPath,
-        configString,
-        migrations,
-        validateLatestConfig,
-        validate,
-        latestConfigVersion,
-      }));
+    if (name === DOCKER_COMPOSE_FILE_NAME) {
+      // CLI will not validate docker-compose at all to not cause additional problems for the users
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      latestConfig = config as LatestConfig;
     } else {
-      latestConfig = await ensureConfigIsValidLatest({
-        config,
-        configPath,
-        validateLatestConfig,
-        validate,
-        latestConfigVersion,
-      });
+      if (
+        typeof config !== "object" ||
+        config === null ||
+        !("version" in config) ||
+        (typeof config.version !== "number" &&
+          typeof config.version !== "string")
+      ) {
+        return commandObj.error(
+          `Invalid config at ${color.yellow(
+            configPath,
+          )}. Expected to have a ${color.yellow("version")} property of type number`,
+        );
+      }
+
+      const currentConfigVersion = Number(config.version);
+
+      if (!isInteger(currentConfigVersion) || currentConfigVersion < 0) {
+        return commandObj.error(
+          `Invalid config at ${color.yellow(
+            configPath,
+          )}. ${color.yellow("version")} property should be a positive integer. Got: ${color.yellow(
+            config.version,
+          )}`,
+        );
+      }
+
+      const currentSchema = allSchemas[currentConfigVersion];
+
+      if (currentSchema === undefined) {
+        return commandObj.error(
+          `Invalid config at ${color.yellow(
+            configPath,
+          )}. ${color.yellow("version")} property should be less than or equal to ${color.yellow(
+            allSchemas.length - 1,
+          )}. Got: ${color.yellow(config.version)}. Make sure you are using a correct version of the CLI that supports this config version`,
+        );
+      }
+
+      const validateCurrentConfigVersion = addFormats(
+        new Ajv.default({
+          allowUnionTypes: true,
+        }),
+      ).compile<Config>(currentSchema);
+
+      if (!validateCurrentConfigVersion(config)) {
+        await updateSchemaPathInConfigString(
+          validateCurrentConfigVersion.schema,
+        );
+
+        return commandObj.error(
+          `Invalid config at ${color.yellow(
+            configPath,
+          )}. ${await validationErrorToString(
+            validateCurrentConfigVersion.errors,
+          )}${
+            currentConfigVersion === latestConfigVersion
+              ? ""
+              : `\n\nConfig version is ${color.yellow(currentConfigVersion)}, while the latest config version (that ${CLI_NAME_FULL} of version ${commandObj.config.version} is aware of) is ${color.yellow(
+                  latestConfigVersion,
+                )}. ${CLI_NAME_FULL} will automatically migrate your config to the latest version when you fix validation errors (that are listed above) and run any command that uses this config`
+          }`,
+        );
+      }
+
+      if (Number(config.version) < migrations.length) {
+        ({ latestConfig, configString } = await migrateConfig({
+          config,
+          configPath,
+          configString,
+          migrations,
+          validateLatestConfig,
+          validate,
+          latestConfigVersion,
+        }));
+      } else {
+        latestConfig = await ensureConfigIsValidLatest({
+          config,
+          configPath,
+          validateLatestConfig,
+          validate,
+          latestConfigVersion,
+        });
+      }
     }
 
     return {
@@ -590,9 +654,6 @@ export function getConfigInitFunction<
               configPath,
             )}.\n\n${newConfigString}\n\n${await validationErrorToString(
               initializedReadonlyConfig.$validateLatest.errors,
-              // every config schema has a version property by convention
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-member-access
-              options.latestSchema.properties.version.const as string,
             )}`,
           );
         }
