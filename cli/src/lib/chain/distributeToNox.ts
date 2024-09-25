@@ -104,37 +104,54 @@ export async function withdrawFromNox(flags: {
       },
     }));
 
-  const providerAddress = await getSignerAddress();
+  const providerPrivateKey = chainFlags[PRIV_KEY_FLAG_NAME];
 
-  for (const { walletKey, name } of computePeers) {
-    setChainFlags({
-      ...chainFlags,
-      [PRIV_KEY_FLAG_NAME]: walletKey,
-    });
-
-    const { amountBigInt, txReceipt } =
+  for (const { walletKey: noxWalletKey, name: noxName } of computePeers) {
+    const { amountBigInt, txReceipt, noxAddress } =
       amount === MAX_TOKEN_AMOUNT_KEYWORD
-        ? await withdrawMaxAmount(providerAddress)
-        : await withdrawSpecificAmount(await fltParse(amount), providerAddress);
+        ? await withdrawMaxAmount({ noxWalletKey, noxName, providerPrivateKey })
+        : await withdrawSpecificAmount({
+            noxWalletKey,
+            noxName,
+            providerPrivateKey,
+            amountBigInt: await fltParse(amount),
+          });
 
     if (amountBigInt !== undefined) {
+      const providerAddress = await getSignerAddress();
+
       commandObj.logToStderr(
         `Successfully withdrawn ${color.yellow(
           await fltFormatWithSymbol(amountBigInt),
         )} from ${color.yellow(
-          name,
-        )} to ${color.yellow(providerAddress)} with tx hash: ${color.yellow(txReceipt.hash)}`,
+          noxName,
+        )} (${noxAddress}) to ${color.yellow(providerAddress)} with tx hash: ${color.yellow(txReceipt.hash)}\n`,
       );
     }
   }
 }
 
-async function withdrawMaxAmount(providerAddress: string) {
+type WithdrawMaxAmountArgs = {
+  noxWalletKey: string;
+  noxName: string;
+  providerPrivateKey: string | undefined;
+};
+
+async function withdrawMaxAmount({
+  noxWalletKey,
+  noxName,
+  providerPrivateKey,
+}: WithdrawMaxAmountArgs) {
+  setChainFlags({
+    ...chainFlags,
+    [PRIV_KEY_FLAG_NAME]: noxWalletKey,
+  });
+
   const { providerOrWallet } = await getDealClient();
-  const signerAddress = await getSignerAddress();
+  const noxAddress = await getSignerAddress();
 
   const gasLimit = await providerOrWallet.estimateGas({
-    to: signerAddress,
+    to: noxAddress,
     value: 0n,
   });
 
@@ -154,20 +171,36 @@ async function withdrawMaxAmount(providerAddress: string) {
   const feeAmount =
     (gasPrice.maxFeePerGas + gasPrice.maxPriorityFeePerGas) * gasLimit;
 
-  const totalBalance = await provider.getBalance(signerAddress);
+  const totalBalance = await provider.getBalance(noxAddress);
   const amountBigInt = totalBalance - feeAmount;
 
   if (amountBigInt <= 0n) {
     commandObj.logToStderr(
-      `No ${FLT_SYMBOL} tokens to withdraw from ${signerAddress}`,
+      `No ${FLT_SYMBOL} tokens to withdraw from ${noxName} (${noxAddress})`,
     );
 
-    return {};
+    return {
+      txReceipt: undefined,
+      amountBigInt: undefined,
+      noxAddress: undefined,
+    };
   }
 
-  return {
+  setChainFlags({
+    ...chainFlags,
+    [PRIV_KEY_FLAG_NAME]: providerPrivateKey,
+  });
+
+  const providerAddress = await getSignerAddress();
+
+  setChainFlags({
+    ...chainFlags,
+    [PRIV_KEY_FLAG_NAME]: noxWalletKey,
+  });
+
+  const result = {
     txReceipt: await sendRawTransaction(
-      `Withdraw max amount of ${await fltFormatWithSymbol(amountBigInt)} to ${providerAddress}`,
+      `Withdraw max amount of ${await fltFormatWithSymbol(amountBigInt)} from ${noxName} (${noxAddress}) to ${providerAddress}`,
       {
         to: providerAddress,
         value: amountBigInt,
@@ -177,18 +210,45 @@ async function withdrawMaxAmount(providerAddress: string) {
       },
     ),
     amountBigInt,
+    noxAddress,
   };
+
+  setChainFlags({
+    ...chainFlags,
+    [PRIV_KEY_FLAG_NAME]: providerPrivateKey,
+  });
+
+  return result;
 }
 
-async function withdrawSpecificAmount(
-  amountBigInt: bigint,
-  providerAddress: string,
-) {
-  return {
+async function withdrawSpecificAmount({
+  noxWalletKey,
+  noxName,
+  providerPrivateKey,
+  amountBigInt,
+}: WithdrawMaxAmountArgs & { amountBigInt: bigint }) {
+  const providerAddress = await getSignerAddress();
+
+  setChainFlags({
+    ...chainFlags,
+    [PRIV_KEY_FLAG_NAME]: noxWalletKey,
+  });
+
+  const noxAddress = await getSignerAddress();
+
+  const result = {
     txReceipt: await sendRawTransaction(
-      `Withdraw ${await fltFormatWithSymbol(amountBigInt)} to ${providerAddress}`,
+      `Withdraw ${await fltFormatWithSymbol(amountBigInt)} from ${noxName} (${noxAddress}) to ${providerAddress}`,
       { to: providerAddress, value: amountBigInt },
     ),
     amountBigInt,
+    noxAddress,
   };
+
+  setChainFlags({
+    ...chainFlags,
+    [PRIV_KEY_FLAG_NAME]: providerPrivateKey,
+  });
+
+  return result;
 }

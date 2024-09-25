@@ -33,8 +33,12 @@ import {
 } from "../common.js";
 
 import { getChainId } from "./chain/chainId.js";
-import { commandObj } from "./commandObj.js";
-import { CLI_CONNECTOR_DIR_NAME } from "./const.js";
+import { commandObj, isInteractive } from "./commandObj.js";
+import {
+  CLI_CONNECTOR_DIR_NAME,
+  CLI_NAME_FULL,
+  PRIV_KEY_FLAG_NAME,
+} from "./const.js";
 import type { ValidateAddress } from "./dealClient.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 
@@ -58,6 +62,12 @@ let currentClientResponse: (() => void) | null = null;
 let sendResultBack: ((result: ConnectorToCLIMessage) => void) | null = null;
 
 async function initServer() {
+  if (!isInteractive) {
+    throw new Error(
+      `Not able to run ${CLI_NAME_FULL} connector frontend in non-interactive mode. You can either run this command interactively and use your wallet in your browser or you might wanna use --${PRIV_KEY_FLAG_NAME} flag to run this command non-interactively`,
+    );
+  }
+
   const cliConnectorPath = await resolveCliConnectorPath();
 
   return new Promise((res) => {
