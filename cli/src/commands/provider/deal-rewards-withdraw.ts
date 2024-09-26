@@ -16,6 +16,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { peerIdHexStringToBase58String } from "../../lib/chain/conversions.js";
 import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
@@ -24,7 +25,12 @@ import {
   DEAL_IDS_FLAG_NAME,
   PT_SYMBOL,
 } from "../../lib/const.js";
-import { getDealClient, getEventValue, sign } from "../../lib/dealClient.js";
+import {
+  getDealClient,
+  getEventValue,
+  sign,
+  batchRead,
+} from "../../lib/dealClient.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -58,6 +64,7 @@ export default class DealRewardsWithdraw extends BaseCommand<
     }
 
     const { dealClient } = await getDealClient();
+    const market = dealClient.getMarket();
 
     for (const dealId of dealIds) {
       const deal = dealClient.getDeal(dealId);
@@ -66,7 +73,38 @@ export default class DealRewardsWithdraw extends BaseCommand<
       let providerRewards = 0n;
       let stakerRewards = 0n;
 
-      for (const { onchainId } of workers) {
+      for (const { onchainId, peerId } of workers) {
+        const computeUnits = await market.getComputeUnits(peerId);
+
+        const rewardAmount = (
+          await batchRead(
+            computeUnits.map(({ id }) => {
+              return () => {
+                return deal.getRewardAmount(id);
+              };
+            }),
+          )
+        ).reduce(
+          (add, val) => {
+            return {
+              stakerReward: add.stakerReward + val.stakerReward,
+              providerReward: add.providerReward + val.providerReward,
+            };
+          },
+          { stakerReward: 0n, providerReward: 0n },
+        );
+
+        if (
+          rewardAmount.providerReward === 0n &&
+          rewardAmount.stakerReward === 0n
+        ) {
+          commandObj.logToStderr(
+            `No rewards to withdraw for worker ${onchainId} (${await peerIdHexStringToBase58String(peerId)})`,
+          );
+
+          continue;
+        }
+
         const txReceipt = await sign({
           title: `Withdraw rewards for worker ${onchainId}`,
           method: deal.withdrawRewards,
