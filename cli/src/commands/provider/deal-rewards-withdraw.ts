@@ -25,12 +25,7 @@ import {
   DEAL_IDS_FLAG_NAME,
   PT_SYMBOL,
 } from "../../lib/const.js";
-import {
-  getDealClient,
-  getEventValue,
-  sign,
-  batchRead,
-} from "../../lib/dealClient.js";
+import { getDealClient, getEventValue, sign } from "../../lib/dealClient.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -64,7 +59,6 @@ export default class DealRewardsWithdraw extends BaseCommand<
     }
 
     const { dealClient } = await getDealClient();
-    const market = dealClient.getMarket();
 
     for (const dealId of dealIds) {
       const deal = dealClient.getDeal(dealId);
@@ -74,25 +68,7 @@ export default class DealRewardsWithdraw extends BaseCommand<
       let stakerRewards = 0n;
 
       for (const { onchainId, peerId } of workers) {
-        const computeUnits = await market.getComputeUnits(peerId);
-
-        const rewardAmount = (
-          await batchRead(
-            computeUnits.map(({ id }) => {
-              return () => {
-                return deal.getRewardAmount(id);
-              };
-            }),
-          )
-        ).reduce(
-          (add, val) => {
-            return {
-              stakerReward: add.stakerReward + val.stakerReward,
-              providerReward: add.providerReward + val.providerReward,
-            };
-          },
-          { stakerReward: 0n, providerReward: 0n },
-        );
+        const rewardAmount = await deal.getRewardAmount(onchainId);
 
         if (
           rewardAmount.providerReward === 0n &&
