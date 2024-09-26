@@ -320,6 +320,11 @@ const noxConfigYAMLSchemaV0 = {
               type: "integer",
               description: `Decider period in seconds`,
             },
+            workerPeriodSec: {
+              nullable: true,
+              type: "integer",
+              description: `Worker period in seconds`,
+            },
             workerIpfsMultiaddr: {
               nullable: true,
               type: "string",
