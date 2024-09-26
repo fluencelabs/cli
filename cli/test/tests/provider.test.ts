@@ -22,8 +22,11 @@ import { describe } from "vitest";
 
 import { LOCAL_NET_DEFAULT_ACCOUNTS } from "../../src/common.js";
 import { initProviderConfigWithPath } from "../../src/lib/configs/project/provider.js";
-import { OFFER_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../../src/lib/const.js";
-import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
+import {
+  ALL_FLAG_VALUE,
+  OFFER_FLAG_NAME,
+  PRIV_KEY_FLAG_NAME,
+} from "../../src/lib/const.js";
 import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
 import { CC_DURATION_SECONDS } from "../helpers/constants.js";
@@ -40,6 +43,20 @@ describe("provider tests", () => {
     async () => {
       const cwd = join("test", "tmp", "fullLifeCycle");
       await initializeTemplate(cwd, "quickstart");
+
+      // remove offer from deal tests
+      await fluence({
+        args: ["provider", "cc-finish"],
+        flags: { offers: ALL_FLAG_VALUE },
+        cwd,
+      });
+
+      await fluence({
+        args: ["provider", "offer-remove"],
+        flags: { offers: ALL_FLAG_VALUE },
+        cwd,
+      });
+
       const providerConfig = await initProviderConfigWithPath(cwd);
 
       assert(
@@ -55,17 +72,7 @@ describe("provider tests", () => {
         "Default offer must exist in the provider config",
       );
 
-      providerConfig.offers = {
-        ...providerConfig.offers,
-        // add offer with remaining compute peers
-        [NEW_OFFER_NAME]: {
-          ...defaultOffer,
-          computePeers: defaultOffer.computePeers.map((_cp, i, ar) => {
-            return `nox-${numToStr(i + ar.length)}`;
-          }),
-        },
-      };
-
+      providerConfig.offers = { [NEW_OFFER_NAME]: defaultOffer };
       const PROVIDER_NAME = "AwesomeProvider";
       providerConfig.providerName = PROVIDER_NAME;
       await providerConfig.$commit();

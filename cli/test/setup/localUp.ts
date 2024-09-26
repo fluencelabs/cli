@@ -34,26 +34,14 @@ if (fluenceEnv === "local") {
   );
 
   // add extra capacity commitments and compute peers not used in any offer
-  providerConfig.capacityCommitments = {
-    ...providerConfig.capacityCommitments,
-    ...Object.fromEntries(
-      Object.values(providerConfig.capacityCommitments).map((config, i, ar) => {
-        return [
-          `nox-${numToStr(i + ar.length)}`,
-          { ...config, duration: `${numToStr(CC_DURATION_SECONDS)} seconds` },
-        ] as const;
-      }),
-    ),
-  };
-
-  providerConfig.computePeers = {
-    ...providerConfig.computePeers,
-    ...Object.fromEntries(
-      Object.values(providerConfig.computePeers).map((config, i, ar) => {
-        return [`nox-${numToStr(i + ar.length)}`, config] as const;
-      }),
-    ),
-  };
+  providerConfig.capacityCommitments = Object.fromEntries(
+    Object.values(providerConfig.capacityCommitments).map((config, i) => {
+      return [
+        `nox-${numToStr(i)}`,
+        { ...config, duration: `${numToStr(CC_DURATION_SECONDS)} seconds` },
+      ] as const;
+    }),
+  );
 
   await providerConfig.$commit();
 
