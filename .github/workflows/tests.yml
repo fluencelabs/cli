@@ -302,6 +302,7 @@ jobs:
 
       - name: Show Runner Load Average
         run: uptime
+        if: always()
 
       - name: Dump container logs
         if: always()
