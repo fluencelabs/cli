@@ -50,7 +50,7 @@
 * [`fluence provider cc-rewards-withdraw`](#fluence-provider-cc-rewards-withdraw)
 * [`fluence provider deal-exit`](#fluence-provider-deal-exit)
 * [`fluence provider deal-list`](#fluence-provider-deal-list)
-* [`fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-deal-rewards-info-deal-address-unit-id)
+* [`fluence provider deal-rewards-info [DEAL-ADDRESS] [ON-CHAIN-WORKER-ID]`](#fluence-provider-deal-rewards-info-deal-address-on-chain-worker-id)
 * [`fluence provider deal-rewards-withdraw`](#fluence-provider-deal-rewards-withdraw)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider info`](#fluence-provider-info)
@@ -1466,18 +1466,18 @@ ALIASES
 
 _See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.21.0/src/commands/provider/deal-list.ts)_
 
-## `fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID]`
+## `fluence provider deal-rewards-info [DEAL-ADDRESS] [ON-CHAIN-WORKER-ID]`
 
 Deal rewards info
 
 ```
 USAGE
-  $ fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <testnet | mainnet | stage | local |
-    custom>] [--priv-key <private-key>]
+  $ fluence provider deal-rewards-info [DEAL-ADDRESS] [ON-CHAIN-WORKER-ID] [--no-input] [--env <testnet | mainnet | stage |
+    local | custom>] [--priv-key <private-key>]
 
 ARGUMENTS
-  DEAL-ADDRESS  Deal address
-  UNIT-ID       Compute unit ID
+  DEAL-ADDRESS        Deal address
+  ON-CHAIN-WORKER-ID  On-chain worker id
 
 FLAGS
   --env=<testnet | mainnet | stage | local | custom>  Fluence Environment to use when running the command
