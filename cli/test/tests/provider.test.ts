@@ -27,6 +27,7 @@ import {
   OFFER_FLAG_NAME,
   PRIV_KEY_FLAG_NAME,
 } from "../../src/lib/const.js";
+import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
 import { CC_DURATION_SECONDS } from "../helpers/constants.js";
@@ -62,6 +63,16 @@ describe("provider tests", () => {
       assert(
         providerConfig !== null,
         "Provider config must already exists in a quickstart template",
+      );
+
+      // add extra capacity commitments and compute peers not used in any offer
+      providerConfig.capacityCommitments = Object.fromEntries(
+        Object.values(providerConfig.capacityCommitments).map((config, i) => {
+          return [
+            `nox-${numToStr(i)}`,
+            { ...config, duration: `${numToStr(CC_DURATION_SECONDS)} seconds` },
+          ] as const;
+        }),
       );
 
       const NEW_OFFER_NAME = "newOffer";
