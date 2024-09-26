@@ -193,6 +193,7 @@ type NoxConfigYAMLV0 = {
     };
     decider?: {
       deciderPeriodSec?: number;
+      workerPeriodSec?: number;
       workerIpfsMultiaddr?: string;
       networkApiEndpoint?: string;
       networkId?: number;
@@ -554,6 +555,11 @@ const noxConfigYAMLSchemaV1 = {
               nullable: true,
               type: "integer",
               description: `Decider period in seconds`,
+            },
+            workerPeriodSec: {
+              nullable: true,
+              type: "integer",
+              description: `Worker period in seconds`,
             },
             workerIpfsMultiaddr: {
               nullable: true,
@@ -2156,6 +2162,7 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       enable: ["aqua-ipfs", "decider"],
       decider: {
         deciderPeriodSec: env === "local" ? 15 : 30,
+        workerPeriodSec: env === "local" ? 10 : 15 * 60,
         workerIpfsMultiaddr:
           env === "local"
             ? NOX_IPFS_MULTIADDR
