@@ -32,16 +32,14 @@ import { fltFormatWithSymbol } from "./currencies.js";
 export async function depositCollateral(flags: CCFlags) {
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
-  const [commitmentsWithInvalidStatus, commitments] = splitErrorsAndResults(
-    await getCommitmentsInfo(flags),
-    (c) => {
+  const [commitmentsWithInvalidStatus, commitmentsWithWaitDelegation] =
+    splitErrorsAndResults(await getCommitmentsInfo(flags), (c) => {
       if (c.status === CommitmentStatus.WaitDelegation) {
         return { result: c };
       }
 
       return { error: c };
-    },
-  );
+    });
 
   if (commitmentsWithInvalidStatus.length > 0) {
     commandObj.warn(
@@ -50,6 +48,10 @@ export async function depositCollateral(flags: CCFlags) {
       )}`,
     );
   }
+
+  const commitments = commitmentsWithWaitDelegation.flatMap(({ ccInfos }) => {
+    return ccInfos;
+  });
 
   if (commitments.length === 0) {
     return commandObj.error(

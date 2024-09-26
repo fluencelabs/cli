@@ -209,6 +209,13 @@ export async function createOffers(flags: OffersArgs) {
       }
 
       const { offerId } = offerIdRes.result;
+
+      const providerAddress = await getSignerAddress();
+      const offerPerEnv = providerArtifactsConfig.offers[fluenceEnv] ?? {};
+      offerPerEnv[offerName] = { id: offerId, providerAddress };
+      providerArtifactsConfig.offers[fluenceEnv] = offerPerEnv;
+      await providerArtifactsConfig.$commit();
+
       await addRemainingCUs({ allCPs, addedCPs, offerId, market, offerName });
       await addRemainingCPs({ allCPs, addedCPs, offerId, market, offerName });
     } catch (e) {
@@ -218,7 +225,7 @@ export async function createOffers(flags: OffersArgs) {
     }
   }
 
-  const [offerIdErrors, offerIds] = splitErrorsAndResults(
+  const [offerIdErrors, offerIdsAndNames] = splitErrorsAndResults(
     registeredMarketOffers,
     (res) => {
       return res;
@@ -233,13 +240,13 @@ export async function createOffers(flags: OffersArgs) {
     );
   }
 
-  if (offerIds.length === 0) {
+  if (offerIdsAndNames.length === 0) {
     commandObj.logToStderr("No offers created");
     return;
   }
 
   type GetOffersInfoReturnType = Awaited<
-    ReturnType<typeof getOffersInfo<(typeof offerIds)[number]>>
+    ReturnType<typeof getOffersInfo<(typeof offerIdsAndNames)[number]>>
   >;
 
   let offerInfoErrors: GetOffersInfoReturnType[0] = [];
@@ -248,7 +255,7 @@ export async function createOffers(flags: OffersArgs) {
   const getOffersInfoRes = await setTryTimeout(
     "Getting offers info from indexer",
     async () => {
-      [offerInfoErrors, offersInfo] = await getOffersInfo(offerIds);
+      [offerInfoErrors, offersInfo] = await getOffersInfo(offerIdsAndNames);
 
       if (offerInfoErrors.length > 0) {
         throw new Error("Not all offers info received");
@@ -267,17 +274,7 @@ export async function createOffers(flags: OffersArgs) {
     commandObj.warn(stringifyUnknown(getOffersInfoRes.error));
   }
 
-  const providerAddress = await getSignerAddress();
-
-  offerIds.forEach(({ offerName, offerId }) => {
-    const offerPerEnv = providerArtifactsConfig.offers[fluenceEnv] ?? {};
-    offerPerEnv[offerName] = { id: offerId, providerAddress };
-    providerArtifactsConfig.offers[fluenceEnv] = offerPerEnv;
-  });
-
-  await providerArtifactsConfig.$commit();
-
-  const offersStr = offerIds
+  const offersStr = offerIdsAndNames
     .map(({ offerName }) => {
       return offerName;
     })
