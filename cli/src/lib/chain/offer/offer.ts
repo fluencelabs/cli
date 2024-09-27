@@ -204,17 +204,20 @@ export async function createOffers(flags: OffersArgs) {
       const offerIdRes = getOfferIdRes(offerRegisterTxReceipt);
       registeredMarketOffers.push(offerIdRes);
 
-      if ("error" in offerIdRes || registeredCUsCount === allCUs.length) {
+      if ("error" in offerIdRes) {
         continue;
       }
 
       const { offerId } = offerIdRes.result;
-
       const providerAddress = await getSignerAddress();
       const offerPerEnv = providerArtifactsConfig.offers[fluenceEnv] ?? {};
       offerPerEnv[offerName] = { id: offerId, providerAddress };
       providerArtifactsConfig.offers[fluenceEnv] = offerPerEnv;
       await providerArtifactsConfig.$commit();
+
+      if (registeredCUsCount === allCUs.length) {
+        continue;
+      }
 
       await addRemainingCUs({ allCPs, addedCPs, offerId, market, offerName });
       await addRemainingCPs({ allCPs, addedCPs, offerId, market, offerName });
