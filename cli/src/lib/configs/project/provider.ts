@@ -2166,8 +2166,7 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
     systemServices: {
       enable: ["aqua-ipfs", "decider"],
       decider: {
-        deciderPeriodSec: env === "local" ? 15 : 30,
-        workerPeriodSec: env === "local" ? 10 : 15 * 60,
+        deciderPeriodSec: 30,
         workerIpfsMultiaddr:
           env === "local"
             ? NOX_IPFS_MULTIADDR
