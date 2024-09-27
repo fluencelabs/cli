@@ -153,7 +153,7 @@ export async function createOffers(flags: OffersArgs) {
       commandObj.warn(result.error);
     }
 
-    pushOfferRegisterResult(result);
+    offerRegisterResults.push(result);
   }
 
   for (const offer of offers) {
