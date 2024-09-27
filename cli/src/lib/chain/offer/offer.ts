@@ -240,6 +240,7 @@ export async function createOffers(flags: OffersArgs) {
     await providerArtifactsConfig.$commit();
 
     if (registeredCUsCount === allCUs.length) {
+      pushOfferRegisterResult({ result: { offerId, offerName } });
       continue;
     }
 
