@@ -22,11 +22,7 @@ import { describe } from "vitest";
 
 import { LOCAL_NET_DEFAULT_ACCOUNTS } from "../../src/common.js";
 import { initProviderConfigWithPath } from "../../src/lib/configs/project/provider.js";
-import {
-  ALL_FLAG_VALUE,
-  OFFER_FLAG_NAME,
-  PRIV_KEY_FLAG_NAME,
-} from "../../src/lib/const.js";
+import { OFFER_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../../src/lib/const.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
@@ -75,11 +71,18 @@ describe("provider tests", () => {
       providerConfig.providerName = PROVIDER_NAME;
       await providerConfig.$commit();
 
-      await fluence({
-        args: ["provider", "tokens-distribute"],
+      const TEST_DEFAULT = {
         flags: {
           ...PRIV_KEY_1,
           [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      } as const;
+
+      await fluence({
+        args: ["provider", "tokens-distribute"],
+        flags: {
+          ...TEST_DEFAULT.flags,
           amount: "10",
         },
         cwd,
@@ -95,90 +98,56 @@ describe("provider tests", () => {
 
       await fluence({
         args: ["provider", "offer-create"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       await fluence({
         args: ["provider", "cc-create"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       await fluence({
         args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       await fluence({
         args: ["provider", "cc-activate"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       await fluence({
         args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       await sleepSeconds(5);
 
       await fluence({
         args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       await sleepSeconds(CC_DURATION_SECONDS);
 
       await fluence({
         args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       await fluence({
         args: ["provider", "cc-finish"],
-        flags: { offers: ALL_FLAG_VALUE },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       await fluence({
         args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       await fluence({
         args: ["provider", "offer-remove"],
-        flags: { offers: ALL_FLAG_VALUE },
-        cwd,
+        ...TEST_DEFAULT,
       });
 
       // SET UP FOR THE REST OF THE TESTS
