@@ -280,6 +280,10 @@ jobs:
         run: yarn local-up
         working-directory: cli
 
+      - name: Run provider tests
+        run: yarn vitest-provider
+        working-directory: cli
+
       - name: Run deal deploy tests
         run: yarn vitest-deal-deploy
         working-directory: cli
@@ -294,10 +298,6 @@ jobs:
 
       - name: Run js-to-aqua tests
         run: yarn vitest-js-to-aqua
-        working-directory: cli
-
-      - name: Run provider tests
-        run: yarn vitest-provider
         working-directory: cli
 
       - name: Show Runner Load Average

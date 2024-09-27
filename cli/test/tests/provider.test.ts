@@ -45,19 +45,6 @@ describe("provider tests", () => {
       const cwd = join("test", "tmp", "fullLifeCycle");
       await initializeTemplate(cwd, "quickstart");
 
-      // remove offer from deal tests
-      await fluence({
-        args: ["provider", "cc-finish"],
-        flags: { offers: ALL_FLAG_VALUE },
-        cwd,
-      });
-
-      await fluence({
-        args: ["provider", "offer-remove"],
-        flags: { offers: ALL_FLAG_VALUE },
-        cwd,
-      });
-
       const providerConfig = await initProviderConfigWithPath(cwd);
 
       assert(
@@ -174,7 +161,13 @@ describe("provider tests", () => {
       });
 
       await fluence({
-        args: ["provider", "cc-collateral-withdraw"],
+        args: ["provider", "cc-finish"],
+        flags: { offers: ALL_FLAG_VALUE },
+        cwd,
+      });
+
+      await fluence({
+        args: ["provider", "cc-info"],
         flags: {
           ...PRIV_KEY_1,
           [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
@@ -183,9 +176,44 @@ describe("provider tests", () => {
       });
 
       await fluence({
-        args: ["provider", "cc-info"],
+        args: ["provider", "offer-remove"],
+        flags: { offers: ALL_FLAG_VALUE },
+        cwd,
+      });
+
+      // SET UP FOR THE REST OF THE TESTS
+
+      providerConfig.capacityCommitments = Object.fromEntries(
+        Object.values(providerConfig.capacityCommitments).map((config, i) => {
+          return [
+            `nox-${numToStr(i)}`,
+            { ...config, duration: `8 hours` },
+          ] as const;
+        }),
+      );
+
+      await providerConfig.$commit();
+      await fluence({ args: ["provider", "register"], cwd });
+
+      await fluence({
+        args: ["provider", "offer-create"],
         flags: {
-          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      });
+
+      await fluence({
+        args: ["provider", "cc-create"],
+        flags: {
+          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      });
+
+      await fluence({
+        args: ["provider", "cc-activate"],
+        flags: {
           [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
         },
         cwd,
