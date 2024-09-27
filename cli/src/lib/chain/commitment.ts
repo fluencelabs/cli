@@ -747,6 +747,7 @@ export async function getCommitmentsInfo(flags: CCFlags) {
     }),
   );
 
+  // group commitments by status
   return Array.from(
     commitmentsInfo
       .reduce<
@@ -754,15 +755,19 @@ export async function getCommitmentsInfo(flags: CCFlags) {
       >((acc, v) => {
         const infos = acc.get(v.status) ?? [];
         infos.push(v);
-        acc.set(v.status, infos);
+
+        acc.set(
+          v.status !== undefined && v.status in CommitmentStatus
+            ? v.status
+            : undefined,
+          infos,
+        );
+
         return acc;
       }, new Map())
       .entries(),
   ).map(([status, ccInfos]) => {
-    return {
-      status,
-      ccInfos,
-    };
+    return { status, ccInfos };
   });
 }
 
