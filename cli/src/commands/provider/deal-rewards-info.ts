@@ -40,8 +40,8 @@ export default class DealRewardsInfo extends BaseCommand<
     "DEAL-ADDRESS": Args.string({
       description: "Deal address",
     }),
-    "UNIT-ID": Args.string({
-      description: "Compute unit ID",
+    "ON-CHAIN-WORKER-ID": Args.string({
+      description: "On-chain worker id",
     }),
   };
 
@@ -51,12 +51,13 @@ export default class DealRewardsInfo extends BaseCommand<
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
 
-    const unitId =
-      args["UNIT-ID"] ?? (await input({ message: "Enter unit id" }));
+    const onChainWorkerId =
+      args["ON-CHAIN-WORKER-ID"] ??
+      (await input({ message: "Enter on-chain worker id" }));
 
     const { readonlyDealClient } = await getReadonlyDealClient();
     const deal = readonlyDealClient.getDeal(dealAddress);
-    const rewardAmount = await deal.getRewardAmount(unitId);
+    const rewardAmount = await deal.getRewardAmount(onChainWorkerId);
 
     commandObj.log(
       `Provider reward: ${color.yellow(

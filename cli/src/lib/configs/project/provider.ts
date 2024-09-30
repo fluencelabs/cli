@@ -193,6 +193,7 @@ type NoxConfigYAMLV0 = {
     };
     decider?: {
       deciderPeriodSec?: number;
+      workerPeriodSec?: number;
       workerIpfsMultiaddr?: string;
       networkApiEndpoint?: string;
       networkId?: number;
@@ -318,6 +319,11 @@ const noxConfigYAMLSchemaV0 = {
               nullable: true,
               type: "integer",
               description: `Decider period in seconds`,
+            },
+            workerPeriodSec: {
+              nullable: true,
+              type: "integer",
+              description: `Worker period in seconds`,
             },
             workerIpfsMultiaddr: {
               nullable: true,
@@ -554,6 +560,11 @@ const noxConfigYAMLSchemaV1 = {
               nullable: true,
               type: "integer",
               description: `Decider period in seconds`,
+            },
+            workerPeriodSec: {
+              nullable: true,
+              type: "integer",
+              description: `Worker period in seconds`,
             },
             workerIpfsMultiaddr: {
               nullable: true,

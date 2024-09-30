@@ -326,6 +326,7 @@ Decider service configuration
 | `startBlock`          | string  | No       | Start block (deprecated)          |
 | `walletKey`           | string  | No       | Wallet key (deprecated)           |
 | `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
+| `workerPeriodSec`     | integer | No       | Worker period in seconds          |
 
 ##### vm
 
@@ -517,6 +518,7 @@ Decider service configuration
 | `startBlock`          | string  | No       | Start block (deprecated)          |
 | `walletKey`           | string  | No       | Wallet key (deprecated)           |
 | `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
+| `workerPeriodSec`     | integer | No       | Worker period in seconds          |
 
 ### vm
 

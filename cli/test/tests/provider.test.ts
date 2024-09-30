@@ -40,11 +40,22 @@ describe("provider tests", () => {
     async () => {
       const cwd = join("test", "tmp", "fullLifeCycle");
       await initializeTemplate(cwd, "quickstart");
+
       const providerConfig = await initProviderConfigWithPath(cwd);
 
       assert(
         providerConfig !== null,
         "Provider config must already exists in a quickstart template",
+      );
+
+      // add extra capacity commitments and compute peers not used in any offer
+      providerConfig.capacityCommitments = Object.fromEntries(
+        Object.values(providerConfig.capacityCommitments).map((config, i) => {
+          return [
+            `nox-${numToStr(i)}`,
+            { ...config, duration: `${numToStr(CC_DURATION_SECONDS)} seconds` },
+          ] as const;
+        }),
       );
 
       const NEW_OFFER_NAME = "newOffer";
@@ -55,26 +66,23 @@ describe("provider tests", () => {
         "Default offer must exist in the provider config",
       );
 
-      providerConfig.offers = {
-        ...providerConfig.offers,
-        // add offer with remaining compute peers
-        [NEW_OFFER_NAME]: {
-          ...defaultOffer,
-          computePeers: defaultOffer.computePeers.map((_cp, i, ar) => {
-            return `nox-${numToStr(i + ar.length)}`;
-          }),
-        },
-      };
-
+      providerConfig.offers = { [NEW_OFFER_NAME]: defaultOffer };
       const PROVIDER_NAME = "AwesomeProvider";
       providerConfig.providerName = PROVIDER_NAME;
       await providerConfig.$commit();
 
-      await fluence({
-        args: ["provider", "tokens-distribute"],
+      const TEST_DEFAULT = {
         flags: {
           ...PRIV_KEY_1,
           [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+        },
+        cwd,
+      } as const;
+
+      await fluence({
+        args: ["provider", "tokens-distribute"],
+        flags: {
+          ...TEST_DEFAULT.flags,
           amount: "10",
         },
         cwd,
@@ -90,8 +98,75 @@ describe("provider tests", () => {
 
       await fluence({
         args: ["provider", "offer-create"],
+        ...TEST_DEFAULT,
+      });
+
+      await fluence({
+        args: ["provider", "cc-create"],
+        ...TEST_DEFAULT,
+      });
+
+      await fluence({
+        args: ["provider", "cc-info"],
+        ...TEST_DEFAULT,
+      });
+
+      await fluence({
+        args: ["provider", "cc-activate"],
+        ...TEST_DEFAULT,
+      });
+
+      await fluence({
+        args: ["provider", "cc-info"],
+        ...TEST_DEFAULT,
+      });
+
+      await sleepSeconds(5);
+
+      await fluence({
+        args: ["provider", "cc-info"],
+        ...TEST_DEFAULT,
+      });
+
+      await sleepSeconds(CC_DURATION_SECONDS);
+
+      await fluence({
+        args: ["provider", "cc-info"],
+        ...TEST_DEFAULT,
+      });
+
+      await fluence({
+        args: ["provider", "cc-finish"],
+        ...TEST_DEFAULT,
+      });
+
+      await fluence({
+        args: ["provider", "cc-info"],
+        ...TEST_DEFAULT,
+      });
+
+      await fluence({
+        args: ["provider", "offer-remove"],
+        ...TEST_DEFAULT,
+      });
+
+      // SET UP FOR THE REST OF THE TESTS
+
+      providerConfig.capacityCommitments = Object.fromEntries(
+        Object.values(providerConfig.capacityCommitments).map((config, i) => {
+          return [
+            `nox-${numToStr(i)}`,
+            { ...config, duration: `8 hours` },
+          ] as const;
+        }),
+      );
+
+      await providerConfig.$commit();
+      await fluence({ args: ["provider", "register"], cwd });
+
+      await fluence({
+        args: ["provider", "offer-create"],
         flags: {
-          ...PRIV_KEY_1,
           [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
         },
         cwd,
@@ -100,16 +175,6 @@ describe("provider tests", () => {
       await fluence({
         args: ["provider", "cc-create"],
         flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
-      });
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
           [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
         },
         cwd,
@@ -118,56 +183,6 @@ describe("provider tests", () => {
       await fluence({
         args: ["provider", "cc-activate"],
         flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
-      });
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
-      });
-
-      await sleepSeconds(5);
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
-      });
-
-      await sleepSeconds(CC_DURATION_SECONDS);
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
-      });
-
-      await fluence({
-        args: ["provider", "cc-collateral-withdraw"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
-      });
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        flags: {
-          ...PRIV_KEY_1,
           [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
         },
         cwd,

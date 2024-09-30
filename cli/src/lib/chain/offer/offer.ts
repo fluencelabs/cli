@@ -18,7 +18,6 @@
 import type { IMarket } from "@fluencelabs/deal-ts-clients";
 import type { OfferDetail } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/types/schemes.js";
 import { color } from "@oclif/color";
-import type { TransactionReceipt } from "ethers";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -78,6 +77,8 @@ export type OffersArgs = {
 
 export async function createOffers(flags: OffersArgs) {
   const allOffers = await resolveOffersFromProviderConfig(flags);
+  const providerConfig = await ensureReadonlyProviderConfig();
+  const providerConfigPath = providerConfig.$getPath();
   const { dealClient } = await getDealClient();
   const market = dealClient.getMarket();
   const usdc = dealClient.getUSDC();
@@ -140,10 +141,20 @@ export async function createOffers(flags: OffersArgs) {
   //   value: OFFER_ID_PROPERTY,
   // });
 
-  const registeredMarketOffers: (
+  const offerRegisterResults: (
     | { result: { offerId: string; offerName: string } }
     | { error: string }
   )[] = [];
+
+  function pushOfferRegisterResult(
+    result: (typeof offerRegisterResults)[number],
+  ) {
+    if ("error" in result) {
+      commandObj.warn(result.error);
+    }
+
+    offerRegisterResults.push(result);
+  }
 
   for (const offer of offers) {
     const {
@@ -155,29 +166,16 @@ export async function createOffers(flags: OffersArgs) {
       maxProtocolVersion = versions.protocolVersion,
     } = offer;
 
-    function getOfferIdRes(txReceipt: TransactionReceipt) {
-      const offerId = getEventValue({
-        contract: market,
-        eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
-        txReceipt,
-        value: OFFER_ID_PROPERTY,
-      });
-
-      return typeof offerId === "string"
-        ? { result: { offerId, offerName } }
-        : {
-            error: `for ${color.yellow(
-              offerName,
-            )} instead of offer id got: ${stringifyUnknown(offerId)} from ${MARKET_OFFER_REGISTERED_EVENT_NAME} event`,
-          };
-    }
-
     const allCUs = allCPs.flatMap(({ unitIds }) => {
       return unitIds;
     });
 
+    let registeredCUsCount;
+    let addedCPs;
+    let offerRegisterTxReceipt;
+
     try {
-      const {
+      ({
         sliceIndex: registeredCUsCount,
         registeredValues: addedCPs,
         txReceipt: offerRegisterTxReceipt,
@@ -199,47 +197,88 @@ export async function createOffers(flags: OffersArgs) {
         },
         method: market.registerMarketOffer,
         validateAddress: assertProviderIsRegistered,
+      }));
+    } catch (e) {
+      pushOfferRegisterResult({
+        error: `Error when registering offer ${offerName}: ${stringifyUnknown(e)}`,
       });
 
-      const offerIdRes = getOfferIdRes(offerRegisterTxReceipt);
-      registeredMarketOffers.push(offerIdRes);
+      continue;
+    }
 
-      if ("error" in offerIdRes || registeredCUsCount === allCUs.length) {
+    let offerId;
+
+    try {
+      offerId = getEventValue({
+        contract: market,
+        eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
+        txReceipt: offerRegisterTxReceipt,
+        value: OFFER_ID_PROPERTY,
+      });
+
+      if (typeof offerId !== "string") {
+        pushOfferRegisterResult({
+          error: `Got: ${stringifyUnknown(offerId)}, instead of offer id string from ${MARKET_OFFER_REGISTERED_EVENT_NAME} event for offer ${color.yellow(
+            offerName,
+          )}`,
+        });
+
         continue;
       }
+    } catch (e) {
+      pushOfferRegisterResult({
+        error: `Error when getting ${OFFER_ID_PROPERTY} property from event ${MARKET_OFFER_REGISTERED_EVENT_NAME} for offer ${offerName}: ${stringifyUnknown(e)}`,
+      });
 
-      const { offerId } = offerIdRes.result;
+      continue;
+    }
+
+    const providerAddress = await getSignerAddress();
+    const offerPerEnv = providerArtifactsConfig.offers[fluenceEnv] ?? {};
+    offerPerEnv[offerName] = { id: offerId, providerAddress };
+    providerArtifactsConfig.offers[fluenceEnv] = offerPerEnv;
+    await providerArtifactsConfig.$commit();
+
+    if (registeredCUsCount === allCUs.length) {
+      pushOfferRegisterResult({ result: { offerId, offerName } });
+      continue;
+    }
+
+    try {
       await addRemainingCUs({ allCPs, addedCPs, offerId, market, offerName });
       await addRemainingCPs({ allCPs, addedCPs, offerId, market, offerName });
     } catch (e) {
-      commandObj.warn(
-        `Error when creating offer ${offerName}: ${stringifyUnknown(e)}`,
-      );
+      pushOfferRegisterResult({
+        error: `Error when adding remaining CUs or CPs to the created offer ${color.yellow(offerName)} (${offerId}). You can try using ${color.yellow(`${CLI_NAME} provider offer-update --${OFFER_FLAG_NAME} ${offerName}`)} command to update on-chain offer to match your offer definition in ${providerConfigPath}. Error: ${stringifyUnknown(e)}`,
+      });
+
+      continue;
     }
+
+    pushOfferRegisterResult({ result: { offerId, offerName } });
   }
 
-  const [offerIdErrors, offerIds] = splitErrorsAndResults(
-    registeredMarketOffers,
+  const [offerCreateErrors, createdOffers] = splitErrorsAndResults(
+    offerRegisterResults,
     (res) => {
       return res;
     },
   );
 
-  if (offerIdErrors.length > 0) {
+  if (offerCreateErrors.length > 0) {
     commandObj.warn(
-      `When getting ${OFFER_ID_PROPERTY} property from event ${MARKET_OFFER_REGISTERED_EVENT_NAME}:\n\n${offerIdErrors.join(
-        ", ",
+      `Got the following errors when creating offers:\n\n${offerCreateErrors.join(
+        "\n\n",
       )}`,
     );
   }
 
-  if (offerIds.length === 0) {
-    commandObj.logToStderr("No offers created");
-    return;
+  if (createdOffers.length === 0) {
+    return commandObj.error("No offers created");
   }
 
   type GetOffersInfoReturnType = Awaited<
-    ReturnType<typeof getOffersInfo<(typeof offerIds)[number]>>
+    ReturnType<typeof getOffersInfo<(typeof createdOffers)[number]>>
   >;
 
   let offerInfoErrors: GetOffersInfoReturnType[0] = [];
@@ -248,7 +287,7 @@ export async function createOffers(flags: OffersArgs) {
   const getOffersInfoRes = await setTryTimeout(
     "Getting offers info from indexer",
     async () => {
-      [offerInfoErrors, offersInfo] = await getOffersInfo(offerIds);
+      [offerInfoErrors, offersInfo] = await getOffersInfo(createdOffers);
 
       if (offerInfoErrors.length > 0) {
         throw new Error("Not all offers info received");
@@ -267,17 +306,7 @@ export async function createOffers(flags: OffersArgs) {
     commandObj.warn(stringifyUnknown(getOffersInfoRes.error));
   }
 
-  const providerAddress = await getSignerAddress();
-
-  offerIds.forEach(({ offerName, offerId }) => {
-    const offerPerEnv = providerArtifactsConfig.offers[fluenceEnv] ?? {};
-    offerPerEnv[offerName] = { id: offerId, providerAddress };
-    providerArtifactsConfig.offers[fluenceEnv] = offerPerEnv;
-  });
-
-  await providerArtifactsConfig.$commit();
-
-  const offersStr = offerIds
+  const offersStr = createdOffers
     .map(({ offerName }) => {
       return offerName;
     })

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { type ICapacity } from "@fluencelabs/deal-ts-clients";
+import { CommitmentStatus, type ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import isUndefined from "lodash-es/isUndefined.js";
 import omitBy from "lodash-es/omitBy.js";
@@ -478,8 +478,10 @@ export async function collateralWithdraw(
   const capacity = dealClient.getCapacity();
   const market = dealClient.getMarket();
 
-  for (const commitment of commitments) {
-    const { commitmentId } = commitment;
+  for (const commitment of commitments.flatMap(({ ccInfos }) => {
+    return ccInfos;
+  })) {
+    const { commitmentId, noxName } = commitment;
 
     const [unitIds, isExitedStatuses] =
       await capacity.getUnitExitStatuses(commitmentId);
@@ -570,7 +572,7 @@ export async function collateralWithdraw(
     }
 
     await signBatch(
-      `Remove compute units from capacity commitments and finish commitment ${commitmentId}`,
+      `Remove compute units from capacity commitments and finish commitment ${noxName === undefined ? commitmentId : `for ${noxName} (${commitmentId})`} ${commitmentId}`,
       [
         ...units
           .filter(({ isExited }) => {
@@ -606,7 +608,7 @@ export async function collateralRewardWithdraw(flags: CCFlags) {
 export function stringifyBasicCommitmentInfo(
   commitment:
     | Awaited<ReturnType<typeof getCommitments>>[number]
-    | Awaited<ReturnType<typeof getCommitmentsInfo>>[number],
+    | Awaited<ReturnType<typeof getCommitmentsInfo>>[number]["ccInfos"][number],
 ) {
   if ("providerConfigComputePeer" in commitment) {
     return `${color.yellow(
@@ -637,6 +639,7 @@ export function stringifyBasicCommitmentInfo(
 
 export async function getCommitmentsInfo(flags: CCFlags) {
   const { readonlyDealClient } = await getReadonlyDealClient();
+  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
   const capacity = readonlyDealClient.getCapacity();
   const core = readonlyDealClient.getCore();
 
@@ -656,7 +659,7 @@ export async function getCommitmentsInfo(flags: CCFlags) {
 
   const dealExplorerClient = await getDealExplorerClient();
 
-  return Promise.all(
+  const commitmentsInfo = await Promise.all(
     commitments.map(async (c) => {
       let commitment: Partial<ICapacity.CommitmentViewStructOutput> =
         "commitmentCreatedEvent" in c
@@ -713,6 +716,8 @@ export async function getCommitmentsInfo(flags: CCFlags) {
               initTimestamp + commitment.endEpoch * epochDuration,
             );
 
+      const status = Number(commitment.status);
+
       return {
         ...("providerConfigComputePeer" in c
           ? {
@@ -722,10 +727,7 @@ export async function getCommitmentsInfo(flags: CCFlags) {
           : {}),
         ccFromExplorer,
         commitmentId: c.commitmentId,
-        status:
-          commitment.status === undefined
-            ? undefined
-            : Number(commitment.status),
+        status: status in CommitmentStatus ? status : undefined,
         currentEpoch: bigintToStr(currentEpoch),
         startEpoch: optBigIntToStr(commitment.startEpoch),
         startDate: ccStartDate,
@@ -744,6 +746,29 @@ export async function getCommitmentsInfo(flags: CCFlags) {
       };
     }),
   );
+
+  // group commitments by status
+  return Array.from(
+    commitmentsInfo
+      .reduce<
+        Map<CommitmentStatus | undefined, (typeof commitmentsInfo)[number][]>
+      >((acc, v) => {
+        const infos = acc.get(v.status) ?? [];
+        infos.push(v);
+
+        acc.set(
+          v.status !== undefined && v.status in CommitmentStatus
+            ? v.status
+            : undefined,
+          infos,
+        );
+
+        return acc;
+      }, new Map())
+      .entries(),
+  ).map(([status, ccInfos]) => {
+    return { status, ccInfos };
+  });
 }
 
 function optBigIntToStr(value: bigint | undefined) {
@@ -769,16 +794,35 @@ export async function printCommitmentsInfo(flags: CCFlags) {
   commandObj.logToStderr(
     (
       await Promise.all(
-        ccInfos.map(async (ccInfo) => {
-          const noxName =
-            ccInfo.noxName === undefined
-              ? ""
-              : color.yellow(`Nox: ${ccInfo.noxName}\n`);
+        ccInfos.map(async ({ status, ccInfos }) => {
+          return `${await getStatusHeading(status, ccInfos)}${(
+            await Promise.all(
+              ccInfos.map(async (ccInfo) => {
+                const noxName =
+                  ccInfo.noxName === undefined
+                    ? ""
+                    : color.yellow(`Nox: ${ccInfo.noxName}\n`);
 
-          return `${noxName}${await getCommitmentInfoString(ccInfo)}`;
+                return `${noxName}${await getCommitmentInfoString(ccInfo)}`;
+              }),
+            )
+          ).join("\n\n")}`;
         }),
       )
     ).join("\n\n"),
+  );
+}
+
+async function getStatusHeading(
+  status: CommitmentStatus | undefined,
+  ccInfos: { noxName?: undefined | string; commitmentId: string }[],
+) {
+  return color.yellow(
+    `Status: ${await ccStatusToString(status)} (${ccInfos
+      .map(({ commitmentId, noxName }) => {
+        return noxName ?? commitmentId;
+      })
+      .join(",")})\n\n`,
   );
 }
 
@@ -786,8 +830,10 @@ export async function printCommitmentsInfoJSON(flags: CCFlags) {
   commandObj.log(jsonStringify(await getCommitmentsInfo(flags)));
 }
 
-export async function getCommitmentInfoString(
-  ccInfo: Awaited<ReturnType<typeof getCommitmentsInfo>>[number],
+async function getCommitmentInfoString(
+  ccInfo: Awaited<
+    ReturnType<typeof getCommitmentsInfo>
+  >[number]["ccInfos"][number],
 ) {
   const { ethers } = await import("ethers");
 
@@ -877,7 +923,7 @@ async function ccStatusToString(status: number | undefined) {
     return `Unknown (${numToStr(status)})`;
   }
 
-  return statusStr;
+  return statusStr === "Inactive" ? "Completed" : statusStr;
 }
 
 export async function basicCCInfoAndStatusToString(
@@ -885,10 +931,12 @@ export async function basicCCInfoAndStatusToString(
 ) {
   return (
     await Promise.all(
-      ccInfos.map(async (ccInfo) => {
-        return `${stringifyBasicCommitmentInfo(
-          ccInfo,
-        )} Status: ${await ccStatusToString(ccInfo.status)}`;
+      ccInfos.map(async ({ status, ccInfos }) => {
+        return `${await getStatusHeading(status, ccInfos)}${ccInfos
+          .map((ccInfo) => {
+            return stringifyBasicCommitmentInfo(ccInfo);
+          })
+          .join("\n\n")} `;
       }),
     )
   ).join("\n\n");
