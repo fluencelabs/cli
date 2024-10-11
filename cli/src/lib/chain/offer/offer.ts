@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { IMarket } from "@fluencelabs/deal-ts-clients";
+import type { Contracts } from "@fluencelabs/deal-ts-clients";
 import type { OfferDetail } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/types/schemes.js";
 import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
@@ -41,7 +41,7 @@ import {
 } from "../../const.js";
 import { dbg } from "../../dbg.js";
 import {
-  getDealClient,
+  getContracts,
   getDealCliClient,
   getSignerAddress,
   guessTxSizeAndSign,
@@ -79,9 +79,7 @@ export async function createOffers(flags: OffersArgs) {
   const allOffers = await resolveOffersFromProviderConfig(flags);
   const providerConfig = await ensureReadonlyProviderConfig();
   const providerConfigPath = providerConfig.$getPath();
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
-  const usdc = dealClient.getUSDC();
+  const { contracts } = await getContracts();
   const providerArtifactsConfig = await initNewProviderArtifactsConfig();
   const fluenceEnv = await ensureFluenceEnv();
 
@@ -107,8 +105,6 @@ export async function createOffers(flags: OffersArgs) {
     );
   }
 
-  const usdcAddress = await usdc.getAddress();
-
   // Multicall here is not working for some reason:
   // Event 'MarketOfferRegistered' with hash '0x8090f06b11ff71e91580cf20918a29fefe5fcb76bc8819d550d1aef761382a99' not found in logs of the successful transaction. Try updating Fluence CLI to the latest version
 
@@ -120,7 +116,7 @@ export async function createOffers(flags: OffersArgs) {
   //       minPricePerCuPerEpochBigInt,
   //     }) => {
   //       return [
-  //         market.registerMarketOffer,
+  //         contracts.diamond.registerMarketOffer,
   //         minPricePerCuPerEpochBigInt,
   //         usdcAddress,
   //         effectorPrefixesAndHash,
@@ -135,7 +131,7 @@ export async function createOffers(flags: OffersArgs) {
   // }
 
   // const notValidatedOfferIds = getEventValueFromReceipts({
-  //   contract: market,
+  //   contract: contracts.diamond,
   //   eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
   //   txReceipts: registerMarketOfferTxReceipts,
   //   value: OFFER_ID_PROPERTY,
@@ -185,7 +181,7 @@ export async function createOffers(flags: OffersArgs) {
         getArgs(computePeersToRegister) {
           return [
             minPricePerCuPerEpochBigInt,
-            usdcAddress,
+            contracts.deployment.usdc,
             effectorPrefixesAndHash,
             computePeersToRegister,
             minProtocolVersion,
@@ -195,7 +191,7 @@ export async function createOffers(flags: OffersArgs) {
         getTitle() {
           return `Register offer: ${offerName}`;
         },
-        method: market.registerMarketOffer,
+        method: contracts.diamond.registerMarketOffer,
         validateAddress: assertProviderIsRegistered,
       }));
     } catch (e) {
@@ -210,7 +206,7 @@ export async function createOffers(flags: OffersArgs) {
 
     try {
       offerId = getEventValue({
-        contract: market,
+        contract: contracts.diamond,
         eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
         txReceipt: offerRegisterTxReceipt,
         value: OFFER_ID_PROPERTY,
@@ -245,8 +241,21 @@ export async function createOffers(flags: OffersArgs) {
     }
 
     try {
-      await addRemainingCUs({ allCPs, addedCPs, offerId, market, offerName });
-      await addRemainingCPs({ allCPs, addedCPs, offerId, market, offerName });
+      await addRemainingCUs({
+        allCPs,
+        addedCPs,
+        offerId,
+        contracts,
+        offerName,
+      });
+
+      await addRemainingCPs({
+        allCPs,
+        addedCPs,
+        offerId,
+        contracts,
+        offerName,
+      });
     } catch (e) {
       pushOfferRegisterResult({
         error: `Error when adding remaining CUs or CPs to the created offer ${color.yellow(offerName)} (${offerId}). You can try using ${color.yellow(`${CLI_NAME} provider offer-update --${OFFER_FLAG_NAME} ${offerName}`)} command to update on-chain offer to match your offer definition in ${providerConfigPath}. Error: ${stringifyUnknown(e)}`,
@@ -323,7 +332,7 @@ type AddRemainingCPsOrCUsArgs = {
   allCPs: CPFromProviderConfig[];
   addedCPs: CPFromProviderConfig[];
   offerId: string;
-  market: IMarket;
+  contracts: Contracts;
   offerName: string;
 };
 
@@ -331,7 +340,7 @@ export async function addRemainingCPs({
   allCPs,
   addedCPs = [],
   offerId,
-  market,
+  contracts,
   offerName,
 }: Omit<AddRemainingCPsOrCUsArgs, "addedCPs"> & {
   addedCPs?: CPFromProviderConfig[];
@@ -358,14 +367,14 @@ export async function addRemainingCPs({
           },
         ).join("\n")}\n\nto offer ${offerName} (${offerId})`;
       },
-      method: market.addComputePeers,
+      method: contracts.diamond.addComputePeers,
     });
 
     await addRemainingCUs({
       allCPs: remainingCPs,
       addedCPs,
       offerId,
-      market,
+      contracts,
       offerName,
     });
 
@@ -377,7 +386,7 @@ async function addRemainingCUs({
   allCPs,
   addedCPs,
   offerId,
-  market,
+  contracts,
   offerName,
 }: AddRemainingCPsOrCUsArgs) {
   const lastRegisteredCP = addedCPs[addedCPs.length - 1];
@@ -411,7 +420,7 @@ async function addRemainingCUs({
       getTitle({ sliceCount: numberOfCUsForAddCU }) {
         return `Add ${numToStr(numberOfCUsForAddCU)} compute units\nto compute peer ${cpName} (${peerIdBase58})\nfor offer ${offerName} (${offerId})`;
       },
-      method: market.addComputeUnits,
+      method: contracts.diamond.addComputeUnits,
     });
 
     totalRegisteredCUsCount = totalRegisteredCUsCount + registeredCUsCount;
@@ -687,8 +696,7 @@ export type EnsureOfferConfig = Awaited<
 async function ensureOfferConfigs() {
   const providerConfig = await ensureReadonlyProviderConfig();
   const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
-
-  const { ethers } = await import("ethers");
+  const { randomBytes } = await import("ethers");
   const fluenceEnv = await ensureFluenceEnv();
 
   return Promise.all(
@@ -718,7 +726,7 @@ async function ensureOfferConfigs() {
                 peerIdBase58: peerId,
                 peerId: await peerIdBase58ToUint8Array(peerId),
                 unitIds: times(computeUnits).map(() => {
-                  return ethers.randomBytes(32);
+                  return randomBytes(32);
                 }),
                 owner: walletAddress,
               };

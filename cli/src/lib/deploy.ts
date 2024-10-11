@@ -49,7 +49,7 @@ import {
 import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
 import { createAndMatchDealsForPeerIds } from "./deal.js";
-import { getReadonlyDealClient } from "./dealClient.js";
+import { getReadonlyContracts } from "./dealClient.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 import { stringifyUnknown } from "./helpers/utils.js";
 import { disconnectFluenceClient } from "./jsClient.js";
@@ -347,8 +347,8 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
 
 async function getDealStatus(dealId: string) {
   const { DealStatus } = await import("@fluencelabs/deal-ts-clients");
-  const { readonlyDealClient } = await getReadonlyDealClient();
-  const deal = readonlyDealClient.getDeal(dealId);
+  const { readonlyContracts } = await getReadonlyContracts();
+  const deal = readonlyContracts.getDeal(dealId);
   const status = Number(await deal.getStatus());
 
   function isDealStatus(status: number): status is DealStatus {

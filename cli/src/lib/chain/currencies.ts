@@ -17,17 +17,17 @@
 
 import { FLT_SYMBOL, PT_SYMBOL } from "../const.js";
 import { dbg } from "../dbg.js";
-import { getReadonlyDealClient } from "../dealClient.js";
+import { getReadonlyContracts } from "../dealClient.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
 
 export async function fltParse(value: string): Promise<bigint> {
-  const { ethers } = await import("ethers");
-  return ethers.parseEther(value);
+  const { parseEther } = await import("ethers");
+  return parseEther(value);
 }
 
 export async function fltFormat(value: bigint): Promise<string> {
-  const { ethers } = await import("ethers");
-  return ethers.formatEther(value);
+  const { formatEther } = await import("ethers");
+  return formatEther(value);
 }
 
 export async function fltFormatWithSymbol(value: bigint): Promise<string> {
@@ -35,13 +35,13 @@ export async function fltFormatWithSymbol(value: bigint): Promise<string> {
 }
 
 export async function ptParse(value: string): Promise<bigint> {
-  const { ethers } = await import("ethers");
-  return ethers.parseUnits(value, await getPtDecimals());
+  const { parseUnits } = await import("ethers");
+  return parseUnits(value, await getPtDecimals());
 }
 
 export async function ptFormat(value: bigint): Promise<string> {
-  const { ethers } = await import("ethers");
-  return ethers.formatUnits(value, await getPtDecimals());
+  const { formatUnits } = await import("ethers");
+  return formatUnits(value, await getPtDecimals());
 }
 
 export async function ptFormatWithSymbol(value: bigint): Promise<string> {
@@ -53,13 +53,12 @@ let ptDecimalsPromise: Promise<number> | undefined;
 export async function getPtDecimals() {
   if (ptDecimalsPromise === undefined) {
     ptDecimalsPromise = (async () => {
-      const { ethers } = await import("ethers");
-      const { readonlyDealClient, provider } = await getReadonlyDealClient();
-      const usdc = readonlyDealClient.getUSDC();
+      const { id } = await import("ethers");
+      const { readonlyContracts, provider } = await getReadonlyContracts();
 
       const decimalsRaw = await provider.call({
-        to: await usdc.getAddress(),
-        data: ethers.id("decimals()").substring(0, 10),
+        to: readonlyContracts.deployment.usdc,
+        data: id("decimals()").substring(0, 10),
       });
 
       const decimals = parseInt(decimalsRaw);

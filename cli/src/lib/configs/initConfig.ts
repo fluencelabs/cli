@@ -24,7 +24,7 @@ import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
 import isInteger from "lodash-es/isInteger.js";
 
 import { jsonStringify } from "../../common.js";
-import { validationErrorToString } from "../ajvInstance.js";
+import { validationErrorToString, getAjv } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import {
   FS_OPTIONS,
@@ -304,15 +304,7 @@ export function getReadonlyConfigInitFunction<
 
     const { configDirPath } = getConfigPathResult;
     let { configPath } = getConfigPathResult;
-
-    const Ajv = (await import("ajv")).default;
-    const addFormats = (await import("ajv-formats")).default.default;
-
-    const validateLatestConfig = addFormats(
-      new Ajv.default({
-        allowUnionTypes: true,
-      }),
-    ).compile<LatestConfig>(latestSchema);
+    const validateLatestConfig = getAjv().compile<LatestConfig>(latestSchema);
 
     const schemaPathCommentStart = "# yaml-language-server: $schema=";
 
@@ -466,11 +458,8 @@ export function getReadonlyConfigInitFunction<
         );
       }
 
-      const validateCurrentConfigVersion = addFormats(
-        new Ajv.default({
-          allowUnionTypes: true,
-        }),
-      ).compile<Config>(currentSchema);
+      const validateCurrentConfigVersion =
+        getAjv().compile<Config>(currentSchema);
 
       if (!validateCurrentConfigVersion(config)) {
         await updateSchemaPathInConfigString(

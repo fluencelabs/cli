@@ -25,7 +25,7 @@ import {
   DEAL_IDS_FLAG_NAME,
 } from "../../lib/const.js";
 import {
-  getDealClient,
+  getContracts,
   getSignerAddress,
   populateTx,
   signBatch,
@@ -50,13 +50,11 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(DealExit));
-    const { dealClient } = await getDealClient();
+    const { contracts } = await getContracts();
     const signerAddress = await getSignerAddress();
 
     const dealIds = flags.all
-      ? (await getProviderDeals()).map(({ id }) => {
-          return id;
-        })
+      ? await getProviderDeals()
       : commaSepStrToArr(
           flags[DEAL_IDS_FLAG_NAME] ??
             (await input({
@@ -67,7 +65,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     const workers = (
       await Promise.all(
         dealIds.map(async (id) => {
-          const deal = dealClient.getDeal(id);
+          const deal = contracts.getDeal(id);
           return (await deal.getWorkers()).map((worker) => {
             return { deal, worker };
           });

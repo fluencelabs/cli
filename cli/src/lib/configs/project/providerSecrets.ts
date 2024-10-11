@@ -58,6 +58,7 @@ const secretesConfig = {
     },
     signingWallet: {
       type: "string",
+      format: "hex",
       description: "Signing wallet for built-in decider system service in nox",
     },
   },
@@ -129,7 +130,7 @@ export async function initNewProviderSecretsConfig(
 }
 
 async function getDefault(providerConfig: ProviderConfigReadonly) {
-  const { ethers } = await import("ethers");
+  const { Wallet } = await import("ethers");
 
   const noxes: Record<string, SecretsConfig> = Object.fromEntries(
     await Promise.all(
@@ -138,7 +139,7 @@ async function getDefault(providerConfig: ProviderConfigReadonly) {
           name,
           {
             networkKey: (await genSecretKeyOrReturnExisting(name)).secretKey,
-            signingWallet: ethers.Wallet.createRandom().privateKey,
+            signingWallet: Wallet.createRandom().privateKey,
           },
         ] as const;
       }),

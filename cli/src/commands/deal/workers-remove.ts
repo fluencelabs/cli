@@ -26,7 +26,7 @@ import {
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { getDeal } from "../../lib/deal.js";
-import { sign, getDealClient } from "../../lib/dealClient.js";
+import { sign, getContracts } from "../../lib/dealClient.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -57,9 +57,9 @@ export default class WorkersRemove extends BaseCommand<typeof WorkersRemove> {
       await this.parse(WorkersRemove),
     );
 
-    const { dealClient } = await getDealClient();
+    const { contracts } = await getContracts();
     const { dealId } = await getDeal({ flags });
-    const dealContract = dealClient.getDeal(dealId);
+    const dealContract = contracts.getDeal(dealId);
 
     const workerIds = commaSepStrToArr(
       args["WORKER-IDS"] ??

@@ -68,6 +68,7 @@ import {
   DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
   DEFAULT_VM_EFFECTOR_CID,
 } from "../../const.js";
+import { getReadonlyContracts } from "../../dealClient.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
@@ -2150,11 +2151,7 @@ const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
 async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
-  const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-
-  const contractAddresses = DealClient.getContractAddresses(
-    env === "testnet" ? "dar" : env,
-  );
+  const { readonlyContracts } = await getReadonlyContracts();
 
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
@@ -2176,7 +2173,7 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
     chain: {
       httpEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
       wsEndpoint: WS_CHAIN_URLS[env],
-      diamondContract: contractAddresses.diamond,
+      diamondContract: readonlyContracts.deployment.diamond,
       networkId,
       defaultPriorityFee: 0,
     },
@@ -2238,7 +2235,7 @@ export type EnsureComputerPeerConfig = Awaited<
 >[number];
 
 export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
-  const { ethers } = await import("ethers");
+  const { Wallet } = await import("ethers");
   const providerConfig = await ensureReadonlyProviderConfig();
 
   const providerSecretsConfig =
@@ -2289,7 +2286,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
             .secretKey,
           computePeerName,
           computePeer,
-          signingWallet: ethers.Wallet.createRandom().privateKey,
+          signingWallet: Wallet.createRandom().privateKey,
         };
       }),
     );
@@ -2422,7 +2419,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
           peerId: await getPeerIdFromSecretKey(secretKey),
           computeUnits: computePeer.computeUnits,
           walletKey: signingWallet,
-          walletAddress: await new ethers.Wallet(signingWallet).getAddress(),
+          walletAddress: await new Wallet(signingWallet).getAddress(),
           capacityCommitment,
         };
       },

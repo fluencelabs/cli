@@ -17,10 +17,11 @@
 
 import assert from "node:assert";
 
-import type {
-  DealClient,
-  DealMatcherClient,
-  DealExplorerClient,
+import {
+  type Contracts,
+  type DealMatcherClient,
+  type DealExplorerClient,
+  SUBGRAPH_URLS,
 } from "@fluencelabs/deal-ts-clients";
 import type { DealCliClient } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/dealCliClient.js";
 import type {
@@ -55,32 +56,25 @@ import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
 import { createTransaction, getAddressFromConnector } from "./server.js";
 
 let provider: Provider | undefined = undefined;
-let readonlyDealClient: DealClient | undefined = undefined;
+let readonlyContracts: Contracts | undefined = undefined;
 
-export async function getReadonlyDealClient() {
+export async function getReadonlyContracts() {
   if (provider === undefined) {
     provider = await ensureProvider();
   }
 
-  if (readonlyDealClient === undefined) {
-    readonlyDealClient = await createDealClient(provider);
+  if (readonlyContracts === undefined) {
+    readonlyContracts = await createContracts(provider);
   }
 
-  return {
-    readonlyDealClient,
-    provider,
-  };
+  return { readonlyContracts, provider };
 }
 
 let providerOrWallet: Provider | Wallet | undefined = undefined;
 
-let dealClient: DealClient | undefined = undefined;
+let contracts: Contracts | undefined = undefined;
 
-// only needed for 'proof' command so it's possible to use multiple wallets during one command execution
-// normally, each command will use only one wallet
-let dealClientPrivKey: string | undefined = undefined;
-
-export async function getDealClient() {
+export async function getContracts() {
   const privKey =
     chainFlags[PRIV_KEY_FLAG_NAME] === undefined &&
     (await ensureChainEnv()) === "local" &&
@@ -88,25 +82,19 @@ export async function getDealClient() {
       ? LOCAL_NET_DEFAULT_WALLET_KEY
       : chainFlags[PRIV_KEY_FLAG_NAME];
 
-  if (
-    providerOrWallet === undefined ||
-    dealClient === undefined ||
-    dealClientPrivKey !== privKey
-  ) {
-    dealClientPrivKey = privKey;
-
+  if (providerOrWallet === undefined || contracts === undefined) {
     providerOrWallet = await (privKey === undefined
       ? ensureProvider()
       : getWallet(privKey));
 
-    dealClient = await createDealClient(providerOrWallet);
+    contracts = await createContracts(providerOrWallet);
   }
 
-  return { dealClient, providerOrWallet };
+  return { contracts, providerOrWallet };
 }
 
 export async function getSignerAddress() {
-  const { providerOrWallet } = await getDealClient();
+  const { providerOrWallet } = await getContracts();
 
   return (
     "address" in providerOrWallet
@@ -130,18 +118,13 @@ export async function getDealMatcherClient() {
 let dealExplorerClient: DealExplorerClient | undefined = undefined;
 
 export async function getDealExplorerClient() {
-  if (provider === undefined) {
-    provider = await ensureProvider();
-  }
-
   if (dealExplorerClient === undefined) {
     const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
-    const env = await ensureChainEnv();
+    const { readonlyContracts } = await getReadonlyContracts();
 
     dealExplorerClient = await DealExplorerClient.create(
-      env === "testnet" ? "dar" : env,
-      undefined,
-      provider,
+      readonlyContracts,
+      SUBGRAPH_URLS[await ensureChainEnv()],
     );
   }
 
@@ -153,54 +136,53 @@ let dealCliClient: DealCliClient | undefined = undefined;
 export async function getDealCliClient() {
   if (dealCliClient === undefined) {
     const { DealCliClient } = await import("@fluencelabs/deal-ts-clients");
-    const env = await ensureChainEnv();
-    dealCliClient = new DealCliClient(env);
+    dealCliClient = new DealCliClient(SUBGRAPH_URLS[await ensureChainEnv()]);
   }
 
   return dealCliClient;
 }
 
-async function createDealClient(signerOrProvider: Provider | Signer) {
-  const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const env = await ensureChainEnv();
+async function createContracts(signerOrProvider: Provider | Signer) {
+  const { Contracts, DEPLOYMENTS } = await import(
+    "@fluencelabs/deal-ts-clients"
+  );
 
-  const client = new DealClient(
+  const contracts = new Contracts(
     signerOrProvider,
-    env === "testnet" ? "dar" : env,
+    DEPLOYMENTS[await ensureChainEnv()],
   );
 
   await setTryTimeout(
     "check if blockchain client is connected",
     async () => {
-      const core = client.getCore();
       // By calling this method we ensure that the blockchain client is connected
-      await core.minDealDepositedEpochs();
+      await contracts.diamond.minDealDepositedEpochs();
     },
     (err) => {
       commandObj.error(
-        `Check if blockchain client is connected by running core.minDealDepositedEpochs() failed: ${stringifyUnknown(err)}`,
+        `Check if blockchain client is connected by running contracts.diamond.minDealDepositedEpochs() failed: ${stringifyUnknown(err)}`,
       );
     },
     1000 * 5, // 5 seconds
   );
 
-  return client;
+  return contracts;
 }
 
 export async function ensureProvider(): Promise<Provider> {
   if (provider === undefined) {
-    const { ethers } = await import("ethers");
+    const { JsonRpcProvider } = await import("ethers");
     const chainEnv = await ensureChainEnv();
     dbg(`Chain RPC ${CHAIN_URLS[chainEnv]}`);
-    provider = new ethers.JsonRpcProvider(CHAIN_URLS[chainEnv]);
+    provider = new JsonRpcProvider(CHAIN_URLS[chainEnv]);
   }
 
   return provider;
 }
 
-async function getWallet(privKey: string): Promise<Wallet> {
-  const { ethers } = await import("ethers");
-  return new ethers.Wallet(privKey, await ensureProvider());
+export async function getWallet(privKey: string): Promise<Wallet> {
+  const { Wallet } = await import("ethers");
+  return new Wallet(privKey, await ensureProvider());
 }
 
 const DEFAULT_OVERRIDES: TransactionRequest = {
@@ -210,6 +192,7 @@ const DEFAULT_OVERRIDES: TransactionRequest = {
 export async function sendRawTransaction(
   title: string,
   transactionRequest: TransactionRequest,
+  providerOrWallet?: Provider | Wallet,
 ) {
   const debugInfo = methodCallToString([
     { name: "sendTransaction" },
@@ -218,16 +201,18 @@ export async function sendRawTransaction(
 
   dbg(`sending raw transaction: ${debugInfo}`);
 
-  const { providerOrWallet } = await getDealClient();
+  const providerOrWalletToUse =
+    providerOrWallet ?? (await getContracts()).providerOrWallet;
 
   let txHash: string;
   let txReceipt: TransactionReceipt | null;
 
-  if (providerOrWallet.sendTransaction !== undefined) {
+  if (providerOrWalletToUse.sendTransaction !== undefined) {
     const { tx, res } = await setTryTimeout(
-      `executing ${color.yellow(title)}`,
+      `execute ${color.yellow(title)}`,
       async function executingContractMethod() {
-        const tx = await providerOrWallet.sendTransaction?.(transactionRequest);
+        const tx =
+          await providerOrWalletToUse.sendTransaction?.(transactionRequest);
 
         assert(
           tx !== undefined,
@@ -275,8 +260,7 @@ export async function sendRawTransaction(
       });
     }));
 
-    const { providerOrWallet } = await getDealClient();
-    const provider = providerOrWallet.provider;
+    const provider = providerOrWalletToUse.provider;
     assert(provider !== null, "Unreachable. Provider is null");
     txReceipt = await provider.getTransactionReceipt(txHash);
   }
@@ -339,14 +323,14 @@ async function doSign<
       : `calling contract method: ${debugInfo}`,
   );
 
-  const { providerOrWallet } = await getDealClient();
+  const { providerOrWallet } = await getContracts();
 
   let txHash: string;
   let txReceipt: TransactionReceipt | null;
 
   if (providerOrWallet.sendTransaction !== undefined) {
     const { tx, res } = await setTryTimeout(
-      `executing ${color.yellow(title)} contract method`,
+      `execute ${color.yellow(title)} contract function`,
       async function executingContractMethod() {
         const tx = await method(...args);
         const res = await tx.wait();
@@ -403,7 +387,7 @@ async function doSign<
       validateAddress,
     ));
 
-    const { providerOrWallet } = await getDealClient();
+    const { providerOrWallet } = await getContracts();
     const provider = providerOrWallet.provider;
     assert(provider !== null, "Unreachable. Provider is null");
     txReceipt = await provider.getTransactionReceipt(txHash);
@@ -506,7 +490,7 @@ export async function signBatch(
   }
 
   const { IMulticall__factory } = await import("@fluencelabs/deal-ts-clients");
-  const { providerOrWallet } = await getDealClient();
+  const { providerOrWallet } = await getContracts();
 
   const { multicall } = IMulticall__factory.connect(
     firstAddr,
@@ -722,7 +706,7 @@ export async function guessTxSizeAndSign<
   let valuesToRegister;
   let sliceIndex = sliceIndexArg;
   let isValidTx = false;
-  const { providerOrWallet } = await getDealClient();
+  const { providerOrWallet } = await getContracts();
   const address = await getSignerAddress();
 
   do {

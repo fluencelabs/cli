@@ -22,7 +22,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
-import { getReadonlyDealClient } from "../../lib/dealClient.js";
+import { getReadonlyContracts } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -55,8 +55,8 @@ export default class DealRewardsInfo extends BaseCommand<
       args["ON-CHAIN-WORKER-ID"] ??
       (await input({ message: "Enter on-chain worker id" }));
 
-    const { readonlyDealClient } = await getReadonlyDealClient();
-    const deal = readonlyDealClient.getDeal(dealAddress);
+    const { readonlyContracts } = await getReadonlyContracts();
+    const deal = readonlyContracts.getDeal(dealAddress);
     const rewardAmount = await deal.getRewardAmount(onChainWorkerId);
 
     commandObj.log(
