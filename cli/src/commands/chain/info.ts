@@ -25,6 +25,7 @@ import { CHAIN_URLS } from "../../common.js";
 import { getChainId } from "../../lib/chain/chainId.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
+import { getReadonlyContracts } from "../../lib/dealClient.js";
 import { ensureChainEnv } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -39,21 +40,14 @@ export default class Info extends BaseCommand<typeof Info> {
   async run(): Promise<void> {
     await initCli(this, await this.parse(Info));
     const chainEnv = await ensureChainEnv();
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { default: contracts }: { default: unknown } = await import(
-      `@fluencelabs/deal-ts-clients/dist/deployments/${chainEnv === "testnet" ? "dar" : chainEnv}.json`,
-      {
-        assert: { type: "json" },
-      }
-    );
+    const { readonlyContracts } = await getReadonlyContracts();
 
     commandObj.log(
       jsonStringify({
         ...(chainEnv === "local"
           ? { defaultAccountsForLocalEnv: LOCAL_NET_DEFAULT_ACCOUNTS }
           : {}),
-        contracts,
+        contracts: readonlyContracts.deployment,
         chainId: await getChainId(),
         chainRPC: CHAIN_URLS[chainEnv],
         ...(chainEnv === "local"
