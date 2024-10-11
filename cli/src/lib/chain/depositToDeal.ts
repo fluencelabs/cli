@@ -36,9 +36,7 @@ export async function depositToDeal(
 ) {
   const parsedAmount = await ptParse(amount);
   const deals = await getDeals(flagsAndArgs);
-  const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
-
-  const { contracts, providerOrWallet } = await getContracts();
+  const { contracts } = await getContracts();
 
   for (const { dealName, dealId } of deals) {
     const deal = contracts.getDeal(dealId);
@@ -46,10 +44,7 @@ export async function depositToDeal(
 
     await sign({
       title: `Approve ${tokensString} tokens to be deposited to the deal ${dealName}`,
-      method: ERC20__factory.connect(
-        await deal.paymentToken(),
-        providerOrWallet,
-      ).approve,
+      method: contracts.usdc.approve,
       args: [await deal.getAddress(), parsedAmount],
     });
 

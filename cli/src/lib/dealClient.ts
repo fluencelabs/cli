@@ -108,8 +108,10 @@ let dealMatcherClient: DealMatcherClient | undefined = undefined;
 export async function getDealMatcherClient() {
   if (dealMatcherClient === undefined) {
     const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
-    const env = await ensureChainEnv();
-    dealMatcherClient = new DealMatcherClient(env === "testnet" ? "dar" : env);
+
+    dealMatcherClient = new DealMatcherClient(
+      SUBGRAPH_URLS[await ensureChainEnv()],
+    );
   }
 
   return dealMatcherClient;
@@ -489,14 +491,8 @@ export async function signBatch(
     throw new Error("All transactions must be to the same address");
   }
 
-  const { IMulticall__factory } = await import("@fluencelabs/deal-ts-clients");
-  const { providerOrWallet } = await getContracts();
-
-  const { multicall } = IMulticall__factory.connect(
-    firstAddr,
-    providerOrWallet,
-  );
-
+  const { contracts } = await getContracts();
+  const { multicall } = contracts.getMulticall(firstAddr);
   const receipts = [];
   let sliceIndexStart = 0;
 
