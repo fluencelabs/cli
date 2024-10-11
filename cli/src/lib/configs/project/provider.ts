@@ -68,7 +68,6 @@ import {
   DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
   DEFAULT_VM_EFFECTOR_CID,
 } from "../../const.js";
-import { getReadonlyContracts } from "../../dealClient.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
@@ -2151,7 +2150,7 @@ const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
 async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
-  const { readonlyContracts } = await getReadonlyContracts();
+  const { DEPLOYMENTS } = await import("@fluencelabs/deal-ts-clients");
 
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
@@ -2173,7 +2172,7 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
     chain: {
       httpEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
       wsEndpoint: WS_CHAIN_URLS[env],
-      diamondContract: readonlyContracts.deployment.diamond,
+      diamondContract: DEPLOYMENTS[env].diamond,
       networkId,
       defaultPriorityFee: 0,
     },
