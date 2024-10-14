@@ -23,13 +23,13 @@ import { type Node as AddrAndPeerId } from "@fluencelabs/fluence-network-environ
 import { color } from "@oclif/color";
 import sample from "lodash-es/sample.js";
 
-import { jsonStringify } from "../common.js";
+import { CHAIN_ENV, jsonStringify } from "../common.js";
 
 import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";
 import { initFluenceConfig } from "./configs/project/fluence.js";
 import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
-import { FLUENCE_ENVS, type FluenceEnv } from "./const.js";
+import type { FluenceEnv } from "./const.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "./helpers/utils.js";
 import {
@@ -77,7 +77,7 @@ async function getMaybeNamedAddrAndPeerId(
     return undefined;
   }
 
-  const fluenceEnv = FLUENCE_ENVS.find((networkName) => {
+  const fluenceEnv = CHAIN_ENV.find((networkName) => {
     return maybeRelayName.startsWith(networkName);
   });
 

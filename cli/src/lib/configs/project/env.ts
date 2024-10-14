@@ -17,12 +17,11 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { DEFAULT_PUBLIC_FLUENCE_ENV } from "../../../common.js";
+import { CHAIN_ENV, DEFAULT_PUBLIC_FLUENCE_ENV } from "../../../common.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   ENV_CONFIG_FILE_NAME,
   ENV_CONFIG_FULL_FILE_NAME,
-  FLUENCE_ENVS,
   FLUENCE_ENVS_OLD,
   fluenceOldEnvToNewEnv,
   TOP_LEVEL_SCHEMA_ID,
@@ -66,6 +65,11 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = configSchemaV0Obj;
 
 type ConfigV1 = {
   fluenceEnv?: FluenceEnv;
+  relays?: Array<string>;
+  subgraphUrl?: string;
+  rpcUrl?: string;
+  blockScoutUrl?: string;
+  chainId?: number;
   version: 1;
 };
 
@@ -76,7 +80,37 @@ const configSchemaV1Obj = {
       title: "Fluence environment",
       description: `Fluence environment to connect to`,
       type: "string",
-      enum: [...FLUENCE_ENVS],
+      enum: [...CHAIN_ENV],
+      nullable: true,
+    },
+    relays: {
+      type: "array",
+      description: `List of custom relay multiaddresses to use when connecting to Fluence network`,
+      items: { type: "string" },
+      minItems: 1,
+      nullable: true,
+    },
+    subgraphUrl: {
+      type: "string",
+      description: `Subgraph URL to use`,
+      format: "uri",
+      nullable: true,
+    },
+    rpcUrl: {
+      type: "string",
+      description: `RPC URL to use`,
+      format: "uri",
+      nullable: true,
+    },
+    blockScoutUrl: {
+      type: "string",
+      description: `BlockScout URL to use`,
+      format: "uri",
+      nullable: true,
+    },
+    chainId: {
+      type: "number",
+      description: `Chain ID to use`,
       nullable: true,
     },
     version: { type: "integer", const: 1 },

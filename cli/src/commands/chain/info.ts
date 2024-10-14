@@ -16,12 +16,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import {
-  BLOCK_SCOUT_URLS,
-  jsonStringify,
-  LOCAL_NET_DEFAULT_ACCOUNTS,
-} from "../../common.js";
-import { CHAIN_URLS } from "../../common.js";
+import { jsonStringify, LOCAL_NET_DEFAULT_ACCOUNTS } from "../../common.js";
 import { getChainId } from "../../lib/chain/chainId.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
@@ -42,6 +37,10 @@ export default class Info extends BaseCommand<typeof Info> {
     const chainEnv = await ensureChainEnv();
     const { readonlyContracts } = await getReadonlyContracts();
 
+    const { RPC_URLS, BLOCK_SCOUT_URLS } = await import(
+      "@fluencelabs/deal-ts-clients"
+    );
+
     commandObj.log(
       jsonStringify({
         ...(chainEnv === "local"
@@ -49,7 +48,7 @@ export default class Info extends BaseCommand<typeof Info> {
           : {}),
         contracts: readonlyContracts.deployment,
         chainId: await getChainId(),
-        chainRPC: CHAIN_URLS[chainEnv],
+        chainRPC: RPC_URLS[chainEnv],
         ...(chainEnv === "local"
           ? {}
           : { blockScoutUrl: BLOCK_SCOUT_URLS[chainEnv] }),

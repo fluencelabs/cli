@@ -31,7 +31,6 @@ import xbytes from "xbytes";
 import {
   getIsUnion,
   CHAIN_ENV,
-  CHAIN_URLS_WITHOUT_LOCAL,
   type ChainENV,
   CHAIN_RPC_PORT,
   LOCAL_NET_DEFAULT_WALLET_KEY,
@@ -116,16 +115,9 @@ export const WC_METADATA = {
   icons: [],
 };
 
-export const FLUENCE_ENVS = [...CHAIN_ENV, "custom"] as const;
-export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
-export const isFluenceEnv = getIsUnion(FLUENCE_ENVS);
-export const FLUENCE_ENVS_OLD = [
-  "stage",
-  "dar",
-  "kras",
-  "local",
-  "custom",
-] as const;
+export type FluenceEnv = (typeof CHAIN_ENV)[number];
+export const isFluenceEnv = getIsUnion(CHAIN_ENV);
+export const FLUENCE_ENVS_OLD = ["stage", "dar", "kras", "local"] as const;
 export type FluenceEnvOld = (typeof FLUENCE_ENVS_OLD)[number];
 export const isFluenceEnvOld = getIsUnion(FLUENCE_ENVS_OLD);
 
@@ -136,7 +128,6 @@ export function fluenceOldEnvToNewEnv(env: FluenceEnvOld): FluenceEnv {
       dar: "testnet",
       kras: "mainnet",
       local: "local",
-      custom: "custom",
     } as const satisfies Record<FluenceEnvOld, FluenceEnv>
   )[env];
 }
@@ -155,11 +146,6 @@ export const WEB_SOCKET_PORT_START = 999;
 export const HTTP_PORT_START = 918;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
 export const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
-
-export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
-  ...CHAIN_URLS_WITHOUT_LOCAL,
-  local: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
-};
 
 export const WS_CHAIN_URLS: Record<ChainENV, string> = {
   mainnet: "wss://ws.mainnet.fluence.dev",
@@ -278,7 +264,7 @@ export const NO_INPUT_FLAG = {
 
 const fluenceEnvFlagAndArg = {
   description: "Fluence Environment to use when running the command",
-  helpValue: `<${FLUENCE_ENVS.join(" | ")}>`,
+  helpValue: `<${CHAIN_ENV.join(" | ")}>`,
 };
 
 export const ENV_FLAG_NAME = "env";

@@ -19,8 +19,8 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 import { Buffer } from "buffer";
 
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { ChainId, CLIToConnectorFullMsg } from "@repo/common";
+import { RainbowKitProvider, getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { CLIToConnectorFullMsg } from "@repo/common";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import React from "react";
 import { useState, useEffect } from "react";
@@ -28,7 +28,6 @@ import ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
 
 import { App } from "./App.jsx";
-import { config } from "./wagmi.js";
 import "@total-typescript/ts-reset";
 import "./index.css";
 
@@ -42,10 +41,12 @@ if (root === null) {
 }
 
 export function AppWrapper() {
-  const [chainId, setChainId] = useState<ChainId | undefined>(undefined);
+  const [chain, setChain] = useState<
+    CLIToConnectorFullMsg["chain"] | undefined
+  >(undefined);
 
   useEffect(() => {
-    if (chainId !== undefined) {
+    if (chain !== undefined) {
       return;
     }
 
@@ -54,25 +55,41 @@ export function AppWrapper() {
     eventSource.onmessage = ({ data }) => {
       // We are sure CLI returns what we expect so there is no need to validate
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { chainId: chainIdFromCLI } = JSON.parse(
+      const { chain } = JSON.parse(
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         data as string,
       ) as CLIToConnectorFullMsg;
 
-      setChainId(chainIdFromCLI);
+      setChain(chain);
       eventSource.close();
     };
-  }, [chainId, setChainId]);
+  }, [chain, setChain]);
 
-  if (chainId === undefined) {
+  if (chain === undefined) {
     return;
   }
+
+  const config = getDefaultConfig({
+    appName: "Fluence CLI Connector",
+    projectId: "YOUR_PROJECT_ID",
+    chains: [
+      {
+        ...chain,
+        nativeCurrency: {
+          decimals: 18,
+          name: "Fluence",
+          symbol: chain.name === "mainnet" ? "FLT" : "tFLT",
+        },
+        testnet: chain.name !== "mainnet",
+      },
+    ],
+  });
 
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider initialChain={chainId}>
-          <App chainId={chainId} setChainId={setChainId} />
+        <RainbowKitProvider initialChain={chain.id}>
+          <App />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

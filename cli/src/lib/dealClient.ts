@@ -17,13 +17,12 @@
 
 import assert from "node:assert";
 
-import {
-  type Contracts,
-  type DealMatcherClient,
-  type DealExplorerClient,
-  SUBGRAPH_URLS,
+import type {
+  Contracts,
+  DealMatcherClient,
+  DealExplorerClient,
+  DealCliClient,
 } from "@fluencelabs/deal-ts-clients";
-import type { DealCliClient } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/dealCliClient.js";
 import type {
   TypedContractMethod,
   StateMutability,
@@ -42,11 +41,16 @@ import chunk from "lodash-es/chunk.js";
 import stripAnsi from "strip-ansi";
 
 import {
-  CHAIN_URLS,
   type TransactionPayload,
   LOCAL_NET_DEFAULT_WALLET_KEY,
 } from "../common.js";
 
+import {
+  getChainId,
+  getNetworkName,
+  getRpcUrl,
+  getSubgraphUrl,
+} from "./chain/chainId.js";
 import { chainFlags } from "./chainFlags.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { CLI_NAME_FULL, PRIV_KEY_FLAG_NAME } from "./const.js";
@@ -108,10 +112,7 @@ let dealMatcherClient: DealMatcherClient | undefined = undefined;
 export async function getDealMatcherClient() {
   if (dealMatcherClient === undefined) {
     const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
-
-    dealMatcherClient = new DealMatcherClient(
-      SUBGRAPH_URLS[await ensureChainEnv()],
-    );
+    dealMatcherClient = new DealMatcherClient(await getSubgraphUrl());
   }
 
   return dealMatcherClient;
@@ -126,7 +127,7 @@ export async function getDealExplorerClient() {
 
     dealExplorerClient = await DealExplorerClient.create(
       readonlyContracts,
-      SUBGRAPH_URLS[await ensureChainEnv()],
+      await getSubgraphUrl(),
     );
   }
 
@@ -138,7 +139,7 @@ let dealCliClient: DealCliClient | undefined = undefined;
 export async function getDealCliClient() {
   if (dealCliClient === undefined) {
     const { DealCliClient } = await import("@fluencelabs/deal-ts-clients");
-    dealCliClient = new DealCliClient(SUBGRAPH_URLS[await ensureChainEnv()]);
+    dealCliClient = new DealCliClient(await getSubgraphUrl());
   }
 
   return dealCliClient;
@@ -174,9 +175,11 @@ async function createContracts(signerOrProvider: Provider | Signer) {
 export async function ensureProvider(): Promise<Provider> {
   if (provider === undefined) {
     const { JsonRpcProvider } = await import("ethers");
-    const chainEnv = await ensureChainEnv();
-    dbg(`Chain RPC ${CHAIN_URLS[chainEnv]}`);
-    provider = new JsonRpcProvider(CHAIN_URLS[chainEnv]);
+
+    provider = new JsonRpcProvider(await getRpcUrl(), {
+      chainId: await getChainId(),
+      name: await getNetworkName(),
+    });
   }
 
   return provider;

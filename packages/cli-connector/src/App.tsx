@@ -24,15 +24,12 @@ import {
   type ConnectorToCLIMessage,
   jsonStringify,
   LOCAL_NET_WALLET_KEYS,
-  CHAIN_IDS,
-  ChainId,
 } from "@repo/common";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as v from "valibot";
 import {
   useClient,
   useSendTransaction,
-  useSwitchChain,
   useAccount,
   useWaitForTransactionReceipt,
 } from "wagmi";
@@ -47,29 +44,16 @@ const TransactionError = v.object({
   }),
 });
 
-export function App({
-  chainId,
-  setChainId,
-}: {
-  chainId: ChainId;
-  setChainId: (chainId: ChainId) => void;
-}) {
-  const { isConnected, address, chainId: accountChainId } = useAccount();
+export function App() {
+  const { isConnected, address } = useAccount();
   const [addressUsedByCLI, setAddressUsedByCLI] = useState<string | null>(null);
   const client = useClient();
-  const { switchChain, isPending: isSwitchChainPending } = useSwitchChain();
   const [isExpectingAddress, setIsExpectingAddress] = useState(false);
   const [isCLIConnected, setIsCLIConnected] = useState(true);
   const [isReturnToCLI, setIsReturnToCLI] = useState(false);
 
   const [wasSwitchChainDialogShown, setWasSwitchChainDialogShown] =
     useState(false);
-
-  useEffect(() => {
-    if (isSwitchChainPending && !wasSwitchChainDialogShown) {
-      setWasSwitchChainDialogShown(true);
-    }
-  }, [isSwitchChainPending, wasSwitchChainDialogShown]);
 
   const [transactionPayload, setTransactionPayload] =
     useState<TransactionPayload | null>(null);
@@ -91,37 +75,6 @@ export function App({
       : error?.message ?? "";
   }, [error]);
 
-  const [trySwitchChainFlag, setTrySwitchChainFlag] = useState(false);
-
-  const isCorrectChainIdSet =
-    chainId === client?.chain.id && chainId === accountChainId;
-
-  useEffect(() => {
-    if (isCorrectChainIdSet) {
-      setWasSwitchChainDialogShown(false);
-    }
-
-    if (wasSwitchChainDialogShown || isCorrectChainIdSet) {
-      return;
-    }
-
-    // For some reason switchChain does not work if called immediately
-    // So we try until user switches the chain cause we can't proceed until he does
-    setTimeout(() => {
-      switchChain({ chainId });
-
-      setTrySwitchChainFlag((prev) => {
-        return !prev;
-      });
-    }, 2000);
-  }, [
-    chainId,
-    switchChain,
-    trySwitchChainFlag,
-    wasSwitchChainDialogShown,
-    isCorrectChainIdSet,
-  ]);
-
   const CLIDisconnectedTimeout = useRef<number>();
   const gotFirstMessage = useRef(false);
   const cliVersion = useRef<string | null>(null);
@@ -132,14 +85,10 @@ export function App({
     events.onmessage = ({ data }) => {
       // We are sure CLI returns what we expect so there is no need to validate
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { chainId: chainIdFromCLI, msg } = JSON.parse(
+      const { msg } = JSON.parse(
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         data as string,
       ) as CLIToConnectorFullMsg;
-
-      if (chainId !== chainIdFromCLI) {
-        setChainId(chainIdFromCLI);
-      }
 
       if (msg.tag !== "ping") {
         reset();
@@ -187,7 +136,7 @@ export function App({
         );
       }
     };
-  }, [chainId, reset, sendTransaction, setChainId]);
+  }, [reset, sendTransaction]);
 
   const {
     data: txReceipt,
@@ -230,7 +179,7 @@ export function App({
   return (
     <>
       {isConnected && <p>Chain: {client?.chain.name}</p>}
-      {client?.chain.id === CHAIN_IDS.local && (
+      {client?.chain.name === "local" && (
         <details>
           <summary>How to work with local chain</summary>
           <ol>
@@ -291,21 +240,19 @@ export function App({
               Send account address to CLI
             </button>
           )}
-          {!isExpectingAddress &&
-            transactionPayload !== null &&
-            isCorrectChainIdSet && (
-              <button
-                type="button"
-                className={`button${isSendTxButtonEnabled ? "" : " button_disabled"}`}
-                onClick={() => {
-                  if (isSendTxButtonEnabled) {
-                    respond({ tag: "sendTransaction", address });
-                  }
-                }}
-              >
-                Send transaction
-              </button>
-            )}
+          {!isExpectingAddress && transactionPayload !== null && (
+            <button
+              type="button"
+              className={`button${isSendTxButtonEnabled ? "" : " button_disabled"}`}
+              onClick={() => {
+                if (isSendTxButtonEnabled) {
+                  respond({ tag: "sendTransaction", address });
+                }
+              }}
+            >
+              Send transaction
+            </button>
+          )}
           {wasSwitchChainDialogShown && (
             <button
               type="button"

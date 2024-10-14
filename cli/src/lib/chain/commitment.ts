@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CommitmentStatus, type ICapacity } from "@fluencelabs/deal-ts-clients";
+import type { CommitmentStatus, ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import isUndefined from "lodash-es/isUndefined.js";
 import omitBy from "lodash-es/omitBy.js";

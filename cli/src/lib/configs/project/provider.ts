@@ -30,7 +30,11 @@ import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
-import { type ChainENV, jsonStringify } from "../../../common.js";
+import {
+  jsonStringify,
+  CHAIN_RPC_PORT,
+  type ChainENV,
+} from "../../../common.js";
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import { getChainId } from "../../chain/chainId.js";
@@ -63,7 +67,7 @@ import {
   WS_CHAIN_URLS,
   PT_SYMBOL,
   DEFAULT_CURL_EFFECTOR_CID,
-  CHAIN_URLS_FOR_CONTAINERS,
+  CHAIN_RPC_CONTAINER_NAME,
   CLI_NAME,
   DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
   DEFAULT_VM_EFFECTOR_CID,
@@ -2150,7 +2154,15 @@ const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
 async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
-  const { DEPLOYMENTS } = await import("@fluencelabs/deal-ts-clients");
+
+  const { DEPLOYMENTS, RPC_URLS } = await import(
+    "@fluencelabs/deal-ts-clients"
+  );
+
+  const CHAIN_URLS_FOR_CONTAINERS = {
+    ...RPC_URLS,
+    local: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
+  };
 
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,

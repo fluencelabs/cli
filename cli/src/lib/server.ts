@@ -32,7 +32,12 @@ import {
   type ConnectorToCLIMessage,
 } from "../common.js";
 
-import { getChainId } from "./chain/chainId.js";
+import {
+  getBlockScoutUrl,
+  getChainId,
+  getRpcUrl,
+  getNetworkName,
+} from "./chain/chainId.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import {
   CLI_CONNECTOR_DIR_NAME,
@@ -163,8 +168,15 @@ async function sendEvent(msg: CLIToConnectorMsg) {
     isServerInitialized = true;
   }
 
-  const chainId = await getChainId();
-  const cliToConnectorFullMsg: CLIToConnectorFullMsg = { chainId, msg };
+  const cliToConnectorFullMsg: CLIToConnectorFullMsg = {
+    chain: {
+      id: await getChainId(),
+      name: await getNetworkName(),
+      rpcUrls: { default: { http: [await getRpcUrl()] } },
+      ...(await getBlockScoutUrl()),
+    },
+    msg,
+  };
 
   clientEventResponse?.write(
     `data: ${jsonStringify(cliToConnectorFullMsg, true)}\n\n`,

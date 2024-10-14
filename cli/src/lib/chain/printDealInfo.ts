@@ -17,7 +17,6 @@
 
 import { color } from "@oclif/color";
 
-import { BLOCK_SCOUT_URLS } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { type DealNameAndId } from "../deal.js";
 import { getReadonlyContracts } from "../dealClient.js";
@@ -33,7 +32,10 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   commandObj.log(`\n${color.yellow(dealName)} info:`);
   const status = await deal.getStatus();
   const env = await ensureChainEnv();
-  const { DealStatus } = await import("@fluencelabs/deal-ts-clients");
+
+  const { DealStatus, BLOCK_SCOUT_URLS } = await import(
+    "@fluencelabs/deal-ts-clients"
+  );
 
   if (env !== "local") {
     commandObj.log(`Deal: ${BLOCK_SCOUT_URLS[env]}address/${dealId}`);

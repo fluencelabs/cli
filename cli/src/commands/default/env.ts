@@ -26,7 +26,6 @@ import { ENV_ARG } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { updateRelaysJSON } from "../../lib/multiaddres.js";
-import { ensureCustomAddrsAndPeerIds } from "../../lib/multiaddresWithoutLocal.js";
 import { ensureValidFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Env extends BaseCommand<typeof Env> {
@@ -47,13 +46,6 @@ export default class Env extends BaseCommand<typeof Env> {
     const newEnvConfig = await initNewEnvConfig();
     setEnvConfig(newEnvConfig);
     const fluenceEnv = await ensureValidFluenceEnv(args.ENV);
-
-    if (
-      fluenceEnv === "custom" &&
-      fluenceConfig?.customFluenceEnv === undefined
-    ) {
-      await ensureCustomAddrsAndPeerIds();
-    }
 
     newEnvConfig.fluenceEnv = fluenceEnv;
     await newEnvConfig.$commit();
