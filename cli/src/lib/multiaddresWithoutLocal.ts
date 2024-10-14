@@ -59,9 +59,7 @@ const ADDR_MAP: Record<PublicFluenceEnv, Array<AddrAndPeerId>> = {
 
 let loggedAboutCustomAddrs = false;
 
-export async function resolveAddrsAndPeerIdsWithoutLocal(
-  env: Exclude<FluenceEnv, "local">,
-): Promise<AddrAndPeerId[]> {
+export async function resolveCustomAddrsAndPeerIds() {
   const envConfig = await initEnvConfig();
 
   if (envConfig !== null && envConfig.relays !== undefined) {
@@ -76,7 +74,13 @@ export async function resolveAddrsAndPeerIdsWithoutLocal(
     return addrsToNodes(envConfig.relays);
   }
 
-  return ADDR_MAP[env];
+  return null;
+}
+
+export async function resolveAddrsAndPeerIdsWithoutLocal(
+  env: Exclude<FluenceEnv, "local">,
+): Promise<AddrAndPeerId[]> {
+  return (await resolveCustomAddrsAndPeerIds()) ?? ADDR_MAP[env];
 }
 
 export async function resolveRelaysWithoutLocal(

@@ -72,7 +72,7 @@ import {
   validateBatchAsync,
 } from "../../helpers/validations.js";
 import { writeSecretKey } from "../../keyPairs.js";
-import { resolveRelays } from "../../multiaddres.js";
+import { resolveDefaultRelays } from "../../multiaddres.js";
 import { getFluenceDir, projectRootDir } from "../../paths.js";
 import type { Mutable } from "../../typeHelpers.js";
 import {
@@ -1298,7 +1298,7 @@ const migrations: Migrations<Config> = [
         contractsEnv: chainNetwork ?? "dar",
         relays:
           relays === undefined || typeof relays === "string"
-            ? await resolveRelays()
+            ? await resolveDefaultRelays()
             : relays,
       };
     }

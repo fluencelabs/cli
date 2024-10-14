@@ -25,7 +25,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import React from "react";
 import { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import { WagmiProvider } from "wagmi";
+import { WagmiProvider, deepEqual } from "wagmi";
 
 import { App } from "./App.jsx";
 import "@total-typescript/ts-reset";
@@ -55,13 +55,14 @@ export function AppWrapper() {
     eventSource.onmessage = ({ data }) => {
       // We are sure CLI returns what we expect so there is no need to validate
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { chain } = JSON.parse(
+      const { chain: chainFromCLI } = JSON.parse(
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         data as string,
       ) as CLIToConnectorFullMsg;
 
-      setChain(chain);
-      eventSource.close();
+      if (!deepEqual(chain, chainFromCLI)) {
+        setChain(chainFromCLI);
+      }
     };
   }, [chain, setChain]);
 
@@ -78,9 +79,9 @@ export function AppWrapper() {
         nativeCurrency: {
           decimals: 18,
           name: "Fluence",
-          symbol: chain.name === "mainnet" ? "FLT" : "tFLT",
+          symbol: chain.name === "Fluence Mainnet" ? "FLT" : "tFLT",
         },
-        testnet: chain.name !== "mainnet",
+        testnet: chain.name !== "Fluence Mainnet",
       },
     ],
   });
@@ -89,7 +90,7 @@ export function AppWrapper() {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider initialChain={chain.id}>
-          <App />
+          <App chain={chain} />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

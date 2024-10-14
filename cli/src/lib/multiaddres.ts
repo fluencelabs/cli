@@ -33,7 +33,7 @@ import type { FluenceEnv } from "./const.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "./helpers/utils.js";
 import {
-  getPeerId,
+  resolveCustomAddrsAndPeerIds,
   resolveAddrsAndPeerIdsWithoutLocal,
 } from "./multiaddresWithoutLocal.js";
 import { projectRootDir } from "./paths.js";
@@ -50,17 +50,27 @@ async function ensureLocalAddrsAndPeerIds() {
   );
 }
 
-export async function resolveAddrsAndPeerIds(): Promise<AddrAndPeerId[]> {
-  const fluenceEnv = await ensureFluenceEnv();
-
-  if (fluenceEnv === "local") {
-    return ensureLocalAddrsAndPeerIds();
-  }
-
-  return resolveAddrsAndPeerIdsWithoutLocal(fluenceEnv);
+async function resolveDefaultAddrsAndPeerIds(): Promise<AddrAndPeerId[]> {
+  const env = await ensureFluenceEnv();
+  return env === "local"
+    ? ensureLocalAddrsAndPeerIds()
+    : resolveAddrsAndPeerIdsWithoutLocal(env);
 }
 
-export async function resolveRelays(): Promise<Array<string>> {
+export async function resolveDefaultRelays(): Promise<Array<string>> {
+  return (await resolveDefaultAddrsAndPeerIds()).map((node) => {
+    return node.multiaddr;
+  });
+}
+
+async function resolveAddrsAndPeerIds(): Promise<AddrAndPeerId[]> {
+  return (
+    (await resolveCustomAddrsAndPeerIds()) ??
+    (await resolveDefaultAddrsAndPeerIds())
+  );
+}
+
+async function resolveRelays(): Promise<Array<string>> {
   return (await resolveAddrsAndPeerIds()).map((node) => {
     return node.multiaddr;
   });
@@ -178,10 +188,6 @@ export async function resolvePeerId(peerIdOrNamedNode: string) {
     (await getMaybeNamedAddrAndPeerId(peerIdOrNamedNode))?.peerId ??
     peerIdOrNamedNode
   );
-}
-
-export async function getRandomPeerId(): Promise<string> {
-  return getPeerId(await getRandomRelayAddr());
 }
 
 export async function updateRelaysJSON() {

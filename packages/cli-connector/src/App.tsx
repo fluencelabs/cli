@@ -30,6 +30,7 @@ import * as v from "valibot";
 import {
   useClient,
   useSendTransaction,
+  useSwitchChain,
   useAccount,
   useWaitForTransactionReceipt,
 } from "wagmi";
@@ -44,16 +45,23 @@ const TransactionError = v.object({
   }),
 });
 
-export function App() {
-  const { isConnected, address } = useAccount();
+export function App({ chain }: { chain: CLIToConnectorFullMsg["chain"] }) {
+  const { isConnected, address, chainId: accountChainId } = useAccount();
   const [addressUsedByCLI, setAddressUsedByCLI] = useState<string | null>(null);
   const client = useClient();
+  const { switchChain, isPending: isSwitchChainPending } = useSwitchChain();
   const [isExpectingAddress, setIsExpectingAddress] = useState(false);
   const [isCLIConnected, setIsCLIConnected] = useState(true);
   const [isReturnToCLI, setIsReturnToCLI] = useState(false);
 
   const [wasSwitchChainDialogShown, setWasSwitchChainDialogShown] =
     useState(false);
+
+  useEffect(() => {
+    if (isSwitchChainPending && !wasSwitchChainDialogShown) {
+      setWasSwitchChainDialogShown(true);
+    }
+  }, [isSwitchChainPending, wasSwitchChainDialogShown]);
 
   const [transactionPayload, setTransactionPayload] =
     useState<TransactionPayload | null>(null);
@@ -74,6 +82,37 @@ export function App() {
       ? parsedError.output.cause.cause.data.message
       : error?.message ?? "";
   }, [error]);
+
+  const [trySwitchChainFlag, setTrySwitchChainFlag] = useState(false);
+
+  const isCorrectChainIdSet =
+    chain.id === client?.chain.id && chain.id === accountChainId;
+
+  useEffect(() => {
+    if (isCorrectChainIdSet) {
+      setWasSwitchChainDialogShown(false);
+    }
+
+    if (wasSwitchChainDialogShown || isCorrectChainIdSet) {
+      return;
+    }
+
+    // For some reason switchChain does not work if called immediately
+    // So we try until user switches the chain cause we can't proceed until he does
+    setTimeout(() => {
+      switchChain({ chainId: chain.id });
+
+      setTrySwitchChainFlag((prev) => {
+        return !prev;
+      });
+    }, 2000);
+  }, [
+    chain,
+    switchChain,
+    trySwitchChainFlag,
+    wasSwitchChainDialogShown,
+    isCorrectChainIdSet,
+  ]);
 
   const CLIDisconnectedTimeout = useRef<number>();
   const gotFirstMessage = useRef(false);
@@ -136,7 +175,7 @@ export function App() {
         );
       }
     };
-  }, [reset, sendTransaction]);
+  }, [chain, reset, sendTransaction]);
 
   const {
     data: txReceipt,
@@ -179,7 +218,7 @@ export function App() {
   return (
     <>
       {isConnected && <p>Chain: {client?.chain.name}</p>}
-      {client?.chain.name === "local" && (
+      {client?.chain.name === "Fluence Local" && (
         <details>
           <summary>How to work with local chain</summary>
           <ol>
@@ -240,19 +279,21 @@ export function App() {
               Send account address to CLI
             </button>
           )}
-          {!isExpectingAddress && transactionPayload !== null && (
-            <button
-              type="button"
-              className={`button${isSendTxButtonEnabled ? "" : " button_disabled"}`}
-              onClick={() => {
-                if (isSendTxButtonEnabled) {
-                  respond({ tag: "sendTransaction", address });
-                }
-              }}
-            >
-              Send transaction
-            </button>
-          )}
+          {!isExpectingAddress &&
+            transactionPayload !== null &&
+            isCorrectChainIdSet && (
+              <button
+                type="button"
+                className={`button${isSendTxButtonEnabled ? "" : " button_disabled"}`}
+                onClick={() => {
+                  if (isSendTxButtonEnabled) {
+                    respond({ tag: "sendTransaction", address });
+                  }
+                }}
+              >
+                Send transaction
+              </button>
+            )}
           {wasSwitchChainDialogShown && (
             <button
               type="button"

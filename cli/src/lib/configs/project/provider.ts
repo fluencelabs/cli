@@ -72,6 +72,7 @@ import {
   DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
   DEFAULT_VM_EFFECTOR_CID,
 } from "../../const.js";
+import { resolveDeployment } from "../../dealClient.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
@@ -92,7 +93,7 @@ import {
   ensureFluenceCCPConfigsDir,
 } from "../../paths.js";
 import { input, list } from "../../prompt.js";
-import { setEnvConfig } from "../globalConfigs.js";
+import { envConfig, setEnvConfig } from "../globalConfigs.js";
 import {
   getReadonlyConfigInitFunction,
   type InitializedConfig,
@@ -2154,10 +2155,7 @@ const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
 async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
-
-  const { DEPLOYMENTS, RPC_URLS } = await import(
-    "@fluencelabs/deal-ts-clients"
-  );
+  const { RPC_URLS } = await import("@fluencelabs/deal-ts-clients");
 
   const CHAIN_URLS_FOR_CONTAINERS = {
     ...RPC_URLS,
@@ -2182,9 +2180,12 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       },
     },
     chain: {
-      httpEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
+      httpEndpoint:
+        envConfig?.rpcUrl === undefined
+          ? CHAIN_URLS_FOR_CONTAINERS[env]
+          : envConfig.rpcUrl,
       wsEndpoint: WS_CHAIN_URLS[env],
-      diamondContract: DEPLOYMENTS[env].diamond,
+      diamondContract: (await resolveDeployment()).diamond,
       networkId,
       defaultPriorityFee: 0,
     },

@@ -22,6 +22,7 @@ import type {
   DealMatcherClient,
   DealExplorerClient,
   DealCliClient,
+  Deployment,
 } from "@fluencelabs/deal-ts-clients";
 import type {
   TypedContractMethod,
@@ -53,6 +54,7 @@ import {
 } from "./chain/chainId.js";
 import { chainFlags } from "./chainFlags.js";
 import { commandObj, isInteractive } from "./commandObj.js";
+import { initEnvConfig } from "./configs/project/env.js";
 import { CLI_NAME_FULL, PRIV_KEY_FLAG_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
@@ -145,15 +147,37 @@ export async function getDealCliClient() {
   return dealCliClient;
 }
 
-async function createContracts(signerOrProvider: Provider | Signer) {
-  const { Contracts, DEPLOYMENTS } = await import(
-    "@fluencelabs/deal-ts-clients"
-  );
+let deployment: Promise<Deployment> | undefined = undefined;
 
-  const contracts = new Contracts(
-    signerOrProvider,
-    DEPLOYMENTS[await ensureChainEnv()],
-  );
+export async function resolveDeployment() {
+  if (deployment === undefined) {
+    deployment = (async () => {
+      const envConfig = await initEnvConfig();
+      const { DEPLOYMENTS } = await import("@fluencelabs/deal-ts-clients");
+
+      if (
+        envConfig !== null &&
+        envConfig.deployment !== undefined &&
+        Object.keys(envConfig.deployment).length > 0
+      ) {
+        commandObj.logToStderr(
+          `Using custom contract addresses ${JSON.stringify(envConfig.deployment)} from ${envConfig.$getPath()}`,
+        );
+      }
+
+      return {
+        ...DEPLOYMENTS[await ensureChainEnv()],
+        ...envConfig?.deployment,
+      };
+    })();
+  }
+
+  return deployment;
+}
+
+async function createContracts(signerOrProvider: Provider | Signer) {
+  const { Contracts } = await import("@fluencelabs/deal-ts-clients");
+  const contracts = new Contracts(signerOrProvider, await resolveDeployment());
 
   await setTryTimeout(
     "check if blockchain client is connected",

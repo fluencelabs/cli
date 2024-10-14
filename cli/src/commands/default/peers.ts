@@ -20,7 +20,7 @@ import { setChainFlags } from "../../lib/chainFlags.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_ARG, ENV_ARG_NAME, ENV_FLAG_NAME } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveRelays } from "../../lib/multiaddres.js";
+import { resolveDefaultRelays } from "../../lib/multiaddres.js";
 
 export default class Peers extends BaseCommand<typeof Peers> {
   static override description = "Print default Fluence network peer addresses";
@@ -34,7 +34,7 @@ export default class Peers extends BaseCommand<typeof Peers> {
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(Peers));
     setChainFlags({ [ENV_FLAG_NAME]: args[ENV_ARG_NAME] });
-    const relays = await resolveRelays();
+    const relays = await resolveDefaultRelays();
     commandObj.log(relays.join("\n"));
   }
 }

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { Deployment } from "@fluencelabs/deal-ts-clients";
 import type { JSONSchemaType } from "ajv";
 
 import { CHAIN_ENV, DEFAULT_PUBLIC_FLUENCE_ENV } from "../../../common.js";
@@ -70,6 +71,7 @@ type ConfigV1 = {
   rpcUrl?: string;
   blockScoutUrl?: string;
   chainId?: number;
+  deployment?: Partial<Deployment>;
   version: 1;
 };
 
@@ -112,6 +114,18 @@ const configSchemaV1Obj = {
       type: "number",
       description: `Chain ID to use`,
       nullable: true,
+    },
+    deployment: {
+      type: "object",
+      description: `Deployed contract address overrides`,
+      nullable: true,
+      required: [],
+      additionalProperties: false,
+      properties: {
+        usdc: { type: "string", nullable: true },
+        multicall3: { type: "string", nullable: true },
+        diamond: { type: "string", nullable: true },
+      },
     },
     version: { type: "integer", const: 1 },
   },
