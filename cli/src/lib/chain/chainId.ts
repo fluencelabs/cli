@@ -74,12 +74,14 @@ export async function getRpcUrl() {
 }
 
 let blockScoutUrlPromise:
-  | Promise<{
-      blockExplorers: {
-        default: { name: "Blockscout"; url: string; apiUrl: string };
-      };
-    }>
-  | object
+  | Promise<
+      | {
+          blockExplorers: {
+            default: { name: "Blockscout"; url: string; apiUrl: string };
+          };
+        }
+      | Record<string, never>
+    >
   | undefined;
 
 export async function getBlockScoutUrl() {
@@ -103,7 +105,15 @@ export async function getBlockScoutUrl() {
       }
 
       dbg(`blockScoutUrl: ${blockScoutUrl}`);
-      return blockScoutUrl;
+      return {
+        blockExplorers: {
+          default: {
+            name: "Blockscout",
+            url: blockScoutUrl,
+            apiUrl: `${blockScoutUrl}api`,
+          },
+        },
+      };
     })();
   }
 
