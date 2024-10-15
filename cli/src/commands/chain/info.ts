@@ -21,10 +21,11 @@ import {
   getBlockScoutUrl,
   getChainId,
   getRpcUrl,
-} from "../../lib/chain/chainId.js";
+  getSubgraphUrl,
+} from "../../lib/chain/chainConfig.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
-import { getReadonlyContracts } from "../../lib/dealClient.js";
+import { resolveDeployment } from "../../lib/dealClient.js";
 import { ensureChainEnv } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -39,14 +40,14 @@ export default class Info extends BaseCommand<typeof Info> {
   async run(): Promise<void> {
     await initCli(this, await this.parse(Info));
     const chainEnv = await ensureChainEnv();
-    const { readonlyContracts } = await getReadonlyContracts();
 
     commandObj.log(
       jsonStringify({
         ...(chainEnv === "local"
           ? { defaultAccountsForLocalEnv: LOCAL_NET_DEFAULT_ACCOUNTS }
           : {}),
-        contracts: readonlyContracts.deployment,
+        contracts: await resolveDeployment(),
+        subgraphUrl: await getSubgraphUrl(),
         chainId: await getChainId(),
         chainRPC: await getRpcUrl(),
         ...(await getBlockScoutUrl()),

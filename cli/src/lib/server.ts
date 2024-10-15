@@ -37,7 +37,7 @@ import {
   getChainId,
   getRpcUrl,
   getNetworkName,
-} from "./chain/chainId.js";
+} from "./chain/chainConfig.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import {
   CLI_CONNECTOR_DIR_NAME,

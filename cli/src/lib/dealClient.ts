@@ -51,7 +51,7 @@ import {
   getNetworkName,
   getRpcUrl,
   getSubgraphUrl,
-} from "./chain/chainId.js";
+} from "./chain/chainConfig.js";
 import { chainFlags } from "./chainFlags.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { initEnvConfig } from "./configs/project/env.js";

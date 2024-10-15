@@ -24,7 +24,7 @@ import { Flags } from "@oclif/core";
 import { baseFlags } from "../baseCommand.js";
 import type Deploy from "../commands/deploy.js";
 
-import { getChainId } from "./chain/chainId.js";
+import { getChainId } from "./chain/chainConfig.js";
 import { printDealInfo } from "./chain/printDealInfo.js";
 import { commandObj } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";

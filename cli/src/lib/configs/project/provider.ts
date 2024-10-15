@@ -37,7 +37,7 @@ import {
 } from "../../../common.js";
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
-import { getChainId } from "../../chain/chainId.js";
+import { getChainId } from "../../chain/chainConfig.js";
 import {
   ccDurationValidator,
   validateAddress,

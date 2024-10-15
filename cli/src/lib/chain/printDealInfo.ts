@@ -22,7 +22,7 @@ import { type DealNameAndId } from "../deal.js";
 import { getReadonlyContracts } from "../dealClient.js";
 import { bigintToStr } from "../helpers/typesafeStringify.js";
 
-import { getBlockScoutUrl } from "./chainId.js";
+import { getBlockScoutUrl } from "./chainConfig.js";
 import { peerIdHexStringToBase58String } from "./conversions.js";
 import { ptFormatWithSymbol } from "./currencies.js";
 

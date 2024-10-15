@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { Contracts } from "@fluencelabs/deal-ts-clients";
 import type { OfferDetail } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/types/schemes.js";
 import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
@@ -245,7 +244,6 @@ export async function createOffers(flags: OffersArgs) {
         allCPs,
         addedCPs,
         offerId,
-        contracts,
         offerName,
       });
 
@@ -253,7 +251,6 @@ export async function createOffers(flags: OffersArgs) {
         allCPs,
         addedCPs,
         offerId,
-        contracts,
         offerName,
       });
     } catch (e) {
@@ -332,7 +329,6 @@ type AddRemainingCPsOrCUsArgs = {
   allCPs: CPFromProviderConfig[];
   addedCPs: CPFromProviderConfig[];
   offerId: string;
-  contracts: Contracts;
   offerName: string;
 };
 
@@ -340,11 +336,11 @@ export async function addRemainingCPs({
   allCPs,
   addedCPs = [],
   offerId,
-  contracts,
   offerName,
 }: Omit<AddRemainingCPsOrCUsArgs, "addedCPs"> & {
   addedCPs?: CPFromProviderConfig[];
 }) {
+  const { contracts } = await getContracts();
   let totalAddedCPs = addedCPs.length;
 
   while (totalAddedCPs < allCPs.length) {
@@ -374,7 +370,6 @@ export async function addRemainingCPs({
       allCPs: remainingCPs,
       addedCPs,
       offerId,
-      contracts,
       offerName,
     });
 
@@ -386,9 +381,9 @@ async function addRemainingCUs({
   allCPs,
   addedCPs,
   offerId,
-  contracts,
   offerName,
 }: AddRemainingCPsOrCUsArgs) {
+  const { contracts } = await getContracts();
   const lastRegisteredCP = addedCPs[addedCPs.length - 1];
   const lastRegisteredCPFromAllCPs = allCPs[addedCPs.length - 1];
 

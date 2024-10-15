@@ -525,15 +525,13 @@ async function addMissingComputePeers(
   { computePeersFromProviderConfig, offerId, offerName }: OnChainOffer,
   peersOnChain: PeersOnChain,
 ) {
-  const { contracts } = await getContracts();
-
   const allCPs = computePeersFromProviderConfig.filter(({ peerIdBase58 }) => {
     return !peersOnChain.some((p) => {
       return p.peerIdBase58 === peerIdBase58;
     });
   });
 
-  return addRemainingCPs({ allCPs, offerId, contracts, offerName });
+  return addRemainingCPs({ allCPs, offerId, offerName });
 }
 
 function printOffersToUpdateInfo(
