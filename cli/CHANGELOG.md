@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.22.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.21.0...fluence-cli-v0.22.0) (2024-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* update deal-ts-clients@0.22.0 ([#1061](https://github.com/fluencelabs/cli/issues/1061))
+* group cc infos by status, store offer id right after it's created [JS-814, JS-815] ([#1059](https://github.com/fluencelabs/cli/issues/1059))
+
+### Features
+
+* add --reset-nox-secrets flag, improve config validation error messages [JS-812, JS-813] ([#1057](https://github.com/fluencelabs/cli/issues/1057)) ([9697231](https://github.com/fluencelabs/cli/commit/96972316a580c4d5430951ce5129bd64a482217e))
+* group cc infos by status, store offer id right after it's created [JS-814, JS-815] ([#1059](https://github.com/fluencelabs/cli/issues/1059)) ([e90c087](https://github.com/fluencelabs/cli/commit/e90c087de568266982011e2b2a29a2ec56bdaf6a))
+* update deal-ts-clients@0.22.0 ([#1061](https://github.com/fluencelabs/cli/issues/1061)) ([d760683](https://github.com/fluencelabs/cli/commit/d760683e6562faaa846049b432c485d8b2a6563e))
+
 ## [0.21.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.20.6...fluence-cli-v0.21.0) (2024-09-23)
 
 
