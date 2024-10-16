@@ -104,38 +104,6 @@ export async function createOffers(flags: OffersArgs) {
     );
   }
 
-  // Multicall here is not working for some reason:
-  // Event 'MarketOfferRegistered' with hash '0x8090f06b11ff71e91580cf20918a29fefe5fcb76bc8819d550d1aef761382a99' not found in logs of the successful transaction. Try updating Fluence CLI to the latest version
-
-  // const registerMarketOfferTxReceipts = await signBatch(
-  //   offers.map(
-  //     ({
-  //       computePeersToRegister,
-  //       effectorPrefixesAndHash,
-  //       minPricePerCuPerEpochBigInt,
-  //     }) => {
-  //       return [
-  //         contracts.diamond.registerMarketOffer,
-  //         minPricePerCuPerEpochBigInt,
-  //         usdcAddress,
-  //         effectorPrefixesAndHash,
-  //         computePeersToRegister,
-  //       ];
-  //     },
-  //   ),
-  // );
-
-  // if (registerMarketOfferTxReceipts === undefined) {
-  //   return commandObj.error("No offers to create");
-  // }
-
-  // const notValidatedOfferIds = getEventValueFromReceipts({
-  //   contract: contracts.diamond,
-  //   eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
-  //   txReceipts: registerMarketOfferTxReceipts,
-  //   value: OFFER_ID_PROPERTY,
-  // });
-
   const offerRegisterResults: (
     | { result: { offerId: string; offerName: string } }
     | { error: string }

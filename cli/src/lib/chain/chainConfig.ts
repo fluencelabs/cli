@@ -84,6 +84,10 @@ let blockScoutUrlPromise:
     >
   | undefined;
 
+/**
+ * Returns blockExplorer config or empty object if env is local
+ * cause we currently don't run Blockscout for local env
+ */
 export async function getBlockScoutUrl() {
   if (blockScoutUrlPromise === undefined) {
     blockScoutUrlPromise = (async () => {
