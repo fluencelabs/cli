@@ -25,7 +25,7 @@ import {
   DEPLOYMENT_NAMES_ARG,
 } from "../../lib/const.js";
 import { getDeals } from "../../lib/deal.js";
-import { getDealClient, sign } from "../../lib/dealClient.js";
+import { getContracts, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Stop extends BaseCommand<typeof Stop> {
@@ -43,10 +43,10 @@ export default class Stop extends BaseCommand<typeof Stop> {
   async run(): Promise<void> {
     const flagsAndArgs = await initCli(this, await this.parse(Stop), true);
     const deals = await getDeals(flagsAndArgs);
-    const { dealClient } = await getDealClient();
+    const { contracts } = await getContracts();
 
     for (const { dealId, dealName } of deals) {
-      const deal = dealClient.getDeal(dealId);
+      const deal = contracts.getDeal(dealId);
 
       await sign({
         title: `Stop the deal ${dealName} (${dealId})`,

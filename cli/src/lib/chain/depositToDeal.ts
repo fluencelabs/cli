@@ -19,7 +19,7 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { getDeals } from "../deal.js";
-import { getDealClient, sign } from "../dealClient.js";
+import { getContracts, sign } from "../dealClient.js";
 
 import { ptFormatWithSymbol, ptParse } from "./currencies.js";
 
@@ -36,20 +36,15 @@ export async function depositToDeal(
 ) {
   const parsedAmount = await ptParse(amount);
   const deals = await getDeals(flagsAndArgs);
-  const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
-
-  const { dealClient, providerOrWallet } = await getDealClient();
+  const { contracts } = await getContracts();
 
   for (const { dealName, dealId } of deals) {
-    const deal = dealClient.getDeal(dealId);
+    const deal = contracts.getDeal(dealId);
     const tokensString = await ptFormatWithSymbol(parsedAmount);
 
     await sign({
       title: `Approve ${tokensString} tokens to be deposited to the deal ${dealName}`,
-      method: ERC20__factory.connect(
-        await deal.paymentToken(),
-        providerOrWallet,
-      ).approve,
+      method: contracts.usdc.approve,
       args: [await deal.getAddress(), parsedAmount],
     });
 

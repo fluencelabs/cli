@@ -16,15 +16,16 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { jsonStringify, LOCAL_NET_DEFAULT_ACCOUNTS } from "../../common.js";
 import {
-  BLOCK_SCOUT_URLS,
-  jsonStringify,
-  LOCAL_NET_DEFAULT_ACCOUNTS,
-} from "../../common.js";
-import { CHAIN_URLS } from "../../common.js";
-import { getChainId } from "../../lib/chain/chainId.js";
+  getBlockScoutUrl,
+  getChainId,
+  getRpcUrl,
+  getSubgraphUrl,
+} from "../../lib/chain/chainConfig.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
+import { resolveDeployment } from "../../lib/dealClient.js";
 import { ensureChainEnv } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -40,25 +41,16 @@ export default class Info extends BaseCommand<typeof Info> {
     await initCli(this, await this.parse(Info));
     const chainEnv = await ensureChainEnv();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { default: contracts }: { default: unknown } = await import(
-      `@fluencelabs/deal-ts-clients/dist/deployments/${chainEnv === "testnet" ? "dar" : chainEnv}.json`,
-      {
-        assert: { type: "json" },
-      }
-    );
-
     commandObj.log(
       jsonStringify({
         ...(chainEnv === "local"
           ? { defaultAccountsForLocalEnv: LOCAL_NET_DEFAULT_ACCOUNTS }
           : {}),
-        contracts,
+        contracts: await resolveDeployment(),
+        subgraphUrl: await getSubgraphUrl(),
         chainId: await getChainId(),
-        chainRPC: CHAIN_URLS[chainEnv],
-        ...(chainEnv === "local"
-          ? {}
-          : { blockScoutUrl: BLOCK_SCOUT_URLS[chainEnv] }),
+        chainRPC: await getRpcUrl(),
+        ...(await getBlockScoutUrl()),
       }),
     );
   }

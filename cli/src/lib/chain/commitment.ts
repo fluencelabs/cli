@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CommitmentStatus, type ICapacity } from "@fluencelabs/deal-ts-clients";
+import type { CommitmentStatus, ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import isUndefined from "lodash-es/isUndefined.js";
 import omitBy from "lodash-es/omitBy.js";
@@ -35,11 +35,11 @@ import {
 import { dbg } from "../dbg.js";
 import {
   batchRead,
-  getDealClient,
+  getContracts,
   getEventValues,
   signBatch,
   populateTx,
-  getReadonlyDealClient,
+  getReadonlyContracts,
   sign,
   getDealExplorerClient,
 } from "../dealClient.js";
@@ -71,24 +71,24 @@ export type ComputePeersWithCC = Awaited<
 export async function getComputePeersWithCC(
   computePeers: ResolvedComputePeer[],
 ) {
-  const { readonlyDealClient } = await getReadonlyDealClient();
-  const market = readonlyDealClient.getMarket();
-  const capacity = readonlyDealClient.getCapacity();
+  const { readonlyContracts } = await getReadonlyContracts();
 
   const commitmentCreatedEvents = Object.fromEntries(
     await Promise.all(
-      (await capacity.queryFilter(capacity.filters.CommitmentCreated)).map(
-        async (event) => {
-          return [
-            await peerIdHexStringToBase58String(event.args.peerId),
-            event,
-          ] as const;
-        },
-      ),
+      (
+        await readonlyContracts.diamond.queryFilter(
+          readonlyContracts.diamond.filters.CommitmentCreated,
+        )
+      ).map(async (event) => {
+        return [
+          await peerIdHexStringToBase58String(event.args.peerId),
+          event,
+        ] as const;
+      }),
     ),
   );
 
-  const { ethers } = await import("ethers");
+  const { ZeroHash } = await import("ethers");
 
   const computePeersWithChainInfo = (
     await Promise.all(
@@ -102,7 +102,9 @@ export async function getComputePeersWithCC(
 
         const marketGetComputePeerRes = await (async () => {
           try {
-            return await market.getComputePeer(peerIdUint8Array);
+            return await readonlyContracts.diamond.getComputePeer(
+              peerIdUint8Array,
+            );
           } catch {
             return undefined;
           }
@@ -128,7 +130,7 @@ export async function getComputePeersWithCC(
       c.commitmentCreatedEvent?.args.commitmentId ??
       c.marketGetComputePeerRes?.commitmentId;
 
-    if (commitmentId === undefined || commitmentId === ethers.ZeroHash) {
+    if (commitmentId === undefined || commitmentId === ZeroHash) {
       return c;
     }
 
@@ -208,12 +210,10 @@ export async function createCommitments(flags: {
   [OFFER_FLAG_NAME]?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
-  const { dealClient } = await getDealClient();
-  const core = dealClient.getCore();
-  const capacity = dealClient.getCapacity();
-  const precision = await core.precision();
-  const { ethers } = await import("ethers");
-  const epochDuration = await core.epochDuration();
+  const { contracts } = await getContracts();
+  const precision = await contracts.diamond.precision();
+  const { ZeroAddress } = await import("ethers");
+  const epochDuration = await contracts.diamond.epochDuration();
 
   const [createCommitmentsTxsErrors, createCommitmentsTxs] =
     splitErrorsAndResults(
@@ -235,10 +235,10 @@ export async function createCommitments(flags: {
 
           dbg(
             `initTimestamp: ${bigintToStr(
-              await core.initTimestamp(),
+              await contracts.diamond.initTimestamp(),
             )} Epoch duration: ${bigintToStr(
               epochDuration,
-            )}. Current epoch: ${bigintToStr(await core.currentEpoch())}`,
+            )}. Current epoch: ${bigintToStr(await contracts.diamond.currentEpoch())}`,
           );
 
           dbg(`Duration in seconds: ${bigintToStr(durationInSec)}`);
@@ -246,7 +246,7 @@ export async function createCommitments(flags: {
           dbg(`Duration in epochs: ${bigintToStr(durationEpoch)}`);
           const ccDelegator = capacityCommitment.delegator;
 
-          const minDuration = await core.minDuration();
+          const minDuration = await contracts.diamond.minDuration();
 
           if (durationEpoch < minDuration) {
             return {
@@ -265,10 +265,10 @@ export async function createCommitments(flags: {
 
           return {
             result: populateTx(
-              capacity.createCommitment,
+              contracts.diamond.createCommitment,
               peerIdUint8Arr,
               durationEpoch,
-              ccDelegator ?? ethers.ZeroAddress,
+              ccDelegator ?? ZeroAddress,
               ccStakerReward,
             ),
           };
@@ -323,7 +323,7 @@ export async function createCommitments(flags: {
   const commitmentIds = createCommitmentsTxReceipts.flatMap((txReceipt) => {
     return getEventValues({
       txReceipt,
-      contract: capacity,
+      contract: contracts.diamond,
       eventName: "CommitmentCreated",
       value: "commitmentId",
     });
@@ -365,8 +365,7 @@ export async function createCommitments(flags: {
 
 export async function removeCommitments(flags: CCFlags) {
   const commitments = await getCommitments(flags);
-  const { dealClient } = await getDealClient();
-  const capacity = dealClient.getCapacity();
+  const { contracts } = await getContracts();
 
   const [commitmentInfoErrors, commitmentInfo] = splitErrorsAndResults(
     await Promise.all(
@@ -375,7 +374,9 @@ export async function removeCommitments(flags: CCFlags) {
           return {
             result: {
               commitment,
-              info: await capacity.getCommitment(commitment.commitmentId),
+              info: await contracts.diamond.getCommitment(
+                commitment.commitmentId,
+              ),
             },
           };
         } catch (error) {
@@ -425,7 +426,7 @@ export async function removeCommitments(flags: CCFlags) {
       })
       .join("\n\n")}`,
     commitments.map(({ commitmentId }) => {
-      return populateTx(capacity.removeCommitment, commitmentId);
+      return populateTx(contracts.diamond.removeCommitment, commitmentId);
     }),
   );
 
@@ -443,7 +444,7 @@ export async function collateralWithdraw(
     [FINISH_COMMITMENT_FLAG_NAME]?: boolean;
   },
 ) {
-  const { ethers } = await import("ethers");
+  const { ZeroAddress } = await import("ethers");
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
@@ -474,9 +475,7 @@ export async function collateralWithdraw(
     );
   }
 
-  const { dealClient } = await getDealClient();
-  const capacity = dealClient.getCapacity();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
 
   for (const commitment of commitments.flatMap(({ ccInfos }) => {
     return ccInfos;
@@ -484,14 +483,14 @@ export async function collateralWithdraw(
     const { commitmentId, noxName } = commitment;
 
     const [unitIds, isExitedStatuses] =
-      await capacity.getUnitExitStatuses(commitmentId);
+      await contracts.diamond.getUnitExitStatuses(commitmentId);
 
     const units = await batchRead(
       unitIds.map((unitId, i) => {
         return async () => {
           return {
             unitId,
-            unitInfo: await market.getComputeUnit(unitId),
+            unitInfo: await contracts.diamond.getComputeUnit(unitId),
             isExited:
               isExitedStatuses[i] ??
               (() => {
@@ -505,7 +504,7 @@ export async function collateralWithdraw(
     );
 
     const unitsWithDeals = units.filter((unit) => {
-      return unit.unitInfo.deal !== ethers.ZeroAddress;
+      return unit.unitInfo.deal !== ZeroAddress;
     });
 
     const unitIdsByOnChainWorkerId: Record<string, string[]> = {};
@@ -526,7 +525,7 @@ export async function collateralWithdraw(
     ).flatMap(([onchainWorkerId, unitIds]) => {
       return unitIds.map((unit) => {
         return populateTx(
-          market.moveResourcesFromDeal,
+          contracts.diamond.moveResourcesFromDeal,
           [unit],
           onchainWorkerId,
         );
@@ -556,8 +555,8 @@ export async function collateralWithdraw(
     }
 
     await sign({
-      title: `Withdraw collateral from: ${commitment.commitmentId}}`,
-      method: capacity.withdrawCollateral,
+      title: `withdraw collateral from: ${commitment.commitmentId}`,
+      method: contracts.diamond.withdrawCollateral,
       args: [commitmentId],
     });
 
@@ -579,9 +578,11 @@ export async function collateralWithdraw(
             return !isExited;
           })
           .map(({ unitId }) => {
-            return populateTx(capacity.removeCUFromCC, commitmentId, [unitId]);
+            return populateTx(contracts.diamond.removeCUFromCC, commitmentId, [
+              unitId,
+            ]);
           }),
-        populateTx(capacity.finishCommitment, commitmentId),
+        populateTx(contracts.diamond.finishCommitment, commitmentId),
       ],
     );
   }
@@ -589,8 +590,7 @@ export async function collateralWithdraw(
 
 export async function collateralRewardWithdraw(flags: CCFlags) {
   const commitments = await getCommitments(flags);
-  const { dealClient } = await getDealClient();
-  const capacity = dealClient.getCapacity();
+  const { contracts } = await getContracts();
 
   // TODO: add logs here
   await signBatch(
@@ -600,7 +600,7 @@ export async function collateralRewardWithdraw(flags: CCFlags) {
       })
       .join("\n")}`,
     commitments.map(({ commitmentId }) => {
-      return populateTx(capacity.withdrawReward, commitmentId);
+      return populateTx(contracts.diamond.withdrawReward, commitmentId);
     }),
   );
 }
@@ -638,10 +638,8 @@ export function stringifyBasicCommitmentInfo(
 }
 
 export async function getCommitmentsInfo(flags: CCFlags) {
-  const { readonlyDealClient } = await getReadonlyDealClient();
+  const { readonlyContracts } = await getReadonlyContracts();
   const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
-  const capacity = readonlyDealClient.getCapacity();
-  const core = readonlyDealClient.getCore();
 
   const [
     commitments,
@@ -651,10 +649,10 @@ export async function getCommitmentsInfo(flags: CCFlags) {
     maxFailedRatio,
   ] = await Promise.all([
     getCommitments(flags),
-    core.currentEpoch(),
-    core.epochDuration(),
-    core.initTimestamp(),
-    core.maxFailedRatio(),
+    readonlyContracts.diamond.currentEpoch(),
+    readonlyContracts.diamond.epochDuration(),
+    readonlyContracts.diamond.initTimestamp(),
+    readonlyContracts.diamond.maxFailedRatio(),
   ]);
 
   const dealExplorerClient = await getDealExplorerClient();
@@ -674,7 +672,9 @@ export async function getCommitmentsInfo(flags: CCFlags) {
           : {};
 
       try {
-        commitment = await capacity.getCommitment(c.commitmentId);
+        commitment = await readonlyContracts.diamond.getCommitment(
+          c.commitmentId,
+        );
       } catch (e) {
         dbg(
           `Failed to get commitment from chain ${c.commitmentId}. Error: ${stringifyUnknown(e)}`,
@@ -780,9 +780,8 @@ async function stakerRewardToString(stakerReward: bigint | undefined) {
     return undefined;
   }
 
-  const { readonlyDealClient } = await getReadonlyDealClient();
-  const core = readonlyDealClient.getCore();
-  const precision = await core.precision();
+  const { readonlyContracts } = await getReadonlyContracts();
+  const precision = await readonlyContracts.diamond.precision();
   return `${numToStr(
     (Number(stakerReward) * HUNDRED_PERCENT) / Number(precision),
   )}%`;
@@ -835,7 +834,7 @@ async function getCommitmentInfoString(
     ReturnType<typeof getCommitmentsInfo>
   >[number]["ccInfos"][number],
 ) {
-  const { ethers } = await import("ethers");
+  const { ZeroAddress } = await import("ethers");
 
   const staker =
     ccInfo.delegator ?? ccInfo.ccFromExplorer?.stakerAddress ?? undefined;
@@ -860,7 +859,7 @@ async function getCommitmentInfoString(
         "Capacity commitment ID": ccInfo.commitmentId,
         Status: await ccStatusToString(ccInfo.status),
         Staker:
-          staker === ethers.ZeroAddress
+          staker === ZeroAddress
             ? "Anyone can activate capacity commitment"
             : staker,
         "Staker reward":

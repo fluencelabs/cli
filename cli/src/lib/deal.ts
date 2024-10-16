@@ -36,11 +36,12 @@ import {
 import { dbg } from "./dbg.js";
 import {
   sign,
-  getDealClient,
+  getContracts,
   getDealMatcherClient,
   getEventValue,
   getEventValues,
-  getReadonlyDealClient,
+  getReadonlyContracts,
+  batchRead,
 } from "./dealClient.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
 import { bigintToStr } from "./helpers/typesafeStringify.js";
@@ -82,12 +83,12 @@ export async function dealCreate({
   protocolVersion,
   deploymentName,
 }: DealCreateArg) {
-  const { dealClient } = await getDealClient();
-  const core = dealClient.getCore();
-  const usdc = dealClient.getUSDC();
-
+  const { contracts } = await getContracts();
   const pricePerCuPerEpochBigInt = await ptParse(pricePerCuPerEpoch);
-  const minDealDepositedEpochs = await core.minDealDepositedEpochs();
+
+  const minDealDepositedEpochs =
+    await contracts.diamond.minDealDepositedEpochs();
+
   const targetWorkersBigInt = BigInt(targetWorkers);
   const cuCountPerWorkerBigInt = BigInt(cuCountPerWorker);
 
@@ -121,20 +122,18 @@ export async function dealCreate({
     );
   }
 
-  const dealFactory = dealClient.getDealFactory();
-
   await sign({
     title: `Approve ${await ptFormatWithSymbol(initialBalanceBigInt)} to be deposited to the deal`,
-    method: usdc.approve,
-    args: [await dealFactory.getAddress(), initialBalanceBigInt],
+    method: contracts.usdc.approve,
+    args: [contracts.deployment.diamond, initialBalanceBigInt],
   });
 
   const deployDealTxReceipt = await sign({
     title: `Create deal with appCID: ${appCID}`,
-    method: dealFactory.deployDeal,
+    method: contracts.diamond.deployDeal,
     args: [
       await cidStringToCIDV1Struct(appCID),
-      await usdc.getAddress(),
+      contracts.deployment.usdc,
       initialBalanceBigInt,
       minWorkers,
       targetWorkers,
@@ -157,7 +156,7 @@ export async function dealCreate({
   });
 
   const dealId = getEventValue({
-    contract: dealFactory,
+    contract: contracts.diamond,
     txReceipt: deployDealTxReceipt,
     eventName: "DealCreated",
     value: "deal",
@@ -172,22 +171,22 @@ export async function createAndMatchDealsForPeerIds({
   ...dealCreateArgs
 }: Parameters<typeof dealCreate>[0] & { peerIdsFromFlags: string }) {
   const peerIds = commaSepStrToArr(peerIdsFromFlags);
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
   const { ZeroAddress } = await import("ethers");
 
   const offersWithCUs = await Promise.all(
     peerIds.map(async (peerId) => {
       const peerIdUint8Array = await peerIdBase58ToUint8Array(peerId);
+      const ccIds = await contracts.diamond.getComputeUnitIds(peerIdUint8Array);
 
       const computeUnits = (
-        await Promise.all(
-          [...(await market.getComputeUnitIds(peerIdUint8Array))].map(
-            async (unitId) => {
-              const info = await market.getComputeUnit(unitId);
-              return { unitId, deal: info.deal };
-            },
-          ),
+        await batchRead(
+          ccIds.map((unitId) => {
+            return async () => {
+              const { deal } = await contracts.diamond.getComputeUnit(unitId);
+              return { unitId, deal };
+            };
+          }),
         )
       )
         .filter(({ deal }) => {
@@ -197,11 +196,10 @@ export async function createAndMatchDealsForPeerIds({
           return unitId;
         });
 
-      return {
-        computeUnits,
-        offerId: (await market.getComputePeer(peerIdUint8Array)).offerId,
-        peerId,
-      };
+      const { offerId } =
+        await contracts.diamond.getComputePeer(peerIdUint8Array);
+
+      return { computeUnits, offerId, peerId };
     }),
   );
 
@@ -227,7 +225,7 @@ export async function createAndMatchDealsForPeerIds({
 
       await sign({
         title: `Match deal ${dealAddress} with compute units:\n\n${CUs.join("\n")}\n\nfrom offer ${offerId}`,
-        method: market.matchDeal,
+        method: contracts.diamond.matchDeal,
         args: [dealAddress, [offerId], [[CUs]]],
       });
 
@@ -249,12 +247,11 @@ async function getDefaultInitialBalance(
   cuCountPerWorker: bigint,
 ) {
   if ((await ensureChainEnv()) === "local") {
-    const { readonlyDealClient } = await getReadonlyDealClient();
-    const core = readonlyDealClient.getCore();
+    const { readonlyContracts } = await getReadonlyContracts();
 
     const balance =
       (DEFAULT_DEAL_ACTIVE_DURATION_FOR_LOCAL_ENV /
-        (await core.epochDuration())) *
+        (await readonlyContracts.diamond.epochDuration())) *
       targetWorkersBigInt *
       pricePerCuPerEpochBigInt *
       cuCountPerWorker;
@@ -273,8 +270,8 @@ type DealUpdateArg = {
 };
 
 export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
-  const { dealClient } = await getDealClient();
-  const deal = dealClient.getDeal(dealAddress);
+  const { contracts } = await getContracts();
+  const deal = contracts.getDeal(dealAddress);
 
   await sign({
     title: `Update deal with new appCID: ${appCID}`,
@@ -284,15 +281,14 @@ export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
 }
 
 export async function match(dealAddress: string) {
-  const { dealClient } = await getDealClient();
+  const { contracts } = await getContracts();
   const dealMatcherClient = await getDealMatcherClient();
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
-  const core = dealClient.getCore();
 
   dbg(
     `initTimestamp: ${bigintToStr(
-      await core.initTimestamp(),
-    )} Current epoch: ${bigintToStr(await core.currentEpoch())}`,
+      await contracts.diamond.initTimestamp(),
+    )} Current epoch: ${bigintToStr(await contracts.diamond.currentEpoch())}`,
   );
 
   const matchedOffers = await setTryTimeout(
@@ -314,16 +310,14 @@ export async function match(dealAddress: string) {
 
   dbg(`got matchedOffers: ${stringifyUnknown(matchedOffers)}`);
 
-  const market = dealClient.getMarket();
-
   const matchDealTxReceipt = await sign({
     title: `Match deal ${dealAddress} with offers:\n\n${matchedOffers.offers.join("\n")}`,
-    method: market.matchDeal,
+    method: contracts.diamond.matchDeal,
     args: [dealAddress, matchedOffers.offers, matchedOffers.computeUnits],
   });
 
   const pats = getEventValues({
-    contract: market,
+    contract: contracts.diamond,
     txReceipt: matchDealTxReceipt,
     eventName: "ComputeUnitsMatched",
     value: "unitId",

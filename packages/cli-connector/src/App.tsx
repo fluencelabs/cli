@@ -24,8 +24,6 @@ import {
   type ConnectorToCLIMessage,
   jsonStringify,
   LOCAL_NET_WALLET_KEYS,
-  CHAIN_IDS,
-  ChainId,
 } from "@repo/common";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as v from "valibot";
@@ -47,13 +45,7 @@ const TransactionError = v.object({
   }),
 });
 
-export function App({
-  chainId,
-  setChainId,
-}: {
-  chainId: ChainId;
-  setChainId: (chainId: ChainId) => void;
-}) {
+export function App({ chain }: { chain: CLIToConnectorFullMsg["chain"] }) {
   const { isConnected, address, chainId: accountChainId } = useAccount();
   const [addressUsedByCLI, setAddressUsedByCLI] = useState<string | null>(null);
   const client = useClient();
@@ -94,7 +86,7 @@ export function App({
   const [trySwitchChainFlag, setTrySwitchChainFlag] = useState(false);
 
   const isCorrectChainIdSet =
-    chainId === client?.chain.id && chainId === accountChainId;
+    chain.id === client?.chain.id && chain.id === accountChainId;
 
   useEffect(() => {
     if (isCorrectChainIdSet) {
@@ -108,14 +100,14 @@ export function App({
     // For some reason switchChain does not work if called immediately
     // So we try until user switches the chain cause we can't proceed until he does
     setTimeout(() => {
-      switchChain({ chainId });
+      switchChain({ chainId: chain.id });
 
       setTrySwitchChainFlag((prev) => {
         return !prev;
       });
     }, 2000);
   }, [
-    chainId,
+    chain,
     switchChain,
     trySwitchChainFlag,
     wasSwitchChainDialogShown,
@@ -132,14 +124,10 @@ export function App({
     events.onmessage = ({ data }) => {
       // We are sure CLI returns what we expect so there is no need to validate
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { chainId: chainIdFromCLI, msg } = JSON.parse(
+      const { msg } = JSON.parse(
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         data as string,
       ) as CLIToConnectorFullMsg;
-
-      if (chainId !== chainIdFromCLI) {
-        setChainId(chainIdFromCLI);
-      }
 
       if (msg.tag !== "ping") {
         reset();
@@ -187,7 +175,7 @@ export function App({
         );
       }
     };
-  }, [chainId, reset, sendTransaction, setChainId]);
+  }, [chain, reset, sendTransaction]);
 
   const {
     data: txReceipt,
@@ -230,7 +218,7 @@ export function App({
   return (
     <>
       {isConnected && <p>Chain: {client?.chain.name}</p>}
-      {client?.chain.id === CHAIN_IDS.local && (
+      {client?.chain.name === "Fluence Local" && (
         <details>
           <summary>How to work with local chain</summary>
           <ol>

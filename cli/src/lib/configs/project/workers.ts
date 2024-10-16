@@ -21,6 +21,7 @@ import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
 
 import {
+  CHAIN_ENV,
   CHAIN_ENV_OLD,
   type ChainENVOld,
   chainEnvOldToNew,
@@ -35,7 +36,6 @@ import {
   CLI_NAME,
   DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_WORKER_NAME,
-  FLUENCE_ENVS,
   type FluenceEnvOld,
   type FluenceEnv,
 } from "../../const.js";
@@ -426,7 +426,7 @@ const migrations: Migrations<Config> = [
     for (const [workerName, host] of Object.entries(config.hosts ?? {})) {
       const env = await fluenceEnvOldPrompt(
         `Select the environment that you used for deploying worker ${workerName} with dummyDealId: ${host.dummyDealId} at ${configPath}`,
-        "custom",
+        "kras",
       );
 
       let hostsForEnv = hosts[env];
@@ -525,7 +525,7 @@ version: ${numToStr(latestSchemaObj.properties.version.const)}
 
 # hosts:
 # # A map of directly deployed workers
-#   ${FLUENCE_ENVS[0]}:
+#   ${CHAIN_ENV[0]}:
 #     ${DEFAULT_WORKER_NAME}:
 #       # worker CID
 #       definition: bafkreicoctafgctpxf7jk4nynpnma4wdxpcecjtspsjmuidmag6enctnqa

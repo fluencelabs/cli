@@ -20,8 +20,6 @@ import { color } from "@oclif/color";
 import type { ChainENV } from "../common.js";
 
 import { commandObj } from "./commandObj.js";
-import { initReadonlyFluenceConfig } from "./configs/project/fluence.js";
-import { CLI_NAME, ENV_FLAG_NAME } from "./const.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 let env: ChainENV | undefined = undefined;
@@ -36,35 +34,5 @@ function setEnv(e: ChainENV): ChainENV {
 }
 
 export async function ensureChainEnv(): Promise<ChainENV> {
-  if (env !== undefined) {
-    return env;
-  }
-
-  const fluenceEnv = await ensureFluenceEnv();
-
-  if (fluenceEnv !== "custom") {
-    return setEnv(fluenceEnv);
-  }
-
-  const fluenceConfig = await initReadonlyFluenceConfig();
-
-  if (fluenceConfig === null) {
-    commandObj.error(
-      `Fluence project is required to use custom env. Please make sure you're in the project directory or specify the environment using --${ENV_FLAG_NAME} flag`,
-    );
-  }
-
-  const customContractsEnv = fluenceConfig.customFluenceEnv?.contractsEnv;
-
-  if (customContractsEnv === undefined) {
-    commandObj.error(
-      `${color.yellow("customFluenceEnv")} is not defined in ${color.yellow(
-        fluenceConfig.$getPath(),
-      )}. Please make sure it's there or choose some other fluence environment using ${color.yellow(
-        `${CLI_NAME} default env`,
-      )}`,
-    );
-  }
-
-  return setEnv(customContractsEnv);
+  return env === undefined ? setEnv(await ensureFluenceEnv()) : env;
 }

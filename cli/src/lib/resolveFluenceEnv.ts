@@ -17,14 +17,13 @@
 
 import { color } from "@oclif/color";
 
-import { DEFAULT_PUBLIC_FLUENCE_ENV } from "../common.js";
+import { CHAIN_ENV, DEFAULT_PUBLIC_FLUENCE_ENV } from "../common.js";
 
 import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";
 import {
   ENV_FLAG_NAME,
-  FLUENCE_ENVS,
   FLUENCE_ENVS_OLD,
   isFluenceEnv,
   type FluenceEnv,
@@ -70,7 +69,7 @@ export async function fluenceEnvPrompt(
 ): Promise<FluenceEnv> {
   return list({
     message,
-    options: [...FLUENCE_ENVS],
+    options: [...CHAIN_ENV],
     oneChoiceMessage() {
       throw new Error("Unreachable. There are multiple envs");
     },

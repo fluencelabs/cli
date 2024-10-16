@@ -25,7 +25,7 @@ import {
   DEAL_IDS_FLAG_NAME,
   PT_SYMBOL,
 } from "../../lib/const.js";
-import { getDealClient, getEventValue, sign } from "../../lib/dealClient.js";
+import { getContracts, getEventValue, sign } from "../../lib/dealClient.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -58,10 +58,10 @@ export default class DealRewardsWithdraw extends BaseCommand<
       return commandObj.error("Got empty list of deal ids. Aborting");
     }
 
-    const { dealClient } = await getDealClient();
+    const { contracts } = await getContracts();
 
     for (const dealId of dealIds) {
-      const deal = dealClient.getDeal(dealId);
+      const deal = contracts.getDeal(dealId);
       const workers = await deal.getWorkers();
 
       let providerRewards = 0n;

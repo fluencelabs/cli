@@ -19,17 +19,15 @@ import assert from "assert";
 
 import { color } from "@oclif/color";
 
-import { setChainFlags, chainFlags } from "../chainFlags.js";
 import { commandObj } from "../commandObj.js";
 import {
   NOX_NAMES_FLAG_NAME,
   FLT_SYMBOL,
   OFFER_FLAG_NAME,
-  PRIV_KEY_FLAG_NAME,
   MAX_TOKEN_AMOUNT_KEYWORD,
 } from "../const.js";
 import {
-  getDealClient,
+  getWallet,
   sendRawTransaction,
   getSignerAddress,
 } from "../dealClient.js";
@@ -104,16 +102,13 @@ export async function withdrawFromNox(flags: {
       },
     }));
 
-  const providerPrivateKey = chainFlags[PRIV_KEY_FLAG_NAME];
-
   for (const { walletKey: noxWalletKey, name: noxName } of computePeers) {
     const { amountBigInt, txReceipt, noxAddress } =
       amount === MAX_TOKEN_AMOUNT_KEYWORD
-        ? await withdrawMaxAmount({ noxWalletKey, noxName, providerPrivateKey })
+        ? await withdrawMaxAmount({ noxWalletKey, noxName })
         : await withdrawSpecificAmount({
             noxWalletKey,
             noxName,
-            providerPrivateKey,
             amountBigInt: await fltParse(amount),
           });
 
@@ -134,30 +129,23 @@ export async function withdrawFromNox(flags: {
 type WithdrawMaxAmountArgs = {
   noxWalletKey: string;
   noxName: string;
-  providerPrivateKey: string | undefined;
 };
 
 async function withdrawMaxAmount({
   noxWalletKey,
   noxName,
-  providerPrivateKey,
 }: WithdrawMaxAmountArgs) {
-  setChainFlags({
-    ...chainFlags,
-    [PRIV_KEY_FLAG_NAME]: noxWalletKey,
-  });
-
-  const { providerOrWallet } = await getDealClient();
+  const noxWallet = await getWallet(noxWalletKey);
   const noxAddress = await getSignerAddress();
 
-  const gasLimit = await providerOrWallet.estimateGas({
+  const gasLimit = await noxWallet.estimateGas({
     to: noxAddress,
     value: 0n,
   });
 
-  const provider = providerOrWallet.provider;
-  assert(provider !== null, "Unreachable. We ensure provider is not null");
-  const gasPrice = await provider.getFeeData();
+  const noxProvider = noxWallet.provider;
+  assert(noxProvider !== null, "Unreachable. We ensure provider is not null");
+  const gasPrice = await noxProvider.getFeeData();
 
   if (
     gasPrice.maxFeePerGas === null ||
@@ -171,7 +159,7 @@ async function withdrawMaxAmount({
   const feeAmount =
     (gasPrice.maxFeePerGas + gasPrice.maxPriorityFeePerGas) * gasLimit;
 
-  const totalBalance = await provider.getBalance(noxAddress);
+  const totalBalance = await noxProvider.getBalance(noxAddress);
   const amountBigInt = totalBalance - feeAmount;
 
   if (amountBigInt <= 0n) {
@@ -186,17 +174,7 @@ async function withdrawMaxAmount({
     };
   }
 
-  setChainFlags({
-    ...chainFlags,
-    [PRIV_KEY_FLAG_NAME]: providerPrivateKey,
-  });
-
   const providerAddress = await getSignerAddress();
-
-  setChainFlags({
-    ...chainFlags,
-    [PRIV_KEY_FLAG_NAME]: noxWalletKey,
-  });
 
   const result = {
     txReceipt: await sendRawTransaction(
@@ -208,15 +186,11 @@ async function withdrawMaxAmount({
         maxFeePerGas: gasPrice.maxFeePerGas,
         maxPriorityFeePerGas: gasPrice.maxPriorityFeePerGas,
       },
+      noxWallet,
     ),
     amountBigInt,
     noxAddress,
   };
-
-  setChainFlags({
-    ...chainFlags,
-    [PRIV_KEY_FLAG_NAME]: providerPrivateKey,
-  });
 
   return result;
 }
@@ -224,19 +198,12 @@ async function withdrawMaxAmount({
 async function withdrawSpecificAmount({
   noxWalletKey,
   noxName,
-  providerPrivateKey,
   amountBigInt,
 }: WithdrawMaxAmountArgs & { amountBigInt: bigint }) {
   const providerAddress = await getSignerAddress();
+  const { address: noxAddress } = await getWallet(noxWalletKey);
 
-  setChainFlags({
-    ...chainFlags,
-    [PRIV_KEY_FLAG_NAME]: noxWalletKey,
-  });
-
-  const noxAddress = await getSignerAddress();
-
-  const result = {
+  return {
     txReceipt: await sendRawTransaction(
       `Withdraw ${await fltFormatWithSymbol(amountBigInt)} from ${noxName} (${noxAddress}) to ${providerAddress}`,
       { to: providerAddress, value: amountBigInt },
@@ -244,11 +211,4 @@ async function withdrawSpecificAmount({
     amountBigInt,
     noxAddress,
   };
-
-  setChainFlags({
-    ...chainFlags,
-    [PRIV_KEY_FLAG_NAME]: providerPrivateKey,
-  });
-
-  return result;
 }

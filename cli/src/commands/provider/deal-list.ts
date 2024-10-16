@@ -31,15 +31,6 @@ export default class DealsList extends BaseCommand<typeof DealsList> {
 
   async run(): Promise<void> {
     await initCli(this, await this.parse(DealsList));
-
-    const deals = await getProviderDeals();
-
-    commandObj.log(
-      deals
-        .map(({ id }) => {
-          return id;
-        })
-        .join("\n"),
-    );
+    commandObj.log((await getProviderDeals()).join("\n"));
   }
 }

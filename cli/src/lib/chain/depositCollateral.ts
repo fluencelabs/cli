@@ -18,7 +18,7 @@
 import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
-import { getDealClient, getReadonlyDealClient, sign } from "../dealClient.js";
+import { getContracts, getReadonlyContracts, sign } from "../dealClient.js";
 import { splitErrorsAndResults } from "../helpers/utils.js";
 
 import {
@@ -65,8 +65,7 @@ export async function depositCollateral(flags: CCFlags) {
     firstCommitment !== undefined &&
     "providerConfigComputePeer" in firstCommitment;
 
-  const { dealClient } = await getDealClient();
-  const capacity = dealClient.getCapacity();
+  const { contracts } = await getContracts();
 
   const commitmentsWithCollateral = await Promise.all(
     commitments.map(async (commitment) => {
@@ -90,7 +89,7 @@ export async function depositCollateral(flags: CCFlags) {
         return [noxName, peerId, commitmentId].filter(Boolean).join("\n");
       })
       .join("\n\n")}`,
-    method: capacity.depositCollateral,
+    method: contracts.diamond.depositCollateral,
     args: [
       commitments.map(({ commitmentId }) => {
         return commitmentId;
@@ -125,8 +124,10 @@ ${(
 }
 
 async function getCollateral(commitmentId: string) {
-  const { readonlyDealClient } = await getReadonlyDealClient();
-  const capacity = readonlyDealClient.getCapacity();
-  const commitment = await capacity.getCommitment(commitmentId);
+  const { readonlyContracts } = await getReadonlyContracts();
+
+  const commitment =
+    await readonlyContracts.diamond.getCommitment(commitmentId);
+
   return commitment.collateralPerUnit * commitment.unitCount;
 }

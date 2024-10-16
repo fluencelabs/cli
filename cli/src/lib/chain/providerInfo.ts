@@ -18,7 +18,7 @@
 import { commandObj } from "../commandObj.js";
 import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
 import { CLI_NAME } from "../const.js";
-import { getDealClient, sign, getSignerAddress } from "../dealClient.js";
+import { getContracts, sign, getSignerAddress } from "../dealClient.js";
 
 import { cidStringToCIDV1Struct } from "./conversions.js";
 
@@ -27,8 +27,7 @@ const CURRENTLY_UNUSED_CID =
 
 export async function registerProvider() {
   const providerConfig = await ensureReadonlyProviderConfig();
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
 
   await sign({
     async validateAddress(address: string) {
@@ -41,7 +40,7 @@ export async function registerProvider() {
       }
     },
     title: `Register provider with the name: ${providerConfig.providerName}`,
-    method: market.setProviderInfo,
+    method: contracts.diamond.setProviderInfo,
     args: [
       providerConfig.providerName,
       await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),
@@ -69,8 +68,7 @@ Provider address: ${signerAddress}
 
 export async function updateProvider() {
   const providerConfig = await ensureReadonlyProviderConfig();
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
 
   await sign({
     async validateAddress(address: string) {
@@ -83,7 +81,7 @@ export async function updateProvider() {
       }
     },
     title: `Update provider name to ${providerConfig.providerName}`,
-    method: market.setProviderInfo,
+    method: contracts.diamond.setProviderInfo,
     args: [
       providerConfig.providerName,
       await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),
@@ -110,9 +108,8 @@ Provider address: ${signerAddress}
 }
 
 export async function getProviderInfoByAddress(address: string) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
-  const { name } = await market.getProviderInfo(address);
+  const { contracts } = await getContracts();
+  const { name } = await contracts.diamond.getProviderInfo(address);
   return { name: name === "" ? null : name, address };
 }
 

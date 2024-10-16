@@ -30,10 +30,14 @@ import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
-import { type ChainENV, jsonStringify } from "../../../common.js";
+import {
+  jsonStringify,
+  CHAIN_RPC_PORT,
+  type ChainENV,
+} from "../../../common.js";
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
-import { getChainId } from "../../chain/chainId.js";
+import { getChainId } from "../../chain/chainConfig.js";
 import {
   ccDurationValidator,
   validateAddress,
@@ -63,11 +67,12 @@ import {
   WS_CHAIN_URLS,
   PT_SYMBOL,
   DEFAULT_CURL_EFFECTOR_CID,
-  CHAIN_URLS_FOR_CONTAINERS,
+  CHAIN_RPC_CONTAINER_NAME,
   CLI_NAME,
   DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
   DEFAULT_VM_EFFECTOR_CID,
 } from "../../const.js";
+import { resolveDeployment } from "../../dealClient.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
@@ -88,7 +93,7 @@ import {
   ensureFluenceCCPConfigsDir,
 } from "../../paths.js";
 import { input, list } from "../../prompt.js";
-import { setEnvConfig } from "../globalConfigs.js";
+import { envConfig, setEnvConfig } from "../globalConfigs.js";
 import {
   getReadonlyConfigInitFunction,
   type InitializedConfig,
@@ -2150,11 +2155,12 @@ const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
 async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
-  const { DealClient } = await import("@fluencelabs/deal-ts-clients");
+  const { RPC_URLS } = await import("@fluencelabs/deal-ts-clients");
 
-  const contractAddresses = DealClient.getContractAddresses(
-    env === "testnet" ? "dar" : env,
-  );
+  const CHAIN_URLS_FOR_CONTAINERS = {
+    ...RPC_URLS,
+    local: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
+  };
 
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
@@ -2174,9 +2180,12 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       },
     },
     chain: {
-      httpEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
+      httpEndpoint:
+        envConfig?.rpcUrl === undefined
+          ? CHAIN_URLS_FOR_CONTAINERS[env]
+          : envConfig.rpcUrl,
       wsEndpoint: WS_CHAIN_URLS[env],
-      diamondContract: contractAddresses.diamond,
+      diamondContract: (await resolveDeployment()).diamond,
       networkId,
       defaultPriorityFee: 0,
     },
@@ -2238,7 +2247,7 @@ export type EnsureComputerPeerConfig = Awaited<
 >[number];
 
 export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
-  const { ethers } = await import("ethers");
+  const { Wallet } = await import("ethers");
   const providerConfig = await ensureReadonlyProviderConfig();
 
   const providerSecretsConfig =
@@ -2289,7 +2298,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
             .secretKey,
           computePeerName,
           computePeer,
-          signingWallet: ethers.Wallet.createRandom().privateKey,
+          signingWallet: Wallet.createRandom().privateKey,
         };
       }),
     );
@@ -2422,7 +2431,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
           peerId: await getPeerIdFromSecretKey(secretKey),
           computeUnits: computePeer.computeUnits,
           walletKey: signingWallet,
-          walletAddress: await new ethers.Wallet(signingWallet).getAddress(),
+          walletAddress: await new Wallet(signingWallet).getAddress(),
           capacityCommitment,
         };
       },

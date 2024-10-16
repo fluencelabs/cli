@@ -25,7 +25,7 @@ import {
   CLI_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
 } from "../../const.js";
-import { getDealClient, signBatch, populateTx } from "../../dealClient.js";
+import { getContracts, signBatch, populateTx } from "../../dealClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
@@ -290,8 +290,7 @@ async function populatePeersToRemoveTxs(
   { computePeersFromProviderConfig }: OnChainOffer,
   peersOnChain: PeersOnChain,
 ) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
 
   const computePeersToRemove = peersOnChain.filter(({ peerIdBase58 }) => {
     return !computePeersFromProviderConfig.some((p) => {
@@ -309,10 +308,10 @@ async function populatePeersToRemoveTxs(
                   description: `\nRemoving peer ${peerIdBase58} with ${numToStr(computeUnits.length)} compute units`,
                 }
               : {}),
-            tx: populateTx(market.removeComputeUnit, computeUnit.id),
+            tx: populateTx(contracts.diamond.removeComputeUnit, computeUnit.id),
           };
         }),
-        { tx: populateTx(market.removeComputePeer, hexPeerId) },
+        { tx: populateTx(contracts.diamond.removeComputePeer, hexPeerId) },
       ];
     },
   );
@@ -322,10 +321,8 @@ async function populatePaymentTokenTx({
   offerIndexerInfo,
   offerId,
 }: OnChainOffer) {
-  const { dealClient } = await getDealClient();
-  const usdc = dealClient.getUSDC();
-  const market = dealClient.getMarket();
-  const usdcAddress = await usdc.getAddress();
+  const { contracts } = await getContracts();
+  const usdcAddress = contracts.deployment.usdc;
   return offerIndexerInfo.paymentToken.address === usdcAddress.toLowerCase()
     ? []
     : [
@@ -333,7 +330,11 @@ async function populatePaymentTokenTx({
           description: `\nchanging payment token from ${color.yellow(
             offerIndexerInfo.paymentToken.address,
           )} to ${color.yellow(usdcAddress)}`,
-          tx: populateTx(market.changePaymentToken, offerId, usdcAddress),
+          tx: populateTx(
+            contracts.diamond.changePaymentToken,
+            offerId,
+            usdcAddress,
+          ),
         },
       ];
 }
@@ -343,8 +344,7 @@ async function populateMinPricePerCuPerEpochTx({
   minPricePerCuPerEpochBigInt,
   offerId,
 }: OnChainOffer) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
   return offerIndexerInfo.pricePerEpoch === minPricePerCuPerEpochBigInt
     ? []
     : [
@@ -355,7 +355,7 @@ async function populateMinPricePerCuPerEpochTx({
             await ptFormatWithSymbol(minPricePerCuPerEpochBigInt),
           )}`,
           tx: populateTx(
-            market.changeMinPricePerCuPerEpoch,
+            contracts.diamond.changeMinPricePerCuPerEpoch,
             offerId,
             minPricePerCuPerEpochBigInt,
           ),
@@ -367,8 +367,7 @@ async function populateEffectorsRemoveTx(
   { effectors, offerId }: OnChainOffer,
   effectorsOnChain: string[],
 ) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
 
   const removedEffectors = effectorsOnChain.filter((cid) => {
     return effectors === undefined ? true : !effectors.includes(cid);
@@ -380,7 +379,7 @@ async function populateEffectorsRemoveTx(
         {
           description: `\nRemoving effectors:\n${removedEffectors.join("\n")}`,
           tx: populateTx(
-            market.removeEffector,
+            contracts.diamond.removeEffector,
             offerId,
             await Promise.all(
               removedEffectors.map((cid) => {
@@ -396,8 +395,7 @@ async function populateEffectorsAddTx(
   { effectors, offerId }: OnChainOffer,
   effectorsOnChain: string[],
 ) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
 
   const addedEffectors = (effectors ?? []).filter((effector) => {
     return !effectorsOnChain.some((cid) => {
@@ -411,7 +409,7 @@ async function populateEffectorsAddTx(
         {
           description: `\nAdding effectors:\n${addedEffectors.join("\n")}`,
           tx: populateTx(
-            market.addEffector,
+            contracts.diamond.addEffector,
             offerId,
             await Promise.all(
               addedEffectors.map((effector) => {
@@ -427,8 +425,7 @@ async function populateCUToRemoveTxs(
   { computePeersFromProviderConfig }: OnChainOffer,
   peersOnChain: PeersOnChain,
 ) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
 
   const computeUnitsToRemove = peersOnChain.flatMap(
     ({ peerIdBase58, computeUnits }) => {
@@ -465,18 +462,17 @@ async function populateCUToRemoveTxs(
               description: `\nRemoving ${numToStr(computeUnits.length)} compute units from peer ${peerIdBase58}`,
             }
           : {}),
-        tx: populateTx(market.removeComputeUnit, computeUnit),
+        tx: populateTx(contracts.diamond.removeComputeUnit, computeUnit),
       };
     });
   });
 }
 
 async function populateOfferRemoveTx({ offerId }: OnChainOffer) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
   return {
     description: `\nRemoving offer: ${offerId}`,
-    tx: populateTx(market.removeOffer, offerId),
+    tx: populateTx(contracts.diamond.removeOffer, offerId),
   };
 }
 
@@ -484,8 +480,7 @@ async function populateCUToAddTxs(
   { computePeersFromProviderConfig }: OnChainOffer,
   peersOnChain: PeersOnChain,
 ) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
+  const { contracts } = await getContracts();
 
   const computeUnitsToAdd = peersOnChain.flatMap(
     ({ peerIdBase58, hexPeerId, computeUnits }) => {
@@ -520,7 +515,7 @@ async function populateCUToAddTxs(
               description: `\nAdding ${numToStr(unitIds.length)} compute units to peer ${peerIdBase58}`,
             }
           : {}),
-        tx: populateTx(market.addComputeUnits, hexPeerId, [CUId]),
+        tx: populateTx(contracts.diamond.addComputeUnits, hexPeerId, [CUId]),
       };
     });
   });
@@ -530,16 +525,13 @@ async function addMissingComputePeers(
   { computePeersFromProviderConfig, offerId, offerName }: OnChainOffer,
   peersOnChain: PeersOnChain,
 ) {
-  const { dealClient } = await getDealClient();
-  const market = dealClient.getMarket();
-
   const allCPs = computePeersFromProviderConfig.filter(({ peerIdBase58 }) => {
     return !peersOnChain.some((p) => {
       return p.peerIdBase58 === peerIdBase58;
     });
   });
 
-  return addRemainingCPs({ allCPs, offerId, market, offerName });
+  return addRemainingCPs({ allCPs, offerId, offerName });
 }
 
 function printOffersToUpdateInfo(

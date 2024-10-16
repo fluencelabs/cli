@@ -29,7 +29,6 @@ import {
   CHAIN_ENV_OLD,
   type ChainENV,
   type ChainENVOld,
-  chainEnvOldToNew,
 } from "../../../common.js";
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import { versions } from "../../../versions.js";
@@ -50,7 +49,6 @@ import {
   DOT_FLUENCE_DIR_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
-  FLUENCE_ENVS,
   type FluenceEnv,
   GLOBAL_CONFIG_FULL_FILE_NAME,
   IPFS_ADDR_PROPERTY,
@@ -64,6 +62,7 @@ import {
   type AquaLogLevel,
   PT_SYMBOL,
   COMPILE_AQUA_PROPERTY_NAME,
+  ENV_CONFIG_FULL_FILE_NAME,
 } from "../../const.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
@@ -73,7 +72,7 @@ import {
   validateBatchAsync,
 } from "../../helpers/validations.js";
 import { writeSecretKey } from "../../keyPairs.js";
-import { resolveRelays } from "../../multiaddres.js";
+import { resolveDefaultRelays } from "../../multiaddres.js";
 import { getFluenceDir, projectRootDir } from "../../paths.js";
 import type { Mutable } from "../../typeHelpers.js";
 import {
@@ -86,6 +85,7 @@ import {
   type Migrations,
 } from "../initConfig.js";
 
+import { initNewEnvConfig } from "./env.js";
 import {
   type OverridableModuleProperties,
   overridableModuleProperties,
@@ -199,10 +199,10 @@ const configSchemaV1Obj = {
     },
     relays: {
       title: "Relays",
-      description: `List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: ${FLUENCE_ENVS[0]}`,
+      description: `List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: ${CHAIN_ENV[0]}`,
       type: ["string", "array"],
       oneOf: [
-        { type: "string", title: "Network name", enum: FLUENCE_ENVS },
+        { type: "string", title: "Network name", enum: CHAIN_ENV },
         {
           type: "array",
           title: "Multi addresses",
@@ -1095,10 +1095,6 @@ ${yamlDiffPatch(
 #     noEmptyResponse: false
 
 # # A list of custom relay multiaddresses to use when connecting to Fluence network
-# customFluenceEnv:
-#   contractsEnv: local
-#   relays:
-#     - "/ip4/127.0.0.1/tcp/10010/ws/p2p/12D3KooWGpqaLpVUoLB5cJPLDS6CjBNZePBNTYPGpNPNZMDs6osY"
 # # A map with service names as keys and service configs as values.
 # # Service names must start with a lowercase letter and contain only letters numbers and underscores.
 # # You can use \`fluence service new\` or \`fluence service add\` command to add a service
@@ -1302,7 +1298,7 @@ const migrations: Migrations<Config> = [
         contractsEnv: chainNetwork ?? "dar",
         relays:
           relays === undefined || typeof relays === "string"
-            ? await resolveRelays()
+            ? await resolveDefaultRelays()
             : relays,
       };
     }
@@ -1498,18 +1494,23 @@ const migrations: Migrations<Config> = [
 
     const { customFluenceEnv, ...rest } = config;
 
-    return {
-      ...rest,
-      version: 10,
-      ...(customFluenceEnv === undefined
-        ? {}
-        : {
-            customFluenceEnv: {
-              ...customFluenceEnv,
-              contractsEnv: chainEnvOldToNew(customFluenceEnv.contractsEnv),
-            },
-          }),
-    };
+    if (customFluenceEnv !== undefined) {
+      const envConfig = await initNewEnvConfig();
+      envConfig.relays = customFluenceEnv.relays;
+
+      envConfig.fluenceEnv =
+        customFluenceEnv.contractsEnv === "kras"
+          ? "mainnet"
+          : customFluenceEnv.contractsEnv === "dar"
+            ? "testnet"
+            : customFluenceEnv.contractsEnv;
+
+      commandObj.warn(
+        `Custom fluence env migrated from ${FLUENCE_CONFIG_FULL_FILE_NAME} to ${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}`,
+      );
+    }
+
+    return { ...rest, version: 10 };
   },
 ];
 

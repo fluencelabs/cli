@@ -18,16 +18,6 @@
 import "@total-typescript/ts-reset";
 import type { TransactionRequest } from "ethers";
 
-export const CHAIN_IDS = {
-  testnet: 52164803,
-  stage: 123420000220,
-  mainnet: 9999999,
-  local: 31337,
-} as const satisfies Record<ChainENV, number>;
-
-export type ChainId = (typeof CHAIN_IDS)[ChainENV];
-export const isChainId = getIsUnion(Object.values(CHAIN_IDS));
-
 export const CHAIN_RPC_PORT = "8545";
 
 export const DEFAULT_PUBLIC_FLUENCE_ENV = "testnet";
@@ -62,23 +52,6 @@ export function chainEnvOldToNew(env: ChainENVOld): ChainENV {
   )[env];
 }
 
-export const CHAIN_URLS_WITHOUT_LOCAL = {
-  mainnet: "https://rpc.mainnet.fluence.dev",
-  testnet: "https://rpc.testnet.fluence.dev",
-  stage: "https://rpc.stage.fluence.dev",
-} as const satisfies Record<Exclude<ChainENV, "local">, string>;
-
-export const CHAIN_URLS = {
-  ...CHAIN_URLS_WITHOUT_LOCAL,
-  local: `http://127.0.0.1:${CHAIN_RPC_PORT}`,
-} as const satisfies Record<ChainENV, string>;
-
-export const BLOCK_SCOUT_URLS = {
-  mainnet: "https://blockscout.mainnet.fluence.dev/",
-  testnet: "https://blockscout.testnet.fluence.dev/",
-  stage: "https://blockscout.stage.fluence.dev/",
-} as const satisfies Record<Exclude<ChainENV, "local">, string>;
-
 export type TransactionPayload = {
   title: string;
   name: string;
@@ -108,7 +81,12 @@ export type CLIToConnectorMsg =
     };
 
 export type CLIToConnectorFullMsg = {
-  chainId: ChainId;
+  chain: {
+    id: number;
+    name: string;
+    rpcUrls: { default: { http: [string] } };
+    blockExplorers?: { default: { name: string; url: string; apiUrl: string } };
+  };
   msg: CLIToConnectorMsg;
 };
 

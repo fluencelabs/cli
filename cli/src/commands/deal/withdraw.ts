@@ -28,7 +28,7 @@ import {
   PT_SYMBOL,
 } from "../../lib/const.js";
 import { getDeals } from "../../lib/deal.js";
-import { getDealClient, sign } from "../../lib/dealClient.js";
+import { getContracts, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -49,7 +49,7 @@ export default class Withdraw extends BaseCommand<typeof Withdraw> {
 
   async run(): Promise<void> {
     const flagsAndArgs = await initCli(this, await this.parse(Withdraw));
-    const { dealClient } = await getDealClient();
+    const { contracts } = await getContracts();
     const deals = await getDeals(flagsAndArgs);
 
     const amount =
@@ -65,7 +65,7 @@ export default class Withdraw extends BaseCommand<typeof Withdraw> {
     );
 
     for (const { dealId, dealName } of deals) {
-      const deal = dealClient.getDeal(dealId);
+      const deal = contracts.getDeal(dealId);
 
       await sign({
         title: `Withdraw ${await ptFormatWithSymbol(parsedAmount)} tokens from the deal ${dealName}`,

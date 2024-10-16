@@ -21,12 +21,18 @@ import addFormats from "ajv-formats";
 
 import { jsonStringify } from "../common.js";
 
-export const ajv = new Ajv.default({
-  allowUnionTypes: true,
-  code: { esm: true },
-});
+export function getAjv() {
+  const ajv = new Ajv.default({
+    allowUnionTypes: true,
+    code: { esm: true },
+  });
 
-addFormats.default(ajv);
+  addFormats.default(ajv);
+  ajv.addFormat("hex", /^0x[0-9a-fA-F]*$/);
+  return ajv;
+}
+
+export const ajv = getAjv();
 
 type AjvErrors =
   | Ajv.ErrorObject<string, Record<string, unknown>>[]

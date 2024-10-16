@@ -17,26 +17,27 @@
 
 import { color } from "@oclif/color";
 
-import { BLOCK_SCOUT_URLS } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { type DealNameAndId } from "../deal.js";
-import { getReadonlyDealClient } from "../dealClient.js";
-import { ensureChainEnv } from "../ensureChainNetwork.js";
+import { getReadonlyContracts } from "../dealClient.js";
 import { bigintToStr } from "../helpers/typesafeStringify.js";
 
+import { getBlockScoutUrl } from "./chainConfig.js";
 import { peerIdHexStringToBase58String } from "./conversions.js";
 import { ptFormatWithSymbol } from "./currencies.js";
 
 export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
-  const { readonlyDealClient } = await getReadonlyDealClient();
-  const deal = readonlyDealClient.getDeal(dealId);
+  const { readonlyContracts } = await getReadonlyContracts();
+  const deal = readonlyContracts.getDeal(dealId);
   commandObj.log(`\n${color.yellow(dealName)} info:`);
   const status = await deal.getStatus();
-  const env = await ensureChainEnv();
   const { DealStatus } = await import("@fluencelabs/deal-ts-clients");
+  const blockScoutUrl = await getBlockScoutUrl();
 
-  if (env !== "local") {
-    commandObj.log(`Deal: ${BLOCK_SCOUT_URLS[env]}address/${dealId}`);
+  if ("blockExplorers" in blockScoutUrl) {
+    commandObj.log(
+      `Deal: ${blockScoutUrl.blockExplorers.default.url}address/${dealId}`,
+    );
   }
 
   commandObj.log(`DealID: "${dealId}"`);

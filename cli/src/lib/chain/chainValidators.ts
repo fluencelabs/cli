@@ -19,7 +19,7 @@ import { color } from "@oclif/color";
 import parseDuration from "parse-duration";
 
 import { versions } from "../../versions.js";
-import { getReadonlyDealClient } from "../dealClient.js";
+import { getReadonlyContracts } from "../dealClient.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import { stringifyUnknown } from "../helpers/utils.js";
@@ -30,9 +30,8 @@ export async function getMinCCDuration(): Promise<bigint> {
 
   if ((await ensureChainEnv()) !== "local") {
     try {
-      const { readonlyDealClient } = await getReadonlyDealClient();
-      const core = readonlyDealClient.getCore();
-      minDuration = await core.minDuration();
+      const { readonlyContracts } = await getReadonlyContracts();
+      minDuration = await readonlyContracts.diamond.minDuration();
     } catch {}
   }
 
@@ -62,13 +61,11 @@ export async function ccDurationValidator() {
 export async function validateAddress(
   input: unknown,
 ): Promise<ValidationResult> {
-  const { ethers } = await import("ethers");
-
-  if (ethers.isAddress(input)) {
-    return true;
-  }
-
-  return `Must be a valid address. Got: ${color.yellow(stringifyUnknown(input))}`;
+  const { isAddress } = await import("ethers");
+  return (
+    isAddress(input) ||
+    `Must be a valid address. Got: ${color.yellow(stringifyUnknown(input))}`
+  );
 }
 
 let protocolVersions:
@@ -82,12 +79,11 @@ export async function getProtocolVersions() {
       let maxProtocolVersion = minProtocolVersion;
 
       if ((await ensureChainEnv()) !== "local") {
-        const { readonlyDealClient } = await getReadonlyDealClient();
-        const core = readonlyDealClient.getCore();
+        const { readonlyContracts } = await getReadonlyContracts();
 
         [minProtocolVersion, maxProtocolVersion] = await Promise.all([
-          core.minProtocolVersion(),
-          core.maxProtocolVersion(),
+          readonlyContracts.diamond.minProtocolVersion(),
+          readonlyContracts.diamond.maxProtocolVersion(),
         ]);
       }
 
