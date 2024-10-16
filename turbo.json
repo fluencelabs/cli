@@ -2,57 +2,80 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "build": {
-      "outputs": [
-        "dist/**",
-        "src/aqua-dependencies/**",
-        "src/cli-aqua-dependencies/**",
-        "src/lib/compiled-aqua/**",
-        "src/lib/compiled-aqua-with-tracing/**",
-        "src/versions/**"
-      ],
       "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
+      "outputs": ["dist/**", "src/dist/**"],
       "dependsOn": ["^build"]
     },
     "on-each-commit": {
-      "inputs": [
-        "bin/**",
-        "src/**",
-        "package.json",
-        "tsconfig.json",
-        "eslint.config.js"
-      ],
+      "inputs": ["src/**", "package.json", "tsconfig.json", "eslint.config.js"],
       "dependsOn": ["^build", "build"]
+    },
+    "install-yarn-dependencies": {
+      "inputs": ["cli/package.json", "cli/yarn.lock", "cli/.yarnrc.yml"],
+      "outputs": ["cli/node_modules/**"]
+    },
+    "install-npm-dependencies": {
+      "inputs": [
+        "cli/cli/cli-aqua-dependencies/package.json",
+        "cli/cli/cli-aqua-dependencies/package-lock.json",
+        "cli/cli/aqua-dependencies/package.json",
+        "cli/cli/aqua-dependencies/package-lock.json"
+      ],
+      "outputs": [
+        "cli/cli/cli-aqua-dependencies/node_modules/**",
+        "cli/cli/aqua-dependencies/node_modules/**"
+      ]
+    },
+    "before-build": {
+      "dependsOn": ["install-yarn-dependencies", "install-npm-dependencies"],
+      "inputs": ["cli/beforeBuild.js", "cli/cli/versions.json"],
+      "outputs": [
+        "cli/cli/lib/compiled-aqua/**",
+        "cli/cli/lib/compiled-aqua-with-tracing/**",
+        "cli/cli/versions/**",
+        "cli/cli/common.ts"
+      ]
+    },
+    "build-cli": {
+      "dependsOn": ["before-build", "@repo/cli-connector#build"],
+      "inputs": [
+        "cli/bin/**",
+        "cli/src/**",
+        "cli/package.json",
+        "cli/tsconfig.json"
+      ],
+      "outputs": ["cli/dist/**"]
+    },
+    "on-each-commit-cli": {
+      "inputs": [
+        "cli/bin/**",
+        "cli/src/**",
+        "cli/package.json",
+        "cli/tsconfig.json",
+        "cli/eslint.config.js"
+      ],
+      "dependsOn": ["build-cli"]
     },
     "pack-ci": {
       "outputs": ["dist/**"],
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build"]
+      "dependsOn": ["build-cli"]
     },
     "pack-linux-x64": {
       "outputs": ["dist/**"],
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build"]
+      "dependsOn": ["build-cli"]
     },
     "pack-darwin-x64": {
       "outputs": ["dist/**"],
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build"]
+      "dependsOn": ["build-cli"]
     },
     "pack-darwin-arm64": {
       "outputs": ["dist/**"],
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build"]
+      "dependsOn": ["build-cli"]
     },
     "pack-win32-x64": {
       "outputs": ["dist/**"],
-      "inputs": [
-        "bin/**",
-        "src/**",
-        "package.json",
-        "tsconfig.json",
-        "nsis/**"
-      ],
-      "dependsOn": ["build"]
+      "inputs": ["nsis/**"],
+      "dependsOn": ["build-cli"]
     }
   }
 }

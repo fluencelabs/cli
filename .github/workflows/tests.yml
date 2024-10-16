@@ -120,7 +120,7 @@ jobs:
           case ${{ inputs.nox-image }} in
           # if nox image is not passed from e2e read from versions.json
           'null')
-            nox="$(jq .nox cli/src/versions.json -r)"
+            nox="$(jq .nox cli/cli/versions.json -r)"
           ;;
           # else set nox image to snapshot passed from e2e
           *)
@@ -188,9 +188,6 @@ jobs:
 
       - run: yarn install
 
-      - run: yarn install
-        working-directory: cli
-
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
@@ -198,7 +195,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
-          working-directory: cli
+          working-directory: packages/cli/cli
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -207,7 +204,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
-          working-directory: cli
+          working-directory: packages/cli/cli
 
       - name: Set deal-ts-clients version
         if: inputs.deal-ts-clients-version != 'null'
@@ -216,7 +213,7 @@ jobs:
           package: "@fluencelabs/deal-ts-clients"
           version: "${{ inputs.deal-ts-clients-version }}"
           package-manager: yarn
-          working-directory: cli
+          working-directory: packages/cli/cli
 
       - name: Set installation-spell version
         if: inputs.installation-spell-version != 'null'
@@ -226,7 +223,7 @@ jobs:
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
           flags: "--dev"
-          working-directory: cli
+          working-directory: packages/cli/cli
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -261,44 +258,44 @@ jobs:
 
       - name: Build CLI
         run: yarn build
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Pack Fluence CLI for Linux
         run: yarn pack-linux-x64
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Download Marine and Mrepl
         run: yarn download-marine-and-mrepl
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Generate templates
         run: yarn generate-templates
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Set up the environment (local up)
         if: inputs.fluence-env == 'local'
         run: yarn local-up
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Run provider tests
         run: yarn vitest-provider
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Run deal deploy tests
         run: yarn vitest-deal-deploy
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Run deal update tests
         run: yarn vitest-deal-update
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Run smoke tests
         run: yarn vitest-smoke
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Run js-to-aqua tests
         run: yarn vitest-js-to-aqua
-        working-directory: cli
+        working-directory: packages/cli/cli
 
       - name: Show Runner Load Average
         run: uptime

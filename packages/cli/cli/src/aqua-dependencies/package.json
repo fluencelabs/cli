@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@fluencelabs/aqua-lib": "0.12.1",
+    "@fluencelabs/spell": "0.7.6"
+  }
+}

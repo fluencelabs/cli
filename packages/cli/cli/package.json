@@ -23,8 +23,8 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "before-build": "npm i --prefix \"./src/cli-aqua-dependencies\" && tsx src/beforeBuild.ts && npm i --prefix \"./src/aqua-dependencies\"",
-    "build": "yarn before-build && shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies && shx cp -r ../packages/cli-connector/dist ./dist/cli-connector",
+    "before-build": "node ./beforeBuild.js",
+    "build": "shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies && shx cp -r ../../cli-connector/dist ./dist/cli-connector",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
@@ -50,7 +50,7 @@
     "local-up": "node --loader ts-node/esm --no-warnings ./test/setup/localUp.ts",
     "test": "yarn download-marine-and-mrepl && yarn generate-templates && yarn local-up && yarn vitest",
     "circular": "madge --circular ./dist --exclude cli-connector",
-    "on-each-commit": "yarn build && yarn lint-fix && yarn circular && cd docs/commands && oclif readme --no-aliases && yarn gen-config-docs",
+    "on-each-commit-cli": "yarn lint-fix && yarn circular && cd docs/commands && oclif readme --no-aliases && yarn gen-config-docs",
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && tsx ./src/genConfigDocs.ts",
     "unused-exports": "ts-unused-exports tsconfig.json",
     "ncu": "ncu -x ethers -x @types/node -u && ncu -f \"@fluencelabs/*\" --target newest -u"

@@ -9,7 +9,7 @@
 oclif.lock
 oclif.manifest.json
 .eslintcache
-tmp
+test/tmp
 
 # for ease of development
 /schemas
@@ -28,7 +28,6 @@ rust-toolchain.toml
 src/lib/compiled-aqua
 src/lib/compiled-aqua-with-tracing
 src/versions
-src/aqua-dependencies
 src/common.ts
 
 .yarn/*

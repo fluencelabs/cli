@@ -1019,6 +1019,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@repo/cli@workspace:packages/cli":
+  version: 0.0.0-use.local
+  resolution: "@repo/cli@workspace:packages/cli"
+  languageName: unknown
+  linkType: soft
+
 "@repo/common@npm:*, @repo/common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@repo/common@workspace:packages/common"

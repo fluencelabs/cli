@@ -1,7 +1,7 @@
 {
   "eslint.experimental.useFlatConfig": true,
   "eslint.workingDirectories": [
-    "cli",
+    "packages/cli/cli",
     "packages/cli-connector",
     "packages/common"
   ]
