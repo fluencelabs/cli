@@ -32,6 +32,7 @@
       "outputs": [
         "cli/cli/lib/compiled-aqua/**",
         "cli/cli/lib/compiled-aqua-with-tracing/**",
+        "cli/cli/src/aqua-dependencies/**",
         "cli/cli/versions/**",
         "cli/cli/common.ts"
       ]
