@@ -253,16 +253,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Build
-        run: yarn build
-
-      - name: Build CLI
-        run: yarn build
-        working-directory: packages/cli/cli
-
       - name: Pack Fluence CLI for Linux
         run: yarn pack-linux-x64
-        working-directory: packages/cli/cli
 
       - name: Download Marine and Mrepl
         run: yarn download-marine-and-mrepl

@@ -15,11 +15,7 @@ try {
 
   const versionsFilePath = join(
     process.env.GITHUB_WORKSPACE,
-    "packages",
-    "cli",
-    "cli",
-    "src",
-    "versions.json",
+    "packages/cli/cli/src/versions.json",
   );
 
   const versionsFileContent = readFileSync(versionsFilePath, "utf-8");

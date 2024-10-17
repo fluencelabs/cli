@@ -2816,9 +2816,7 @@ try {
 
   const versionsFilePath = (0,path__WEBPACK_IMPORTED_MODULE_2__.join)(
     process.env.GITHUB_WORKSPACE,
-    "cli",
-    "src",
-    "versions.json",
+    "packages/cli/cli/src/versions.json",
   );
 
   const versionsFileContent = (0,fs__WEBPACK_IMPORTED_MODULE_1__.readFileSync)(versionsFilePath, "utf-8");
