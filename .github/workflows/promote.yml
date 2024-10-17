@@ -57,12 +57,12 @@ jobs:
           cache: "yarn"
 
       - run: yarn install
-        working-directory: packages/cli/cli
+        working-directory: cli
 
       - name: Promote fluence-cli
-        working-directory: packages/cli/cli
+        working-directory: cli
         run: yarn oclif promote -t linux-x64,darwin-x64,darwin-arm64 --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
       - name: Promote fluence-cli windows
-        working-directory: packages/cli/cli
+        working-directory: cli
         run: yarn oclif promote -t win32-x64 --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes

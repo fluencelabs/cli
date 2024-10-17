@@ -2,15 +2,15 @@
   "name": "@repo/cli",
   "private": true,
   "scripts": {
-    "install-yarn-dependencies": "yarn ./cli install",
-    "install-npm-dependencies": "npm --prefix ./cli/src/cli-aqua-dependencies install",
-    "before-build": "yarn ./cli before-build",
-    "build-cli": "yarn ./cli build-cli",
-    "pack-ci": "yarn ./cli pack-ci",
-    "pack-linux-x64": "yarn ./cli pack-linux-x64",
-    "pack-darwin-x64": "yarn ./cli pack-darwin-x64",
-    "pack-darwin-arm64": "yarn ./cli pack-darwin-arm64",
-    "pack-win32-x64": "yarn ./cli pack-win32-x64",
-    "on-each-commit-cli": "yarn ./cli on-each-commit-cli"
+    "install-yarn-dependencies": "yarn ../cli install",
+    "install-npm-dependencies": "npm --prefix ../cli/src/cli-aqua-dependencies install",
+    "before-build": "yarn ../cli before-build",
+    "build-cli": "yarn ../cli build-cli",
+    "pack-ci": "yarn ../cli pack-ci",
+    "pack-linux-x64": "yarn ../cli pack-linux-x64",
+    "pack-darwin-x64": "yarn ../cli pack-darwin-x64",
+    "pack-darwin-arm64": "yarn ../cli pack-darwin-arm64",
+    "pack-win32-x64": "yarn ../cli pack-win32-x64",
+    "on-each-commit-cli": "yarn ../cli on-each-commit-cli"
   }
 }
