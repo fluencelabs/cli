@@ -61,14 +61,6 @@
     "pack-win32-x64": {
       "dependsOn": ["build"],
       "outputs": ["package/dist/**"]
-    },
-    "generate-templates": {
-      "outputs": ["package/test/tmp/templates/**"]
-    },
-    "vitest-provider": {},
-    "vitest-deal-deploy": {},
-    "vitest-deal-update": {},
-    "vitest-smoke": {},
-    "vitest-js-to-aqua": {}
+    }
   }
 }
