@@ -18,6 +18,12 @@
     "pack-win32-x64": "turbo run pack-win32-x64 --cache-dir=.turbo",
     "on-each-commit": "turbo run on-each-commit --cache-dir=.turbo",
     "on-each-commit-cli": "turbo run on-each-commit-cli --cache-dir=.turbo",
+    "generate-templates": "turbo run generate-templates --cache-dir=.turbo",
+    "vitest-provider": "turbo run vitest-provider --cache-dir=.turbo",
+    "vitest-deal-deploy": "turbo run vitest-deal-deploy --cache-dir=.turbo",
+    "vitest-deal-update": "turbo run vitest-deal-update --cache-dir=.turbo",
+    "vitest-smoke": "turbo run vitest-smoke --cache-dir=.turbo",
+    "vitest-js-to-aqua": "turbo run vitest-js-to-aqua --cache-dir=.turbo",
     "format": "prettier --write \"**/*.{ts,js,tsx}\""
   },
   "devDependencies": {

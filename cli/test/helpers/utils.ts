@@ -17,7 +17,7 @@
 
 import { access, readFile, writeFile } from "node:fs/promises";
 
-import core from "@actions/core";
+// import core from "@actions/core";
 import lockfile from "proper-lockfile";
 import { test } from "vitest";
 
@@ -79,8 +79,8 @@ export function wrappedTest(
   ) => Promise<void>,
 ) {
   test(name, async (...args) => {
-    core.startGroup(name);
+    // core.startGroup(name);
     await fn(...args);
-    core.endGroup();
+    // core.endGroup();
   });
 }

@@ -262,7 +262,6 @@ jobs:
 
       - name: Generate templates
         run: yarn generate-templates
-        working-directory: cli
 
       - name: Set up the environment (local up)
         if: inputs.fluence-env == 'local'
@@ -271,23 +270,18 @@ jobs:
 
       - name: Run provider tests
         run: yarn vitest-provider
-        working-directory: cli
 
       - name: Run deal deploy tests
         run: yarn vitest-deal-deploy
-        working-directory: cli
 
       - name: Run deal update tests
         run: yarn vitest-deal-update
-        working-directory: cli
 
       - name: Run smoke tests
         run: yarn vitest-smoke
-        working-directory: cli
 
       - name: Run js-to-aqua tests
         run: yarn vitest-js-to-aqua
-        working-directory: cli
 
       - name: Show Runner Load Average
         run: uptime

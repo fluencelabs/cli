@@ -2,12 +2,10 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "build": {
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
       "outputs": ["dist/**"],
       "dependsOn": ["^build"]
     },
     "on-each-commit": {
-      "inputs": ["eslint.config.js"],
       "dependsOn": ["^build", "build"]
     },
     "install-yarn-dependencies": {
@@ -31,7 +29,11 @@
         "install-npm-dependencies",
         "@repo/cli-connector#build"
       ],
-      "inputs": ["../../cli/src/beforeBuild.ts", "../../cli/src/versions.json"],
+      "inputs": [
+        "../../cli/src/beforeBuild.ts",
+        "../../cli/src/versions.json",
+        "../../cli/src/versions.ts"
+      ],
       "outputs": [
         "../../cli/src/lib/compiled-aqua/**",
         "../../cli/src/lib/compiled-aqua-with-tracing/**",
@@ -57,33 +59,191 @@
       "outputs": ["../../cli/dist/**"]
     },
     "on-each-commit-cli": {
-      "inputs": [],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ],
       "dependsOn": ["build-cli"]
     },
     "pack-ci": {
-      "inputs": [],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ],
       "outputs": ["../../cli/dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-linux-x64": {
-      "inputs": [],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ],
       "outputs": ["../../cli/dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-darwin-x64": {
-      "inputs": [],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ],
       "outputs": ["../../cli/dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-darwin-arm64": {
-      "inputs": [],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ],
       "outputs": ["../../cli/dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-win32-x64": {
       "outputs": ["../../cli/dist/**"],
-      "inputs": ["nsis/**"],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json",
+        "nsis/**"
+      ],
       "dependsOn": ["build-cli"]
+    },
+    "generate-templates": {
+      "dependsOn": ["pack-linux-x64"],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ],
+      "outputs": ["../../cli/test/tmp/templates/**"]
+    },
+    "vitest-provider": {
+      "dependsOn": ["generate-templates"],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ]
+    },
+    "vitest-deal-deploy": {
+      "dependsOn": ["generate-templates"],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ]
+    },
+    "vitest-deal-update": {
+      "dependsOn": ["generate-templates"],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ]
+    },
+    "vitest-smoke": {
+      "dependsOn": ["generate-templates"],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ]
+    },
+    "vitest-js-to-aqua": {
+      "dependsOn": ["generate-templates"],
+      "inputs": [
+        "../../cli/bin/**",
+        "../../cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
+        "../../cli/package.json",
+        "../../cli/tsconfig.json"
+      ]
     }
   }
 }
