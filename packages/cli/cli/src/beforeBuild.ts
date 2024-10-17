@@ -32,7 +32,7 @@ const root = resolve(__dirname, "..");
 
 const WORKSPACE_NODE_MODULES_PATH = resolve(root, "node_modules");
 
-const aquaDependenciesDirPath = join("src", "aqua-dependencies");
+const aquaDependenciesDirPath = join(root, "src", "aqua-dependencies");
 await mkdir(aquaDependenciesDirPath, { recursive: true });
 
 await writeFile(

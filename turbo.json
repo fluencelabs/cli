@@ -3,11 +3,11 @@
   "tasks": {
     "build": {
       "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "outputs": ["dist/**", "src/dist/**"],
+      "outputs": ["dist/**"],
       "dependsOn": ["^build"]
     },
     "on-each-commit": {
-      "inputs": ["src/**", "package.json", "tsconfig.json", "eslint.config.js"],
+      "inputs": ["eslint.config.js"],
       "dependsOn": ["^build", "build"]
     },
     "install-yarn-dependencies": {
@@ -22,7 +22,11 @@
       "outputs": ["cli/src/cli-aqua-dependencies/node_modules/**"]
     },
     "before-build": {
-      "dependsOn": ["install-yarn-dependencies", "install-npm-dependencies"],
+      "dependsOn": [
+        "install-yarn-dependencies",
+        "install-npm-dependencies",
+        "@repo/cli-connector#build"
+      ],
       "inputs": ["cli/src/beforeBuild.ts", "cli/src/versions.json"],
       "outputs": [
         "cli/src/lib/compiled-aqua/**",
@@ -33,38 +37,42 @@
       ]
     },
     "build-cli": {
-      "dependsOn": ["before-build", "@repo/cli-connector#build"],
+      "dependsOn": ["before-build"],
       "inputs": [
         "cli/bin/**",
         "cli/src/**",
+        "!cli/src/cli-aqua-dependencies/node_modules/**",
+        "!cli/src/lib/compiled-aqua/**",
+        "!cli/src/lib/compiled-aqua-with-tracing/**",
+        "!cli/src/aqua-dependencies/**",
+        "!cli/src/versions/**",
+        "!cli/src/common.ts",
         "cli/package.json",
         "cli/tsconfig.json"
       ],
       "outputs": ["cli/dist/**"]
     },
     "on-each-commit-cli": {
-      "inputs": [
-        "cli/bin/**",
-        "cli/src/**",
-        "cli/package.json",
-        "cli/tsconfig.json",
-        "cli/eslint.config.js"
-      ],
+      "inputs": [],
       "dependsOn": ["build-cli"]
     },
     "pack-ci": {
+      "inputs": [],
       "outputs": ["dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-linux-x64": {
+      "inputs": [],
       "outputs": ["dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-darwin-x64": {
+      "inputs": [],
       "outputs": ["dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-darwin-arm64": {
+      "inputs": [],
       "outputs": ["dist/**"],
       "dependsOn": ["build-cli"]
     },
