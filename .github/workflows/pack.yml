@@ -110,7 +110,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
-          working-directory: cli
+          working-directory: packages/cli/package
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -119,7 +119,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
-          working-directory: cli
+          working-directory: packages/cli/package
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -155,17 +155,17 @@ jobs:
 
       - name: Upload fluence-cli
         if: inputs.upload-to-s3 == true
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn upload-${{ inputs.platform }}
 
       - name: Promote fluence-cli
         if: inputs.channel != 'null' && inputs.platform != 'win32-x64'
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
       - name: Promote fluence-cli windows
         if: inputs.channel != 'null' && inputs.platform == 'win32-x64'
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes
 
       - name: Rename archive
@@ -206,10 +206,10 @@ jobs:
 
       - name: Promote fluence-cli to unstable
         if: inputs.tag != 'null' && inputs.platform != 'win32-x64'
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --no-xz --indexes
 
       - name: Promote fluence-cli windows to unstable
         if: inputs.tag != 'null' && inputs.platform == 'win32-x64'
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --win --no-xz --indexes
