@@ -120,7 +120,7 @@ jobs:
           case ${{ inputs.nox-image }} in
           # if nox image is not passed from e2e read from versions.json
           'null')
-            nox="$(jq .nox cli/cli/versions.json -r)"
+            nox="$(jq .nox packages/cli/cli/src/versions.json -r)"
           ;;
           # else set nox image to snapshot passed from e2e
           *)
