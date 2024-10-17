@@ -1,13 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "build": {
-      "dependsOn": ["^build", "before-build"],
-      "outputs": ["dist/**", "package/dist/**"]
-    },
-    "on-each-commit": {
-      "dependsOn": ["^build", "build"]
-    },
     "install-yarn-dependencies": {
       "inputs": [
         "package/package.json",
@@ -41,6 +34,13 @@
         "package/src/versions/**",
         "package/src/common.ts"
       ]
+    },
+    "build": {
+      "dependsOn": ["^build", "before-build"],
+      "outputs": ["dist/**", "package/dist/**"]
+    },
+    "on-each-commit": {
+      "dependsOn": ["^build", "build"]
     },
     "pack-ci": {
       "dependsOn": ["build"],
