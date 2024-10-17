@@ -24,7 +24,6 @@ import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import defaultAquaDependencies from "../../../aqua-dependencies/package.json" assert { type: "json" };
 import {
   CHAIN_ENV,
   CHAIN_ENV_OLD,
@@ -1068,7 +1067,7 @@ ${yamlDiffPatch(
   "",
   {},
   {
-    aquaDependencies: defaultAquaDependencies.dependencies,
+    aquaDependencies: versions.npm,
   },
 )}
 
@@ -1200,7 +1199,7 @@ ${yamlDiffPatch(
 # # You can check default dependencies using \`fluence dep v --default\`
 # # use \`fluence dep i\` to install project aqua dependencies
 # aquaDependencies:
-#   "${AQUA_LIB_NPM_DEPENDENCY}": ${defaultAquaDependencies.dependencies[AQUA_LIB_NPM_DEPENDENCY]}
+#   "${AQUA_LIB_NPM_DEPENDENCY}": ${versions.npm[AQUA_LIB_NPM_DEPENDENCY]}
 #
 # # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
 # # use \`fluence dep i\` to install marine and mrepl
@@ -1395,8 +1394,7 @@ const migrations: Migrations<Config> = [
     const res: ConfigV6 = {
       ...restConfig,
       version: 6,
-      aquaDependencies:
-        dependencies?.npm ?? defaultAquaDependencies.dependencies,
+      aquaDependencies: dependencies?.npm ?? versions.npm,
       ...(marine === undefined ? {} : { marineVersion: marine }),
       ...(mrepl === undefined ? {} : { mreplVersion: mrepl }),
     };
