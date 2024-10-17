@@ -103,9 +103,6 @@ jobs:
 
       - run: yarn install
 
-      - run: yarn install
-        working-directory: packages/cli/cli
-
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
@@ -153,16 +150,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Build
-        run: yarn build
-
-      - name: Build CLI
-        run: yarn build
-        working-directory: packages/cli/cli
-
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
-        working-directory: packages/cli/cli
 
       - name: Upload fluence-cli
         if: inputs.upload-to-s3 == true

@@ -23,7 +23,7 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "before-build": "node ./beforeBuild.js",
+    "before-build": "tsx ./src/beforeBuild.ts && npm --prefix ./src/aqua-dependencies install",
     "build": "shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies && shx cp -r ../../cli-connector/dist ./dist/cli-connector",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",

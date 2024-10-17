@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "install-yarn-dependencies": "yarn ./cli install",
-    "install-npm-dependencies": "npm --prefix ./cli/src/cli-aqua-dependencies install && npm --prefix ./cli/src/aqua-dependencies install",
+    "install-npm-dependencies": "npm --prefix ./cli/src/cli-aqua-dependencies install",
     "before-build": "yarn ./cli before-build",
     "build-cli": "yarn ./cli build",
     "pack-ci": "yarn ./cli pack-ci",

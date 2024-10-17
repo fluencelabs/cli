@@ -17,7 +17,6 @@
 
 import { Flags } from "@oclif/core";
 
-import defaultAquaDependencies from "../../aqua-dependencies/package.json" assert { type: "json" };
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import internalAquaDependencies from "../../cli-aqua-dependencies/package.json" assert { type: "json" };
 import { jsonStringify } from "../../common.js";
@@ -75,7 +74,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
         JSClientPackageJSON.dependencies,
       ),
       [RUST_TOOLCHAIN]: versions["rust-toolchain"],
-      [AQUA_DEPENDENCIES]: defaultAquaDependencies.dependencies,
+      [AQUA_DEPENDENCIES]: versions.npm,
       [TOOLS]: {
         [MARINE]: versions.cargo.marine,
         [MREPL]: versions.cargo.mrepl,
@@ -97,7 +96,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
       [RUST_TOOLCHAIN]: await getRustToolchainToUse(),
       [AQUA_DEPENDENCIES]:
         maybeFluenceConfig === null
-          ? defaultAquaDependencies.dependencies
+          ? versions.npm
           : maybeFluenceConfig.aquaDependencies,
       [TOOLS]: {
         [MARINE]: await getMarineOrMreplVersion("marine"),

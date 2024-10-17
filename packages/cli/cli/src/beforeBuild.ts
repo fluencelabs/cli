@@ -24,13 +24,25 @@ import { compileFromPath } from "@fluencelabs/aqua-api";
 import aquaToJs from "@fluencelabs/aqua-to-js";
 import { gatherImportsFromNpm } from "@fluencelabs/npm-aqua-compiler";
 
+import { versions } from "./versions.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const root = resolve(__dirname, "..");
 
-const WORKSPACE_NODE_MODULES_PATH = resolve(__dirname, "node_modules");
+const WORKSPACE_NODE_MODULES_PATH = resolve(root, "node_modules");
 
-const VERSIONS_DIR_PATH = join(__dirname, "src", "versions");
-const SRC_LIB_PATH = join(__dirname, "src", "lib");
+const aquaDependenciesDirPath = join("src", "aqua-dependencies");
+await mkdir(aquaDependenciesDirPath, { recursive: true });
+
+await writeFile(
+  join(aquaDependenciesDirPath, "package.json"),
+  JSON.stringify({ dependencies: versions.npm }, null, 2),
+  "utf-8",
+);
+
+const VERSIONS_DIR_PATH = join(root, "src", "versions");
+const SRC_LIB_PATH = join(root, "src", "lib");
 const COMPILED_AQUA_PATH = join(SRC_LIB_PATH, "compiled-aqua");
 
 const COMPILED_AQUA_WITH_TRACING_PATH = join(
@@ -49,7 +61,7 @@ const COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH = join(
 );
 
 const CLI_AQUA_DEPENDENCIES_DIR_PATH = resolve(
-  join(__dirname, "src", "cli-aqua-dependencies"),
+  join(root, "src", "cli-aqua-dependencies"),
 );
 
 const INSTALLATION_SPELL_DIR_PATH = join(
@@ -125,8 +137,8 @@ await cp(
 );
 
 await cp(
-  resolve(__dirname, "..", "..", "common", "src", "index.ts"),
-  resolve(__dirname, "src", "common.ts"),
+  resolve(root, "..", "..", "common", "src", "index.ts"),
+  resolve(root, "src", "common.ts"),
 );
 
 await rm(COMPILED_AQUA_PATH, { recursive: true, force: true });
