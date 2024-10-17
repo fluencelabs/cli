@@ -990,7 +990,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@repo/cli-connector@workspace:packages/cli-connector":
+"@repo/cli-connector@npm:*, @repo/cli-connector@workspace:packages/cli-connector":
   version: 0.0.0-use.local
   resolution: "@repo/cli-connector@workspace:packages/cli-connector"
   dependencies:
@@ -1022,6 +1022,9 @@ __metadata:
 "@repo/cli@workspace:packages/cli":
   version: 0.0.0-use.local
   resolution: "@repo/cli@workspace:packages/cli"
+  dependencies:
+    "@repo/cli-connector": "npm:*"
+    "@repo/common": "npm:*"
   languageName: unknown
   linkType: soft
 

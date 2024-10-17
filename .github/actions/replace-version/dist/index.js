@@ -2816,7 +2816,9 @@ try {
 
   const versionsFilePath = (0,path__WEBPACK_IMPORTED_MODULE_2__.join)(
     process.env.GITHUB_WORKSPACE,
+    "packages",
     "cli",
+    "package",
     "src",
     "versions.json",
   );

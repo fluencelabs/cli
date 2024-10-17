@@ -38,7 +38,7 @@ jobs:
         run: ./install.sh
 
       - name: Check fluence
-        run: ${FLUENCE_USER_DIR}/cli/bin/fluence --version
+        run: ${FLUENCE_USER_DIR}/packages/cli/package/bin/fluence --version
 
       - name: Cleanup
         if: always()

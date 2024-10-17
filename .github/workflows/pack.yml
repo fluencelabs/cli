@@ -170,7 +170,7 @@ jobs:
 
       - name: Rename archive
         if: inputs.platform != 'win32-x64'
-        run: mv cli/dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
+        run: mv packages/cli/package/dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
 
       - name: Upload archive to CI
         if: inputs.platform != 'win32-x64'
@@ -188,7 +188,7 @@ jobs:
 
       - name: Rename windows installer
         if: inputs.platform == 'win32-x64'
-        run: mv cli/dist/win32/fluence-*.exe fluence-cli-${{ inputs.platform }}.exe
+        run: mv packages/cli/package/dist/win32/fluence-*.exe fluence-cli-${{ inputs.platform }}.exe
 
       - name: Upload windows installer to CI
         if: inputs.platform == 'win32-x64'
