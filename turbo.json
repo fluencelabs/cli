@@ -58,26 +58,26 @@
     },
     "pack-ci": {
       "inputs": [],
-      "outputs": ["dist/**"],
+      "outputs": ["cli/dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-linux-x64": {
       "inputs": [],
-      "outputs": ["dist/**"],
+      "outputs": ["cli/dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-darwin-x64": {
       "inputs": [],
-      "outputs": ["dist/**"],
+      "outputs": ["cli/dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-darwin-arm64": {
       "inputs": [],
-      "outputs": ["dist/**"],
+      "outputs": ["cli/dist/**"],
       "dependsOn": ["build-cli"]
     },
     "pack-win32-x64": {
-      "outputs": ["dist/**"],
+      "outputs": ["cli/dist/**"],
       "inputs": ["nsis/**"],
       "dependsOn": ["build-cli"]
     }
