@@ -24,7 +24,7 @@
   ],
   "scripts": {
     "before-build": "tsx src/beforeBuild.ts && npm --prefix ./src/aqua-dependencies install",
-    "build": "shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist && shx cp -r ../packages/cli-connector/dist ./dist/cli-connector",
+    "build": "shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist && shx cp -r ../../cli-connector/dist ./dist/cli-connector",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",

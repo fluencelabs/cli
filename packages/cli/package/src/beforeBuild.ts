@@ -137,7 +137,7 @@ await cp(
 );
 
 await cp(
-  resolve(root, "..", "..", "..", "common", "src", "index.ts"),
+  resolve(root, "..", "..", "common", "src", "index.ts"),
   resolve(root, "src", "common.ts"),
 );
 

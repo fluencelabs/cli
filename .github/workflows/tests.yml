@@ -258,7 +258,6 @@ jobs:
 
       - name: Download Marine and Mrepl
         run: yarn download-marine-and-mrepl
-        working-directory: packages/cli/package
 
       - name: Generate templates
         run: yarn generate-templates
@@ -266,7 +265,6 @@ jobs:
       - name: Set up the environment (local up)
         if: inputs.fluence-env == 'local'
         run: yarn local-up
-        working-directory: packages/cli/package
 
       - name: Run provider tests
         run: yarn vitest-provider
