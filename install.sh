@@ -76,7 +76,7 @@ mkdir -p "${FLUENCE_USER_DIR}/cli"
 curl --progress-bar -o "${TEMP}/${archive}" "$url"
 tar --strip-components=1 -xzf "${TEMP}/${archive}" -C "${FLUENCE_USER_DIR}/cli"
 
-# Add Fluence CLI to path with symling
+# Add Fluence CLI to path with symlink
 if echo $PATH | grep -q $HOME/.local/bin; then
   echo "Adding Fluence CLI symlink to ${HOME}/.local/fluence"
   mkdir -p $HOME/.local/bin

@@ -1,0 +1,20 @@
+{
+  "extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
+  "compilerOptions": {
+    "importHelpers": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
+    "resolveJsonModule": true,
+    "importsNotUsedAsValues": "remove",
+    "verbatimModuleSyntax": true,
+    "lib": ["es2023"]
+  },
+  "ts-node": {
+    "esm": true
+  },
+  "include": ["src/**/*"],
+  "files": ["src/environment.d.ts", "src/types.d.ts", "src/fetch.d.ts"],
+  "types": ["node"]
+}

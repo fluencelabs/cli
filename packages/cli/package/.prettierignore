@@ -1,0 +1,8 @@
+dist
+docs
+node_modules
+tmp
+.fluence
+src/lib/compiled-aqua
+CHANGELOG.md
+.github/workflows

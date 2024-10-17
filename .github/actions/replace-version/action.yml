@@ -1,6 +1,6 @@
 name: Replace version
 description: |
-  Replace version in cli/src/versions.json
+  Replace version in packages/cli/package/src/versions.json
 
 inputs:
   versions:

@@ -1,0 +1,10 @@
+aqua Main
+
+export identify
+
+import "@fluencelabs/aqua-lib/builtin.aqua"
+
+func identify() -> Info:
+  on HOST_PEER_ID:
+    res <- Peer.identify()
+  <- res

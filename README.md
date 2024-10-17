@@ -74,9 +74,9 @@ rm $(which fluence)
 
 ## Documentation
 
-1. [A complete list of commands together with usage examples](./cli/docs/commands/README.md)
-1. [Documentation for all Fluence CLI configs](./cli/docs/configs/README.md)
-1. [Environment variables that affect Fluence CLI and are important for Fluence CLI maintainers](./cli/example.env)
+1. [A complete list of commands together with usage examples](./packages/cli/package/docs/commands/README.md)
+1. [Documentation for all Fluence CLI configs](./packages/cli/package/docs/configs/README.md)
+1. [Environment variables that affect Fluence CLI and are important for Fluence CLI maintainers](./packages/cli/package/example.env)
 
 ## Support
 
