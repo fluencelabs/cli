@@ -17,6 +17,7 @@
     "pack-darwin-arm64": "turbo run pack-darwin-arm64 --cache-dir=.turbo",
     "pack-win32-x64": "turbo run pack-win32-x64 --cache-dir=.turbo",
     "on-each-commit": "turbo run on-each-commit --cache-dir=.turbo",
+    "on-each-commit-cli": "turbo run on-each-commit-cli --cache-dir=.turbo",
     "format": "prettier --write \"**/*.{ts,js,tsx}\""
   },
   "devDependencies": {
