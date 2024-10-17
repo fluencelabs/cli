@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import defaultAquaDependencies from "../../aqua-dependencies/package.json" assert { type: "json" };
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CLI_NAME } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { npmInstallAll } from "../../lib/npm.js";
-import { versions } from "../../versions.js";
 
 export default class Reset extends BaseCommand<typeof Reset> {
   static override aliases = ["dep:r"];
@@ -55,7 +55,7 @@ export default class Reset extends BaseCommand<typeof Reset> {
 
     maybeFluenceConfig.aquaDependencies = {
       ...maybeFluenceConfig.aquaDependencies,
-      ...versions.npm,
+      ...defaultAquaDependencies.dependencies,
     };
 
     await npmInstallAll(maybeFluenceConfig);

@@ -21,7 +21,7 @@
       "depNameTemplate": "chain"
     },
     {
-      "fileMatch": ["^packages/cli/cli/src/versions\\.json$"],
+      "fileMatch": ["^packages/cli/cli/src/aqua-dependencies/package\\.json$"],
       "matchStrings": [
         "\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\""
       ],

@@ -5,10 +5,6 @@
   "chain-deploy-script": "fluencelabs/chain-deploy-script:0.22.0",
   "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.22.0",
   "rust-toolchain": "nightly-2024-06-10",
-  "npm": {
-    "@fluencelabs/aqua-lib": "0.12.1",
-    "@fluencelabs/spell": "0.7.6"
-  },
   "cargo": {
     "marine": "0.20.1",
     "mrepl": "0.31.0",
