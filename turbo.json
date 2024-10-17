@@ -16,25 +16,20 @@
     },
     "install-npm-dependencies": {
       "inputs": [
-        "cli/cli/cli-aqua-dependencies/package.json",
-        "cli/cli/cli-aqua-dependencies/package-lock.json",
-        "cli/cli/aqua-dependencies/package.json",
-        "cli/cli/aqua-dependencies/package-lock.json"
+        "cli/src/cli-aqua-dependencies/package.json",
+        "cli/src/cli-aqua-dependencies/package-lock.json"
       ],
-      "outputs": [
-        "cli/cli/cli-aqua-dependencies/node_modules/**",
-        "cli/cli/aqua-dependencies/node_modules/**"
-      ]
+      "outputs": ["cli/src/cli-aqua-dependencies/node_modules/**"]
     },
     "before-build": {
       "dependsOn": ["install-yarn-dependencies", "install-npm-dependencies"],
-      "inputs": ["cli/beforeBuild.js", "cli/cli/versions.json"],
+      "inputs": ["cli/src/beforeBuild.ts", "cli/src/versions.json"],
       "outputs": [
-        "cli/cli/lib/compiled-aqua/**",
-        "cli/cli/lib/compiled-aqua-with-tracing/**",
-        "cli/cli/src/aqua-dependencies/**",
-        "cli/cli/versions/**",
-        "cli/cli/common.ts"
+        "cli/src/lib/compiled-aqua/**",
+        "cli/src/lib/compiled-aqua-with-tracing/**",
+        "cli/src/aqua-dependencies/**",
+        "cli/src/versions/**",
+        "cli/src/common.ts"
       ]
     },
     "build-cli": {
