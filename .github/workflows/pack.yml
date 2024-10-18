@@ -47,6 +47,10 @@ on:
         description: "aqua snapshots"
         type: string
         default: "null"
+      node-version:
+        description: "Node version"
+        type: string
+        default: "18.20.3"
 
 env:
   CI: true
@@ -97,7 +101,7 @@ jobs:
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
         with:
-          node-version: "18.20.3"
+          node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.fluence.dev"
           cache: "yarn"
 
@@ -149,6 +153,15 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-
+
+      - name: Cache node binaries
+        id: cache-node-binaries
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-binaries
+        with:
+          path: packages/cli/package/tmp/cache/node-v${{ inputs.node-version }}-${{ inputs.platform }}
+          key: ${{ env.cache-name }}-${{ inputs.node-version }}-${{ inputs.platform }}
 
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}

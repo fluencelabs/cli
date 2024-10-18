@@ -39,6 +39,10 @@ on:
         description: "@fluencelabs/installation-spell version"
         type: string
         default: "null"
+      node-version:
+        description: "Node version"
+        type: string
+        default: "18.20.3"
 
 env:
   CI: true
@@ -154,6 +158,24 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-
+
+      - name: Cache node binaries linux-x64
+        id: cache-node-binaries-linux-x64
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-binaries
+        with:
+          path: packages/cli/package/tmp/cache/node-v${{ inputs.node-version }}-linux-x64
+          key: ${{ env.cache-name }}-${{ inputs.node-version }}-linux-x64
+
+      - name: Cache node binaries darwin-arm64
+        id: cache-node-binaries-darwin-arm64
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-binaries
+        with:
+          path: packages/cli/package/tmp/cache/node-v${{ inputs.node-version }}-linux-x64
+          key: ${{ env.cache-name }}-${{ inputs.node-version }}-darwin-arm64
 
       - name: Pack Fluence CLI for Linux and macOS
         run: yarn pack-ci
