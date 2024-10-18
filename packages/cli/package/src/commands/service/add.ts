@@ -55,11 +55,7 @@ export default class Add extends BaseCommand<typeof Add> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, fluenceConfig } = await initCli(
-      this,
-      await this.parse(Add),
-      true,
-    );
+    const { args, flags } = await initCli(this, await this.parse(Add), true);
 
     const serviceOrServiceDirPathOrUrl =
       args[PATH_OR_URL] ??
@@ -77,7 +73,6 @@ export default class Add extends BaseCommand<typeof Add> {
     }
 
     const serviceName = await ensureValidServiceName(
-      fluenceConfig,
       flags.name ?? serviceConfig.name,
     );
 
@@ -86,7 +81,6 @@ export default class Add extends BaseCommand<typeof Add> {
     await addService({
       serviceName,
       absolutePathOrUrl: resolveServicePathOrUrl(serviceOrServiceDirPathOrUrl),
-      fluenceConfig,
       marineCli,
       marineBuildArgs: flags["marine-build-args"],
     });

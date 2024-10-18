@@ -24,6 +24,7 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module.js";
 import { ensureServiceConfig } from "../../lib/configs/project/service.js";
 import {
@@ -58,10 +59,7 @@ export default class Add extends BaseCommand<typeof Add> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Add),
-    );
+    const { args, flags } = await initCli(this, await this.parse(Add));
 
     const modulePathOrUrl =
       args[PATH_OR_URL] ??
@@ -79,21 +77,23 @@ export default class Add extends BaseCommand<typeof Add> {
       );
     }
 
+    const fluenceConfig = await initFluenceConfig();
+
     const serviceNameOrPath =
       flags.service ??
       (await input({
         message:
-          maybeFluenceConfig === null
+          fluenceConfig === null
             ? `Enter path to the service directory`
             : `Enter service name from ${color.yellow(
-                maybeFluenceConfig.$getPath(),
+                fluenceConfig.$getPath(),
               )} or path to the service directory`,
       }));
 
     let serviceOrServiceDirPathOrUrl = serviceNameOrPath;
 
-    if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
-      const serviceGet = maybeFluenceConfig.services[serviceNameOrPath]?.get;
+    if (hasKey(serviceNameOrPath, fluenceConfig?.services)) {
+      const serviceGet = fluenceConfig.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
       serviceOrServiceDirPathOrUrl = serviceGet;
     }

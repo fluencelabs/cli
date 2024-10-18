@@ -21,7 +21,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env.js";
-import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
+import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { ENV_ARG } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -38,10 +38,7 @@ export default class Env extends BaseCommand<typeof Env> {
     ...ENV_ARG,
   };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig: fluenceConfig } = await initCli(
-      this,
-      await this.parse(Env),
-    );
+    const { args } = await initCli(this, await this.parse(Env));
 
     const newEnvConfig = await initNewEnvConfig();
     setEnvConfig(newEnvConfig);
@@ -50,15 +47,9 @@ export default class Env extends BaseCommand<typeof Env> {
     newEnvConfig.fluenceEnv = fluenceEnv;
     await newEnvConfig.$commit();
 
-    if (fluenceConfig !== null) {
-      const workersConfig = await initNewWorkersConfigReadonly();
+    if ((await initFluenceConfig()) !== null) {
       await updateRelaysJSON();
-
-      await ensureAquaFileWithWorkerInfo(
-        workersConfig,
-        fluenceConfig,
-        fluenceEnv,
-      );
+      await ensureAquaFileWithWorkerInfo();
     }
 
     commandObj.log(

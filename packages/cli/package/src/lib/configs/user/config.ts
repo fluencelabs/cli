@@ -201,7 +201,6 @@ export async function initNewUserConfig() {
     await createSecretKey({
       name: AUTO_GENERATED,
       isUser: true,
-      maybeFluenceConfig: null,
       askToSetKeyAsDefaultInteractively: false,
     });
   }

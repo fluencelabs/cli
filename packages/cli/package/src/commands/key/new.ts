@@ -46,15 +46,7 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(New),
-    );
-
-    await createSecretKey({
-      isUser: flags.user,
-      name: args.name,
-      maybeFluenceConfig,
-    });
+    const { args, flags } = await initCli(this, await this.parse(New));
+    await createSecretKey({ isUser: flags.user, name: args.name });
   }
 }

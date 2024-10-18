@@ -17,7 +17,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CLI_NAME } from "../../lib/const.js";
+import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { npmInstallAll } from "../../lib/npm.js";
 import { versions } from "../../versions.js";
@@ -31,35 +31,30 @@ export default class Reset extends BaseCommand<typeof Reset> {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    const { maybeFluenceConfig } = await initCli(this, await this.parse(Reset));
+    await initCli(this, await this.parse(Reset));
+    const fluenceConfig = await ensureFluenceProject();
 
-    if (maybeFluenceConfig === null) {
-      commandObj.error(
-        `Not a fluence project. Default dependency versions are always used if running cli outside of the fluence project. Run '${CLI_NAME} dep v' to check them out`,
-      );
+    if (fluenceConfig.mreplVersion !== undefined) {
+      delete fluenceConfig.mreplVersion;
     }
 
-    if (maybeFluenceConfig.mreplVersion !== undefined) {
-      delete maybeFluenceConfig.mreplVersion;
+    if (fluenceConfig.marineVersion !== undefined) {
+      delete fluenceConfig.marineVersion;
     }
 
-    if (maybeFluenceConfig.marineVersion !== undefined) {
-      delete maybeFluenceConfig.marineVersion;
+    if (fluenceConfig.rustToolchain !== undefined) {
+      delete fluenceConfig.rustToolchain;
     }
 
-    if (maybeFluenceConfig.rustToolchain !== undefined) {
-      delete maybeFluenceConfig.rustToolchain;
-    }
+    await fluenceConfig.$commit();
 
-    await maybeFluenceConfig.$commit();
-
-    maybeFluenceConfig.aquaDependencies = {
-      ...maybeFluenceConfig.aquaDependencies,
+    fluenceConfig.aquaDependencies = {
+      ...fluenceConfig.aquaDependencies,
       ...versions.npm,
     };
 
-    await npmInstallAll(maybeFluenceConfig);
-    await maybeFluenceConfig.$commit();
+    await npmInstallAll();
+    await fluenceConfig.$commit();
     commandObj.log("Successfully reset project dependencies versions");
   }
 }

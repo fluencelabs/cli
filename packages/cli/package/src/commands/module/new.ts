@@ -22,6 +22,7 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { ensureServiceConfig } from "../../lib/configs/project/service.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import { isUrl } from "../../lib/helpers/downloadFile.js";
@@ -50,10 +51,7 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(New),
-    );
+    const { args, flags } = await initCli(this, await this.parse(New));
 
     if (typeof args.name === "string") {
       const moduleNameValidity = validateModuleName(args.name);
@@ -73,11 +71,12 @@ export default class New extends BaseCommand<typeof New> {
 
     const pathToModulesDir = flags.path ?? (await ensureModulesDir());
     const pathToModuleDir = join(pathToModulesDir, moduleName);
+    const fluenceConfig = await initFluenceConfig();
 
     const serviceName =
       flags.service === undefined
         ? undefined
-        : maybeFluenceConfig?.services?.[flags.service] === undefined
+        : fluenceConfig?.services?.[flags.service] === undefined
           ? undefined
           : flags.service;
 

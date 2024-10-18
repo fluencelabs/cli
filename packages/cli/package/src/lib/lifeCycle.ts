@@ -18,13 +18,8 @@
 import { access } from "fs/promises";
 
 import { color } from "@oclif/color";
-import type {
-  ArgOutput,
-  FlagOutput,
-  ParserOutput,
-} from "@oclif/core/lib/interfaces/parser.js";
 
-import { setChainFlags, type ChainFlags } from "./chainFlags.js";
+import { setChainFlags } from "./chainFlags.js";
 import {
   commandObj,
   isInteractive,
@@ -33,10 +28,7 @@ import {
 } from "./commandObj.js";
 import { setEnvConfig, setUserConfig } from "./configs/globalConfigs.js";
 import { initEnvConfig, initNewEnvConfig } from "./configs/project/env.js";
-import {
-  type FluenceConfig,
-  initFluenceConfig,
-} from "./configs/project/fluence.js";
+import { initFluenceConfig } from "./configs/project/fluence.js";
 import { initNewUserConfig, initUserConfig } from "./configs/user/config.js";
 import {
   NODE_JS_MAJOR_VERSION,
@@ -44,6 +36,7 @@ import {
   NO_INPUT_FLAG_NAME,
   CLI_NAME,
   PRIV_KEY_FLAG_NAME,
+  ENV_FLAG_NAME,
 } from "./const.js";
 import { haltCountly, initCountly } from "./countly.js";
 import "./setupEnvironment.js";
@@ -86,57 +79,27 @@ const ensureUserConfig = async (): Promise<void> => {
   setUserConfig(userConfig);
 };
 
-type CommonReturn<A extends ArgOutput, F extends FlagOutput> = {
-  args: A;
-  flags: F;
-};
-
-type ParserOutputWithNoInputFlag<
-  F extends FlagOutput,
-  F2 extends FlagOutput,
-  A extends ArgOutput,
-> = ParserOutput<F, F2, A> & {
-  flags: {
-    [NO_INPUT_FLAG_NAME]: boolean;
-  } & ChainFlags;
-};
-
 export async function initCli<
-  F extends FlagOutput,
-  F2 extends FlagOutput,
-  A extends ArgOutput,
->(
-  commandObj: CommandObj,
-  parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
-  requiresFluenceProject?: false,
-): Promise<CommonReturn<A, F> & { maybeFluenceConfig: FluenceConfig | null }>;
-export async function initCli<
-  F extends FlagOutput,
-  F2 extends FlagOutput,
-  A extends ArgOutput,
->(
-  commandObj: CommandObj,
-  parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
-  requiresFluenceProject: true,
-): Promise<CommonReturn<A, F> & { fluenceConfig: FluenceConfig }>;
-
-export async function initCli<
-  F extends FlagOutput,
-  F2 extends FlagOutput,
-  A extends ArgOutput,
+  T extends {
+    args: unknown;
+    flags: {
+      [NO_INPUT_FLAG_NAME]: boolean;
+      [ENV_FLAG_NAME]?: string | undefined;
+      [PRIV_KEY_FLAG_NAME]?: string | undefined;
+    };
+  },
 >(
   commandObjFromArgs: CommandObj,
-  { args, flags }: ParserOutputWithNoInputFlag<F, F2, A>,
+  argsAndFlags: T,
   requiresFluenceProject = false,
-): Promise<
-  CommonReturn<A, F> & {
-    fluenceConfig?: FluenceConfig | null;
-    maybeFluenceConfig?: FluenceConfig | null;
-  }
-> {
+): Promise<T> {
   dbg("command execution started");
   setProjectRootDir(await recursivelyFindProjectRootDir(projectRootDir));
-  setCommandObjAndIsInteractive(commandObjFromArgs, getIsInteractive(flags));
+
+  setCommandObjAndIsInteractive(
+    commandObjFromArgs,
+    getIsInteractive(argsAndFlags.flags),
+  );
 
   const platform = (await import("platform")).default;
 
@@ -171,8 +134,8 @@ export async function initCli<
   }
 
   setChainFlags({
-    env: flags.env,
-    [PRIV_KEY_FLAG_NAME]: flags[PRIV_KEY_FLAG_NAME],
+    env: argsAndFlags.flags.env,
+    [PRIV_KEY_FLAG_NAME]: argsAndFlags.flags[PRIV_KEY_FLAG_NAME],
   });
 
   const res = requiresFluenceProject
@@ -182,7 +145,7 @@ export async function initCli<
   const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
   await initCountly({ maybeFluenceConfig });
   ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
-  return { args, flags, ...res };
+  return argsAndFlags;
 }
 
 function ensureCorrectCliVersion(maybeCliVersion: string | undefined): void {

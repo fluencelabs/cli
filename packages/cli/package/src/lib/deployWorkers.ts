@@ -53,10 +53,11 @@ import {
   resolveEndSec,
   resolveStartSec,
 } from "./configs/project/spell.js";
-import type {
-  Deal,
-  Host,
-  WorkersConfigReadonly,
+import {
+  type Deal,
+  type Host,
+  type WorkersConfigReadonly,
+  initNewWorkersConfig,
 } from "./configs/project/workers.js";
 import {
   MODULE_TYPE_RUST,
@@ -78,6 +79,7 @@ import {
   getUrlOrAbsolutePath,
   isUrl,
 } from "./helpers/downloadFile.js";
+import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import {
   jsToAqua,
@@ -95,6 +97,7 @@ import {
   projectRootDir,
 } from "./paths.js";
 import { checkboxes } from "./prompt.js";
+import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 import { hasKey } from "./typeHelpers.js";
 
 const handlePreviouslyDeployedWorkers = async (
@@ -155,7 +158,6 @@ type UploadDeployServiceConfig =
   Upload_deployArgConfig["workers"][number]["config"]["services"][number];
 
 type PrepareForDeployArg = {
-  fluenceConfig: FluenceConfig;
   flags: {
     import: Array<string> | undefined;
     "no-build": boolean;
@@ -169,11 +171,9 @@ type PrepareForDeployArg = {
   isBuildCheck?: boolean;
   deploymentNamesString?: string | undefined;
   initPeerId?: string;
-  workersConfig?: WorkersConfigReadonly;
 };
 
 export async function prepareForDeploy({
-  fluenceConfig,
   flags: {
     "marine-build-args": marineBuildArgs,
     import: aquaImportsFromFlags,
@@ -183,8 +183,9 @@ export async function prepareForDeploy({
   isBuildCheck = false,
   deploymentNamesString,
   initPeerId,
-  workersConfig: maybeWorkersConfig,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> {
+  const workersConfig = await initNewWorkersConfig();
+  const fluenceConfig = await ensureFluenceProject();
   const isDealDeploy = initPeerId === undefined;
   const deploymentsOrHostsString = isDealDeploy ? "deployments" : "hosts";
   const dealsOrHostsString = isDealDeploy ? "deals" : "hosts";
@@ -194,10 +195,7 @@ export async function prepareForDeploy({
   );
 
   assertIsArrayWithHostsOrDeals(hostsOrDeals);
-
-  const maybeDeployedHostsOrDeals = (maybeWorkersConfig ?? {})[
-    dealsOrHostsString
-  ];
+  const maybeDeployedHostsOrDeals = workersConfig[dealsOrHostsString];
 
   const deploymentsToDeploy = await getDeploymentNames(
     deploymentNamesString,
@@ -368,7 +366,6 @@ export async function prepareForDeploy({
       [...moduleAbsolutePathOrURLToModuleConfigsMap.values()],
       marineCli,
       marineBuildArgs,
-      fluenceConfig,
     );
 
     const serviceNamePathToFacadeMap: Record<string, string> =
@@ -393,11 +390,7 @@ export async function prepareForDeploy({
         }),
       );
 
-    await updateAquaServiceInterfaceFile(
-      serviceNamePathToFacadeMap,
-      fluenceConfig.services,
-      marineCli,
-    );
+    await updateAquaServiceInterfaceFile(serviceNamePathToFacadeMap, marineCli);
   }
 
   const spellsToCompile = isBuildCheck
@@ -411,7 +404,7 @@ export async function prepareForDeploy({
       ];
 
   const spellConfigs = (
-    await compileSpells(fluenceConfig, aquaImportsFromFlags, spellsToCompile)
+    await compileSpells(aquaImportsFromFlags, spellsToCompile)
   ).map(({ functions, name, spellConfig, spellAquaFilePath }) => {
     const { script } = functions[spellConfig.function] ?? {};
 
@@ -460,7 +453,6 @@ export async function prepareForDeploy({
           serviceConfigsWithOverrides,
           moduleAbsolutePathOrURLToModuleConfigsMap,
           spellConfigs,
-          maybeWorkersConfig,
           initPeerId,
           fluenceEnv,
         });
@@ -511,7 +503,7 @@ const validateWasmExist = async (
           try {
             await access(wasm);
             return true;
-          } catch (e) {
+          } catch {
             return `wasm file not found at ${color.yellow(
               wasm,
             )}\nfor deployment: ${color.yellow(
@@ -611,11 +603,11 @@ const emptyHosts: Host = {
   dummyDealId: "",
 };
 
-export async function ensureAquaFileWithWorkerInfo(
-  workersConfig: WorkersConfigReadonly,
-  fluenceConfig: FluenceConfigReadonly,
-  fluenceEnv: FluenceEnv,
-) {
+export async function ensureAquaFileWithWorkerInfo() {
+  const workersConfig = await initNewWorkersConfig();
+  const fluenceEnv = await ensureFluenceEnv();
+  const fluenceConfig = await ensureFluenceProject();
+
   const dealWorkers = Object.fromEntries(
     Object.entries({
       ...fluenceConfig.deployments,
@@ -671,7 +663,7 @@ export async function ensureAquaFileWithWorkerInfo(
     FS_OPTIONS,
   );
 
-  await compileAquaFromFluenceConfigWithDefaults(fluenceConfig);
+  await compileAquaFromFluenceConfigWithDefaults();
 }
 
 type ResolveDeploymentArgs = {
@@ -690,16 +682,16 @@ type ResolveDeploymentArgs = {
   } & OverridableServiceProperties)[];
   moduleAbsolutePathOrURLToModuleConfigsMap: Map<string, ModuleConfigReadonly>;
   spellConfigs: UploadDeploySpellConfig[];
-  maybeWorkersConfig: WorkersConfigReadonly | undefined;
   initPeerId: string | undefined;
   fluenceEnv: FluenceEnv;
 };
 
 export async function compileSpells(
-  fluenceConfig: FluenceConfig,
   aquaImportsFromFlags: string[] | undefined = [],
   spellNames?: string[],
 ) {
+  const fluenceConfig = await ensureFluenceProject();
+
   const spellsFromFluenceConfig = (
     spellNames ?? Object.keys(fluenceConfig.spells ?? {})
   ).map((name) => {
@@ -762,10 +754,7 @@ export async function compileSpells(
       // TODO: consider how to compile spells with aqua compilation args
       const { errors, functions } = await compileFromPath({
         filePath: spellAquaFilePath,
-        imports: await getAquaImports({
-          aquaImportsFromFlags,
-          fluenceConfig,
-        }),
+        imports: await getAquaImports(aquaImportsFromFlags),
       });
 
       return {
@@ -804,7 +793,6 @@ async function resolveDeployment({
   serviceConfigsWithOverrides,
   moduleAbsolutePathOrURLToModuleConfigsMap,
   spellConfigs,
-  maybeWorkersConfig,
   initPeerId,
   fluenceEnv,
 }: ResolveDeploymentArgs) {
@@ -813,7 +801,8 @@ async function resolveDeployment({
 
   if (!isDealDeploy) {
     dummyDealId =
-      maybeWorkersConfig?.hosts?.[fluenceEnv]?.[deploymentName]?.dummyDealId ??
+      (await initNewWorkersConfig()).hosts?.[fluenceEnv]?.[deploymentName]
+        ?.dummyDealId ??
       `${deploymentName}_${initPeerId}_${numToStr(Math.random()).slice(2)}`;
   }
 

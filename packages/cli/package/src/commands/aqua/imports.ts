@@ -29,11 +29,7 @@ export default class Json extends BaseCommand<typeof Json> {
   };
 
   async run(): Promise<void> {
-    const { maybeFluenceConfig: fluenceConfig } = await initCli(
-      this,
-      await this.parse(Json),
-    );
-
-    commandObj.log(jsonStringify(await getAquaImports({ fluenceConfig })));
+    await initCli(this, await this.parse(Json));
+    commandObj.log(jsonStringify(await getAquaImports()));
   }
 }

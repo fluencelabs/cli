@@ -16,7 +16,7 @@
  */
 
 import type { Command } from "@oclif/core";
-import { CLIError } from "@oclif/core/lib/errors/index.js";
+import { CLIError } from "@oclif/core/errors";
 
 export type CommandObj = InstanceType<typeof Command>;
 export let commandObj: CommandObj =

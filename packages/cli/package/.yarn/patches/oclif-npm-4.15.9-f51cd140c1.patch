@@ -1,8 +1,8 @@
 diff --git a/lib/commands/pack/win.js b/lib/commands/pack/win.js
-index 36ffafcdb8b92678a7e8e2e2205fd5e877ca2e00..483d38a31da5120501e1ad7b757246c86dcf26b8 100644
+index 488e61a50e3183a2183b69f8a8571cb9523bdae4..f71e9d9d2c87a5b8aef4f672ac9cb01398f3e4dc 100644
 --- a/lib/commands/pack/win.js
 +++ b/lib/commands/pack/win.js
-@@ -14,12 +14,13 @@ const scripts = {
+@@ -37,12 +37,13 @@ const scripts = {
      /* eslint-disable no-useless-escape */
      cmd: (config, additionalCLI) => `@echo off
  setlocal enableextensions
@@ -16,21 +16,21 @@ index 36ffafcdb8b92678a7e8e2e2205fd5e877ca2e00..483d38a31da5120501e1ad7b757246c8
 +  "%~dp0\\..\\client\\bin\\fluence.cmd" %*
  )
  `,
-     nsis: ({ arch, config, customization, defenderOptionDefault, hideDefenderOption, }) => `!include MUI2.nsh
-@@ -239,7 +240,7 @@ the CLI should already exist in a directory named after the CLI that is the root
-         const { config } = buildConfig;
+     nsis: ({ arch, config, customization, defenderOptional, hideDefenderOption, }) => `!include MUI2.nsh
+@@ -268,7 +269,7 @@ the CLI should already exist in a directory named after the CLI that is the root
          const nsisCustomization = config.nsisCustomization ? (0, node_fs_1.readFileSync)(config.nsisCustomization, 'utf8') : '';
          const arches = buildConfig.targets.filter((t) => t.platform === 'win32').map((t) => t.arch);
--        await Tarballs.build(buildConfig, { pack: false, parallel: true, platform: 'win32', tarball: flags.tarball });
-+        await Tarballs.build(buildConfig, { pack: true, parallel: true, platform: 'win32', tarball: flags.tarball });
-         await Promise.all(arches.map(async (arch) => {
-             const installerBase = path.join(buildConfig.tmp, `windows-${arch}-installer`);
-             await (0, promises_1.rm)(installerBase, { force: true, recursive: true });
+         await Tarballs.build(buildConfig, {
+-            pack: false,
++            pack: true,
+             parallel: true,
+             platform: 'win32',
+             pruneLockfiles: flags['prune-lockfiles'],
 diff --git a/lib/tarballs/bin.js b/lib/tarballs/bin.js
-index f05f8a117a9e06d55fe0cf0a93a7cae6db357d2a..452307d11234348effef6c28e4c997a344d9fe2b 100644
+index 9272ce0ff10b1f09c3c8dbbb7e2ccdf72dc8268e..3ba9b823baf13e7c65ccf76b5f531339bfee7316 100644
 --- a/lib/tarballs/bin.js
 +++ b/lib/tarballs/bin.js
-@@ -33,6 +33,8 @@ if exist "%~dp0..\\bin\\node.exe" (
+@@ -57,6 +57,8 @@ if exist "%~dp0..\\bin\\node.exe" (
      const writeUnix = async () => {
          const bin = path.join(baseWorkspace, 'bin', config.bin);
          await fs.promises.writeFile(bin, `#!/usr/bin/env bash

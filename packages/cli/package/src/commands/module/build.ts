@@ -48,10 +48,7 @@ export default class Build extends BaseCommand<typeof Build> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Build),
-    );
+    const { args, flags } = await initCli(this, await this.parse(Build));
 
     const modulePath =
       args[PATH] ??
@@ -75,7 +72,6 @@ export default class Build extends BaseCommand<typeof Build> {
       [moduleConfig],
       marineCli,
       flags[MARINE_BUILD_ARGS_FLAG_NAME],
-      maybeFluenceConfig,
     );
   }
 }

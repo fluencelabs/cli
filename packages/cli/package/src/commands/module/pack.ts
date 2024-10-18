@@ -57,10 +57,7 @@ export default class Pack extends BaseCommand<typeof Pack> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Pack),
-    );
+    const { args, flags } = await initCli(this, await this.parse(Pack));
 
     const modulePath =
       args[PATH] ??
@@ -85,7 +82,6 @@ export default class Pack extends BaseCommand<typeof Pack> {
       marineCli,
       marineBuildArgs: flags[MARINE_BUILD_ARGS_FLAG_NAME],
       bindingCrate: flags["binding-crate"],
-      maybeFluenceConfig,
       destination:
         flags.destination ??
         (await input({

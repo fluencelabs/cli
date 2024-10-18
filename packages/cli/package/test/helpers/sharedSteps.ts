@@ -229,8 +229,7 @@ export async function deployDealAndWaitUntilDeployed(
   });
 
   const dealId = res.split('DealID: "')[1]?.split('"')[0];
-
-  assert(dealId, "dealId is expected to be defined");
+  assert(dealId !== undefined, "dealId is expected to be defined");
   console.log("DealID:", dealId);
 
   await setTryTimeout(

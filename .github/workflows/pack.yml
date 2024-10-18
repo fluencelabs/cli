@@ -50,7 +50,7 @@ on:
       node-version:
         description: "Node version"
         type: string
-        default: "18.20.3"
+        default: "22.10.0"
 
 env:
   CI: true

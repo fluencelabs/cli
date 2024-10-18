@@ -80,7 +80,7 @@ export function App({ chain }: { chain: CLIToConnectorFullMsg["chain"] }) {
 
     return parsedError.success
       ? parsedError.output.cause.cause.data.message
-      : error?.message ?? "";
+      : (error?.message ?? "");
   }, [error]);
 
   const [trySwitchChainFlag, setTrySwitchChainFlag] = useState(false);

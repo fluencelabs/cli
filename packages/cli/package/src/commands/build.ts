@@ -17,7 +17,6 @@
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { commandObj } from "../lib/commandObj.js";
-import { initNewWorkersConfigReadonly } from "../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   MARINE_BUILD_ARGS_FLAG,
@@ -25,6 +24,7 @@ import {
   ENV_FLAG,
 } from "../lib/const.js";
 import { prepareForDeploy } from "../lib/deployWorkers.js";
+import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { ensureFluenceEnv } from "../lib/resolveFluenceEnv.js";
 
@@ -38,12 +38,8 @@ export default class Build extends BaseCommand<typeof Build> {
     ...ENV_FLAG,
   };
   async run(): Promise<void> {
-    const { fluenceConfig, flags } = await initCli(
-      this,
-      await this.parse(Build),
-      true,
-    );
-
+    const { flags } = await initCli(this, await this.parse(Build), true);
+    const fluenceConfig = await ensureFluenceProject();
     const fluenceEnv = await ensureFluenceEnv();
 
     await prepareForDeploy({
@@ -51,7 +47,6 @@ export default class Build extends BaseCommand<typeof Build> {
         ...flags,
         "no-build": false,
       },
-      fluenceConfig,
       fluenceEnv,
       isBuildCheck: true,
       deploymentNamesString: Object.keys(fluenceConfig.deployments ?? {}).join(
@@ -63,8 +58,7 @@ export default class Build extends BaseCommand<typeof Build> {
       "../lib/deployWorkers.js"
     );
 
-    const workerConfig = await initNewWorkersConfigReadonly();
-    await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig, fluenceEnv);
+    await ensureAquaFileWithWorkerInfo();
 
     commandObj.logToStderr(
       `All services and spells built, all aqua files generated and compiled successfully`,

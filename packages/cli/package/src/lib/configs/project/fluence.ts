@@ -30,7 +30,7 @@ import {
   type ChainENV,
   type ChainENVOld,
 } from "../../../common.js";
-import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
+import CLIPackageJSON from "../../../versions/cli.package.json" with { type: "json" };
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import { validateProtocolVersion } from "../../chain/chainValidators.js";

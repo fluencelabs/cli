@@ -50,6 +50,7 @@ import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
 import { createAndMatchDealsForPeerIds } from "./deal.js";
 import { getReadonlyContracts } from "./dealClient.js";
+import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 import { stringifyUnknown } from "./helpers/utils.js";
 import { disconnectFluenceClient } from "./jsClient.js";
@@ -86,12 +87,8 @@ type DealState =
   | "notEnoughWorkers";
 
 export async function deployImpl(this: Deploy, cl: typeof Deploy) {
-  const { flags, fluenceConfig, args } = await initCli(
-    this,
-    await this.parse(cl),
-    true,
-  );
-
+  const { flags, args } = await initCli(this, await this.parse(cl), true);
+  const fluenceConfig = await ensureFluenceProject();
   const chainNetworkId = await getChainId();
   const workersConfig = await initNewWorkersConfig();
 
@@ -103,8 +100,6 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
 
   const uploadArg = await prepareForDeploy({
     deploymentNamesString: args[DEPLOYMENT_NAMES_ARG_NAME],
-    workersConfig,
-    fluenceConfig,
     fluenceEnv,
     flags,
   });
@@ -328,9 +323,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
     }
   }
 
-  dbg("start creating aqua files with worker info");
-
-  await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig, fluenceEnv);
+  await ensureAquaFileWithWorkerInfo();
 
   commandObj.log(
     `\n\nUse ${color.yellow(

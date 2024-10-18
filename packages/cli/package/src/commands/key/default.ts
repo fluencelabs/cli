@@ -38,15 +38,7 @@ export default class Default extends BaseCommand<typeof Default> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Default),
-    );
-
-    await setDefaultSecretKey({
-      maybeFluenceConfig,
-      isUser: flags.user,
-      name: args.name,
-    });
+    const { args, flags } = await initCli(this, await this.parse(Default));
+    await setDefaultSecretKey({ isUser: flags.user, name: args.name });
   }
 }

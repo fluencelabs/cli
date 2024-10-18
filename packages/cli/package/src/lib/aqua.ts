@@ -26,13 +26,12 @@ import type {
 import type { GatherImportsResult } from "@fluencelabs/npm-aqua-compiler";
 import { color } from "@oclif/color";
 
-import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
+import CLIPackageJSON from "../versions/cli.package.json" with { type: "json" };
 
 import { commandObj } from "./commandObj.js";
 import type {
   CompileAquaConfig,
   Constants,
-  FluenceConfig,
 } from "./configs/project/fluence.js";
 import { LOG_LEVEL_COMPILER_FLAG_NAME } from "./const.js";
 import {
@@ -357,13 +356,9 @@ export type ResolvedCommonAquaCompilationFlags = Required<
 
 export async function resolveCommonAquaCompilationFlags(
   flags: CommonAquaCompilationFlags & { quiet?: boolean },
-  fluenceConfig: FluenceConfig | null,
 ): Promise<ResolvedCommonAquaCompilationFlags> {
   return {
-    imports: await getAquaImports({
-      aquaImportsFromFlags: flags.import,
-      fluenceConfig,
-    }),
+    imports: await getAquaImports(flags.import),
     constants: formatConstantsFromFlags(flags.const),
     logLevel: await resolveAquaLogLevel(
       flags["log-level-compiler"],

@@ -42,15 +42,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Remove),
-    );
-
-    await removeSecretKey({
-      name: args.name,
-      isUser: flags.user,
-      maybeFluenceConfig,
-    });
+    const { args, flags } = await initCli(this, await this.parse(Remove));
+    await removeSecretKey({ name: args.name, isUser: flags.user });
   }
 }

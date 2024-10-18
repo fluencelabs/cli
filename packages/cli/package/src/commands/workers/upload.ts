@@ -57,12 +57,7 @@ export default class Upload extends BaseCommand<typeof Upload> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Upload),
-      true,
-    );
-
+    const { flags, args } = await initCli(this, await this.parse(Upload), true);
     await initFluenceClient(flags);
     await doRegisterIpfsClient();
     const { Fluence } = await import("@fluencelabs/js-client");
@@ -73,7 +68,6 @@ export default class Upload extends BaseCommand<typeof Upload> {
 
     const uploadArg = await prepareForDeploy({
       deploymentNamesString: args["WORKER-NAMES"],
-      fluenceConfig,
       fluenceEnv,
       initPeerId,
       flags,
