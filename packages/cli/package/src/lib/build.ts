@@ -46,6 +46,7 @@ import type { MarineCLI } from "../lib/marineCli.js";
 
 import { buildModules } from "./buildModules.js";
 import { commandObj } from "./commandObj.js";
+import { initFluenceConfig } from "./configs/project/fluence.js";
 import { overrideModule } from "./deployWorkers.js";
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import { genServiceConfigToml } from "./helpers/serviceConfigToml.js";
@@ -186,7 +187,6 @@ export async function build({
       [...mapOfModuleConfigs.values()],
       marineCli,
       marineBuildArgs,
-      resolveDeployInfosArg.fluenceConfig,
     );
 
     stopSpinner();
@@ -240,12 +240,7 @@ export async function build({
     },
   );
 
-  await updateAquaServiceInterfaceFile(
-    serviceNamePathToFacadeMap,
-    resolveDeployInfosArg.fluenceConfig.services,
-    marineCli,
-  );
-
+  await updateAquaServiceInterfaceFile(serviceNamePathToFacadeMap, marineCli);
   return serviceInfoWithModuleConfigs;
 }
 
@@ -310,7 +305,6 @@ async function overrideModuleConfig(
 type ResolveSingleServiceModuleConfigsAndBuildArgs = {
   serviceName: string;
   serviceConfig: ServiceConfigReadonly;
-  fluenceConfig: FluenceConfigReadonly | undefined | null;
   marineCli: MarineCLI;
   marineBuildArgs: string | undefined;
 };
@@ -318,10 +312,11 @@ type ResolveSingleServiceModuleConfigsAndBuildArgs = {
 export async function resolveSingleServiceModuleConfigsAndBuild({
   serviceName,
   serviceConfig,
-  fluenceConfig,
   marineCli,
   marineBuildArgs,
 }: ResolveSingleServiceModuleConfigsAndBuildArgs) {
+  const fluenceConfig = await initFluenceConfig();
+
   const maybeOverridesFromFluenceCOnfig =
     fluenceConfig?.services?.[serviceConfig.name]?.overrideModules;
 
@@ -331,12 +326,7 @@ export async function resolveSingleServiceModuleConfigsAndBuild({
       maybeOverridesFromFluenceCOnfig,
     );
 
-  await buildModules(
-    allModuleConfigs,
-    marineCli,
-    marineBuildArgs,
-    fluenceConfig,
-  );
+  await buildModules(allModuleConfigs, marineCli, marineBuildArgs);
 
   const fluenceServiceConfigTomlPath = await genServiceConfigToml(
     serviceName,

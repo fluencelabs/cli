@@ -58,12 +58,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Deploy),
-      true,
-    );
-
+    const { flags, args } = await initCli(this, await this.parse(Deploy), true);
     const workersConfig = await initNewWorkersConfig();
 
     const { ensureAquaFileWithWorkerInfo, prepareForDeploy } = await import(
@@ -79,8 +74,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const uploadDeployArg = await prepareForDeploy({
       deploymentNamesString: args["WORKER-NAMES"],
-      fluenceConfig,
-      workersConfig,
       fluenceEnv,
       initPeerId,
       flags,
@@ -135,13 +128,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     };
 
     await workersConfig.$commit();
-
-    await ensureAquaFileWithWorkerInfo(
-      workersConfig,
-      fluenceConfig,
-      fluenceEnv,
-    );
-
+    await ensureAquaFileWithWorkerInfo();
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     commandObj.log(

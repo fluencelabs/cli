@@ -19,7 +19,7 @@ import assert from "node:assert";
 
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { color } from "@oclif/color";
-import { CLIError } from "@oclif/core/lib/errors/index.js";
+import { CLIError } from "@oclif/core/errors";
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
@@ -206,6 +206,7 @@ interceptor.on("response", ({ request: { url } }) => {
 const WARN_MSGS_TO_IGNORE = [
   "ExperimentalWarning: Import assertions are not a stable feature of the JavaScript language",
   "ExperimentalWarning: Importing JSON modules is an experimental feature",
+  "DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.",
 ];
 
 /**
@@ -235,7 +236,7 @@ export function setUpProcessWarningListener() {
     });
 
     if (!isWarnMsgToIgnore) {
-      process.stderr.write(`Warning: ${warning.message}\n`);
+      process.stderr.write(`${JSON.stringify(warning, null, 2)}\n\n`);
     }
   });
 }

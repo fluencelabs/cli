@@ -19,7 +19,7 @@ import { spawn } from "node:child_process";
 import { join } from "path";
 
 import { color } from "@oclif/color";
-import { CLIError } from "@oclif/core/lib/errors/index.js";
+import { CLIError } from "@oclif/core/errors";
 
 import { CLI_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { dbg } from "./dbg.js";

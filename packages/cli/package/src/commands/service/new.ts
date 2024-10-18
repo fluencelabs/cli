@@ -23,6 +23,7 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService, ensureValidServiceName } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import { AQUA_NAME_REQUIREMENTS } from "../../lib/helpers/downloadFile.js";
@@ -47,13 +48,10 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(New),
-    );
+    const { args, flags } = await initCli(this, await this.parse(New));
+    const fluenceConfig = await initFluenceConfig();
 
     const serviceName = await ensureValidServiceName(
-      maybeFluenceConfig,
       args.name ?? (await input({ message: "Enter service name" })),
     );
 
@@ -76,14 +74,13 @@ export default class New extends BaseCommand<typeof New> {
       )}`,
     );
 
-    if (maybeFluenceConfig !== null) {
+    if (fluenceConfig !== null) {
       const marineCli = await initMarineCli();
 
       await addService({
         marineCli,
         serviceName,
         absolutePathOrUrl: absoluteServicePath,
-        fluenceConfig: maybeFluenceConfig,
       });
     }
   }

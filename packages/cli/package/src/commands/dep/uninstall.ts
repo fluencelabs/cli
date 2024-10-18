@@ -39,17 +39,8 @@ export default class Install extends BaseCommand<typeof Install> {
   };
 
   async run(): Promise<void> {
-    const { args, fluenceConfig } = await initCli(
-      this,
-      await this.parse(Install),
-      true,
-    );
-
-    await npmUninstall({
-      packageName: args[PACKAGE_NAME],
-      fluenceConfig,
-    });
-
+    const { args } = await initCli(this, await this.parse(Install), true);
+    await npmUninstall(args[PACKAGE_NAME]);
     commandObj.logToStderr(`Uninstalled ${args[PACKAGE_NAME]} successfully`);
   }
 }

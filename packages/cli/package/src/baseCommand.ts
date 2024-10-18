@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Command, Flags, Interfaces } from "@oclif/core";
+import { Command, type Interfaces } from "@oclif/core";
 
 import { NO_INPUT_FLAG } from "./lib/const.js";
 import { exitCli } from "./lib/lifeCycle.js";

@@ -401,7 +401,7 @@ export function getReadonlyConfigInitFunction<
       configString =
         // this is basically the only place where userConfig is undefined until it's initialized in initCli
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        userConfig?.docsInConfigs ?? false
+        (userConfig?.docsInConfigs ?? false)
           ? `${schemaPathComment}\n\n${documentationLinkComment}\n${defConf}`
           : yamlDiffPatch(
               `${schemaPathComment}\n${description}\n\n${documentationLinkComment}\n`,

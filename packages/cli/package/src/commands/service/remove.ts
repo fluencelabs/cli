@@ -28,6 +28,7 @@ import {
 } from "../../lib/configs/project/fluence.js";
 import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../../lib/const.js";
 import { getServiceAbsolutePath } from "../../lib/helpers/downloadFile.js";
+import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { removeProperties } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { projectRootDir } from "../../lib/paths.js";
@@ -47,11 +48,8 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }),
   };
   async run(): Promise<void> {
-    const { args, fluenceConfig } = await initCli(
-      this,
-      await this.parse(Remove),
-      true,
-    );
+    const { args } = await initCli(this, await this.parse(Remove), true);
+    const fluenceConfig = await ensureFluenceProject();
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??

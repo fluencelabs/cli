@@ -19,7 +19,7 @@ import { AssertionError } from "node:assert";
 import { access } from "node:fs/promises";
 
 import { color } from "@oclif/color";
-import { CLIError } from "@oclif/core/lib/errors/index.js";
+import { CLIError } from "@oclif/core/errors";
 
 import { jsonStringify } from "../../common.js";
 import { commandObj } from "../commandObj.js";

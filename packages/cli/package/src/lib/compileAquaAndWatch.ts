@@ -29,6 +29,7 @@ import { commandObj } from "./commandObj.js";
 import {
   type FluenceConfigReadonly,
   type CompileAqua,
+  initFluenceConfig,
 } from "./configs/project/fluence.js";
 import { COMPILE_AQUA_PROPERTY_NAME } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
@@ -41,7 +42,6 @@ import { projectRootDir } from "./paths.js";
 import type { Required } from "./typeHelpers.js";
 
 type CompileAquaFromFluenceConfigArgs = {
-  fluenceConfig: FluenceConfigReadonly;
   imports: GatherImportsResult;
   names?: string | undefined;
   dry?: boolean | undefined;
@@ -53,8 +53,9 @@ export async function compileAquaFromFluenceConfig({
   imports,
   watch = false,
   dry = false,
-  fluenceConfig,
 }: CompileAquaFromFluenceConfigArgs) {
+  const fluenceConfig = await initFluenceConfig();
+
   if (!hasAquaToCompile(fluenceConfig)) {
     return;
   }
@@ -128,12 +129,10 @@ export async function compileAquaFromFluenceConfig({
 }
 
 export async function compileAquaFromFluenceConfigWithDefaults(
-  fluenceConfig: FluenceConfigReadonly,
-  aquaImportsFromFlags?: string[] | undefined,
+  aquaImportsFromFlags?: string[],
 ) {
   await compileAquaFromFluenceConfig({
-    fluenceConfig,
-    imports: await getAquaImports({ aquaImportsFromFlags, fluenceConfig }),
+    imports: await getAquaImports(aquaImportsFromFlags),
   });
 }
 

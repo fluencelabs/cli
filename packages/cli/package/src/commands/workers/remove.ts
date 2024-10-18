@@ -53,12 +53,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Remove),
-      true,
-    );
-
+    const { flags, args } = await initCli(this, await this.parse(Remove), true);
     const workersConfig = await initNewWorkersConfig();
 
     const { ensureAquaFileWithWorkerInfo } = await import(
@@ -135,13 +130,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }
 
     await workersConfig.$commit();
-
-    await ensureAquaFileWithWorkerInfo(
-      workersConfig,
-      fluenceConfig,
-      fluenceEnv,
-    );
-
+    await ensureAquaFileWithWorkerInfo();
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     commandObj.log(

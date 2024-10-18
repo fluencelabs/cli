@@ -24,6 +24,7 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
+import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initNewReadonlySpellConfig } from "../../lib/configs/project/spell.js";
 import {
   FS_OPTIONS,
@@ -50,11 +51,8 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig, flags } = await initCli(
-      this,
-      await this.parse(New),
-    );
-
+    const { args, flags } = await initCli(this, await this.parse(New));
+    const fluenceConfig = await initFluenceConfig();
     const pathToSpellsDir = flags.path ?? (await ensureSpellsDir());
 
     function getPathToSpellDir(spellName: string) {
@@ -62,8 +60,8 @@ export default class New extends BaseCommand<typeof New> {
     }
 
     async function validateSpellName(spellName: string) {
-      if (maybeFluenceConfig?.spells?.[spellName] !== undefined) {
-        return `Spell ${color.yellow(spellName)} already exists in ${maybeFluenceConfig.$getPath()}`;
+      if (fluenceConfig?.spells?.[spellName] !== undefined) {
+        return `Spell ${color.yellow(spellName)} already exists in ${fluenceConfig.$getPath()}`;
       }
 
       const pathToSpellDir = getPathToSpellDir(spellName);
@@ -100,11 +98,9 @@ export default class New extends BaseCommand<typeof New> {
       )}`,
     );
 
-    if (maybeFluenceConfig === null) {
+    if (fluenceConfig === null) {
       return;
     }
-
-    const fluenceConfig = maybeFluenceConfig;
 
     if (fluenceConfig.spells === undefined) {
       fluenceConfig.spells = {};

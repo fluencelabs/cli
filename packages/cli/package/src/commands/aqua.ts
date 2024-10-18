@@ -29,6 +29,7 @@ import {
   compileAquaFromFluenceConfig,
   compileAquaAndWatch,
 } from "../lib/compileAquaAndWatch.js";
+import { initFluenceConfig } from "../lib/configs/project/fluence.js";
 import {
   INPUT_FLAG_EXPLANATION,
   COMPILE_AQUA_PROPERTY_NAME,
@@ -84,22 +85,15 @@ export default class Aqua extends Command {
     }),
   };
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig: fluenceConfig } = await initCli(
-      this,
-      await this.parse(Aqua),
-    );
-
-    const commonFlags = await resolveCommonAquaCompilationFlags(
-      flags,
-      fluenceConfig,
-    );
+    const { flags } = await initCli(this, await this.parse(Aqua));
+    const fluenceConfig = await initFluenceConfig();
+    const commonFlags = await resolveCommonAquaCompilationFlags(flags);
 
     if (
       flags[INPUT_FLAG_NAME] === undefined &&
       hasAquaToCompile(fluenceConfig)
     ) {
       await compileAquaFromFluenceConfig({
-        fluenceConfig,
         imports: commonFlags.imports,
         names: flags.names,
         dry: flags.dry,

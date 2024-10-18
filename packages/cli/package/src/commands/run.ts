@@ -35,10 +35,7 @@ import {
 } from "../lib/aqua.js";
 import type { ResolvedCommonAquaCompilationFlags } from "../lib/aqua.js";
 import { commandObj } from "../lib/commandObj.js";
-import {
-  type FluenceConfig,
-  type FluenceConfigReadonly,
-} from "../lib/configs/project/fluence.js";
+import { initFluenceConfig } from "../lib/configs/project/fluence.js";
 import {
   COMPILE_AQUA_PROPERTY_NAME,
   INPUT_FLAG_NAME,
@@ -119,10 +116,7 @@ export default class Run extends BaseCommand<typeof Run> {
     ...COMMON_AQUA_COMPILATION_FLAGS,
   };
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig: fluenceConfig } = await initCli(
-      this,
-      await this.parse(Run),
-    );
+    const { flags } = await initCli(this, await this.parse(Run));
 
     if (flags.quiet) {
       commandObj.log = () => {};
@@ -140,11 +134,7 @@ export default class Run extends BaseCommand<typeof Run> {
 
     const compileFuncCallArgs = await ensureCompileFuncCallArgs({
       aquaPathFromFlags: flags.input,
-      fluenceConfig,
-      aquaCompilationFlags: await resolveCommonAquaCompilationFlags(
-        flags,
-        fluenceConfig,
-      ),
+      aquaCompilationFlags: await resolveCommonAquaCompilationFlags(flags),
     });
 
     const [funcCall, runData] = await Promise.all([
@@ -164,7 +154,6 @@ export default class Run extends BaseCommand<typeof Run> {
       compileFuncCallArgs,
       runData,
       funcCall,
-      fluenceConfig,
     });
 
     const stringResult =
@@ -184,17 +173,17 @@ export default class Run extends BaseCommand<typeof Run> {
 
 type EnsureAquaPathArg = {
   aquaPathFromFlags: string | undefined;
-  fluenceConfig: FluenceConfigReadonly | null;
   aquaCompilationFlags: ResolvedCommonAquaCompilationFlags;
 };
 
 async function ensureCompileFuncCallArgs({
   aquaPathFromFlags,
-  fluenceConfig,
   aquaCompilationFlags,
 }: EnsureAquaPathArg): Promise<
   Omit<CompileFuncCallFromPathArgs, "funcCall">[]
 > {
+  const fluenceConfig = await initFluenceConfig();
+
   if (typeof aquaPathFromFlags === "string") {
     return [{ ...aquaCompilationFlags, filePath: resolve(aquaPathFromFlags) }];
   }
@@ -299,7 +288,6 @@ const getRunData = async (flags: {
 };
 
 type RunArgs = {
-  fluenceConfig: FluenceConfig | null;
   compileFuncCallArgs: Omit<CompileFuncCallFromPathArgs, "funcCall">[];
   funcCall: string;
   runData: RunData | undefined;

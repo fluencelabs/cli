@@ -19,11 +19,7 @@ import { join } from "node:path";
 
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
-import type {
-  Flag,
-  OutputFlags,
-  ParserOutput,
-} from "@oclif/core/lib/interfaces/parser.js";
+import type { Flag, OutputFlags, ParserOutput } from "@oclif/core/interfaces";
 import camelCase from "lodash-es/camelCase.js";
 import upperFirst from "lodash-es/upperFirst.js";
 import xbytes from "xbytes";
@@ -41,7 +37,7 @@ import { aquaComment } from "./helpers/utils.js";
 export const CLI_NAME = "fluence";
 export const CLI_NAME_FULL = "Fluence CLI";
 const GITHUB_REPO_NAME = "https://github.com/fluencelabs/cli";
-export const NODE_JS_MAJOR_VERSION = 18;
+export const NODE_JS_MAJOR_VERSION = 22;
 export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
 export const FLT_SYMBOL = "FLT";
 export const PT_SYMBOL = "USDC";
