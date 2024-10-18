@@ -174,7 +174,7 @@ jobs:
         env:
           cache-name: cache-node-binaries
         with:
-          path: packages/cli/package/tmp/cache/node-v${{ inputs.node-version }}-linux-x64
+          path: packages/cli/package/tmp/cache/node-v${{ inputs.node-version }}-darwin-arm64
           key: ${{ env.cache-name }}-${{ inputs.node-version }}-darwin-arm64
 
       - name: Pack Fluence CLI for Linux and macOS
