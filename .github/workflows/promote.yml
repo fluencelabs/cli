@@ -7,11 +7,11 @@ on:
         description: "Promote version to channel"
         type: choice
         options:
-          - main     # latest build from main branch
-          - stage    # version compatible with current stage env
-          - testnet  # version compatible with current testnet env
-          - stable   # latest stable version (same as mainnet)
-          - mainnet  # version compatible with current mainnet env
+          - main # latest build from main branch
+          - stage # version compatible with current stage env
+          - testnet # version compatible with current testnet env
+          - stable # latest stable version (same as mainnet)
+          - mainnet # version compatible with current mainnet env
           - unstable # version used by all CI jobs; TODO: publish automatically on every release
         required: true
 
@@ -57,12 +57,12 @@ jobs:
           cache: "yarn"
 
       - run: yarn install
-        working-directory: cli
+        working-directory: packages/cli/package
 
       - name: Promote fluence-cli
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t linux-x64,darwin-x64,darwin-arm64 --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
       - name: Promote fluence-cli windows
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t win32-x64 --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes

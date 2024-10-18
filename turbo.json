@@ -1,58 +1,66 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "build": {
-      "outputs": [
-        "dist/**",
-        "src/aqua-dependencies/**",
-        "src/cli-aqua-dependencies/**",
-        "src/lib/compiled-aqua/**",
-        "src/lib/compiled-aqua-with-tracing/**",
-        "src/versions/**"
+    "install-yarn-dependencies": {
+      "inputs": [
+        "package/package.json",
+        "package/yarn.lock",
+        "package/.yarnrc.yml"
       ],
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["^build"]
+      "outputs": ["package/node_modules/**"]
+    },
+    "install-npm-dependencies": {
+      "inputs": [
+        "package/src/cli-aqua-dependencies/package.json",
+        "package/src/cli-aqua-dependencies/package-lock.json"
+      ],
+      "outputs": ["package/src/cli-aqua-dependencies/node_modules/**"]
+    },
+    "before-build": {
+      "dependsOn": [
+        "install-yarn-dependencies",
+        "install-npm-dependencies",
+        "^build"
+      ],
+      "inputs": [
+        "package/src/beforeBuild.ts",
+        "package/src/versions.json",
+        "package/src/versions.ts"
+      ],
+      "outputs": [
+        "package/src/lib/compiled-aqua/**",
+        "package/src/lib/compiled-aqua-with-tracing/**",
+        "package/src/aqua-dependencies/**",
+        "package/src/versions/**",
+        "package/src/common.ts"
+      ]
+    },
+    "build": {
+      "dependsOn": ["^build", "before-build"],
+      "outputs": ["dist/**", "package/dist/**"]
     },
     "on-each-commit": {
-      "inputs": [
-        "bin/**",
-        "src/**",
-        "package.json",
-        "tsconfig.json",
-        "eslint.config.js"
-      ],
       "dependsOn": ["^build", "build"]
     },
     "pack-ci": {
-      "outputs": ["dist/**"],
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["package/dist/**"]
     },
     "pack-linux-x64": {
-      "outputs": ["dist/**"],
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["package/dist/**"]
     },
     "pack-darwin-x64": {
-      "outputs": ["dist/**"],
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["package/dist/**"]
     },
     "pack-darwin-arm64": {
-      "outputs": ["dist/**"],
-      "inputs": ["bin/**", "src/**", "package.json", "tsconfig.json"],
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["package/dist/**"]
     },
     "pack-win32-x64": {
-      "outputs": ["dist/**"],
-      "inputs": [
-        "bin/**",
-        "src/**",
-        "package.json",
-        "tsconfig.json",
-        "nsis/**"
-      ],
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["package/dist/**"]
     }
   }
 }

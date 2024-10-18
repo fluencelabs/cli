@@ -18,12 +18,11 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import InternalAquaDependenciesPackageJSON from "../../cli-aqua-dependencies/package.json" assert { type: "json" };
+import internalAquaDependencies from "../../cli-aqua-dependencies/package.json" assert { type: "json" };
 import { jsonStringify } from "../../common.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CLI_NAME_FULL, JSON_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureMarinePath, ensureMreplPath } from "../../lib/marineCli.js";
 import {
   getRustToolchainToUse,
   getMarineOrMreplVersion,
@@ -53,17 +52,36 @@ export default class Versions extends BaseCommand<typeof Versions> {
 
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
-    if (flags.default) {
-      const defaultDeps = {
-        "cli version": commandObj.config.version,
-        [`default aqua dependencies`]: versions.npm,
-        tools: {
-          marine: versions.cargo.marine,
-          mrepl: versions.cargo.mrepl,
-        },
-        "default rust toolchain": versions["rust-toolchain"],
-      };
+    const devDependencies = filterOutNonFluenceDependencies(
+      CLIPackageJSON.devDependencies,
+    );
 
+    const defaultDeps = {
+      [`${CLI_NAME_FULL} version`]: commandObj.config.version,
+      "internal aqua dependencies": internalAquaDependencies.dependencies,
+      "nox version": versions["nox"],
+      "internal dependencies": filterOutNonFluenceDependencies(
+        CLIPackageJSON.dependencies,
+      ),
+      ...(Object.keys(devDependencies).length === 0
+        ? {}
+        : {
+            "internal dev dependencies": filterOutNonFluenceDependencies(
+              CLIPackageJSON.devDependencies,
+            ),
+          }),
+      "js-client dependencies": filterOutNonFluenceDependencies(
+        JSClientPackageJSON.dependencies,
+      ),
+      [RUST_TOOLCHAIN]: versions["rust-toolchain"],
+      [AQUA_DEPENDENCIES]: versions.npm,
+      [TOOLS]: {
+        [MARINE]: versions.cargo.marine,
+        [MREPL]: versions.cargo.mrepl,
+      },
+    };
+
+    if (flags.default) {
       commandObj.log(
         flags.json
           ? jsonStringify(defaultDeps)
@@ -73,43 +91,17 @@ export default class Versions extends BaseCommand<typeof Versions> {
       return;
     }
 
-    const devDependencies = filterOutNonFluenceDependencies(
-      CLIPackageJSON.devDependencies,
-    );
-
     const deps = {
-      [`${CLI_NAME_FULL} version`]: commandObj.config.version,
-      "nox version": versions["nox"],
-      "rust toolchain": await getRustToolchainToUse(),
-      "aqua dependencies":
+      ...defaultDeps,
+      [RUST_TOOLCHAIN]: await getRustToolchainToUse(),
+      [AQUA_DEPENDENCIES]:
         maybeFluenceConfig === null
           ? versions.npm
           : maybeFluenceConfig.aquaDependencies,
-      tools: {
-        marine: {
-          version: await getMarineOrMreplVersion("marine"),
-          path: await ensureMarinePath(),
-        },
-        mrepl: {
-          version: await getMarineOrMreplVersion("mrepl"),
-          path: await ensureMreplPath(),
-        },
+      [TOOLS]: {
+        [MARINE]: await getMarineOrMreplVersion("marine"),
+        [MREPL]: await getMarineOrMreplVersion("mrepl"),
       },
-      "internal dependencies": filterOutNonFluenceDependencies(
-        CLIPackageJSON.dependencies,
-      ),
-      ...(Object.keys(devDependencies).length === 0
-        ? {}
-        : {
-            "dev dependencies": filterOutNonFluenceDependencies(
-              CLIPackageJSON.devDependencies,
-            ),
-          }),
-      "internal aqua dependencies":
-        InternalAquaDependenciesPackageJSON.dependencies,
-      "js-client dependencies": filterOutNonFluenceDependencies(
-        JSClientPackageJSON.dependencies,
-      ),
     };
 
     commandObj.log(
@@ -117,6 +109,12 @@ export default class Versions extends BaseCommand<typeof Versions> {
     );
   }
 }
+
+const RUST_TOOLCHAIN = "rust-toolchain";
+const AQUA_DEPENDENCIES = "aqua-dependencies";
+const TOOLS = "tools";
+const MARINE = "marine";
+const MREPL = "mrepl";
 
 const filterOutNonFluenceDependencies = (
   dependencies: Record<string, string>,

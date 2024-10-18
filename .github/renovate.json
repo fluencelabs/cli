@@ -1,12 +1,9 @@
 {
-  "extends": [
-    "github>fluencelabs/renovate",
-    "github>fluencelabs/renovate:npm"
-  ],
+  "extends": ["github>fluencelabs/renovate", "github>fluencelabs/renovate:npm"],
   "enabledManagers": ["npm", "regex"],
   "regexManagers": [
     {
-      "fileMatch": ["^cli/src/versions\\.json$"],
+      "fileMatch": ["^packages/cli/package/src/versions\\.json$"],
       "matchStrings": [
         "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
       ],
@@ -14,7 +11,7 @@
       "depNameTemplate": "nox"
     },
     {
-      "fileMatch": ["^cli/src/versions\\.json$"],
+      "fileMatch": ["^packages/cli/package/src/versions\\.json$"],
       "matchStrings": [
         "\"chain-rpc\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n",
         "\"chain-deploy-script\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n",
@@ -24,7 +21,7 @@
       "depNameTemplate": "chain"
     },
     {
-      "fileMatch": ["^cli/src/versions\\.json$"],
+      "fileMatch": ["^packages/cli/package/src/versions\\.json$"],
       "matchStrings": [
         "\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\""
       ],
@@ -32,7 +29,7 @@
       "datasourceTemplate": "npm"
     },
     {
-      "fileMatch": ["^cli/src/versions\\.json$"],
+      "fileMatch": ["^packages/cli/package/src/versions\\.json$"],
       "matchStrings": [
         "\"(?<depName>[marine|mrepl|marine\\-rs\\-sdk|marine\\-rs\\-sdk\\-test]+)\": \"(?<currentValue>[^\"\n]+)\""
       ],

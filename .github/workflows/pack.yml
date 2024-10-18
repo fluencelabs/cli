@@ -47,6 +47,10 @@ on:
         description: "aqua snapshots"
         type: string
         default: "null"
+      node-version:
+        description: "Node version"
+        type: string
+        default: "18.20.3"
 
 env:
   CI: true
@@ -97,14 +101,11 @@ jobs:
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
         with:
-          node-version: "18.20.3"
+          node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.fluence.dev"
           cache: "yarn"
 
       - run: yarn install
-
-      - run: yarn install
-        working-directory: cli
 
       - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
@@ -113,7 +114,7 @@ jobs:
           package: "@fluencelabs/js-client"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
-          working-directory: cli
+          working-directory: packages/cli/package
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -122,7 +123,7 @@ jobs:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
-          working-directory: cli
+          working-directory: packages/cli/package
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -153,35 +154,36 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Build
-        run: yarn build
-
-      - name: Build CLI
-        run: yarn build
-        working-directory: cli
+      - name: Cache node binaries
+        id: cache-node-binaries
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-binaries
+        with:
+          path: packages/cli/package/tmp/cache/node-v${{ inputs.node-version }}-${{ inputs.platform }}
+          key: ${{ env.cache-name }}-${{ inputs.node-version }}-${{ inputs.platform }}
 
       - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
-        working-directory: cli
 
       - name: Upload fluence-cli
         if: inputs.upload-to-s3 == true
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn upload-${{ inputs.platform }}
 
       - name: Promote fluence-cli
         if: inputs.channel != 'null' && inputs.platform != 'win32-x64'
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
       - name: Promote fluence-cli windows
         if: inputs.channel != 'null' && inputs.platform == 'win32-x64'
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes
 
       - name: Rename archive
         if: inputs.platform != 'win32-x64'
-        run: mv cli/dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
+        run: mv packages/cli/package/dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
 
       - name: Upload archive to CI
         if: inputs.platform != 'win32-x64'
@@ -199,7 +201,7 @@ jobs:
 
       - name: Rename windows installer
         if: inputs.platform == 'win32-x64'
-        run: mv cli/dist/win32/fluence-*.exe fluence-cli-${{ inputs.platform }}.exe
+        run: mv packages/cli/package/dist/win32/fluence-*.exe fluence-cli-${{ inputs.platform }}.exe
 
       - name: Upload windows installer to CI
         if: inputs.platform == 'win32-x64'
@@ -217,10 +219,10 @@ jobs:
 
       - name: Promote fluence-cli to unstable
         if: inputs.tag != 'null' && inputs.platform != 'win32-x64'
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --no-xz --indexes
 
       - name: Promote fluence-cli windows to unstable
         if: inputs.tag != 'null' && inputs.platform == 'win32-x64'
-        working-directory: cli
+        working-directory: packages/cli/package
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --win --no-xz --indexes
