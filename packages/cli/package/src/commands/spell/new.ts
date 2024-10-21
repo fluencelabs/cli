@@ -22,7 +22,7 @@ import { join, relative } from "path";
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initNewReadonlySpellConfig } from "../../lib/configs/project/spell.js";
@@ -39,7 +39,6 @@ export default class New extends BaseCommand<typeof New> {
   static override description = "Create a new spell template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     path: Flags.string({
       description: "Path to spells dir (default: src/spells)",
       helpValue: "<path>",

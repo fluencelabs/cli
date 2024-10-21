@@ -21,7 +21,7 @@ import { cwd } from "node:process";
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { isValidServiceModules } from "../../lib/configs/project/service.js";
@@ -48,7 +48,6 @@ export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove module from ${SERVICE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     service: Flags.directory({
       description: `Service name from ${FLUENCE_CONFIG_FULL_FILE_NAME} or path to the service directory`,
       helpValue: "<name | path>",

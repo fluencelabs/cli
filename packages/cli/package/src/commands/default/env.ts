@@ -17,7 +17,7 @@
 
 import { color } from "@oclif/color";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env.js";
@@ -31,9 +31,7 @@ import { ensureValidFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 export default class Env extends BaseCommand<typeof Env> {
   static override description = "Switch default Fluence Environment";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {
-    ...baseFlags,
-  };
+  static override flags = {};
   static override args = {
     ...ENV_ARG,
   };

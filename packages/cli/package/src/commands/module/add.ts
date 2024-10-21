@@ -22,7 +22,7 @@ import { cwd } from "node:process";
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module.js";
@@ -43,7 +43,6 @@ export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add module to ${SERVICE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     name: Flags.string({
       description: "Override module name",
       helpValue: "<name>",

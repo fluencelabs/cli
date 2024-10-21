@@ -18,7 +18,7 @@
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
@@ -32,7 +32,6 @@ export default class DealRewardsInfo extends BaseCommand<
   static override aliases = ["provider:dri"];
   static override description = "Deal rewards info";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
   };
 

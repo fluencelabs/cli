@@ -18,7 +18,7 @@
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
@@ -30,7 +30,6 @@ export default class Create extends BaseCommand<typeof Create> {
   static override description =
     "Create your deal with the specified parameters";
   static override flags = {
-    ...baseFlags,
     "app-cid": Flags.string({
       description: "CID of the application that will be deployed",
       required: true,

@@ -20,7 +20,7 @@ import { join } from "node:path";
 
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "../../common.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
@@ -57,7 +57,6 @@ export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using all the offers from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} config using default wallet key ${LOCAL_NET_DEFAULT_WALLET_KEY}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...NOXES_FLAG,
     timeout: Flags.integer({
       description:

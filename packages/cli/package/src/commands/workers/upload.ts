@@ -17,7 +17,7 @@
 
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { jsonStringify } from "../../common.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
@@ -43,7 +43,6 @@ export default class Upload extends BaseCommand<typeof Upload> {
   static override description = `Upload workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...FLUENCE_CLIENT_FLAGS,
     ...OFF_AQUA_LOGS_FLAG,
     ...IMPORT_FLAG,

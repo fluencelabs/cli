@@ -20,7 +20,7 @@ import { cwd } from "node:process";
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { ensureValidServiceName, addService } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
@@ -42,7 +42,6 @@ export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add service to ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     name: Flags.string({
       description: `Override service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",

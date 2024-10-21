@@ -21,7 +21,6 @@ import type { DealStatus } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
-import { baseFlags } from "../baseCommand.js";
 import type Deploy from "../commands/deploy.js";
 
 import { getChainId } from "./chain/chainConfig.js";
@@ -63,7 +62,6 @@ export const DEPLOY_DESCRIPTION = `Deploy according to 'deployments' property in
 export const DEPLOY_EXAMPLES = ["<%= config.bin %> <%= command.id %>"];
 
 export const DEPLOY_FLAGS = {
-  ...baseFlags,
   ...CHAIN_FLAGS,
   ...IMPORT_FLAG,
   ...NO_BUILD_FLAG,

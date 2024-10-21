@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { getProviderDeals } from "../../lib/chain/deals.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
@@ -25,7 +25,6 @@ export default class DealsList extends BaseCommand<typeof DealsList> {
   static override aliases = ["provider:dl"];
   static override description = "List all deals";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
   };
 

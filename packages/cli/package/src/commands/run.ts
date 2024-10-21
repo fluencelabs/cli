@@ -25,7 +25,7 @@ import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
-import { BaseCommand, baseFlags } from "../baseCommand.js";
+import { BaseCommand } from "../baseCommand.js";
 import { jsonStringify } from "../common.js";
 import { validationErrorToString, ajv } from "../lib/ajvInstance.js";
 import {
@@ -74,7 +74,6 @@ export default class Run extends BaseCommand<typeof Run> {
     `<%= config.bin %> <%= command.id %> -${FUNC_SHORT_FLAG_NAME} '${FUNC_CALL_EXAMPLE}'`,
   ];
   static override flags = {
-    ...baseFlags,
     data: Flags.string({
       description:
         "JSON in { [argumentName]: argumentValue } format. You can call a function using these argument names like this: -f 'myFunc(argumentName)'. Arguments in this flag override arguments in the --data-path flag",

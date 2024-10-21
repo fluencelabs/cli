@@ -17,7 +17,7 @@
 
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import internalAquaDependencies from "../../cli-aqua-dependencies/package.json" with { type: "json" };
 import { jsonStringify } from "../../common.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -38,7 +38,6 @@ export default class Versions extends BaseCommand<typeof Versions> {
     "Get versions of all cli dependencies, including aqua, marine, mrepl and internal";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     default: Flags.boolean({
       description:
         "Display default npm and cargo dependencies and their versions for current CLI version. Default npm dependencies are always available to be imported in Aqua",

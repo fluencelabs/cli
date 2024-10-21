@@ -20,7 +20,7 @@ import { cwd } from "node:process";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { buildModules } from "../../lib/buildModules.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module.js";
@@ -39,7 +39,6 @@ export default class Build extends BaseCommand<typeof Build> {
   static override description = `Build module`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...MARINE_BUILD_ARGS_FLAG,
   };
   static override args = {

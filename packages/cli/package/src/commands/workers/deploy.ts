@@ -18,7 +18,7 @@
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
@@ -44,7 +44,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...OFF_AQUA_LOGS_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
     ...IMPORT_FLAG,

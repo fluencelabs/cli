@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../baseCommand.js";
+import { BaseCommand } from "../baseCommand.js";
 import { commandObj } from "../lib/commandObj.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -32,7 +32,6 @@ export default class Build extends BaseCommand<typeof Build> {
   static override description = `Build all application services, described in ${FLUENCE_CONFIG_FULL_FILE_NAME} and generate aqua interfaces for them`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...MARINE_BUILD_ARGS_FLAG,
     ...IMPORT_FLAG,
     ...ENV_FLAG,

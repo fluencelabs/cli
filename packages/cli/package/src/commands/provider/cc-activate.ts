@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { CC_FLAGS, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -24,7 +24,6 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
   static override description = `Add ${FLT_SYMBOL} collateral to capacity commitment to activate it`;
   static override aliases = ["provider:ca"];
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...CC_FLAGS,
   };

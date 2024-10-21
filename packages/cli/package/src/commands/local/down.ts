@@ -17,7 +17,7 @@
 
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
   DOCKER_COMPOSE_FULL_FILE_NAME,
@@ -25,12 +25,12 @@ import {
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { input } from "../../lib/prompt.js";
 
 export default class Down extends BaseCommand<typeof Down> {
   static override description = `Stop and remove currently running ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     volumes: Flags.boolean({
       char: "v",
       description:
@@ -42,6 +42,10 @@ export default class Down extends BaseCommand<typeof Down> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Down));
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
+
+    await input({
+      message: `Stopping and removing ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose. Are you sure?`,
+    });
 
     await dockerCompose({
       args: [

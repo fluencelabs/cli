@@ -17,7 +17,7 @@
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { setDefaultSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -25,7 +25,6 @@ export default class Default extends BaseCommand<typeof Default> {
   static override description = "Set default key-pair for user or project";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     user: Flags.boolean({
       default: false,
       description:

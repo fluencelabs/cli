@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
 import { NOX_NAMES_FLAG, CHAIN_FLAGS, OFFER_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -26,7 +26,6 @@ export default class CreateCommitment extends BaseCommand<
   static override aliases = ["provider:cc"];
   static override description = "Create Capacity commitment";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
     ...OFFER_FLAG,

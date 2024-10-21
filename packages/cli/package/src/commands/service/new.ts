@@ -20,7 +20,7 @@ import { join, relative, resolve } from "node:path";
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { addService, ensureValidServiceName } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
@@ -36,7 +36,6 @@ export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine service template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     path: Flags.string({
       description: "Path to services dir (default: src/services)",
       helpValue: "<path>",

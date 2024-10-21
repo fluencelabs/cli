@@ -17,7 +17,7 @@
 
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { PACKAGE_NAME_AND_VERSION_ARG_NAME } from "../../lib/const.js";
@@ -31,9 +31,7 @@ export default class Install extends BaseCommand<typeof Install> {
   static override description =
     "Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {
-    ...baseFlags,
-  };
+  static override flags = {};
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
       description:
