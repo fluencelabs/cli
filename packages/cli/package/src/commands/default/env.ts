@@ -39,11 +39,9 @@ export default class Env extends BaseCommand<typeof Env> {
   };
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(Env));
-
     const newEnvConfig = await initNewEnvConfig();
     setEnvConfig(newEnvConfig);
     const fluenceEnv = await ensureValidFluenceEnv(args.ENV);
-
     newEnvConfig.fluenceEnv = fluenceEnv;
     await newEnvConfig.$commit();
 
