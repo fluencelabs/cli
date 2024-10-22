@@ -55,6 +55,9 @@
     "unused-exports": "ts-unused-exports tsconfig.json",
     "ncu": "ncu -x ethers -x @types/node -u && ncu -f \"@fluencelabs/*\" --target newest -u"
   },
+  "resolutions": {
+    "whatwg-url": "^14.0.0"
+  },
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "0.4.0",
     "@fluencelabs/aqua-api": "0.14.11",
