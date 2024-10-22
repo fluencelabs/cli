@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import {
   printCommitmentsInfo,
   printCommitmentsInfoJSON,
@@ -27,7 +27,6 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
   static override aliases = ["provider:ci"];
   static override description = "Get info about capacity commitments";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...CC_FLAGS,
     ...JSON_FLAG,

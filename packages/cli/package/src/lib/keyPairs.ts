@@ -23,6 +23,7 @@ import { color } from "@oclif/color";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { userConfig } from "./configs/globalConfigs.js";
 import {
+  initFluenceConfig,
   initReadonlyFluenceConfig,
   type FluenceConfig,
 } from "./configs/project/fluence.js";
@@ -43,24 +44,19 @@ import { list, type Choices, input, confirm } from "./prompt.js";
 type UpdateSecretKeyArg = {
   name: string | undefined;
   isUser: boolean;
-  maybeFluenceConfig: FluenceConfig | null;
 };
 
-type ResolveUserOrProjectConfigArgs = {
-  isUser: boolean;
-  maybeFluenceConfig: FluenceConfig | null;
-};
+async function resolveUserOrProjectConfig(
+  isUser: boolean,
+): Promise<UserConfig | FluenceConfig> {
+  const fluenceConfig = await initFluenceConfig();
 
-async function resolveUserOrProjectConfig({
-  isUser,
-  maybeFluenceConfig,
-}: ResolveUserOrProjectConfigArgs): Promise<UserConfig | FluenceConfig> {
   if (isUser) {
     return userConfig;
   }
 
-  if (maybeFluenceConfig !== null) {
-    return maybeFluenceConfig;
+  if (fluenceConfig !== null) {
+    return fluenceConfig;
   }
 
   return ensureFluenceProject();
@@ -84,13 +80,9 @@ export async function writeSecretKey({
 export async function createSecretKey({
   name,
   isUser,
-  maybeFluenceConfig,
   askToSetKeyAsDefaultInteractively = true,
 }: UpdateSecretKeyArg & { askToSetKeyAsDefaultInteractively?: boolean }) {
-  const userOrProjectConfig = await resolveUserOrProjectConfig({
-    isUser,
-    maybeFluenceConfig,
-  });
+  const userOrProjectConfig = await resolveUserOrProjectConfig(isUser);
 
   const secretsPath = await getSecretsPathForWriting(isUser);
   const secrets = await getSecretKeys(isUser);
@@ -155,15 +147,8 @@ export async function createSecretKey({
   );
 }
 
-export async function removeSecretKey({
-  name,
-  isUser,
-  maybeFluenceConfig,
-}: UpdateSecretKeyArg) {
-  const userOrProjectConfig = await resolveUserOrProjectConfig({
-    isUser,
-    maybeFluenceConfig,
-  });
+export async function removeSecretKey({ name, isUser }: UpdateSecretKeyArg) {
+  const userOrProjectConfig = await resolveUserOrProjectConfig(isUser);
 
   const secretsPath = isUser
     ? await ensureUserFluenceSecretsDir()
@@ -256,22 +241,14 @@ export async function removeSecretKey({
     return;
   }
 
-  await setDefaultSecretKey({
-    isUser,
-    maybeFluenceConfig,
-    name,
-  });
+  await setDefaultSecretKey({ isUser, name });
 }
 
 export async function setDefaultSecretKey({
   name,
   isUser,
-  maybeFluenceConfig,
 }: UpdateSecretKeyArg) {
-  const userOrProjectConfig = await resolveUserOrProjectConfig({
-    isUser,
-    maybeFluenceConfig,
-  });
+  const userOrProjectConfig = await resolveUserOrProjectConfig(isUser);
 
   const secretsPath = isUser
     ? getFluenceSecretsDir()

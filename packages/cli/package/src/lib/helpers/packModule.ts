@@ -24,7 +24,6 @@ import type { JSONSchemaType } from "ajv";
 import { ajv, validationErrorToString } from "../ajvInstance.js";
 import { buildModules } from "../buildModules.js";
 import { commandObj } from "../commandObj.js";
-import type { FluenceConfigReadonly } from "../configs/project/fluence.js";
 import {
   type ModuleConfigReadonly,
   initNewModuleConfig,
@@ -46,7 +45,6 @@ type PackModuleArgs = {
   moduleConfig: ModuleConfigReadonly;
   marineCli: MarineCLI;
   marineBuildArgs: string | undefined;
-  maybeFluenceConfig: FluenceConfigReadonly | undefined | null;
   destination: string;
   bindingCrate: string | undefined;
 };
@@ -55,17 +53,10 @@ export async function packModule({
   moduleConfig,
   marineCli,
   marineBuildArgs,
-  maybeFluenceConfig,
   destination,
   bindingCrate,
 }: PackModuleArgs) {
-  await buildModules(
-    [moduleConfig],
-    marineCli,
-    marineBuildArgs,
-    maybeFluenceConfig,
-  );
-
+  await buildModules([moduleConfig], marineCli, marineBuildArgs);
   const wasmPath = getModuleWasmPath(moduleConfig);
   const tmpModuleDirPath = await ensureFluenceTmpModulePath();
 

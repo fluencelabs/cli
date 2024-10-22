@@ -17,7 +17,7 @@
 
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { CUSTOM_TYPES_FLAG, USE_F64_FLAG } from "../../lib/const.js";
 import { fileToAqua } from "../../lib/helpers/jsToAqua.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -26,7 +26,6 @@ export default class Json extends BaseCommand<typeof Json> {
   static override description =
     "Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the json file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into";
   static override flags = {
-    ...baseFlags,
     ...USE_F64_FLAG,
     ...CUSTOM_TYPES_FLAG,
   };

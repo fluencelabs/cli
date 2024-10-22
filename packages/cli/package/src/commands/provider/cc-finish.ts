@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { collateralWithdraw } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -24,7 +24,6 @@ export default class CCFinish extends BaseCommand<typeof CCFinish> {
   static override aliases = ["provider:ccf"];
   static override description = `Move resources from deals, withdraw ${FLT_SYMBOL} collateral from capacity commitments, remove compute units from capacity commitments and finish capacity commitments`;
   static override flags = {
-    ...baseFlags,
     ...CC_FLAGS,
     ...CHAIN_FLAGS,
   };

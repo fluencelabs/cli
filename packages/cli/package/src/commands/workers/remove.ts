@@ -19,7 +19,7 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 import isEmpty from "lodash-es/isEmpty.js";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { RemoveArgWorkers } from "../../lib/compiled-aqua/installation-spell/deploy.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
@@ -42,7 +42,6 @@ export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove workers from hosts, described in 'hosts' property in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...OFF_AQUA_LOGS_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
     ...TRACING_FLAG,
@@ -53,12 +52,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Remove),
-      true,
-    );
-
+    const { flags, args } = await initCli(this, await this.parse(Remove), true);
     const workersConfig = await initNewWorkersConfig();
 
     const { ensureAquaFileWithWorkerInfo } = await import(
@@ -135,13 +129,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }
 
     await workersConfig.$commit();
-
-    await ensureAquaFileWithWorkerInfo(
-      workersConfig,
-      fluenceConfig,
-      fluenceEnv,
-    );
-
+    await ensureAquaFileWithWorkerInfo();
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     commandObj.log(

@@ -17,7 +17,7 @@
 
 import { color } from "@oclif/color";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   DEAL_IDS_FLAG,
@@ -31,7 +31,6 @@ import { initCli } from "../../lib/lifeCycle.js";
 export default class Stop extends BaseCommand<typeof Stop> {
   static override description = "Stop the deal";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
   };

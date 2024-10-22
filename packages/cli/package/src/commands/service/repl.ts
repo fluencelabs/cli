@@ -25,7 +25,7 @@ import { resolveSingleServiceModuleConfigsAndBuild } from "../../lib/build.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import {
   initReadonlyFluenceConfig,
-  type FluenceConfig,
+  initFluenceConfig,
 } from "../../lib/configs/project/fluence.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import {
@@ -66,14 +66,10 @@ export default class REPL extends Command {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(REPL),
-    );
+    const { args, flags } = await initCli(this, await this.parse(REPL));
 
     const nameOrPathOrUrl =
-      args[NAME_OR_PATH_OR_URL] ??
-      (await promptForNamePathOrUrl(maybeFluenceConfig));
+      args[NAME_OR_PATH_OR_URL] ?? (await promptForNamePathOrUrl());
 
     const { serviceName, serviceConfig } =
       await ensureServiceConfig(nameOrPathOrUrl);
@@ -86,18 +82,18 @@ export default class REPL extends Command {
       await resolveSingleServiceModuleConfigsAndBuild({
         serviceName,
         serviceConfig,
-        fluenceConfig: maybeFluenceConfig,
         marineCli,
         marineBuildArgs: flags["marine-build-args"],
       });
 
+    const fluenceConfig = await initFluenceConfig();
+
     const isServiceListedInFluenceConfig =
-      maybeFluenceConfig?.services?.[nameOrPathOrUrl] !== undefined;
+      fluenceConfig?.services?.[nameOrPathOrUrl] !== undefined;
 
     if (isServiceListedInFluenceConfig) {
       await updateAquaServiceInterfaceFile(
         { [nameOrPathOrUrl]: getModuleWasmPath(facadeModuleConfig) },
-        maybeFluenceConfig.services,
         marineCli,
       );
     }
@@ -161,10 +157,9 @@ async function ensureServiceConfig(nameOrPathOrUrl: string) {
 const ENTER_PATH_OR_URL_MSG =
   "Enter path to a service or url to .tar.gz archive";
 
-async function promptForNamePathOrUrl(
-  maybeFluenceConfig: FluenceConfig | null,
-): Promise<string> {
-  const serviceNames = Object.keys(maybeFluenceConfig?.services ?? {});
+async function promptForNamePathOrUrl(): Promise<string> {
+  const fluenceConfig = await initFluenceConfig();
+  const serviceNames = Object.keys(fluenceConfig?.services ?? {});
 
   const selected = await list({
     message: "Select service",

@@ -18,7 +18,7 @@
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { ptFormatWithSymbol, ptParse } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
@@ -35,7 +35,6 @@ import { input } from "../../lib/prompt.js";
 export default class Withdraw extends BaseCommand<typeof Withdraw> {
   static override description = "Withdraw tokens from the deal";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
   };

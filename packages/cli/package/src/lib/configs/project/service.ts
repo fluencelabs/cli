@@ -87,12 +87,7 @@ type ConfigV0 = {
   totalMemoryLimit?: string;
 };
 
-const OVERRIDABLE_SERVICE_PROPERTIES = ["totalMemoryLimit"] as const;
-
-export type OverridableServiceProperties = Pick<
-  ConfigV0,
-  (typeof OVERRIDABLE_SERVICE_PROPERTIES)[number]
->;
+export type OverridableServiceProperties = Pick<ConfigV0, "totalMemoryLimit">;
 
 export const overridableServiceProperties = {
   type: "object",

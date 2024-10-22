@@ -17,7 +17,7 @@
 
 import snakeCase from "lodash-es/snakeCase.js";
 
-import versionsJSON from "./versions.json" assert { type: "json" };
+import versionsJSON from "./versions.json" with { type: "json" };
 
 // Don't know how to do this transformation without type assertion.
 // It is pretty simple so it is safe
@@ -26,6 +26,7 @@ export const versions = override(versionsJSON, "FCLI_V") as typeof versionsJSON;
 
 type AllowedValues = string | number | boolean;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface RecToOverride extends Record<string, AllowedValues | RecToOverride> {}
 
 /**

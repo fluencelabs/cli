@@ -17,7 +17,7 @@
 
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { jsonStringify } from "../../common.js";
 import { getProviderInfo } from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -38,7 +38,6 @@ export default class Info extends BaseCommand<typeof Info> {
   static override aliases = ["provider:i"];
   static override description = "Print nox signing wallets and peer ids";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
     ...JSON_FLAG,

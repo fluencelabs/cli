@@ -18,7 +18,7 @@
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   initNewReadonlyProviderConfig,
@@ -34,7 +34,6 @@ import { initCli } from "../../lib/lifeCycle.js";
 export default class Init extends BaseCommand<typeof Init> {
   static override description = `Init provider config. Creates a ${PROVIDER_CONFIG_FULL_FILE_NAME} file`;
   static override flags = {
-    ...baseFlags,
     ...NOXES_FLAG,
     ...CHAIN_FLAGS,
     "no-vm": Flags.boolean({

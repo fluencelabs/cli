@@ -16,7 +16,7 @@
  */
 
 // @ts-check
-import { cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, rm, writeFile, readFile } from "node:fs/promises";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -33,6 +33,18 @@ const root = resolve(__dirname, "..");
 const WORKSPACE_NODE_MODULES_PATH = resolve(root, "node_modules");
 
 const aquaDependenciesDirPath = join(root, "src", "aqua-dependencies");
+
+const rustToolchainPath = join(root, "..", "..", "..", "rust-toolchain.toml");
+const toolchainFileContent = await readFile(rustToolchainPath, "utf-8");
+
+await writeFile(
+  rustToolchainPath,
+  toolchainFileContent.replace(/channel = "(.*)"/, () => {
+    return `channel = "${versions["rust-toolchain"]}"`;
+  }),
+  "utf-8",
+);
+
 await mkdir(aquaDependenciesDirPath, { recursive: true });
 
 await writeFile(

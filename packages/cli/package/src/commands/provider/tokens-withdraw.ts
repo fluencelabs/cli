@@ -17,7 +17,7 @@
 
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { withdrawFromNox } from "../../lib/chain/distributeToNox.js";
 import {
   CHAIN_FLAGS,
@@ -33,7 +33,6 @@ export default class TokensWithdraw extends BaseCommand<typeof TokensWithdraw> {
   static override aliases = ["provider:tw"];
   static override description = `Withdraw ${FLT_SYMBOL} tokens from noxes`;
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
     [AMOUNT_FLAG_NAME]: Flags.string({

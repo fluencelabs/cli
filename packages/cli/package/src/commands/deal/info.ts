@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { printDealInfo } from "../../lib/chain/printDealInfo.js";
 import {
   CHAIN_FLAGS,
@@ -28,7 +28,6 @@ import { initCli } from "../../lib/lifeCycle.js";
 export default class Info extends BaseCommand<typeof Info> {
   static override description = "Get info about the deal";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
   };

@@ -14,7 +14,7 @@ When you contribute, you have to be aware that your contribution is covered by *
 
 ## Guidelines for contributors
 
--   CLI repo consists of a yarn monorepo (that uses turborepo for caching) which contains everything in the `./packages` dir + a separate yarn package for CLI itself is needed in the `./packages/cli/package` dir (because oclif framework that doesn't work as part of the monorepo). To install yarn you need Node.js 18 installed and then run `corepack enable`. Then you run `yarn` to install all the dependencies for the monorepo and `yarn build` to build everything.
+-   CLI repo consists of a yarn monorepo (that uses turborepo for caching) which contains everything in the `./packages` dir + a separate yarn package for CLI itself is needed in the `./packages/cli/package` dir (because oclif framework that doesn't work as part of the monorepo). To install yarn you need Node.js 22.10.0 installed and then run `corepack enable`. Then you run `yarn` to install all the dependencies for the monorepo and `yarn build` to build everything.
 -   To run tests locally you need to do the following:
     1. Install and run [Docker](https://docs.docker.com/get-docker/)
     1. run e.g. for linux: `DEBUG=fcli:*,deal-ts-clients:* yarn test-linux-x64` which will build cli, package it, prepare the tests and run them. For fish shell: `env DEBUG="fcli:*,deal-ts-clients:*" yarn test-linux-x64`. `DEBUG` env variable is needed to see debug logs of Fluence CLI and deal-ts-clients lib (you can also inspect js-client logs like by adding `fluence:*`, libp2p also uses a similar system, check out their docs).

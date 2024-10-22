@@ -18,7 +18,7 @@
 import assert from "node:assert";
 import { readFile, writeFile } from "node:fs/promises";
 
-import type { FluenceConfig } from "../configs/project/fluence.js";
+import { initFluenceConfig } from "../configs/project/fluence.js";
 import { FS_OPTIONS, SERVICE_INTERFACE_FILE_HEADER } from "../const.js";
 import type { MarineCLI } from "../marineCli.js";
 import { ensureFluenceAquaServicesPath } from "../paths.js";
@@ -104,7 +104,6 @@ function getServiceInterfaceFileContent(serviceInterfaces: string[]) {
 
 export const updateAquaServiceInterfaceFile = async (
   serviceNamePathToFacadeMap: Record<string, string>,
-  servicesFromFluenceConfig: FluenceConfig["services"],
   marineCli: MarineCLI,
 ) => {
   let previouslyGeneratedInterfacesStr = "";
@@ -130,7 +129,7 @@ export const updateAquaServiceInterfaceFile = async (
     });
 
   const serviceNamesFromFluenceConfig = new Set(
-    Object.keys(servicesFromFluenceConfig ?? {}),
+    Object.keys((await initFluenceConfig())?.services ?? {}),
   );
 
   const previouslyGeneratedInterfacesWithIdsPresentInFluenceConfig =

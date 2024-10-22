@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { createOffers } from "../../lib/chain/offer/offer.js";
 import { OFFER_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -25,7 +25,6 @@ export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
   static override description =
     "Create offers. You have to be registered as a provider to do that";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...OFFER_FLAG,
   };

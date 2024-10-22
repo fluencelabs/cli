@@ -20,7 +20,7 @@ import { join } from "node:path";
 
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "../../common.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
@@ -34,6 +34,7 @@ import {
   dockerComposeDirPath,
 } from "../../lib/configs/project/dockerCompose.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env.js";
+import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   DOCKER_COMPOSE_FLAGS,
@@ -51,13 +52,11 @@ import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { stringifyUnknown } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using all the offers from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} config using default wallet key ${LOCAL_NET_DEFAULT_WALLET_KEY}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...NOXES_FLAG,
     timeout: Flags.integer({
       description:
@@ -110,10 +109,7 @@ export default class Up extends BaseCommand<typeof Up> {
       );
     }
 
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Up),
-    );
+    const { flags } = await initCli(this, await this.parse(Up));
 
     setChainFlags({
       env: "local",
@@ -151,14 +147,8 @@ export default class Up extends BaseCommand<typeof Up> {
         delete workersConfig.deals.local;
         await workersConfig.$commit();
 
-        if (maybeFluenceConfig !== null) {
-          const fluenceEnv = await ensureFluenceEnv();
-
-          await ensureAquaFileWithWorkerInfo(
-            workersConfig,
-            maybeFluenceConfig,
-            fluenceEnv,
-          );
+        if ((await initFluenceConfig()) !== null) {
+          await ensureAquaFileWithWorkerInfo();
         }
       }
     }

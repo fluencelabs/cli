@@ -51,7 +51,7 @@ import {
   type Migrations,
 } from "../initConfig.js";
 
-import schema from "./compose.schema.json" assert { type: "json" };
+import schema from "./compose.schema.json" with { type: "json" };
 import { ensureComputerPeerConfigs, getConfigTomlName } from "./provider.js";
 
 type Service = {

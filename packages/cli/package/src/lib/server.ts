@@ -119,7 +119,7 @@ async function resolveCliConnectorPath() {
     "..",
     "..",
     "..",
-    "packages",
+    "..",
     CLI_CONNECTOR_DIR_NAME,
     "dist",
   );

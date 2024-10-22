@@ -19,7 +19,7 @@ import { readFile } from "fs/promises";
 
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { FS_OPTIONS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -29,9 +29,7 @@ export default class Beautify extends BaseCommand<typeof Beautify> {
   static override aliases = ["air:b"];
   static override description =
     "Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.";
-  static override flags = {
-    ...baseFlags,
-  };
+  static override flags = {};
   static override args = {
     PATH: Args.string({
       description: `Path to an AIR file. Must be relative to the current working directory or absolute`,

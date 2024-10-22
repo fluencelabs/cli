@@ -19,7 +19,7 @@ import { rm } from "fs/promises";
 
 import { color } from "@oclif/color";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   initNewReadonlyDockerComposeConfig,
@@ -38,7 +38,6 @@ export default class Init extends BaseCommand<typeof Init> {
   static override description = `Init ${DOCKER_COMPOSE_FULL_FILE_NAME} according to ${PROVIDER_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
   };
   async run(): Promise<void> {

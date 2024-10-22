@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { jsonStringify, LOCAL_NET_DEFAULT_ACCOUNTS } from "../../common.js";
 import {
   getBlockScoutUrl,
@@ -33,7 +33,6 @@ export default class Info extends BaseCommand<typeof Info> {
   static override description =
     "Show contract addresses for the fluence environment and accounts for the local environment";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
   };
 

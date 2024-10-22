@@ -17,8 +17,9 @@
 
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { PACKAGE_NAME_AND_VERSION_ARG_NAME } from "../../lib/const.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -30,9 +31,7 @@ export default class Install extends BaseCommand<typeof Install> {
   static override description =
     "Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {
-    ...baseFlags,
-  };
+  static override flags = {};
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
       description:
@@ -40,17 +39,15 @@ export default class Install extends BaseCommand<typeof Install> {
     }),
   };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Install),
-    );
+    const { args } = await initCli(this, await this.parse(Install));
+    const fluenceConfig = await initFluenceConfig();
 
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
     if (packageNameAndVersion === undefined) {
-      if (maybeFluenceConfig !== null) {
+      if (fluenceConfig !== null) {
         startSpinner("Installing aqua dependencies");
-        await npmInstallAll(maybeFluenceConfig);
+        await npmInstallAll();
         stopSpinner();
         commandObj.logToStderr("Aqua dependencies are successfully installed");
       }
@@ -59,15 +56,12 @@ export default class Install extends BaseCommand<typeof Install> {
       return;
     }
 
-    if (maybeFluenceConfig === null) {
+    if (fluenceConfig === null) {
       commandObj.error(
         "Not a fluence project. Please init fluence project to install specific aqua dependencies",
       );
     }
 
-    await npmInstall({
-      packageNameAndVersion,
-      fluenceConfig: maybeFluenceConfig,
-    });
+    await npmInstall(packageNameAndVersion);
   }
 }

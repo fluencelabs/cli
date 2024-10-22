@@ -17,7 +17,7 @@
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { collateralWithdraw } from "../../lib/chain/commitment.js";
 import {
   CC_IDS_FLAG_NAME,
@@ -33,7 +33,6 @@ export default class CollateralWithdraw extends BaseCommand<
   static override aliases = ["delegator:cw"];
   static override description = `Withdraw ${FLT_SYMBOL} collateral from capacity commitment`;
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     [FINISH_COMMITMENT_FLAG_NAME]: Flags.boolean({
       description: `Finish capacity commitment after collateral withdrawal`,

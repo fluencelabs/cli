@@ -241,7 +241,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.0.17/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.2.6/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -856,7 +856,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.0.21/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.2.15/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -2033,10 +2033,11 @@ update the fluence CLI
 
 ```
 USAGE
-  $ fluence update [CHANNEL] [-a] [--force] [-i | -v <value>]
+  $ fluence update [CHANNEL] [--force |  | [-a | -v <value> | -i]] [-b ]
 
 FLAGS
   -a, --available        See available versions.
+  -b, --verbose          Show more details about the available versions.
   -i, --interactive      Interactively select version to install. This is ignored if a channel is provided.
   -v, --version=<value>  Install a specific version.
       --force            Force a re-download of the requested version.
@@ -2062,5 +2063,5 @@ EXAMPLES
     $ fluence update --available
 ```
 
-_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.2.11/src/commands/update.ts)_
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.6.4/src/commands/update.ts)_
 <!-- commandsstop -->

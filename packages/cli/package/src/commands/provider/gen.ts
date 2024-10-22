@@ -21,7 +21,7 @@ import { basename, join } from "path";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { withdrawFromNox } from "../../lib/chain/distributeToNox.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ensureComputerPeerConfigs } from "../../lib/configs/project/provider.js";
@@ -54,7 +54,6 @@ export default class Gen extends BaseCommand<typeof Gen> {
   static override description = `Generate Config.toml files according to ${PROVIDER_CONFIG_FULL_FILE_NAME} and secrets according to ${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     [RESET_NOX_SECRETS_FLAG_NAME]: Flags.boolean({
       description: `Withdraw remaining tokens from your noxes, backup nox secrets from ${DOT_FLUENCE_DIR_NAME}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME} and ${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME} (if they exist) to ${DOT_FLUENCE_DIR_NAME}/${BACKUPS_DIR_NAME} and generate new ones`,

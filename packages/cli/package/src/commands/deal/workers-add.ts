@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
@@ -28,7 +28,6 @@ export default class Match extends BaseCommand<typeof Match> {
   static override aliases = ["deal:wa"];
   static override description = "Add missing workers to the deal";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
   };

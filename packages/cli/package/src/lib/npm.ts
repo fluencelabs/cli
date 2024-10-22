@@ -27,9 +27,9 @@ import { jsonStringify } from "../common.js";
 
 import { ajv } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
 import { AQUA_DEPENDENCIES_DIR_NAME, FS_OPTIONS } from "./const.js";
 import { type ExecPromiseArg, execPromise } from "./execPromise.js";
+import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { removeProperties, stringifyUnknown } from "./helpers/utils.js";
 import {
@@ -128,8 +128,8 @@ export async function runNpm(args: Omit<ExecPromiseArg, "command">) {
   });
 }
 
-export async function npmInstallAll(fluenceConfig: FluenceConfig) {
-  await updatePackageJSON(fluenceConfig);
+export async function npmInstallAll() {
+  await updatePackageJSON();
 
   await runNpm({
     args: ["i"],
@@ -139,16 +139,9 @@ export async function npmInstallAll(fluenceConfig: FluenceConfig) {
   });
 }
 
-type NpmInstallArgs = {
-  fluenceConfig: FluenceConfig;
-  packageNameAndVersion: string;
-};
-
-export async function npmInstall({
-  fluenceConfig,
-  packageNameAndVersion,
-}: NpmInstallArgs) {
-  await updatePackageJSON(fluenceConfig);
+export async function npmInstall(packageNameAndVersion: string) {
+  const fluenceConfig = await ensureFluenceProject();
+  await updatePackageJSON();
 
   const correctPackageNameAndVersion = await ensureNpmInstallArgIsCorrect(
     packageNameAndVersion,
@@ -215,7 +208,8 @@ async function ensureNpmInstallArgIsCorrect(packageNameAndVersion: string) {
   );
 }
 
-async function updatePackageJSON(fluenceConfig: FluenceConfig) {
+async function updatePackageJSON() {
+  const fluenceConfig = await ensureFluenceProject();
   const fluenceAquaDependenciesPath = await ensureFluenceAquaDependenciesPath();
 
   const dependenciesWithFixedRelativePath = Object.fromEntries(
@@ -319,15 +313,9 @@ function ensurePathInVersionIsCorrect(
   return `file:${newRelativeDependencyPath}`;
 }
 
-type NpmUninstallArgs = {
-  packageName: string;
-  fluenceConfig: FluenceConfig;
-};
+export async function npmUninstall(packageName: string) {
+  const fluenceConfig = await ensureFluenceProject();
 
-export async function npmUninstall({
-  packageName,
-  fluenceConfig,
-}: NpmUninstallArgs) {
   await runNpm({
     args: ["uninstall", packageName],
     options: {

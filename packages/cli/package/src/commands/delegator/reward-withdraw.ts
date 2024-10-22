@@ -17,7 +17,7 @@
 
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { collateralRewardWithdraw } from "../../lib/chain/commitment.js";
 import { CC_IDS_FLAG_NAME, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -26,7 +26,6 @@ export default class RewardWithdraw extends BaseCommand<typeof RewardWithdraw> {
   static override aliases = ["delegator:rw"];
   static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitment`;
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
   };
   static override args = {

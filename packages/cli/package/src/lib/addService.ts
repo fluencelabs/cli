@@ -22,7 +22,7 @@ import { color } from "@oclif/color";
 
 import { resolveSingleServiceModuleConfigsAndBuild } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
+import { initFluenceConfig } from "./configs/project/fluence.js";
 import { initReadonlyModuleConfig } from "./configs/project/module.js";
 import {
   FACADE_MODULE_NAME,
@@ -34,16 +34,14 @@ import {
   getModuleWasmPath,
   validateAquaName,
 } from "./helpers/downloadFile.js";
+import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import type { MarineCLI } from "./marineCli.js";
 import { projectRootDir } from "./paths.js";
 import { input, checkboxes } from "./prompt.js";
 
-export async function ensureValidServiceName(
-  fluenceConfig: FluenceConfig | null,
-  serviceName: string,
-) {
-  const validateServiceName = createServiceNameValidator(fluenceConfig);
+export async function ensureValidServiceName(serviceName: string) {
+  const validateServiceName = await createServiceNameValidator();
   const serviceNameValidity = validateServiceName(serviceName);
 
   if (typeof serviceNameValidity === "string") {
@@ -56,7 +54,9 @@ export async function ensureValidServiceName(
   return serviceName;
 }
 
-function createServiceNameValidator(fluenceConfig: FluenceConfig | null) {
+async function createServiceNameValidator() {
+  const fluenceConfig = await initFluenceConfig();
+
   return function validateServiceName(serviceName: string): true | string {
     if (
       fluenceConfig !== null &&
@@ -80,7 +80,6 @@ function createServiceNameValidator(fluenceConfig: FluenceConfig | null) {
 type AddServiceArg = {
   serviceName: string;
   absolutePathOrUrl: string;
-  fluenceConfig: FluenceConfig;
   marineCli: MarineCLI;
   marineBuildArgs?: string | undefined;
   isATemplateInitStep?: boolean;
@@ -89,11 +88,11 @@ type AddServiceArg = {
 export async function addService({
   serviceName: serviceNameFromArgs,
   absolutePathOrUrl,
-  fluenceConfig,
   marineCli,
   marineBuildArgs,
   isATemplateInitStep = false,
 }: AddServiceArg): Promise<string> {
+  const fluenceConfig = await ensureFluenceProject();
   let serviceName = serviceNameFromArgs;
 
   if (fluenceConfig.services === undefined) {
@@ -164,16 +163,11 @@ export async function addService({
     );
   }
 
-  await addServiceToDeployment({
-    fluenceConfig,
-    isATemplateInitStep,
-    serviceName,
-  });
+  await addServiceToDeployment({ isATemplateInitStep, serviceName });
 
   await resolveSingleServiceModuleConfigsAndBuild({
     serviceName,
     serviceConfig,
-    fluenceConfig,
     marineCli,
     marineBuildArgs,
   });
@@ -182,7 +176,6 @@ export async function addService({
     {
       [serviceName]: getModuleWasmPath(facadeModuleConfig),
     },
-    fluenceConfig.services,
     marineCli,
   );
 
@@ -190,16 +183,15 @@ export async function addService({
 }
 
 type AddServiceToDeploymentArgs = {
-  fluenceConfig: FluenceConfig;
   isATemplateInitStep: boolean;
   serviceName: string;
 };
 
 async function addServiceToDeployment({
-  fluenceConfig,
   isATemplateInitStep,
   serviceName,
 }: AddServiceToDeploymentArgs) {
+  const fluenceConfig = await ensureFluenceProject();
   const deployments = Object.keys(fluenceConfig.deployments ?? {});
 
   if (deployments.length === 0) {

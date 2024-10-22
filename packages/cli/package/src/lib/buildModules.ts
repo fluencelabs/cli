@@ -21,13 +21,13 @@ import { relative } from "node:path";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
-import type { FluenceConfigReadonly } from "../lib/configs/project/fluence.js";
 import { type ModuleConfigReadonly } from "../lib/configs/project/module.js";
 import { MODULE_TYPE_RUST, DEFAULT_MARINE_BUILD_ARGS } from "../lib/const.js";
 import type { MarineCLI } from "../lib/marineCli.js";
 
 import { ajv, validationErrorToString } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
+import { initFluenceConfig } from "./configs/project/fluence.js";
 import { FS_OPTIONS } from "./const.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "./helpers/utils.js";
@@ -161,7 +161,7 @@ members = []
     parsedConfig.workspace?.dependencies ?? {},
   ).reduce<Record<string, string[]>>((acc, [name, strOrObj]) => {
     const packageName =
-      typeof strOrObj === "string" ? name : strOrObj.package ?? name;
+      typeof strOrObj === "string" ? name : (strOrObj.package ?? name);
 
     const version = typeof strOrObj === "string" ? strOrObj : strOrObj.version;
     acc[packageName] = [...(acc[packageName] ?? []), version];
@@ -266,7 +266,6 @@ export async function buildModules(
   modulesConfigs: ModuleConfigReadonly[],
   marineCli: MarineCLI,
   marineBuildArgs: string | undefined,
-  maybeFluenceConfig: FluenceConfigReadonly | undefined | null,
 ): Promise<void> {
   const rustModuleConfigs = modulesConfigs.filter(({ type }) => {
     return type === MODULE_TYPE_RUST;
@@ -289,7 +288,7 @@ export async function buildModules(
 
   const marineBuildArgsToUse = (
     marineBuildArgs ??
-    maybeFluenceConfig?.marineBuildArgs ??
+    (await initFluenceConfig())?.marineBuildArgs ??
     DEFAULT_MARINE_BUILD_ARGS
   ).split(" ");
 

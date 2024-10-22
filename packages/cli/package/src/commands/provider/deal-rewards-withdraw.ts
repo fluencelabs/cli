@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { peerIdHexStringToBase58String } from "../../lib/chain/conversions.js";
 import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -38,7 +38,6 @@ export default class DealRewardsWithdraw extends BaseCommand<
   static override aliases = ["provider:drw"];
   static override description = `Withdraw ${PT_SYMBOL} rewards from deals`;
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
   };
