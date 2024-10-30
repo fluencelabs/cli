@@ -25,7 +25,6 @@ import {
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
 export default class Down extends BaseCommand<typeof Down> {
   static override description = `Stop and remove currently running ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
@@ -42,10 +41,6 @@ export default class Down extends BaseCommand<typeof Down> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Down));
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
-
-    await input({
-      message: `Stopping and removing ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose. Are you sure?`,
-    });
 
     await dockerCompose({
       args: [

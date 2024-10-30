@@ -164,7 +164,6 @@ export function getConfigInitFunction<
     } = getLatestConfigRes;
 
     let prevConfigString = latestConfigString;
-    let prevConfig = latestConfig;
 
     const initializedConfig: InitializedConfig<LatestConfig> = {
       ...latestConfig,
@@ -178,11 +177,11 @@ export function getConfigInitFunction<
 
         prevConfigString = await saveConfig(
           actualConfigPath,
-          yamlDiffPatch(prevConfigString, prevConfig, config),
+          yamlDiffPatch(prevConfigString, {}, config),
           prevConfigString,
         );
 
-        prevConfig = await validateLatestConfig(config);
+        await validateLatestConfig(config);
       },
     };
 
