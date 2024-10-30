@@ -1,0 +1,35 @@
+diff --git a/lib/aws.js b/lib/aws.js
+index de23a617995470968ef472e242a9de263bc6f363..e27793ede9c02e841e7bca2ca2a53544b9f11f25 100644
+--- a/lib/aws.js
++++ b/lib/aws.js
+@@ -2,9 +2,10 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ const client_cloudfront_1 = require("@aws-sdk/client-cloudfront");
+ const client_s3_1 = require("@aws-sdk/client-s3");
++const lib_storage_1 = require("@aws-sdk/lib-storage");
++const promises_1 = require("node:fs/promises");
+ const errors_1 = require("@oclif/core/errors");
+ const ux_1 = require("@oclif/core/ux");
+-const fs_extra_1 = require("fs-extra");
+ const log_1 = require("./log");
+ const util_1 = require("./util");
+ const debug = log_1.debug.new('aws');
+@@ -129,11 +130,13 @@ exports.default = {
+                 ux_1.ux.stdout();
+                 if (dryRun)
+                     return;
+-                options.Body = (0, fs_extra_1.createReadStream)(local);
+-                aws.s3
+-                    ?.send(new client_s3_1.PutObjectCommand(options))
+-                    .then((data) => resolve(data))
+-                    .catch((error) => reject(error));
++                promises_1.readFile(local).then((Body) => {
++                    options.Body = Body;
++                    new lib_storage_1.Upload({ client: aws.s3, params: options })
++                        .done()
++                        .then((data) => resolve(data))
++                        .catch((error) => reject(error));
++                })
+             }),
+         };
+     },
