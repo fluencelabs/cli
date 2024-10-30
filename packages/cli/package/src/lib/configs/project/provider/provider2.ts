@@ -16,7 +16,7 @@
  */
 
 import type { JSONSchemaType } from "ajv";
-import { mapValues } from "lodash-es";
+import mapValues from "lodash-es/mapValues.js";
 
 import { versions } from "../../../../versions.js";
 import { PT_SYMBOL } from "../../../const.js";

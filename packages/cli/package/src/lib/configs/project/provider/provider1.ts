@@ -16,7 +16,9 @@
  */
 
 import type { JSONSchemaType } from "ajv";
-import { isUndefined, mapValues, omitBy } from "lodash-es";
+import isUndefined from "lodash-es/isUndefined.js";
+import mapValues from "lodash-es/mapValues.js";
+import omitBy from "lodash-es/omitBy.js";
 
 import {
   COMPUTE_UNIT_MEMORY_STR,
