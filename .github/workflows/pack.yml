@@ -164,6 +164,7 @@ jobs:
           key: ${{ env.cache-name }}-${{ inputs.node-version }}-${{ inputs.platform }}
 
       - name: Pack fluence-cli
+        working-directory: packages/cli/package
         run: yarn pack-${{ inputs.platform }}
 
       - name: Upload fluence-cli
