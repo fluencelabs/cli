@@ -59,7 +59,6 @@
     "whatwg-url": "^14.0.0"
   },
   "dependencies": {
-    "@aws-sdk/lib-storage": "^3.501.0",
     "@fluencelabs/air-beautify-wasm": "0.4.0",
     "@fluencelabs/aqua-api": "0.14.11",
     "@fluencelabs/aqua-to-js": "0.3.13",
@@ -104,6 +103,7 @@
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
+    "@aws-sdk/lib-storage": "^3.501.0",
     "@tsconfig/node22": "^22.0.0",
     "@tsconfig/strictest": "^2.0.5",
     "@types/debug": "4.1.12",
