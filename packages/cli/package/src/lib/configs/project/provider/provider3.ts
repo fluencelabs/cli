@@ -116,10 +116,11 @@ type CapacityCommitments = Record<string, CapacityCommitment>;
 
 const capacityCommitmentsSchema = {
   type: "object",
-  description: "Capacity commitments",
+  description:
+    "A map with nox names as keys and capacity commitments as values",
   additionalProperties: capacityCommitmentSchema,
   properties: {
-    commitmentName: capacityCommitmentSchema,
+    noxName: capacityCommitmentSchema,
   },
   required: [],
 } as const satisfies JSONSchemaType<CapacityCommitments>;

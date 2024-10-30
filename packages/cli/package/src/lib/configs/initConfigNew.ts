@@ -213,7 +213,12 @@ export async function addTitleDescriptionAndVersionToSchemas<
   options.forEach(({ schema }, version) => {
     schema.title = title;
     schema.description = description;
-    schema.properties.version = { type: "integer", const: version };
+
+    schema.properties.version = {
+      type: "integer",
+      const: version,
+      description: "Config version",
+    };
 
     if (schema.required?.includes("version") !== true) {
       schema.required = [...(schema.required ?? []), "version"];
