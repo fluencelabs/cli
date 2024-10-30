@@ -50,7 +50,7 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
-  GLOBAL_CONFIG_FULL_FILE_NAME,
+  USER_CONFIG_FULL_FILE_NAME,
   IPFS_ADDR_PROPERTY,
   LOCAL_IPFS_ADDRESS,
   MARINE_BUILD_ARGS_FLAG_NAME,
@@ -85,7 +85,7 @@ import {
   type Migrations,
 } from "../initConfig.js";
 
-import { initNewEnvConfig } from "./env.js";
+import { initNewEnvConfig } from "./env/env.js";
 import {
   type OverridableModuleProperties,
   overridableModuleProperties,
@@ -521,7 +521,7 @@ const configSchemaV2Obj = {
         AQUA_DIR_NAME,
       )} dir, npm dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}, npm dependencies from user's ${join(
         DOT_FLUENCE_DIR_NAME,
-        GLOBAL_CONFIG_FULL_FILE_NAME,
+        USER_CONFIG_FULL_FILE_NAME,
       )}, npm dependencies recommended by fluence`,
       items: { type: "string" },
       nullable: true,

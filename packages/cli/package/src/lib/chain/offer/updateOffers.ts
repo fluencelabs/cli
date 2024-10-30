@@ -20,7 +20,7 @@ import { color } from "@oclif/color";
 import omit from "lodash-es/omit.js";
 
 import { commandObj } from "../../commandObj.js";
-import { initNewProviderArtifactsConfig } from "../../configs/project/providerArtifacts.js";
+import { initNewProviderArtifactsConfig } from "../../configs/project/providerArtifacts/providerArtifacts.js";
 import {
   CLI_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,

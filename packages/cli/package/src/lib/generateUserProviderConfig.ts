@@ -23,10 +23,8 @@ import {
   validateAddress,
 } from "./chain/chainValidators.js";
 import { isInteractive } from "./commandObj.js";
-import type {
-  UserProvidedConfig,
-  OfferV1,
-} from "./configs/project/provider.js";
+import type { ProviderConfig } from "./configs/project/provider/provider.js";
+import type { Offer } from "./configs/project/provider/provider2.js";
 import {
   defaultNumberProperties,
   type CurrencyProperty,
@@ -44,7 +42,7 @@ import {
 import { checkboxes, confirm, input } from "./prompt.js";
 
 async function promptToSetNumberProperty(
-  offer: OfferV1,
+  offer: Offer,
   property: CurrencyProperty,
 ) {
   const propertyStr = await input({
@@ -64,7 +62,7 @@ export type ProviderConfigArgs = {
 
 export async function addComputePeers(
   numberOfNoxes: number | undefined,
-  userProvidedConfig: UserProvidedConfig,
+  providerConfig: ProviderConfig,
 ) {
   let computePeersCounter = 0;
   let isAddingMoreComputePeers = true;
@@ -112,13 +110,13 @@ export async function addComputePeers(
       validate: validatePercent,
     });
 
-    userProvidedConfig.capacityCommitments[name] = {
+    providerConfig.capacityCommitments[name] = {
       duration: capacityCommitmentDuration,
       delegator: capacityCommitmentDelegator,
       stakerReward: Number(capacityCommitmentStakerReward),
     };
 
-    userProvidedConfig.computePeers[name] = {
+    providerConfig.computePeers[name] = {
       computeUnits: Number(computeUnitsString),
     };
 
@@ -139,7 +137,7 @@ export async function addComputePeers(
   } while (isAddingMoreComputePeers);
 }
 
-export async function addOffers(userProvidedConfig: UserProvidedConfig) {
+export async function addOffers(providerConfig: ProviderConfig) {
   let isAddingMoreOffers = true;
   let offersCounter = 0;
 
@@ -156,7 +154,7 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
       offersCounter = offersCounter + 1;
     }
 
-    const computePeerOptions = Object.keys(userProvidedConfig.computePeers);
+    const computePeerOptions = Object.keys(providerConfig.computePeers);
 
     const computePeers = isInteractive
       ? await checkboxes({
@@ -186,7 +184,7 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
     const effectors =
       effectorsString === "" ? [] : commaSepStrToArr(effectorsString);
 
-    const offer: OfferV1 = {
+    const offer: Offer = {
       ...defaultNumberProperties,
       computePeers,
       ...(effectors.length > 0 ? { effectors } : {}),
@@ -196,7 +194,7 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
       await promptToSetNumberProperty(offer, numberProperty);
     }
 
-    userProvidedConfig.offers[name] = offer;
+    providerConfig.offers[name] = offer;
 
     isAddingMoreOffers = await confirm({
       message: "Do you want to add more offers",

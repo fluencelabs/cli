@@ -27,7 +27,6 @@ export default class Reset extends BaseCommand<typeof Reset> {
   static override description =
     "Reset all project dependencies to recommended versions";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {};
   async run(): Promise<void> {
     await initCli(this, await this.parse(Reset));
     const fluenceConfig = await ensureFluenceProject();

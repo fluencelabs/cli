@@ -21,7 +21,7 @@ import { CHAIN_ENV, DEFAULT_PUBLIC_FLUENCE_ENV } from "../common.js";
 
 import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
-import { envConfig } from "./configs/globalConfigs.js";
+import { initEnvConfig } from "./configs/project/env/env.js";
 import {
   ENV_FLAG_NAME,
   FLUENCE_ENVS_OLD,
@@ -41,6 +41,7 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
   }
 
   const fluenceEnvFromFlags = await ensureValidFluenceEnvFlag(chainFlags.env);
+  const envConfig = await initEnvConfig();
   const fluenceEnv = fluenceEnvFromFlags ?? envConfig?.fluenceEnv;
 
   if (fluenceEnv !== undefined) {

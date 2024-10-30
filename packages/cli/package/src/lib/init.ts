@@ -70,12 +70,11 @@ import CLIPackageJSON from "../versions/cli.package.json" with { type: "json" };
 import { addService } from "./addService.js";
 import { compileToFiles } from "./aqua.js";
 import { commandObj, isInteractive } from "./commandObj.js";
-import { envConfig, setEnvConfig } from "./configs/globalConfigs.js";
-import { initNewEnvConfig } from "./configs/project/env.js";
+import { initNewEnvConfig, initEnvConfig } from "./configs/project/env/env.js";
 import {
   ensureComputerPeerConfigs,
-  initNewReadonlyProviderConfig,
-} from "./configs/project/provider.js";
+  initNewProviderConfig,
+} from "./configs/project/provider/provider.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import {
   COMPILE_AQUA_PROPERTY_NAME,
@@ -167,16 +166,17 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   const fluenceConfig = await initNewFluenceConfig();
   await copyDefaultDependencies();
   const fluenceEnv = await ensureFluenceEnv();
+  const envConfig = await initEnvConfig();
 
   if (envConfig === null) {
-    setEnvConfig(await initNewEnvConfig(fluenceEnv));
+    await initNewEnvConfig(fluenceEnv);
   } else {
     envConfig.fluenceEnv = fluenceEnv;
     await envConfig.$commit();
   }
 
   if (fluenceEnv === "local") {
-    await initNewReadonlyProviderConfig(options);
+    await initNewProviderConfig(options);
     await ensureComputerPeerConfigs();
   }
 

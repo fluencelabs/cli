@@ -26,9 +26,9 @@ import sample from "lodash-es/sample.js";
 import { CHAIN_ENV, jsonStringify } from "../common.js";
 
 import { commandObj } from "./commandObj.js";
-import { envConfig } from "./configs/globalConfigs.js";
+import { initEnvConfig } from "./configs/project/env/env.js";
 import { initFluenceConfig } from "./configs/project/fluence.js";
-import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
+import { ensureComputerPeerConfigs } from "./configs/project/provider/provider.js";
 import type { FluenceEnv } from "./const.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "./helpers/utils.js";
@@ -192,6 +192,7 @@ export async function resolvePeerId(peerIdOrNamedNode: string) {
 
 export async function updateRelaysJSON() {
   const fluenceConfig = await initFluenceConfig();
+  const envConfig = await initEnvConfig();
 
   if (
     fluenceConfig?.relaysPath === undefined ||

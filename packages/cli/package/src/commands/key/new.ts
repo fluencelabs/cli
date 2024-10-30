@@ -22,7 +22,10 @@ import {
   PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import { createSecretKey } from "../../lib/keyPairs.js";
+import {
+  createSecretKey,
+  resolveUserOrProjectConfig,
+} from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -46,6 +49,11 @@ export default class New extends BaseCommand<typeof New> {
   };
   async run(): Promise<void> {
     const { args, flags } = await initCli(this, await this.parse(New));
-    await createSecretKey({ isUser: flags.user, name: args.name });
+
+    await createSecretKey({
+      isUser: flags.user,
+      name: args.name,
+      userOrProjectConfig: await resolveUserOrProjectConfig(flags.user),
+    });
   }
 }

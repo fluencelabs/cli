@@ -19,8 +19,7 @@ import { color } from "@oclif/color";
 
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
-import { initNewEnvConfig } from "../../lib/configs/project/env.js";
+import { initNewEnvConfig } from "../../lib/configs/project/env/env.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { ENV_ARG } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
@@ -31,17 +30,15 @@ import { ensureValidFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 export default class Env extends BaseCommand<typeof Env> {
   static override description = "Switch default Fluence Environment";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {};
   static override args = {
     ...ENV_ARG,
   };
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(Env));
-    const newEnvConfig = await initNewEnvConfig();
-    setEnvConfig(newEnvConfig);
+    const envConfig = await initNewEnvConfig();
     const fluenceEnv = await ensureValidFluenceEnv(args.ENV);
-    newEnvConfig.fluenceEnv = fluenceEnv;
-    await newEnvConfig.$commit();
+    envConfig.fluenceEnv = fluenceEnv;
+    await envConfig.$commit();
 
     if ((await initFluenceConfig()) !== null) {
       await updateRelaysJSON();

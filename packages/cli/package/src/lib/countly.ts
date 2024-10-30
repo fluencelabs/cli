@@ -21,8 +21,8 @@ import {
 } from "../errorInterceptor.js";
 
 import { commandObj } from "./commandObj.js";
-import { userConfig } from "./configs/globalConfigs.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
+import { initNewUserConfig } from "./configs/user/config/config.js";
 import { IS_DEVELOPMENT } from "./const.js";
 import { ensureDir, getUserCountlyDir } from "./paths.js";
 
@@ -34,6 +34,7 @@ export async function initCountly({
   maybeFluenceConfig,
 }: InitCountlyArgs): Promise<void> {
   const userCountlyDir = await getUserCountlyDir();
+  const userConfig = await initNewUserConfig();
 
   if (!IS_DEVELOPMENT && userConfig.countlyConsent) {
     const Countly = (await import("countly-sdk-nodejs")).default;

@@ -22,14 +22,12 @@ import { color } from "@oclif/color";
 import { setChainFlags } from "./chainFlags.js";
 import {
   commandObj,
-  isInteractive,
   setCommandObjAndIsInteractive,
   type CommandObj,
 } from "./commandObj.js";
-import { setEnvConfig, setUserConfig } from "./configs/globalConfigs.js";
-import { initEnvConfig, initNewEnvConfig } from "./configs/project/env.js";
+import { initNewEnvConfig } from "./configs/project/env/env.js";
 import { initFluenceConfig } from "./configs/project/fluence.js";
-import { initNewUserConfig, initUserConfig } from "./configs/user/config.js";
+import { initNewUserConfig } from "./configs/user/config/config.js";
 import {
   NODE_JS_MAJOR_VERSION,
   CLI_NAME_FULL,
@@ -50,34 +48,8 @@ import {
   setProjectRootDir,
   getProviderConfigPath,
 } from "./paths.js";
-import { confirm } from "./prompt.js";
 
 const NODE_JS_MAJOR_VERSION_STR = numToStr(NODE_JS_MAJOR_VERSION);
-
-const ensureUserConfig = async (): Promise<void> => {
-  const maybeUserConfig = await initUserConfig();
-  const isGeneratingNewUserConfig = maybeUserConfig === null;
-  const userConfig = maybeUserConfig ?? (await initNewUserConfig());
-
-  if (
-    isGeneratingNewUserConfig &&
-    isInteractive &&
-    (await confirm({
-      message: `Help me improve ${CLI_NAME_FULL} by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
-        "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data.",
-      )}\nOK?`,
-    }))
-  ) {
-    userConfig.countlyConsent = true;
-    await userConfig.$commit();
-
-    commandObj.logToStderr(
-      `If you change your mind later, modify "countlyConsent" property in ${userConfig.$getPath()}`,
-    );
-  }
-
-  setUserConfig(userConfig);
-};
 
 export async function initCli<
   T extends {
@@ -115,22 +87,16 @@ export async function initCli<
     );
   }
 
-  await ensureUserConfig();
+  await initNewUserConfig();
 
   if (requiresFluenceProject) {
-    setEnvConfig(await initNewEnvConfig());
+    await initNewEnvConfig();
   } else {
     try {
       // ensure env config also when provider.yaml exists
       await access(getProviderConfigPath());
-      setEnvConfig(await initNewEnvConfig());
-    } catch {
-      const envConfig = await initEnvConfig();
-
-      if (envConfig !== null) {
-        setEnvConfig(envConfig);
-      }
-    }
+      await initNewEnvConfig();
+    } catch {}
   }
 
   setChainFlags({

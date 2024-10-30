@@ -25,7 +25,7 @@ import {
   initNewReadonlyDockerComposeConfig,
   initReadonlyDockerComposeConfig,
 } from "../../lib/configs/project/dockerCompose.js";
-import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
+import { initNewProviderConfig } from "../../lib/configs/project/provider/provider.js";
 import {
   DOCKER_COMPOSE_FULL_FILE_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
@@ -42,7 +42,7 @@ export default class Init extends BaseCommand<typeof Init> {
   };
   async run(): Promise<void> {
     await initCli(this, await this.parse(Init));
-    await initNewReadonlyProviderConfig();
+    await initNewProviderConfig();
     const existingDockerCompose = await initReadonlyDockerComposeConfig();
 
     if (existingDockerCompose !== null) {

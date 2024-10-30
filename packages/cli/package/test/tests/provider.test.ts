@@ -21,8 +21,13 @@ import { join } from "node:path";
 import { describe } from "vitest";
 
 import { LOCAL_NET_DEFAULT_ACCOUNTS } from "../../src/common.js";
-import { initProviderConfigWithPath } from "../../src/lib/configs/project/provider.js";
-import { OFFER_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../../src/lib/const.js";
+import { getConfigInitFunction } from "../../src/lib/configs/initConfigNew.js";
+import { options as providerConfigOptions } from "../../src/lib/configs/project/provider/provider.js";
+import {
+  OFFER_FLAG_NAME,
+  PRIV_KEY_FLAG_NAME,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+} from "../../src/lib/const.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
@@ -33,6 +38,15 @@ import { sleepSeconds, wrappedTest } from "../helpers/utils.js";
 const PRIV_KEY_1 = {
   [PRIV_KEY_FLAG_NAME]: LOCAL_NET_DEFAULT_ACCOUNTS[1].privateKey,
 };
+
+async function initProviderConfigWithPath(path: string) {
+  return getConfigInitFunction({
+    ...providerConfigOptions,
+    getConfigPath() {
+      return join(path, PROVIDER_CONFIG_FULL_FILE_NAME);
+    },
+  })();
+}
 
 describe("provider tests", () => {
   wrappedTest(

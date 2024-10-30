@@ -25,7 +25,6 @@ import { resolveDefaultRelays } from "../../lib/multiaddres.js";
 export default class Peers extends BaseCommand<typeof Peers> {
   static override description = "Print default Fluence network peer addresses";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {};
   static override args = {
     ...ENV_ARG,
   };

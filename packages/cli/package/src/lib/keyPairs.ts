@@ -21,13 +21,15 @@ import { join, parse, relative } from "node:path";
 import { color } from "@oclif/color";
 
 import { commandObj, isInteractive } from "./commandObj.js";
-import { userConfig } from "./configs/globalConfigs.js";
 import {
   initFluenceConfig,
   initReadonlyFluenceConfig,
   type FluenceConfig,
 } from "./configs/project/fluence.js";
-import type { UserConfig } from "./configs/user/config.js";
+import {
+  initNewUserConfig,
+  type UserConfig,
+} from "./configs/user/config/config.js";
 import { FS_OPTIONS } from "./const.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { bufferToBase64 } from "./helpers/typesafeStringify.js";
@@ -46,14 +48,14 @@ type UpdateSecretKeyArg = {
   isUser: boolean;
 };
 
-async function resolveUserOrProjectConfig(
+export async function resolveUserOrProjectConfig(
   isUser: boolean,
 ): Promise<UserConfig | FluenceConfig> {
-  const fluenceConfig = await initFluenceConfig();
-
   if (isUser) {
-    return userConfig;
+    return initNewUserConfig();
   }
+
+  const fluenceConfig = await initFluenceConfig();
 
   if (fluenceConfig !== null) {
     return fluenceConfig;
@@ -80,10 +82,12 @@ export async function writeSecretKey({
 export async function createSecretKey({
   name,
   isUser,
+  userOrProjectConfig,
   askToSetKeyAsDefaultInteractively = true,
-}: UpdateSecretKeyArg & { askToSetKeyAsDefaultInteractively?: boolean }) {
-  const userOrProjectConfig = await resolveUserOrProjectConfig(isUser);
-
+}: UpdateSecretKeyArg & {
+  askToSetKeyAsDefaultInteractively?: boolean;
+  userOrProjectConfig: UserConfig | FluenceConfig;
+}) {
   const secretsPath = await getSecretsPathForWriting(isUser);
   const secrets = await getSecretKeys(isUser);
 
@@ -307,7 +311,9 @@ export async function getUserSecretKey(
   secretKeyName: string | undefined,
 ): Promise<string | undefined> {
   const userSecrets = await getUserSecretKeys();
-  return userSecrets[secretKeyName ?? userConfig.defaultSecretKeyName];
+  return userSecrets[
+    secretKeyName ?? (await initNewUserConfig()).defaultSecretKeyName
+  ];
 }
 
 export async function getProjectSecretKey(

@@ -28,12 +28,11 @@ import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { setChainFlags } from "../../lib/chainFlags.js";
-import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
 import {
   initNewReadonlyDockerComposeConfig,
   dockerComposeDirPath,
 } from "../../lib/configs/project/dockerCompose.js";
-import { initNewEnvConfig } from "../../lib/configs/project/env.js";
+import { initNewEnvConfig } from "../../lib/configs/project/env/env.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
@@ -50,7 +49,6 @@ import {
 } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
-import { stringifyUnknown } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Up extends BaseCommand<typeof Up> {
@@ -97,18 +95,9 @@ export default class Up extends BaseCommand<typeof Up> {
 
   async run(): Promise<void> {
     const env: FluenceEnv = "local";
-
-    try {
-      const envConfig = await initNewEnvConfig(env);
-      envConfig.fluenceEnv = env;
-      await envConfig.$commit();
-      setEnvConfig(envConfig);
-    } catch (e) {
-      this.error(
-        `Make sure to init fluence project first. Error: ${stringifyUnknown(e)}`,
-      );
-    }
-
+    const envConfig = await initNewEnvConfig(env);
+    envConfig.fluenceEnv = env;
+    await envConfig.$commit();
     const { flags } = await initCli(this, await this.parse(Up));
 
     setChainFlags({
@@ -180,7 +169,7 @@ export default class Up extends BaseCommand<typeof Up> {
     await distributeToNox({ ...flags, ...allOffers, amount: "10" });
     await registerProvider();
     await createOffers({ force: true, ...allOffers });
-    await createCommitments({ ...flags, ...allOffers, env });
+    await createCommitments({ ...flags, ...allOffers });
     await depositCollateral(allOffers);
   }
 }

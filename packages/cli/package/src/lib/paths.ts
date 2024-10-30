@@ -61,6 +61,8 @@ import {
   CCP_CONFIGS_DIR_NAME,
   SERVICE_CONFIGS_DIR_NAME,
   BACKUPS_DIR_NAME,
+  ENV_CONFIG_FULL_FILE_NAME,
+  USER_CONFIG_FULL_FILE_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -95,6 +97,10 @@ export const ensureUserFluenceDir = (): Promise<string> => {
 
   return ensureDir(join(homedir(), DOT_FLUENCE_DIR_NAME));
 };
+
+export async function getUserConfigPath(): Promise<string> {
+  return join(await ensureUserFluenceDir(), USER_CONFIG_FULL_FILE_NAME);
+}
 
 export const getUserCountlyDir = async (): Promise<string> => {
   return join(await ensureUserFluenceDir(), COUNTLY_DIR_NAME, COUNTLY_DIR_NAME);
@@ -204,6 +210,10 @@ export const getREADMEPath = (): string => {
 export const getFluenceDir = (cwd?: string): string => {
   return join(cwd ?? projectRootDir, DOT_FLUENCE_DIR_NAME);
 };
+
+export function getEnvConfigPath(): string {
+  return join(getFluenceDir(), ENV_CONFIG_FULL_FILE_NAME);
+}
 
 const ensureFluenceDir = async (): Promise<string> => {
   return ensureDir(getFluenceDir());

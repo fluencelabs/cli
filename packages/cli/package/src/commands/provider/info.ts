@@ -21,7 +21,7 @@ import { BaseCommand } from "../../baseCommand.js";
 import { jsonStringify } from "../../common.js";
 import { getProviderInfo } from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initNewProviderArtifactsConfig } from "../../lib/configs/project/providerArtifacts.js";
+import { initNewProviderArtifactsConfig } from "../../lib/configs/project/providerArtifacts/providerArtifacts.js";
 import {
   NOX_NAMES_FLAG,
   CHAIN_FLAGS,

@@ -24,7 +24,7 @@ import { Flags } from "@oclif/core";
 import { BaseCommand } from "../../baseCommand.js";
 import { withdrawFromNox } from "../../lib/chain/distributeToNox.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ensureComputerPeerConfigs } from "../../lib/configs/project/provider.js";
+import { ensureComputerPeerConfigs } from "../../lib/configs/project/provider/provider.js";
 import {
   CHAIN_FLAGS,
   PROVIDER_CONFIG_FULL_FILE_NAME,

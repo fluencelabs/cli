@@ -16,7 +16,7 @@
  */
 
 import { commandObj } from "../commandObj.js";
-import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
+import { ensureReadonlyProviderConfig } from "../configs/project/provider/provider.js";
 import { CLI_NAME } from "../const.js";
 import { getContracts, sign, getSignerAddress } from "../dealClient.js";
 

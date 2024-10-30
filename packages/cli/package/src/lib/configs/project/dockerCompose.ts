@@ -52,7 +52,10 @@ import {
 } from "../initConfig.js";
 
 import schema from "./compose.schema.json" with { type: "json" };
-import { ensureComputerPeerConfigs, getConfigTomlName } from "./provider.js";
+import {
+  ensureComputerPeerConfigs,
+  getConfigTomlName,
+} from "./provider/provider.js";
 
 type Service = {
   image?: string;
