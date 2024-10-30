@@ -7,7 +7,7 @@ Defines secrets config used for provider set up
 | Property  | Type             | Required | Description                   |
 |-----------|------------------|----------|-------------------------------|
 | `noxes`   | [object](#noxes) | **Yes**  | Secret keys for noxes by name |
-| `version` | integer          | **Yes**  | Config version                |
+| `version` | integer          | **Yes**  |                               |
 
 ## noxes
 

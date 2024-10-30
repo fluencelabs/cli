@@ -1,6 +1,6 @@
 # env.yaml
 
-Defines user project preferences
+Defines project user's preferences
 
 ## Properties
 

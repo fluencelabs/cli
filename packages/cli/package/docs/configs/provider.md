@@ -6,25 +6,25 @@ Defines config used for provider set up
 
 | Property              | Type                           | Required | Description                                                                                     |
 |-----------------------|--------------------------------|----------|-------------------------------------------------------------------------------------------------|
-| `capacityCommitments` | [object](#capacitycommitments) | **Yes**  | A map with nox names as keys and capacity commitments as values                                 |
+| `capacityCommitments` | [object](#capacitycommitments) | **Yes**  | Capacity commitments                                                                            |
 | `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peers as values                               |
 | `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offers as values                                             |
 | `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                                                |
-| `version`             | integer                        | **Yes**  | Config version                                                                                  |
+| `version`             | integer                        | **Yes**  |                                                                                                 |
 | `ccp`                 | [object](#ccp)                 | No       | Configuration to pass to the Capacity Commitment Prover                                         |
 | `nox`                 | [object](#nox)                 | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
 
 ## capacityCommitments
 
-A map with nox names as keys and capacity commitments as values
+Capacity commitments
 
 ### Properties
 
-| Property  | Type               | Required | Description                   |
-|-----------|--------------------|----------|-------------------------------|
-| `noxName` | [object](#noxname) | No       | Defines a capacity commitment |
+| Property         | Type                      | Required | Description                   |
+|------------------|---------------------------|----------|-------------------------------|
+| `commitmentName` | [object](#commitmentname) | No       | Defines a capacity commitment |
 
-### noxName
+### commitmentName
 
 Defines a capacity commitment
 
