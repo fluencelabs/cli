@@ -103,6 +103,7 @@
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
+    "@aws-sdk/lib-storage": "^3.501.0",
     "@tsconfig/node22": "^22.0.0",
     "@tsconfig/strictest": "^2.0.5",
     "@types/debug": "4.1.12",
@@ -123,7 +124,7 @@
     "globby": "14",
     "madge": "8.0.0",
     "npm-check-updates": "17.1.4",
-    "oclif": "patch:oclif@npm%3A4.15.9#~/.yarn/patches/oclif-npm-4.15.9-f51cd140c1.patch",
+    "oclif": "patch:oclif@patch%3Aoclif@npm%253A4.15.9%23~/.yarn/patches/oclif-npm-4.15.9-f51cd140c1.patch%3A%3Aversion=4.15.9&hash=ce7fb7#~/.yarn/patches/oclif-patch-c5b232dd7e.patch",
     "proper-lockfile": "4.1.2",
     "shx": "0.3.4",
     "ts-prune": "0.10.3",
@@ -182,6 +183,7 @@
     },
     "update": {
       "s3": {
+        "host": "https://s3.console.aws.amazon.com/",
         "bucket": "fcli-binaries",
         "xz": false
       }
