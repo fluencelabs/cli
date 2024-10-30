@@ -341,7 +341,7 @@ const getInitConfigOptions = (
 
 export const initReadonlyModuleConfig = async (
   configOrConfigDirPathOrUrl: string,
-  absolutePath?: string | undefined,
+  absolutePath?: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import {
   resolveCreatedOffers,
   getOffersInfo,
@@ -29,7 +29,6 @@ export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
   static override aliases = ["provider:oi"];
   static override description = "Get info about offers";
   static override flags = {
-    ...baseFlags,
     ...OFFER_FLAGS,
     ...CHAIN_FLAGS,
   };

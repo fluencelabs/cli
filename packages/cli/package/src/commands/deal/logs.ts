@@ -18,7 +18,7 @@
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { Get_logs_dealParams } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import {
@@ -51,7 +51,6 @@ export default class Logs extends BaseCommand<typeof Logs> {
   static override description = `Get logs from deployed workers for deals listed in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...FLUENCE_CLIENT_FLAGS,
     ...OFF_AQUA_LOGS_FLAG,
     ...TRACING_FLAG,

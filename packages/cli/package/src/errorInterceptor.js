@@ -19,7 +19,7 @@ import assert from "node:assert";
 
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { color } from "@oclif/color";
-import { CLIError } from "@oclif/core/lib/errors/index.js";
+import { CLIError } from "@oclif/core/errors";
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
@@ -235,7 +235,7 @@ export function setUpProcessWarningListener() {
     });
 
     if (!isWarnMsgToIgnore) {
-      process.stderr.write(`Warning: ${warning.message}\n`);
+      process.stderr.write(`${JSON.stringify(warning, null, 2)}\n\n`);
     }
   });
 }

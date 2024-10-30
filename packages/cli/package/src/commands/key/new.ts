@@ -17,7 +17,7 @@
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import {
   PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
@@ -29,7 +29,6 @@ export default class New extends BaseCommand<typeof New> {
   static override description = `Generate key-pair and store it in ${USER_SECRETS_CONFIG_FULL_FILE_NAME} or ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     user: Flags.boolean({
       default: false,
       description:
@@ -46,15 +45,7 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(New),
-    );
-
-    await createSecretKey({
-      isUser: flags.user,
-      name: args.name,
-      maybeFluenceConfig,
-    });
+    const { args, flags } = await initCli(this, await this.parse(New));
+    await createSecretKey({ isUser: flags.user, name: args.name });
   }
 }

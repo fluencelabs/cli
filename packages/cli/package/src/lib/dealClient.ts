@@ -338,12 +338,12 @@ async function doSign<
 
   const debugInfo =
     method.name === "multicall"
-      ? batchTxMessage ??
+      ? (batchTxMessage ??
         (() => {
           throw new Error(
             "Unreachable. batchTxMessage is supposed to be set up when creating multicall",
           );
-        })()
+        })())
       : methodCallToString([method, ...args]);
 
   dbg(

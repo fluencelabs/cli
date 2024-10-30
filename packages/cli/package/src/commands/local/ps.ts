@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
@@ -29,7 +29,6 @@ export default class PS extends BaseCommand<typeof PS> {
   static override description = `List containers using docker compose`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...DOCKER_COMPOSE_FLAGS,
   };
   async run(): Promise<void> {

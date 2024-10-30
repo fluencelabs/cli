@@ -20,7 +20,7 @@ import { cwd } from "node:process";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   isFluenceConfigWithServices,
@@ -28,6 +28,7 @@ import {
 } from "../../lib/configs/project/fluence.js";
 import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../../lib/const.js";
 import { getServiceAbsolutePath } from "../../lib/helpers/downloadFile.js";
+import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { removeProperties } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { projectRootDir } from "../../lib/paths.js";
@@ -38,20 +39,15 @@ const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove service from ${FLUENCE_CONFIG_FULL_FILE_NAME} services property and from all of the workers`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {
-    ...baseFlags,
-  };
+  static override flags = {};
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
       description: `Service name from ${FLUENCE_CONFIG_FULL_FILE_NAME}, path to a service or url to .tar.gz archive`,
     }),
   };
   async run(): Promise<void> {
-    const { args, fluenceConfig } = await initCli(
-      this,
-      await this.parse(Remove),
-      true,
-    );
+    const { args } = await initCli(this, await this.parse(Remove), true);
+    const fluenceConfig = await ensureFluenceProject();
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??

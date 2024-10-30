@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { jsonStringify } from "../../common.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { getAquaImports } from "../../lib/helpers/aquaImports.js";
@@ -24,16 +24,10 @@ import { initCli } from "../../lib/lifeCycle.js";
 export default class Json extends BaseCommand<typeof Json> {
   static override description =
     "Returns a list of aqua imports that CLI produces";
-  static override flags = {
-    ...baseFlags,
-  };
+  static override flags = {};
 
   async run(): Promise<void> {
-    const { maybeFluenceConfig: fluenceConfig } = await initCli(
-      this,
-      await this.parse(Json),
-    );
-
-    commandObj.log(jsonStringify(await getAquaImports({ fluenceConfig })));
+    await initCli(this, await this.parse(Json));
+    commandObj.log(jsonStringify(await getAquaImports()));
   }
 }

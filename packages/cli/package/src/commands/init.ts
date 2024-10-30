@@ -17,7 +17,7 @@
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../baseCommand.js";
+import { BaseCommand } from "../baseCommand.js";
 import { TEMPLATES, ENV_FLAG, NOXES_FLAG } from "../lib/const.js";
 import { ensureTemplate, init } from "../lib/init.js";
 import { initCli } from "../lib/lifeCycle.js";
@@ -26,7 +26,6 @@ export default class Init extends BaseCommand<typeof Init> {
   static override description = "Initialize fluence project";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     template: Flags.string({
       description: `Template to use for the project. One of: ${TEMPLATES.join(
         ", ",

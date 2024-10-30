@@ -18,7 +18,7 @@
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
@@ -35,7 +35,6 @@ export default class WorkersRemove extends BaseCommand<typeof WorkersRemove> {
   static override aliases = ["deal:wr"];
   static override description = "Remove unit from the deal";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     "deal-id": Flags.string({
       description: `Deal id. You can get it using '${CLI_NAME} deal info' command`,

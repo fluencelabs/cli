@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { collateralRewardWithdraw } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -26,7 +26,6 @@ export default class CCRewardsWithdraw extends BaseCommand<
   static override aliases = ["provider:crw"];
   static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitments`;
   static override flags = {
-    ...baseFlags,
     ...CC_FLAGS,
     ...CHAIN_FLAGS,
   };

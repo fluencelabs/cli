@@ -1,4 +1,4 @@
-#!/usr/bin/env -S node --no-warnings --loader ts-node/esm/transpile-only
+#!/usr/bin/env -S node --no-warnings --import tsx
 
 /**
  * Fluence CLI
@@ -26,7 +26,7 @@ import {
 
 setUpProcessWarningListener();
 
-// In dev mode -> use ts-node and dev plugins
+// In dev mode -> use tsx and dev plugins
 process.env.NODE_ENV = "development";
 // In dev mode, always show stack traces
 oclif.settings.debug = true;

@@ -17,7 +17,7 @@
 
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { PACKAGE_NAME } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -28,9 +28,7 @@ export default class Install extends BaseCommand<typeof Install> {
   static override description =
     "Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {
-    ...baseFlags,
-  };
+  static override flags = {};
   static override args = {
     [PACKAGE_NAME]: Args.string({
       description: `Aqua dependency name`,
@@ -39,17 +37,8 @@ export default class Install extends BaseCommand<typeof Install> {
   };
 
   async run(): Promise<void> {
-    const { args, fluenceConfig } = await initCli(
-      this,
-      await this.parse(Install),
-      true,
-    );
-
-    await npmUninstall({
-      packageName: args[PACKAGE_NAME],
-      fluenceConfig,
-    });
-
+    const { args } = await initCli(this, await this.parse(Install), true);
+    await npmUninstall(args[PACKAGE_NAME]);
     commandObj.logToStderr(`Uninstalled ${args[PACKAGE_NAME]} successfully`);
   }
 }

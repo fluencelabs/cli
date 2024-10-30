@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Command, Flags, Interfaces } from "@oclif/core";
+import { Command, type Interfaces } from "@oclif/core";
 
 import { NO_INPUT_FLAG } from "./lib/const.js";
 import { exitCli } from "./lib/lifeCycle.js";
@@ -24,16 +24,15 @@ type Flags<T extends typeof Command> = Interfaces.InferredFlags<
   (typeof BaseCommand)["baseFlags"] & T["flags"]
 >;
 type Args<T extends typeof Command> = Interfaces.InferredArgs<T["args"]>;
-/**
- * As of Feb 3 2023 for some reason oclif's baseFlags are not working so we have to do this explicitly
- */
-export const baseFlags = {
+
+const baseFlags = {
   ...NO_INPUT_FLAG,
 };
 
 export abstract class BaseCommand<T extends typeof Command> extends Command {
   protected flags!: Flags<T>;
   protected args!: Args<T>;
+  static override baseFlags = baseFlags;
 
   protected override async finally(
     maybeError: Error | undefined,

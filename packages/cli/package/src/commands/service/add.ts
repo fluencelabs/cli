@@ -20,7 +20,7 @@ import { cwd } from "node:process";
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { ensureValidServiceName, addService } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
@@ -42,7 +42,6 @@ export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add service to ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     name: Flags.string({
       description: `Override service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
@@ -55,11 +54,7 @@ export default class Add extends BaseCommand<typeof Add> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, fluenceConfig } = await initCli(
-      this,
-      await this.parse(Add),
-      true,
-    );
+    const { args, flags } = await initCli(this, await this.parse(Add), true);
 
     const serviceOrServiceDirPathOrUrl =
       args[PATH_OR_URL] ??
@@ -77,7 +72,6 @@ export default class Add extends BaseCommand<typeof Add> {
     }
 
     const serviceName = await ensureValidServiceName(
-      fluenceConfig,
       flags.name ?? serviceConfig.name,
     );
 
@@ -86,7 +80,6 @@ export default class Add extends BaseCommand<typeof Add> {
     await addService({
       serviceName,
       absolutePathOrUrl: resolveServicePathOrUrl(serviceOrServiceDirPathOrUrl),
-      fluenceConfig,
       marineCli,
       marineBuildArgs: flags["marine-build-args"],
     });

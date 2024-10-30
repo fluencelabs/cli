@@ -17,7 +17,7 @@
 
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import {
   CHAIN_FLAGS,
@@ -33,7 +33,6 @@ export default class TokensDistribute extends BaseCommand<
   static override aliases = ["provider:td"];
   static override description = `Distribute ${FLT_SYMBOL} tokens to noxes`;
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
     ...OFFER_FLAG,

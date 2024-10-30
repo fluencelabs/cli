@@ -17,7 +17,7 @@
 
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { getProviderDeals } from "../../lib/chain/deals.js";
 import {
   CHAIN_FLAGS,
@@ -38,7 +38,6 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
   static override aliases = ["provider:de"];
   static override description = "Exit from deal";
   static override flags = {
-    ...baseFlags,
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
     all: Flags.boolean({

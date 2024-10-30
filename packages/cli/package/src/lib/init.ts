@@ -65,7 +65,7 @@ import {
   ensureDir,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
-import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
+import CLIPackageJSON from "../versions/cli.package.json" with { type: "json" };
 
 import { addService } from "./addService.js";
 import { compileToFiles } from "./aqua.js";
@@ -77,7 +77,6 @@ import {
   initNewReadonlyProviderConfig,
 } from "./configs/project/provider.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
-import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
 import {
   COMPILE_AQUA_PROPERTY_NAME,
   SERVICE_INTERFACE_FILE_HEADER,
@@ -86,6 +85,7 @@ import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
+import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { initMarineCli } from "./marineCli.js";
 import { updateRelaysJSON } from "./multiaddres.js";
 import { copyDefaultDependencies } from "./npm.js";
@@ -200,9 +200,8 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     FS_OPTIONS,
   );
 
-  const workersConfig = await initNewWorkersConfigReadonly();
   const { ensureAquaFileWithWorkerInfo } = await import("./deployWorkers.js");
-  await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig, fluenceEnv);
+  await ensureAquaFileWithWorkerInfo();
   await writeFile(getREADMEPath(), READMEs[template], FS_OPTIONS);
 
   switch (template) {
@@ -224,21 +223,21 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
 
     case "quickstart": {
       await quickstart();
-      await initTSorJSGatewayProject({ isJS: true, fluenceConfig });
+      await initTSorJSGatewayProject(true);
       break;
     }
 
     case "js": {
       await quickstart();
-      await initTSorJSProject({ isJS: true, fluenceConfig });
-      await initTSorJSGatewayProject({ isJS: true, fluenceConfig });
+      await initTSorJSProject(true);
+      await initTSorJSGatewayProject(true);
       break;
     }
 
     case "ts": {
       await quickstart();
-      await initTSorJSProject({ isJS: false, fluenceConfig });
-      await initTSorJSGatewayProject({ isJS: false, fluenceConfig });
+      await initTSorJSProject(false);
+      await initTSorJSGatewayProject(false);
       break;
     }
   }
@@ -257,7 +256,6 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
 
     await addService({
       serviceName,
-      fluenceConfig,
       marineCli: await initMarineCli(),
       absolutePathOrUrl: absoluteServicePath,
       isATemplateInitStep: true,
@@ -290,29 +288,18 @@ const shouldInit = async (projectPath: string): Promise<boolean> => {
   );
 };
 
-type InitTSorJSProjectArg = {
-  isJS: boolean;
-  fluenceConfig: FluenceConfig;
-};
-
 const convertPathToModuleImport = (path: string) => {
   return path.split(sep).join(posixSep);
 };
 
-async function initTSorJSProject({
-  isJS,
-  fluenceConfig,
-}: InitTSorJSProjectArg): Promise<void> {
+async function initTSorJSProject(isJS: boolean): Promise<void> {
   const frontendCompiledAquaPath = await ensureFrontendCompiledAquaPath();
   const indexFilePath = getFrontendIndexTSorJSPath(isJS);
   const packageJSONPath = getFrontendPackageJSONPath();
   const frontendSrcPath = getFrontendSrcPath();
   const aquaDir = await ensureAquaDir();
-
-  addRelayPathEntryToConfig(
-    fluenceConfig,
-    relative(projectRootDir, frontendSrcPath),
-  );
+  await addRelayPathEntryToConfig(relative(projectRootDir, frontendSrcPath));
+  const fluenceConfig = await ensureFluenceProject();
 
   fluenceConfig[COMPILE_AQUA_PROPERTY_NAME] = {
     ...fluenceConfig[COMPILE_AQUA_PROPERTY_NAME],
@@ -341,35 +328,22 @@ async function initTSorJSProject({
         ),
     compileToFiles({
       filePath: aquaDir,
-      imports: await getAquaImports({
-        fluenceConfig: fluenceConfig,
-      }),
+      imports: await getAquaImports(),
       targetType: isJS ? "js" : "ts",
       outputPathAbsolute: frontendCompiledAquaPath,
     }),
   ]);
 }
 
-type InitTSorJSGatewayProjectArg = {
-  isJS: boolean;
-  fluenceConfig: FluenceConfig;
-};
-
-async function initTSorJSGatewayProject({
-  isJS,
-  fluenceConfig,
-}: InitTSorJSGatewayProjectArg): Promise<void> {
+async function initTSorJSGatewayProject(isJS: boolean): Promise<void> {
   const gatewayCompiledAquaPath = await ensureGatewayCompiledAquaPath();
   const packageJSONPath = getGatewayPackageJSONPath();
   const gatewaySrcPath = getGatewaySrcPath();
   const gatewayReadmePath = join(getGatewayPath(), README_MD_FILE_NAME);
   const aquaDir = await ensureAquaDir();
   const ext = isJS ? "js" : "ts";
-
-  addRelayPathEntryToConfig(
-    fluenceConfig,
-    relative(projectRootDir, gatewaySrcPath),
-  );
+  await addRelayPathEntryToConfig(relative(projectRootDir, gatewaySrcPath));
+  const fluenceConfig = await ensureFluenceProject();
 
   fluenceConfig[COMPILE_AQUA_PROPERTY_NAME] = {
     ...fluenceConfig[COMPILE_AQUA_PROPERTY_NAME],
@@ -422,7 +396,7 @@ async function initTSorJSGatewayProject({
         ),
     compileToFiles({
       filePath: aquaDir,
-      imports: await getAquaImports({ fluenceConfig }),
+      imports: await getAquaImports(),
       targetType: ext,
       outputPathAbsolute: gatewayCompiledAquaPath,
     }),
@@ -453,7 +427,7 @@ function getIndexHTMLContent(isJS: boolean) {
 
 function getFrontendIndexJsContent(isJS: boolean) {
   return `import { Fluence } from "@fluencelabs/js-client";
-import relays from "./relays.json" assert { type: "json" };
+import relays from "./relays.json" with { type: "json" };
 import {
   helloWorld,
   helloWorldRemote,
@@ -569,7 +543,7 @@ function stringifyError(e${isJS ? "" : ": unknown"}) {
 
 function getGatewayIndexJsContent(isJS: boolean) {
   return `import { Fluence, KeyPair } from "@fluencelabs/js-client";
-import relays from "../relays.json" assert { type: "json" };
+import relays from "../relays.json" with { type: "json" };
 import { ${isJS ? "" : "type Static, "}Type } from "@sinclair/typebox";
 ${isJS ? "" : 'import { type FastifyInstance } from "fastify";'}
 
@@ -929,7 +903,9 @@ To run \`showSubnet\` and \`runDeployedServices\` successfully, it is required t
 > Remember to replace hardcoded token and peer private key. You can achieve that by placing these credentials in env variables, for example.
 `;
 
-function addRelayPathEntryToConfig(fluenceConfig: FluenceConfig, path: string) {
+async function addRelayPathEntryToConfig(path: string) {
+  const fluenceConfig = await ensureFluenceProject();
+
   if (fluenceConfig.relaysPath === undefined) {
     fluenceConfig.relaysPath = [path];
   } else if (typeof fluenceConfig.relaysPath === "string") {

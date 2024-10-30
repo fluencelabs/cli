@@ -18,10 +18,11 @@
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { FLUENCE_CONFIG_FULL_FILE_NAME, IMPORT_FLAG } from "../../lib/const.js";
 import { compileSpells } from "../../lib/deployWorkers.js";
+import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -30,7 +31,6 @@ export default class Build extends BaseCommand<typeof Build> {
     "Check spells aqua is able to compile without any errors";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...baseFlags,
     ...IMPORT_FLAG,
   };
   static override args = {
@@ -39,17 +39,14 @@ export default class Build extends BaseCommand<typeof Build> {
     }),
   };
   async run(): Promise<void> {
-    const { args, fluenceConfig, flags } = await initCli(
-      this,
-      await this.parse(Build),
-      true,
-    );
+    const { args, flags } = await initCli(this, await this.parse(Build), true);
+    const fluenceConfig = await ensureFluenceProject();
 
     const spellNames = commaSepStrToArr(
       args["SPELL-NAMES"] ?? Object.keys(fluenceConfig.spells ?? {}).join(","),
     );
 
-    await compileSpells(fluenceConfig, flags.import, spellNames);
+    await compileSpells(flags.import, spellNames);
 
     commandObj.log(
       `Compiled ${color.yellow(spellNames.join(", "))} successfully`,

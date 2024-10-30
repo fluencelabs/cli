@@ -19,7 +19,7 @@ import { access } from "node:fs/promises";
 
 import type { GatherImportsResult } from "@fluencelabs/npm-aqua-compiler";
 
-import type { FluenceConfigReadonly } from "../configs/project/fluence.js";
+import { initFluenceConfig } from "../configs/project/fluence.js";
 import { builtInAquaDependenciesDirPath } from "../npm.js";
 import {
   getFluenceAquaDir,
@@ -27,15 +27,10 @@ import {
   projectRootDir,
 } from "../paths.js";
 
-type GetAquaImportsArg = {
-  fluenceConfig: FluenceConfigReadonly | null;
-  aquaImportsFromFlags?: string[] | undefined;
-};
-
-export async function getAquaImports({
-  aquaImportsFromFlags,
-  fluenceConfig = null,
-}: GetAquaImportsArg): Promise<GatherImportsResult> {
+export async function getAquaImports(
+  aquaImportsFromFlags?: string[],
+): Promise<GatherImportsResult> {
+  const fluenceConfig = await initFluenceConfig();
   const fluenceAquaDirPath = getFluenceAquaDir();
 
   const globalImports = [

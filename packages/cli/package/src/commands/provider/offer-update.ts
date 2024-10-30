@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { BaseCommand } from "../../baseCommand.js";
 import { updateOffers } from "../../lib/chain/offer/updateOffers.js";
 import { CHAIN_FLAGS, OFFER_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -24,7 +24,6 @@ export default class OfferUpdate extends BaseCommand<typeof OfferUpdate> {
   static override aliases = ["provider:ou"];
   static override description = "Update offers";
   static override flags = {
-    ...baseFlags,
     ...OFFER_FLAG,
     ...CHAIN_FLAGS,
   };
