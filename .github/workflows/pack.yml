@@ -174,12 +174,12 @@ jobs:
       - name: Promote fluence-cli
         if: inputs.channel != 'null' && inputs.platform != 'win32-x64'
         working-directory: packages/cli/package
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../../../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
       - name: Promote fluence-cli windows
         if: inputs.channel != 'null' && inputs.platform == 'win32-x64'
         working-directory: packages/cli/package
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../../../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --win --indexes
 
       - name: Rename archive
         if: inputs.platform != 'win32-x64'
@@ -220,9 +220,9 @@ jobs:
       - name: Promote fluence-cli to unstable
         if: inputs.tag != 'null' && inputs.platform != 'win32-x64'
         working-directory: packages/cli/package
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --no-xz --indexes
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../../../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --no-xz --indexes
 
       - name: Promote fluence-cli windows to unstable
         if: inputs.tag != 'null' && inputs.platform == 'win32-x64'
         working-directory: packages/cli/package
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --win --no-xz --indexes
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r ../../../.github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --win --no-xz --indexes
