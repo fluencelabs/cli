@@ -19,7 +19,7 @@ import { color } from "@oclif/color";
 
 import { commandObj, isInteractive } from "../../../commandObj.js";
 import { CLI_NAME_FULL, AUTO_GENERATED } from "../../../const.js";
-import { createSecretKey, getUserSecretKey } from "../../../keyPairs.js";
+import { createSecretKey, getUserSecretKeys } from "../../../keyPairs.js";
 import { getUserConfigPath } from "../../../paths.js";
 import { confirm } from "../../../prompt.js";
 import { getConfigInitFunction } from "../../initConfigNew.js";
@@ -28,12 +28,10 @@ import { type InitConfigOptions } from "../../initConfigNewTypes.js";
 import configOptions0, { type Config as Config0 } from "./config0.js";
 import configOptions1, { type Config as Config1 } from "./config1.js";
 
-const getConfigPath = getUserConfigPath;
-
 export const options: InitConfigOptions<Config0, Config1> = {
   description: `Defines global config for ${CLI_NAME_FULL}`,
   options: [configOptions0, configOptions1],
-  getConfigPath,
+  getConfigPath: getUserConfigPath,
 };
 
 export async function initNewUserConfig() {
@@ -51,7 +49,7 @@ export async function initNewUserConfig() {
       countlyConsent = true;
 
       commandObj.logToStderr(
-        `If you change your mind later, modify "countlyConsent" property in ${await getConfigPath()}`,
+        `If you change your mind later, modify "countlyConsent" property in ${await options.getConfigPath()}`,
       );
     }
 
@@ -73,3 +71,11 @@ export async function initNewUserConfig() {
 }
 
 export type UserConfig = Awaited<ReturnType<typeof initNewUserConfig>>;
+
+export async function getUserSecretKey(
+  secretKeyName: string | undefined,
+): Promise<string | undefined> {
+  return (await getUserSecretKeys())[
+    secretKeyName ?? (await initNewUserConfig()).defaultSecretKeyName
+  ];
+}

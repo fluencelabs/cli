@@ -33,6 +33,7 @@ export let commandObj: CommandObj =
     error(msg: string): never {
       throw new CLIError(msg);
     },
+    config: {},
   } as CommandObj;
 export let isInteractive: boolean;
 

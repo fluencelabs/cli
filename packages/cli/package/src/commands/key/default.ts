@@ -18,8 +18,8 @@
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand.js";
-import { setDefaultSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { setDefaultSecretKey } from "../../lib/secretKeys.js";
 
 export default class Default extends BaseCommand<typeof Default> {
   static override description = "Set default key-pair for user or project";

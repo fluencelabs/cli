@@ -22,11 +22,9 @@ import {
   PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import {
-  createSecretKey,
-  resolveUserOrProjectConfig,
-} from "../../lib/keyPairs.js";
+import { createSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveUserOrProjectConfig } from "../../lib/secretKeys.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = `Generate key-pair and store it in ${USER_SECRETS_CONFIG_FULL_FILE_NAME} or ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}`;
