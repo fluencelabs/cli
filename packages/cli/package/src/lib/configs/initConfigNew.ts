@@ -228,25 +228,6 @@ export async function addTitleDescriptionAndVersionToSchemas<
   return options;
 }
 
-export function getLatestConfigOptions<
-  C0,
-  C1 = undefined,
-  C2 = undefined,
-  C3 = undefined,
-  C4 = undefined,
-  C5 = undefined,
-  C6 = undefined,
-  C7 = undefined,
-  C8 = undefined,
-  C9 = undefined,
->(arr: OptionsTuple<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>) {
-  // The latest config is always the last one in the array
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return arr[arr.length - 1] as unknown as ConfigOptionsWithoutMigrate<
-    GetLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>
-  >;
-}
-
 function getConfigValidator<Config>({
   actualConfigPath,
   configOptions: { schema, validate },
@@ -334,7 +315,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
       return null;
     }
 
-    const latestConfigOptions = getLatestConfigOptions(options);
+    const latestConfigOptions = options[options.length - 1];
     const { description } = latestConfigOptions.schema;
 
     assert(

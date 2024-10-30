@@ -20,7 +20,6 @@ import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { jsonStringify } from "./common.js";
-import { getLatestConfigOptions } from "./lib/configs/initConfigNew.js";
 import { addTitleDescriptionAndVersionToSchemas } from "./lib/configs/initConfigNew.js";
 import { options as envOptions } from "./lib/configs/project/env/env.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
@@ -55,27 +54,40 @@ import CLIPackageJSON from "./versions/cli.package.json";
 const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
 const DOCS_COMMANDS_PATH = join("docs", "commands", "README.md");
 
+function getLatestConfigOptionsSchema<
+  T extends { schema: { description?: string } },
+>(arr: T[]) {
+  const latestOptions = arr[arr.length - 1];
+
+  assert(
+    latestOptions !== undefined,
+    "Unreachable. There is always at least one element in the array",
+  );
+
+  return latestOptions.schema;
+}
+
 const configsInfo = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
-  [PROVIDER_CONFIG_FILE_NAME]: getLatestConfigOptions(
+  [PROVIDER_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
     await addTitleDescriptionAndVersionToSchemas(providerOptions),
-  ).schema,
-  [PROVIDER_SECRETS_CONFIG_FILE_NAME]: getLatestConfigOptions(
+  ),
+  [PROVIDER_SECRETS_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
     await addTitleDescriptionAndVersionToSchemas(providerSecretsOptions),
-  ).schema,
+  ),
   [MODULE_CONFIG_FILE_NAME]: moduleSchema,
   [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
   [SPELL_CONFIG_FILE_NAME]: spellSchema,
   [WORKERS_CONFIG_FILE_NAME]: workersSchema,
-  [USER_CONFIG_FILE_NAME]: getLatestConfigOptions(
+  [USER_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
     await addTitleDescriptionAndVersionToSchemas(userConfigOptions),
-  ).schema,
-  [ENV_CONFIG_FILE_NAME]: getLatestConfigOptions(
+  ),
+  [ENV_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
     await addTitleDescriptionAndVersionToSchemas(envOptions),
-  ).schema,
-  [PROVIDER_ARTIFACTS_CONFIG_FILE_NAME]: getLatestConfigOptions(
+  ),
+  [PROVIDER_ARTIFACTS_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
     await addTitleDescriptionAndVersionToSchemas(providerArtifactsOptions),
-  ).schema,
+  ),
 }).map(([filename, schema]) => {
   return {
     schemaPath: join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),

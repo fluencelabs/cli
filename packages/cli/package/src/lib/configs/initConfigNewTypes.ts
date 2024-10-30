@@ -70,86 +70,18 @@ export type GetLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9> =
       : C8
     : C9;
 
-export type OptionsTuple<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9> =
-  C9 extends undefined
-    ? C8 extends undefined
-      ? C7 extends undefined
-        ? C6 extends undefined
-          ? C5 extends undefined
-            ? C4 extends undefined
-              ? C3 extends undefined
-                ? C2 extends undefined
-                  ? C1 extends undefined
-                    ? [ConfigOptions<undefined, C0>]
-                    : [ConfigOptions<undefined, C0>, ConfigOptions<C0, C1>]
-                  : [
-                      ConfigOptions<undefined, C0>,
-                      ConfigOptions<C0, C1>,
-                      ConfigOptions<C1, C2>,
-                    ]
-                : [
-                    ConfigOptions<undefined, C0>,
-                    ConfigOptions<C0, C1>,
-                    ConfigOptions<C1, C2>,
-                    ConfigOptions<C2, C3>,
-                  ]
-              : [
-                  ConfigOptions<undefined, C0>,
-                  ConfigOptions<C0, C1>,
-                  ConfigOptions<C1, C2>,
-                  ConfigOptions<C2, C3>,
-                  ConfigOptions<C3, C4>,
-                ]
-            : [
-                ConfigOptions<undefined, C0>,
-                ConfigOptions<C0, C1>,
-                ConfigOptions<C1, C2>,
-                ConfigOptions<C2, C3>,
-                ConfigOptions<C3, C4>,
-                ConfigOptions<C4, C5>,
-              ]
-          : [
-              ConfigOptions<undefined, C0>,
-              ConfigOptions<C0, C1>,
-              ConfigOptions<C1, C2>,
-              ConfigOptions<C2, C3>,
-              ConfigOptions<C3, C4>,
-              ConfigOptions<C4, C5>,
-              ConfigOptions<C5, C6>,
-            ]
-        : [
-            ConfigOptions<undefined, C0>,
-            ConfigOptions<C0, C1>,
-            ConfigOptions<C1, C2>,
-            ConfigOptions<C2, C3>,
-            ConfigOptions<C3, C4>,
-            ConfigOptions<C4, C5>,
-            ConfigOptions<C5, C6>,
-            ConfigOptions<C6, C7>,
-          ]
-      : [
-          ConfigOptions<undefined, C0>,
-          ConfigOptions<C0, C1>,
-          ConfigOptions<C1, C2>,
-          ConfigOptions<C2, C3>,
-          ConfigOptions<C3, C4>,
-          ConfigOptions<C4, C5>,
-          ConfigOptions<C5, C6>,
-          ConfigOptions<C6, C7>,
-          ConfigOptions<C7, C8>,
-        ]
-    : [
-        ConfigOptions<undefined, C0>,
-        ConfigOptions<C0, C1>,
-        ConfigOptions<C1, C2>,
-        ConfigOptions<C2, C3>,
-        ConfigOptions<C3, C4>,
-        ConfigOptions<C4, C5>,
-        ConfigOptions<C5, C6>,
-        ConfigOptions<C6, C7>,
-        ConfigOptions<C7, C8>,
-        ConfigOptions<C8, C9>,
-      ];
+export type OptionsTuple<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9> = [
+  ConfigOptions<undefined, C0>,
+  ...(C1 extends undefined ? [] : ConfigOptions<C0, C1>[]),
+  ...(C2 extends undefined ? [] : ConfigOptions<C1, C2>[]),
+  ...(C3 extends undefined ? [] : ConfigOptions<C2, C3>[]),
+  ...(C4 extends undefined ? [] : ConfigOptions<C3, C4>[]),
+  ...(C5 extends undefined ? [] : ConfigOptions<C4, C5>[]),
+  ...(C6 extends undefined ? [] : ConfigOptions<C5, C6>[]),
+  ...(C7 extends undefined ? [] : ConfigOptions<C6, C7>[]),
+  ...(C8 extends undefined ? [] : ConfigOptions<C7, C8>[]),
+  ...(C9 extends undefined ? [] : ConfigOptions<C8, C9>[]),
+];
 
 export type InitConfigOptions<
   C0,
