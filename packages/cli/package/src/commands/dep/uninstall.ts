@@ -20,13 +20,13 @@ import { Args } from "@oclif/core";
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { PACKAGE_NAME } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { npmUninstall } from "../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
-  static override aliases = ["dep:un"];
-  static override description =
-    "Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)";
+  static override hiddenAliases = ["dep:un"];
+  static override description = `Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)${aliasesText.apply(this)}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override args = {
     [PACKAGE_NAME]: Args.string({

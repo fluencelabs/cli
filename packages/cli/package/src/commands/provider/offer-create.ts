@@ -18,12 +18,12 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { createOffers } from "../../lib/chain/offer/offer.js";
 import { OFFER_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
-  static override aliases = ["provider:oc"];
-  static override description =
-    "Create offers. You have to be registered as a provider to do that";
+  static override hiddenAliases = ["provider:oc"];
+  static override description = `Create offers. You have to be registered as a provider to do that${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...OFFER_FLAG,

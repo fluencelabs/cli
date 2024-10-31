@@ -17,15 +17,15 @@
 
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { npmInstallAll } from "../../lib/npm.js";
 import { versions } from "../../versions.js";
 
 export default class Reset extends BaseCommand<typeof Reset> {
-  static override aliases = ["dep:r"];
-  static override description =
-    "Reset all project dependencies to recommended versions";
+  static override hiddenAliases = ["dep:r"];
+  static override description = `Reset all project dependencies to recommended versions${aliasesText.apply(this)}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   async run(): Promise<void> {
     await initCli(this, await this.parse(Reset));

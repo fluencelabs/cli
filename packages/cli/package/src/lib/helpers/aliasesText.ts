@@ -15,21 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseCommand } from "../../baseCommand.js";
-import { registerProvider } from "../../lib/chain/providerInfo.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
-import { aliasesText } from "../../lib/helpers/aliasesText.js";
-import { initCli } from "../../lib/lifeCycle.js";
+import { CLI_NAME } from "../const.js";
 
-export default class Register extends BaseCommand<typeof Register> {
-  static override hiddenAliases = ["provider:r"];
-  static override description = `Register as a provider${aliasesText.apply(this)}`;
-  static override flags = {
-    ...CHAIN_FLAGS,
-  };
-
-  async run(): Promise<void> {
-    await initCli(this, await this.parse(Register));
-    await registerProvider();
+export function aliasesText(this: { hiddenAliases: string[] }) {
+  if (this.hiddenAliases.length === 0) {
+    return "";
   }
+
+  return `. Alias${this.hiddenAliases.length === 1 ? "" : "es"}: ${this.hiddenAliases
+    .map((alias) => {
+      return `${CLI_NAME} ${alias.split(":").join(" ")}`;
+    })
+    .join(", ")}`;
 }

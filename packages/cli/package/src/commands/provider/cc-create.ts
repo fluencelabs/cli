@@ -18,13 +18,14 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
 import { NOX_NAMES_FLAG, CHAIN_FLAGS, OFFER_FLAG } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CreateCommitment extends BaseCommand<
   typeof CreateCommitment
 > {
-  static override aliases = ["provider:cc"];
-  static override description = "Create Capacity commitment";
+  static override hiddenAliases = ["provider:cc"];
+  static override description = `Create Capacity commitment${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,

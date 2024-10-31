@@ -19,11 +19,12 @@ import { BaseCommand } from "../../baseCommand.js";
 import { getProviderDeals } from "../../lib/chain/deals.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class DealsList extends BaseCommand<typeof DealsList> {
-  static override aliases = ["provider:dl"];
-  static override description = "List all deals";
+  static override hiddenAliases = ["provider:dl"];
+  static override description = `List all deals${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
   };

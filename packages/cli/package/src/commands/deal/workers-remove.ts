@@ -27,13 +27,14 @@ import {
 } from "../../lib/const.js";
 import { getDeal } from "../../lib/deal.js";
 import { sign, getContracts } from "../../lib/dealClient.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class WorkersRemove extends BaseCommand<typeof WorkersRemove> {
-  static override aliases = ["deal:wr"];
-  static override description = "Remove unit from the deal";
+  static override hiddenAliases = ["deal:wr"];
+  static override description = `Remove unit from the deal${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     "deal-id": Flags.string({

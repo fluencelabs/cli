@@ -21,15 +21,15 @@ import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { PACKAGE_NAME_AND_VERSION_ARG_NAME } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { npmInstall, npmInstallAll } from "../../lib/npm.js";
 import { ensureMarineAndMreplDependencies } from "../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
-  static override aliases = ["dep:i"];
-  static override description =
-    "Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)";
+  static override hiddenAliases = ["dep:i"];
+  static override description = `Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)${aliasesText.apply(this)}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({

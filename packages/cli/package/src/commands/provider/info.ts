@@ -30,13 +30,14 @@ import {
   ADDRESS_FLAG_NAME,
   PRIV_KEY_FLAG_NAME,
 } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { resolveComputePeersByNames } from "../../lib/resolveComputePeersByNames.js";
 import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Info extends BaseCommand<typeof Info> {
-  static override aliases = ["provider:i"];
-  static override description = "Print nox signing wallets and peer ids";
+  static override hiddenAliases = ["provider:i"];
+  static override description = `Print nox signing wallets and peer ids${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,

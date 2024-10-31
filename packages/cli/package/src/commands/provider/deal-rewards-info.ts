@@ -23,14 +23,15 @@ import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
 import { getReadonlyContracts } from "../../lib/dealClient.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class DealRewardsInfo extends BaseCommand<
   typeof DealRewardsInfo
 > {
-  static override aliases = ["provider:dri"];
-  static override description = "Deal rewards info";
+  static override hiddenAliases = ["provider:dri"];
+  static override description = `Deal rewards info${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
   };
