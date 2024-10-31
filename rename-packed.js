@@ -49,7 +49,7 @@ if (
 }
 
 const { stdout: commitHash } = await promisify(exec)(
-  "git rev-parse --short=8 HEAD",
+  "git rev-parse --short=7 HEAD",
 );
 
 const common = `${cliPackageJSON.oclif.bin}-v${cliPackageJSON.version}`;
