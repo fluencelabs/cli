@@ -183,7 +183,7 @@
     },
     "update": {
       "s3": {
-        "host": "https://s3.console.aws.amazon.com/",
+        "host": "http://fcli-binaries.s3.eu-west-1.amazonaws.com/",
         "bucket": "fcli-binaries",
         "xz": false
       }
