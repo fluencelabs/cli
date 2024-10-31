@@ -44,23 +44,28 @@
     },
     "pack-ci": {
       "dependsOn": ["build"],
-      "outputs": ["package/dist/**"]
+      "outputs": ["package/dist/**"],
+      "cache": false
     },
     "pack-linux-x64": {
       "dependsOn": ["build"],
-      "outputs": ["package/dist/**"]
+      "outputs": ["package/dist/**"],
+      "cache": false
     },
     "pack-darwin-x64": {
       "dependsOn": ["build"],
-      "outputs": ["package/dist/**"]
+      "outputs": ["package/dist/**"],
+      "cache": false
     },
     "pack-darwin-arm64": {
       "dependsOn": ["build"],
-      "outputs": ["package/dist/**"]
+      "outputs": ["package/dist/**"],
+      "cache": false
     },
     "pack-win32-x64": {
       "dependsOn": ["build"],
-      "outputs": ["package/dist/**"]
+      "outputs": ["package/dist/**"],
+      "cache": false
     }
   }
 }
