@@ -16,7 +16,7 @@
  */
 
 import { rm } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname } from "node:path";
 
 import { Flags } from "@oclif/core";
 
@@ -28,17 +28,13 @@ import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { setChainFlags } from "../../lib/chainFlags.js";
-import {
-  initNewReadonlyDockerComposeConfig,
-  dockerComposeDirPath,
-} from "../../lib/configs/project/dockerCompose.js";
+import { ensureDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env/env.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   DOCKER_COMPOSE_FLAGS,
   OFFER_FLAG_NAME,
-  PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   ALL_FLAG_VALUE,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   NOXES_FLAG,
@@ -50,6 +46,10 @@ import {
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import {
+  ensureDockerComposeConfigPath,
+  ensureProviderArtifactsConfigPath,
+} from "../../lib/paths.js";
 
 export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using all the offers from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} config using default wallet key ${LOCAL_NET_DEFAULT_WALLET_KEY}`;
@@ -105,29 +105,25 @@ export default class Up extends BaseCommand<typeof Up> {
       [PRIV_KEY_FLAG_NAME]: LOCAL_NET_DEFAULT_WALLET_KEY,
     });
 
-    if (!flags["no-reset"]) {
-      const dirPath = dockerComposeDirPath();
-      await initNewReadonlyDockerComposeConfig();
+    const dockerComposeConfigPath = await ensureDockerComposeConfigPath();
+    const dockerComposeDir = dirname(dockerComposeConfigPath);
 
+    if (!flags["no-reset"]) {
       try {
         await dockerCompose({
           args: ["down"],
-          flags: {
-            v: true,
-          },
+          flags: { v: true },
           printOutput: true,
-          options: {
-            cwd: dirPath,
-          },
+          options: { cwd: dockerComposeDir },
         });
       } catch {}
 
       try {
-        await rm(join(dirPath, DOCKER_COMPOSE_FULL_FILE_NAME));
+        await rm(dockerComposeConfigPath);
       } catch {}
 
       try {
-        await rm(join(dirPath, PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME));
+        await rm(await ensureProviderArtifactsConfigPath());
       } catch {}
 
       const workersConfig = await initNewWorkersConfig();
@@ -142,7 +138,7 @@ export default class Up extends BaseCommand<typeof Up> {
       }
     }
 
-    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
+    await ensureDockerComposeConfig();
 
     await dockerCompose({
       args: [
@@ -156,9 +152,7 @@ export default class Up extends BaseCommand<typeof Up> {
         wait: !flags["no-wait"],
       },
       printOutput: true,
-      options: {
-        cwd: dockerComposeConfig.$getDirPath(),
-      },
+      options: { cwd: dockerComposeDir },
     });
 
     if (flags["no-set-up"]) {

@@ -29,7 +29,6 @@ import {
   FS_OPTIONS,
   YAML_EXT,
   YML_EXT,
-  DOCKER_COMPOSE_FILE_NAME,
   CLI_NAME_FULL,
   SCHEMAS_DIR_NAME,
 } from "../const.js";
@@ -287,7 +286,6 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     import("yaml-diff-patch"),
   ]);
 
-  const configName = getConfigName(expectedConfigPath);
   let configString: string;
   let actualConfigPath = expectedConfigPath;
 
@@ -325,32 +323,11 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     configString = yamlDiffPatch(
       `# ${description}\n\n`,
       {},
-      {
-        ...(configName === DOCKER_COMPOSE_FILE_NAME
-          ? {}
-          : { version: options.length - 1 }),
-        ...(await getDefaultConfig()),
-      },
+      { version: options.length - 1, ...(await getDefaultConfig()) },
     );
   }
 
   const currentConfigUnknown: unknown = parse(configString);
-
-  if (configName === DOCKER_COMPOSE_FILE_NAME) {
-    await saveConfig(actualConfigPath, configString);
-
-    return {
-      // CLI will not validate docker-compose at all to not cause additional problems for the users
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      latestConfig: currentConfigUnknown as LatestConfig,
-      latestConfigString: configString,
-      actualConfigPath,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      validateLatestConfig: (() => {
-        return Promise.resolve(currentConfigUnknown);
-      }) as ReturnType<typeof getConfigValidator<LatestConfig>>,
-    };
-  }
 
   if (
     typeof currentConfigUnknown !== "object" ||

@@ -15,10 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { dirname } from "path";
+
 import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand.js";
-import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { ensureDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
   DOCKER_COMPOSE_FULL_FILE_NAME,
   DOCKER_COMPOSE_FLAGS,
@@ -40,20 +42,16 @@ export default class Down extends BaseCommand<typeof Down> {
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Down));
-    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
+    const dockerComposeConfigPath = await ensureDockerComposeConfig();
 
     await dockerCompose({
       args: [
         "down",
         ...(flags.flags === undefined ? [] : flags.flags.split(" ")),
       ],
-      flags: {
-        v: flags.volumes,
-      },
+      flags: { v: flags.volumes },
       printOutput: true,
-      options: {
-        cwd: dockerComposeConfig.$getDirPath(),
-      },
+      options: { cwd: dirname(dockerComposeConfigPath) },
     });
   }
 }
