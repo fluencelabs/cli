@@ -24,7 +24,7 @@ jobs:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     name: Generate docs
-    runs-on: ubuntu-latest
+    runs-on: builder
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
