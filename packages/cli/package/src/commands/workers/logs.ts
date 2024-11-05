@@ -32,8 +32,8 @@ import {
   type FluenceEnv,
 } from "../../lib/const.js";
 import { formatAquaLogs } from "../../lib/helpers/formatAquaLogs.js";
-import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { stringifyUnknown } from "../../lib/helpers/stringifyUnknown.js";
+import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,

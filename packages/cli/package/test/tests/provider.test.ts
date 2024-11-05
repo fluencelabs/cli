@@ -28,8 +28,8 @@ import {
   PRIV_KEY_FLAG_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../src/lib/const.js";
+import { stringifyUnknown } from "../../src/lib/helpers/stringifyUnknown.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
-import { stringifyUnknown } from "../../src/lib/helpers/utils.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
 import { CC_DURATION_SECONDS } from "../helpers/constants.js";
 import { initializeTemplate } from "../helpers/sharedSteps.js";

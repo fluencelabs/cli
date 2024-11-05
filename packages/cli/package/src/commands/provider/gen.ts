@@ -36,8 +36,8 @@ import {
   MAX_TOKEN_AMOUNT_KEYWORD,
   CLI_NAME,
 } from "../../lib/const.js";
-import { pathExists } from "../../lib/helpers/utils.js";
 import { stringifyUnknown } from "../../lib/helpers/stringifyUnknown.js";
+import { pathExists } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
   getFluenceSecretsDir,

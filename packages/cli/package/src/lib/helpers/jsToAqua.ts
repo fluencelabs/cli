@@ -30,8 +30,8 @@ import { AQUA_EXT, FS_OPTIONS } from "../const.js";
 import { input } from "../prompt.js";
 
 import { validateAquaTypeName, validateAquaName } from "./downloadFile.js";
-import { boolToStr, numToStr } from "./typesafeStringify.js";
 import { stringifyUnknown } from "./stringifyUnknown.js";
+import { boolToStr, numToStr } from "./typesafeStringify.js";
 
 /**
  * In js object, json or yaml when you want to represent optional value and still generate a type for it you can use this syntax:

@@ -31,8 +31,8 @@ import { AQUA_DEPENDENCIES_DIR_NAME, FS_OPTIONS } from "./const.js";
 import { type ExecPromiseArg, execPromise } from "./execPromise.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { removeProperties } from "./helpers/utils.js";
 import { stringifyUnknown } from "./helpers/stringifyUnknown.js";
+import { removeProperties } from "./helpers/utils.js";
 import {
   getFluenceAquaDependenciesPackageJsonPath,
   ensureFluenceAquaDependenciesPath,

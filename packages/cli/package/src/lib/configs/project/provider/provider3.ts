@@ -24,9 +24,6 @@ import mapValues from "lodash-es/mapValues.js";
 import mergeWith from "lodash-es/mergeWith.js";
 
 import { jsonStringify, type ChainENV } from "../../../../common.js";
-import { CHAIN_RPC_PORT, IPFS_PORT } from "../chainContainers.js";
-import { IPFS_CONTAINER_NAME } from "../chainContainers.js";
-import { CHAIN_RPC_CONTAINER_NAME } from "../chainContainers.js";
 import { versions } from "../../../../versions.js";
 import { getChainId } from "../../../chain/chainConfig.js";
 import {
@@ -56,6 +53,9 @@ import {
 import { validateBatchAsync } from "../../../helpers/validations.js";
 import { resolveRelaysWithoutLocal } from "../../../multiaddresWithoutLocal.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
+import { CHAIN_RPC_CONTAINER_NAME } from "../chainContainers.js";
+import { IPFS_CONTAINER_NAME } from "../chainContainers.js";
+import { CHAIN_RPC_PORT, IPFS_PORT } from "../chainContainers.js";
 import { initEnvConfig } from "../env/env.js";
 
 import { providerNameSchema } from "./provider0.js";

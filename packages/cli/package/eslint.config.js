@@ -186,7 +186,7 @@ export default tseslint.config(
       "bin/dev.js",
       "resources/*",
       ".yarn/*",
-      "src/lib/gql/gql.generated.ts",
+      "src/lib/gql/gqlGenerated.ts",
     ],
   },
 );
