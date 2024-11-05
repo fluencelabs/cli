@@ -21,10 +21,7 @@
       "inputs": [
         "package/src/lib/configs/project/chainContainers.ts",
         "package/src/genGqlSchema.ts",
-        "package/src/versions.ts",
-        "package/src/versions.json",
-        "package/src/lib/helpers/setTryTimeout.ts",
-        "package/src/lib/setupEnvironment.ts"
+        "package/src/versions.json"
       ],
       "outputs": ["package/src/lib/gql/gqlSchema.json"]
     },
