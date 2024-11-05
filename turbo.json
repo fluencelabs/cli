@@ -57,7 +57,7 @@
       "outputs": ["dist/**", "package/dist/**"]
     },
     "on-each-commit": {
-      "dependsOn": ["^build", "before-build"]
+      "dependsOn": ["^build", "build"]
     },
     "pack-ci": {
       "dependsOn": ["build"],
