@@ -12,11 +12,7 @@ concurrency:
 env:
   CI: true
   FORCE_COLOR: true
-  DEBUG: "fcli:*,deal-ts-clients:*"
   FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
-  CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
-  NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-  FLUENCE_LOG_DISPLAY_SPAN_LIST: true
 
 jobs:
   docs:
@@ -24,49 +20,12 @@ jobs:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     name: Generate docs
-    runs-on: builder
-
-    permissions:
-      contents: write
-      id-token: write
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
-
-      - name: Import secrets
-        uses: hashicorp/vault-action@v3.0.0
-        id: secrets
-        with:
-          url: https://vault.fluence.dev
-          path: jwt/github
-          role: ci
-          method: jwt
-          jwtGithubAudience: "https://github.com/fluencelabs"
-          jwtTtl: 300
-          exportToken: false
-          secrets: |
-            kv/hub.docker.com/fluencebot username | DOCKER_HUB_USERNAME ;
-            kv/hub.docker.com/fluencebot password | DOCKER_HUB_PASSWORD ;
-            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
-            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD ;
-            kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN;
-            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ env.DOCKER_HUB_USERNAME }}
-          password: ${{ env.DOCKER_HUB_PASSWORD }}
-
-      - name: Login to private docker registry
-        uses: docker/login-action@v3
-        with:
-          registry: docker.fluence.dev
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4

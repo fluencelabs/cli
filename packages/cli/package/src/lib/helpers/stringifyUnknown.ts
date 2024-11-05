@@ -19,8 +19,6 @@ import { AssertionError } from "assert";
 
 import { CLIError } from "@oclif/core/errors";
 
-import { jsonStringify } from "../../common.js";
-
 /**
  * Used for error stringification cause one can throw anything in js (not only errors)
  * also used for e.g. debug logs or "unreachable error" messages where we don't necessarily care much about the output as long as it's somewhat readable.
@@ -62,7 +60,7 @@ export function stringifyUnknown(unknown: unknown): string {
       return "undefined";
     }
 
-    return jsonStringify(unknown);
+    return JSON.stringify(unknown, null, 2);
   } catch {
     // eslint-disable-next-line no-restricted-syntax
     return String(unknown);
