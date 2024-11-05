@@ -16,7 +16,8 @@
  */
 
 import { numToStr } from "./typesafeStringify.js";
-import { splitErrorsAndResults, stringifyUnknown } from "./utils.js";
+import { splitErrorsAndResults } from "./utils.js";
+import { stringifyUnknown } from "./stringifyUnknown.js";
 
 export type ValidationResult = string | true;
 

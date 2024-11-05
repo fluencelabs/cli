@@ -47,8 +47,8 @@ import { numToStr } from "../../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
-  stringifyUnknown,
 } from "../../helpers/utils.js";
+import { stringifyUnknown } from "../../helpers/stringifyUnknown.js";
 import { setTryTimeout } from "../../helpers/setTryTimeout.js";
 import { checkboxes } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";

@@ -20,8 +20,8 @@ import { color } from "@oclif/color";
 import { commandObj } from "../commandObj.js";
 import { dbg } from "../dbg.js";
 
+import { stringifyUnknown } from "./stringifyUnknown.js";
 import { numToStr } from "./typesafeStringify.js";
-import { stringifyUnknown } from "./utils.js";
 
 export async function setTryTimeout<T, U>(
   message: string,

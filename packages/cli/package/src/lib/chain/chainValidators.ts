@@ -22,7 +22,7 @@ import { versions } from "../../versions.js";
 import { getReadonlyContracts } from "../dealClient.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
-import { stringifyUnknown } from "../helpers/utils.js";
+import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
 import type { ValidationResult } from "../helpers/validations.js";
 
 export async function getMinCCDuration(): Promise<bigint> {

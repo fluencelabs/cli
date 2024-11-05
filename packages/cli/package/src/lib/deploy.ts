@@ -51,7 +51,7 @@ import { createAndMatchDealsForPeerIds } from "./deal.js";
 import { getReadonlyContracts } from "./dealClient.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
-import { stringifyUnknown } from "./helpers/utils.js";
+import { stringifyUnknown } from "./helpers/stringifyUnknown.js";
 import { disconnectFluenceClient } from "./jsClient.js";
 import { initCli } from "./lifeCycle.js";
 import { getIpfsClient } from "./localServices/ipfs.js";

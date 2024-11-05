@@ -10,11 +10,6 @@
     "verbatimModuleSyntax": true
   },
   "include": ["src/**/*"],
-  "files": [
-    "src/environment.d.ts",
-    "src/types.d.ts",
-    "./src/lib/helpers/setTryTimeout.ts",
-    "src/lib/configs/project/chainContainers.ts"
-  ],
+  "files": ["src/environment.d.ts", "src/types.d.ts"],
   "types": ["node"]
 }

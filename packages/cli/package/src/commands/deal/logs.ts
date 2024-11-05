@@ -37,10 +37,8 @@ import {
   formatAquaLogsHeader,
   formatAquaLogs,
 } from "../../lib/helpers/formatAquaLogs.js";
-import {
-  LOGS_RESOLVE_SUBNET_ERROR_START,
-  stringifyUnknown,
-} from "../../lib/helpers/utils.js";
+import { LOGS_RESOLVE_SUBNET_ERROR_START } from "../../lib/helpers/utils.js";
+import { stringifyUnknown } from "../../lib/helpers/stringifyUnknown.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,

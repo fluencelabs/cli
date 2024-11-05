@@ -58,7 +58,7 @@ import { CLI_NAME_FULL, PRIV_KEY_FLAG_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
 import { setTryTimeout } from "./helpers/setTryTimeout.js";
-import { stringifyUnknown } from "./helpers/utils.js";
+import { stringifyUnknown } from "./helpers/stringifyUnknown.js";
 import { createTransaction, getAddressFromConnector } from "./server.js";
 
 let provider: Provider | undefined = undefined;

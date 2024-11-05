@@ -66,7 +66,7 @@ import {
   DOCKER_COMPOSE_FULL_FILE_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
-import { stringifyUnknown } from "./helpers/utils.js";
+import { stringifyUnknown } from "./helpers/stringifyUnknown.js";
 import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
 export const validatePath = async (path: string): Promise<string | true> => {
