@@ -4,5 +4,6 @@ node_modules
 tmp
 .fluence
 src/lib/compiled-aqua
+gql.generated.ts
 CHANGELOG.md
 .github/workflows

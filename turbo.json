@@ -16,6 +16,26 @@
       ],
       "outputs": ["package/src/cli-aqua-dependencies/node_modules/**"]
     },
+    "gen-gql-schema": {
+      "dependsOn": ["install-yarn-dependencies"],
+      "inputs": [
+        "package/src/lib/configs/project/chainContainers.ts",
+        "package/src/genGqlSchema.ts",
+        "package/src/versions.ts",
+        "package/src/versions.json",
+        "package/src/lib/helpers/setTryTimeout.ts",
+        "package/src/lib/setupEnvironment.ts"
+      ],
+      "outputs": ["package/src/lib/gql/gqlSchema.json"]
+    },
+    "gql-codegen": {
+      "dependsOn": ["gen-gql-schema"],
+      "inputs": [
+        "package/src/lib/gql/gqlCodegen.ts",
+        "package/src/lib/gql/schema.graphql"
+      ],
+      "outputs": ["package/src/lib/gql/gqlGenerated.ts"]
+    },
     "before-build": {
       "dependsOn": [
         "install-yarn-dependencies",
@@ -36,7 +56,7 @@
       ]
     },
     "build": {
-      "dependsOn": ["^build", "before-build"],
+      "dependsOn": ["^build", "before-build", "gql-codegen"],
       "outputs": ["dist/**", "package/dist/**"]
     },
     "on-each-commit": {

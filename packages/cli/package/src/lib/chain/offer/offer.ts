@@ -15,12 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { OfferDetail } from "@fluencelabs/deal-ts-clients/dist/dealCliClient/types/schemes.js";
 import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { jsonStringify } from "../../../common.js";
 import { versions } from "../../../versions.js";
 import { commandObj } from "../../commandObj.js";
 import {
@@ -38,29 +36,28 @@ import {
   OFFER_IDS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
 } from "../../const.js";
-import { dbg } from "../../dbg.js";
 import {
   getContracts,
-  getDealCliClient,
   getSignerAddress,
   guessTxSizeAndSign,
   getEventValue,
 } from "../../dealClient.js";
-import { startSpinner, stopSpinner } from "../../helpers/spinner.js";
+import { getOffers } from "../../gql/gqlClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
-  setTryTimeout,
   splitErrorsAndResults,
   stringifyUnknown,
 } from "../../helpers/utils.js";
+import { setTryTimeout } from "../../helpers/setTryTimeout.js";
 import { checkboxes } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import { getProtocolVersions } from "../chainValidators.js";
 import {
+  cidHexStringToBase32,
   cidStringToCIDV1Struct,
-  peerIdHexStringToBase58String,
   peerIdBase58ToUint8Array,
+  peerIdHexStringToBase58String,
 } from "../conversions.js";
 import { ptFormat, ptParse } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
@@ -461,10 +458,8 @@ async function formatOfferInfo(
     {
       "Provider ID": offerIndexerInfo.providerId,
       "Offer ID": offerIndexerInfo.id,
-      "Created At": new Date(offerIndexerInfo.createdAt * 1000).toISOString(),
-      "Last Updated At": new Date(
-        offerIndexerInfo.updatedAt * 1000,
-      ).toISOString(),
+      "Created At": offerIndexerInfo.createdAt,
+      "Last Updated At": offerIndexerInfo.updatedAt,
       "Price Per Epoch": await ptFormat(offerIndexerInfo.pricePerEpoch),
       Effectors: await Promise.all(
         offerIndexerInfo.effectors.map(({ cid }) => {
@@ -832,44 +827,92 @@ export async function resolveCreatedOffers(flags: OfferArtifactsArgs) {
 
 export async function getOffersInfo<T extends OfferNameAndId>(
   offers: T[],
-): Promise<[T[], (T & { offerIndexerInfo: OfferDetail })[]]> {
+): Promise<
+  [
+    T[],
+    (T & {
+      offerIndexerInfo: Awaited<ReturnType<typeof serializeOfferInfo>>;
+    })[],
+  ]
+> {
   if (offers.length === 0) {
     return [[], []];
   }
 
-  const dealCliClient = await getDealCliClient();
-
-  const getOffersArg: Parameters<typeof dealCliClient.getOffers>[0] = {
-    ids: offers.map(({ offerId }) => {
+  const offersIndexerInfo = await getOffers(
+    offers.map(({ offerId }) => {
       return offerId;
     }),
-  };
-
-  dbg(`Running dealCliClient.getOffers with ${jsonStringify(getOffersArg)}`);
-  startSpinner("Fetching offers info from indexer");
-  const offersIndexerInfo = await dealCliClient.getOffers(getOffersArg);
-  stopSpinner();
+  );
 
   const offersInfoMap = Object.fromEntries(
-    offersIndexerInfo.map((o) => {
+    offersIndexerInfo.offers.map((o) => {
       return [o.id, o] as const;
     }),
   );
 
-  return splitErrorsAndResults(offers, (offer) => {
+  const [errors, results] = splitErrorsAndResults(offers, (offer) => {
     const offerIndexerInfo = offersInfoMap[offer.offerId];
 
-    if (offerIndexerInfo === undefined) {
-      return {
-        error: offer,
-      };
-    }
-
-    return {
-      result: {
-        ...offer,
-        offerIndexerInfo,
-      },
-    };
+    return offerIndexerInfo === undefined
+      ? { error: offer }
+      : { result: { offer, offerIndexerInfo } };
   });
+
+  return [
+    errors,
+    await Promise.all(
+      results.map(async ({ offerIndexerInfo, offer }) => {
+        return {
+          ...offer,
+          offerIndexerInfo: await serializeOfferInfo(offerIndexerInfo),
+        };
+      }),
+    ),
+  ] as const;
+}
+
+type OfferIndexerInfo = Awaited<ReturnType<typeof getOffers>>["offers"][number];
+
+async function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
+  const serializedPeers =
+    offerIndexerInfo.peers?.map((peer) => {
+      return {
+        id: peer.id,
+        computeUnits:
+          peer.computeUnits?.map((computeUnit) => {
+            return {
+              id: computeUnit.id,
+              workerId: computeUnit.worker?.id,
+            };
+          }) ?? [],
+      };
+    }) ?? [];
+
+  return {
+    id: offerIndexerInfo.id,
+    createdAt: new Date(
+      Number(offerIndexerInfo.createdAt) * 1000,
+    ).toISOString(),
+    updatedAt: new Date(
+      Number(offerIndexerInfo.updatedAt) * 1000,
+    ).toISOString(),
+    pricePerEpoch: BigInt(offerIndexerInfo.pricePerEpoch),
+    paymentToken: {
+      address: offerIndexerInfo.paymentToken.id,
+    },
+    totalComputeUnits: offerIndexerInfo.computeUnitsTotal,
+    freeComputeUnits: offerIndexerInfo.computeUnitsAvailable,
+    effectors: await serializeEffectors(offerIndexerInfo.effectors),
+    providerId: offerIndexerInfo.provider.id,
+    peers: serializedPeers,
+  };
+}
+
+async function serializeEffectors(effectors: OfferIndexerInfo["effectors"]) {
+  return Promise.all(
+    effectors?.map(async ({ effector: { id } }) => {
+      return { cid: await cidHexStringToBase32(id) };
+    }) ?? [],
+  );
 }

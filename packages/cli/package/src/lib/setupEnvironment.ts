@@ -17,9 +17,8 @@
 
 import { isAbsolute } from "node:path";
 
+import { CONTRACTS_ENV } from "@fluencelabs/deal-ts-clients";
 import dotenv from "dotenv";
-
-import { CHAIN_ENV, getIsUnion } from "../common.js";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
@@ -71,7 +70,16 @@ const isAbsolutePath = (v: unknown): v is string => {
   return typeof v === "string" && isAbsolute(v);
 };
 
-setEnvVariable(FLUENCE_ENV, getIsUnion(CHAIN_ENV), "local");
+setEnvVariable(
+  FLUENCE_ENV,
+  (val): val is (typeof CONTRACTS_ENV)[number] => {
+    return CONTRACTS_ENV.some((v) => {
+      return v === val;
+    });
+  },
+  "local",
+);
+
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
 setEnvVariable(CI, isTrueOrFalseString, "false");
 setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);

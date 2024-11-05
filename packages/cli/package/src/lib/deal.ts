@@ -47,10 +47,10 @@ import { ensureChainEnv } from "./ensureChainNetwork.js";
 import { bigintToStr } from "./helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
-  setTryTimeout,
   splitErrorsAndResults,
   stringifyUnknown,
 } from "./helpers/utils.js";
+import { setTryTimeout } from "./helpers/setTryTimeout.js";
 import { checkboxes, input, list } from "./prompt.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 

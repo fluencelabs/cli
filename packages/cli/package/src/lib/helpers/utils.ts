@@ -18,12 +18,9 @@
 import { AssertionError } from "node:assert";
 import { access } from "node:fs/promises";
 
-import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/errors";
 
 import { jsonStringify } from "../../common.js";
-import { commandObj } from "../commandObj.js";
-import { dbg } from "../dbg.js";
 
 import { numToStr } from "./typesafeStringify.js";
 
@@ -172,74 +169,6 @@ export function splitErrorsAndResults<T, U, V>(
   }
 
   return [errors, results];
-}
-
-export async function setTryTimeout<T, U>(
-  message: string,
-  callbackToTry: () => T | Promise<T>,
-  errorHandler: (error: unknown) => U,
-  msToTryFor: number,
-  msBetweenTries = 1000,
-  failCondition?: (error: unknown) => boolean,
-): Promise<T | U> {
-  const yellowMessage = color.yellow(message);
-  let isTimeoutRunning = true;
-
-  const timeout = setTimeout(() => {
-    isTimeoutRunning = false;
-  }, msToTryFor);
-
-  let error: unknown;
-  let attemptCounter = 1;
-  let isTrying = true;
-
-  while (isTrying) {
-    isTrying = isTimeoutRunning;
-
-    try {
-      dbg(`Trying to ${yellowMessage}`);
-      const res = await callbackToTry();
-      clearTimeout(timeout);
-      isTrying = false;
-
-      if (attemptCounter > 1) {
-        commandObj.logToStderr(
-          `Succeeded to ${yellowMessage} after ${numToStr(attemptCounter)} attempts`,
-        );
-      }
-
-      return res;
-    } catch (e) {
-      if (failCondition !== undefined && failCondition(e)) {
-        clearTimeout(timeout);
-        return errorHandler(e);
-      }
-
-      const errorString = stringifyUnknown(e);
-      const previousErrorString = stringifyUnknown(error);
-
-      if (errorString === previousErrorString) {
-        commandObj.logToStderr(
-          `Attempt #${numToStr(
-            attemptCounter,
-          )} to ${yellowMessage} failed with the same error`,
-        );
-      } else {
-        const retryMessage = isTrying ? ". Going to retry" : "";
-        commandObj.logToStderr(`Failing to ${yellowMessage}${retryMessage}`);
-        dbg(`Reason: ${stringifyUnknown(e)}`);
-      }
-
-      error = e;
-      attemptCounter++;
-    }
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, msBetweenTries);
-    });
-  }
-
-  return errorHandler(error);
 }
 
 export async function pathExists(path: string) {

@@ -21,7 +21,6 @@ import type {
   Contracts,
   DealMatcherClient,
   DealExplorerClient,
-  DealCliClient,
   Deployment,
 } from "@fluencelabs/deal-ts-clients";
 import type {
@@ -58,7 +57,8 @@ import { initEnvConfig } from "./configs/project/env/env.js";
 import { CLI_NAME_FULL, PRIV_KEY_FLAG_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
-import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
+import { setTryTimeout } from "./helpers/setTryTimeout.js";
+import { stringifyUnknown } from "./helpers/utils.js";
 import { createTransaction, getAddressFromConnector } from "./server.js";
 
 let provider: Provider | undefined = undefined;
@@ -134,17 +134,6 @@ export async function getDealExplorerClient() {
   }
 
   return dealExplorerClient;
-}
-
-let dealCliClient: DealCliClient | undefined = undefined;
-
-export async function getDealCliClient() {
-  if (dealCliClient === undefined) {
-    const { DealCliClient } = await import("@fluencelabs/deal-ts-clients");
-    dealCliClient = new DealCliClient(await getSubgraphUrl());
-  }
-
-  return dealCliClient;
 }
 
 let deployment: Promise<Deployment> | undefined = undefined;

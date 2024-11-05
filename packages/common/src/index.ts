@@ -18,8 +18,6 @@
 import "@total-typescript/ts-reset";
 import type { TransactionRequest } from "ethers";
 
-export const CHAIN_RPC_PORT = "8545";
-
 export const DEFAULT_PUBLIC_FLUENCE_ENV = "testnet";
 export const PUBLIC_FLUENCE_ENV = [
   DEFAULT_PUBLIC_FLUENCE_ENV,

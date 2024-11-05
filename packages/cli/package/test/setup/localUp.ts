@@ -22,7 +22,7 @@ import { pathToTheTemplateWhereLocalEnvironmentIsSpunUp } from "../helpers/paths
 if (fluenceEnv === "local") {
   await fluence({
     args: ["local", "up"],
-    flags: { r: true, "no-set-up": true },
+    flags: { "no-set-up": true },
     cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
     timeout: 1000 * 60 * 5, // 5 minutes
   });

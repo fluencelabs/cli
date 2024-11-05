@@ -1,0 +1,65 @@
+query DealsQuery(
+  $filters: Deal_filter
+  $offset: Int
+  $limit: Int
+  $orderBy: Deal_orderBy
+  $orderType: OrderDirection
+) {
+  deals(
+    where: $filters
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    id
+  }
+}
+
+# Exclude deleted CUs.
+# Exclude deleted Peers.
+
+query OfferDetailsQuery(
+  $filters: Offer_filter
+  $orderType: OrderDirection
+  $orderBy: Offer_orderBy
+) {
+  offers(
+    where: {
+      and: [
+        $filters
+        # Exclude deleted offers.
+        { deleted: false }
+      ]
+    }
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    id
+    createdAt
+    updatedAt
+    pricePerEpoch
+    paymentToken {
+      id
+    }
+    computeUnitsTotal
+    computeUnitsAvailable
+    effectors {
+      effector {
+        id
+      }
+    }
+    provider {
+      id
+    }
+    peers(where: { deleted: false }) {
+      id
+      computeUnits(where: { deleted: false }) {
+        id
+        worker {
+          id
+        }
+      }
+    }
+  }
+}

@@ -56,7 +56,7 @@ export default tseslint.config(
             "Please use type-safe to string converter (e.g. numToString)",
         },
         {
-          selector: "Identifier[name='String']",
+          selector: "CallExpression[callee.name='String']",
           message:
             // cause when the variable changes type you will have no way to learn you possibly have to change it's string representation
             "Please use type-safe to string converter (e.g. numToString)",
@@ -186,6 +186,7 @@ export default tseslint.config(
       "bin/dev.js",
       "resources/*",
       ".yarn/*",
+      "src/lib/gql/gql.generated.ts",
     ],
   },
 );

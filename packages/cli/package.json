@@ -8,6 +8,8 @@
   "scripts": {
     "install-yarn-dependencies": "yarn ./package install",
     "install-npm-dependencies": "npm --prefix ./package/src/cli-aqua-dependencies install",
+    "gen-gql-schema": "yarn ./package gen-gql-schema",
+    "gql-codegen": "yarn ./package gql-codegen",
     "before-build": "yarn ./package before-build",
     "build": "yarn ./package build",
     "pack-ci": "yarn ./package pack-ci",

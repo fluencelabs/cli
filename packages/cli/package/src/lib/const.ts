@@ -28,10 +28,14 @@ import {
   getIsUnion,
   CHAIN_ENV,
   type ChainENV,
-  CHAIN_RPC_PORT,
   LOCAL_NET_DEFAULT_WALLET_KEY,
 } from "../common.js";
 
+import {
+  CHAIN_RPC_CONTAINER_NAME,
+  CHAIN_RPC_PORT,
+  IPFS_PORT,
+} from "./configs/project/chainContainers.js";
 import { aquaComment } from "./helpers/utils.js";
 
 export const CLI_NAME = "fluence";
@@ -128,15 +132,7 @@ export function fluenceOldEnvToNewEnv(env: FluenceEnvOld): FluenceEnv {
   )[env];
 }
 
-export const IPFS_CONTAINER_NAME = "ipfs";
-export const IPFS_PORT = "5001";
-export const GRAPH_NODE_CONTAINER_NAME = "graph-node";
-export const GRAPH_NODE_PORT = "8020";
-export const POSTGRES_CONTAINER_NAME = "postgres";
 export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
-export const CHAIN_RPC_CONTAINER_NAME = "chain-rpc";
-export const CHAIN_DEPLOY_SCRIPT_NAME = "chain-deploy-script";
-export const SUBGRAPH_DEPLOY_SCRIPT_NAME = "subgraph-deploy-script";
 export const TCP_PORT_START = 977;
 export const WEB_SOCKET_PORT_START = 999;
 export const HTTP_PORT_START = 918;
