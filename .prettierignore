@@ -3,7 +3,8 @@ docs
 node_modules
 tmp
 .fluence
-src/lib/compiled-aqua
-gql.generated.ts
+compiled-aqua
+gqlSchema.json
+gqlGenerated.ts
 CHANGELOG.md
 .github/workflows
