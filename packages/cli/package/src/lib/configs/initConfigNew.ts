@@ -46,7 +46,10 @@ import type {
   ConfigOptions,
 } from "./initConfigNewTypes.js";
 
-const initializedConfigs = new Map<string, InitializedConfig<unknown>>();
+const initializedConfigs = new Map<
+  string,
+  Promise<InitializedConfig<unknown> | null>
+>();
 
 export function getConfigInitFunction<
   C0,
@@ -120,72 +123,76 @@ export function getConfigInitFunction<
     if (previouslyInitializedConfig !== undefined) {
       // It's safe to assert here because we can be sure that previouslyInitializedConfig has the same type
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return previouslyInitializedConfig as InitializedConfig<LatestConfig>;
+      return previouslyInitializedConfig as Promise<InitializedConfig<LatestConfig> | null>;
     }
 
-    if (
-      !expectedConfigPath.endsWith(YAML_EXT) &&
-      !expectedConfigPath.endsWith(YML_EXT)
-    ) {
-      commandObj.error(
-        `Invalid config path ${color.yellow(
-          expectedConfigPath,
-        )}. Config path must end with ${color.yellow(YAML_EXT)} or ${color.yellow(
-          YML_EXT,
-        )}`,
-      );
-    }
-
-    await addTitleDescriptionAndVersionToSchemas({
-      options,
-      description,
-      getConfigPath,
-    });
-
-    const getLatestConfigRes = await getLatestConfig({
-      options,
-      expectedConfigPath,
-      getDefaultConfig,
-      getSchemaDirPath,
-    });
-
-    if (getLatestConfigRes === null) {
-      return null;
-    }
-
-    const { yamlDiffPatch } = await import("yaml-diff-patch");
-
-    const {
-      latestConfig,
-      latestConfigString,
-      actualConfigPath,
-      validateLatestConfig,
-    } = getLatestConfigRes;
-
-    let prevConfigString = latestConfigString;
-
-    const initializedConfig: InitializedConfig<LatestConfig> = {
-      ...latestConfig,
-      $getPath(): string {
-        return actualConfigPath;
-      },
-      async $commit(): Promise<void> {
-        const config = removeProperties(this, ([, v]) => {
-          return typeof v === "function";
-        });
-
-        prevConfigString = await saveConfig(
-          actualConfigPath,
-          yamlDiffPatch(prevConfigString, {}, config),
-          prevConfigString,
+    const initializedConfigPromise = (async () => {
+      if (
+        !expectedConfigPath.endsWith(YAML_EXT) &&
+        !expectedConfigPath.endsWith(YML_EXT)
+      ) {
+        commandObj.error(
+          `Invalid config path ${color.yellow(
+            expectedConfigPath,
+          )}. Config path must end with ${color.yellow(YAML_EXT)} or ${color.yellow(
+            YML_EXT,
+          )}`,
         );
+      }
 
-        await validateLatestConfig(config);
-      },
-    };
+      await addTitleDescriptionAndVersionToSchemas({
+        options,
+        description,
+        getConfigPath,
+      });
 
-    initializedConfigs.set(expectedConfigPath, initializedConfig);
-    return initializedConfig;
+      const getLatestConfigRes = await getLatestConfig({
+        options,
+        expectedConfigPath,
+        getDefaultConfig,
+        getSchemaDirPath,
+      });
+
+      if (getLatestConfigRes === null) {
+        return null;
+      }
+
+      const { yamlDiffPatch } = await import("yaml-diff-patch");
+
+      const {
+        latestConfig,
+        latestConfigString,
+        actualConfigPath,
+        validateLatestConfig,
+      } = getLatestConfigRes;
+
+      let prevConfigString = latestConfigString;
+
+      const initializedConfig: InitializedConfig<LatestConfig> = {
+        ...latestConfig,
+        $getPath(): string {
+          return actualConfigPath;
+        },
+        async $commit(): Promise<void> {
+          const config = removeProperties(this, ([, v]) => {
+            return typeof v === "function";
+          });
+
+          prevConfigString = await saveConfig(
+            actualConfigPath,
+            yamlDiffPatch(prevConfigString, {}, config),
+            prevConfigString,
+          );
+
+          await validateLatestConfig(config);
+        },
+      };
+
+      return initializedConfig;
+    })();
+
+    initializedConfigs.set(expectedConfigPath, initializedConfigPromise);
+    return initializedConfigPromise;
   };
 }
 
