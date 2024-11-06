@@ -118,12 +118,17 @@ export function getConfigInitFunction<
     const expectedConfigPath = await getConfigPath();
 
     const previouslyInitializedConfig =
-      initializedConfigs.get(expectedConfigPath);
+      await initializedConfigs.get(expectedConfigPath);
 
-    if (previouslyInitializedConfig !== undefined) {
+    if (
+      // return previously initialized config if it exists
+      previouslyInitializedConfig !== undefined &&
+      // And don't return null if default config is provided, proceed with initialization
+      !(previouslyInitializedConfig === null && getDefaultConfig !== undefined)
+    ) {
       // It's safe to assert here because we can be sure that previouslyInitializedConfig has the same type
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return previouslyInitializedConfig as Promise<InitializedConfig<LatestConfig> | null>;
+      return previouslyInitializedConfig as InitializedConfig<LatestConfig> | null;
     }
 
     const initializedConfigPromise = (async () => {
