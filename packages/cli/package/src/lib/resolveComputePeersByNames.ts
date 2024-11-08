@@ -23,7 +23,7 @@ import {
   ensureComputerPeerConfigs,
   ensureReadonlyProviderConfig,
   type EnsureComputerPeerConfig,
-} from "./configs/project/provider.js";
+} from "./configs/project/provider/provider.js";
 import {
   NOX_NAMES_FLAG_NAME,
   ALL_FLAG_VALUE,

@@ -24,7 +24,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { jsonStringify } from "../../common.js";
 import { commandObj } from "../commandObj.js";
-import { initReadonlyProviderConfig } from "../configs/project/provider.js";
+import { initProviderConfig } from "../configs/project/provider/provider.js";
 import {
   CLI_NAME,
   NOX_NAMES_FLAG_NAME,
@@ -190,7 +190,7 @@ export async function getCommitments(
 
   if (
     flags[NOX_NAMES_FLAG_NAME] === undefined &&
-    (await initReadonlyProviderConfig()) === null
+    (await initProviderConfig()) === null
   ) {
     return commaSepStrToArr(
       await input({
@@ -205,7 +205,6 @@ export async function getCommitments(
 }
 
 export async function createCommitments(flags: {
-  env: string | undefined;
   [NOX_NAMES_FLAG_NAME]?: string | undefined;
   [OFFER_FLAG_NAME]?: string | undefined;
 }) {

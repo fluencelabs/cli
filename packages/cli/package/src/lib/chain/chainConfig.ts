@@ -18,7 +18,7 @@
 import capitalize from "lodash-es/capitalize.js";
 
 import { commandObj } from "../commandObj.js";
-import { envConfig } from "../configs/globalConfigs.js";
+import { initEnvConfig } from "../configs/project/env/env.js";
 import { dbg } from "../dbg.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
@@ -31,6 +31,7 @@ export async function getChainId() {
       const chainEnv = await ensureChainEnv();
       const { CHAIN_IDS } = await import("@fluencelabs/deal-ts-clients");
       let chainId: number = CHAIN_IDS[chainEnv];
+      const envConfig = await initEnvConfig();
 
       if (envConfig?.chainId !== undefined) {
         commandObj.logToStderr(
@@ -56,6 +57,7 @@ export async function getRpcUrl() {
       const chainEnv = await ensureChainEnv();
       const { RPC_URLS } = await import("@fluencelabs/deal-ts-clients");
       let rpcUrl: string = RPC_URLS[chainEnv];
+      const envConfig = await initEnvConfig();
 
       if (envConfig?.rpcUrl !== undefined) {
         commandObj.logToStderr(
@@ -99,6 +101,7 @@ export async function getBlockScoutUrl() {
 
       const { BLOCK_SCOUT_URLS } = await import("@fluencelabs/deal-ts-clients");
       let blockScoutUrl: string = BLOCK_SCOUT_URLS[chainEnv];
+      const envConfig = await initEnvConfig();
 
       if (envConfig?.blockScoutUrl !== undefined) {
         commandObj.logToStderr(
@@ -132,6 +135,7 @@ export async function getSubgraphUrl() {
       const chainEnv = await ensureChainEnv();
       const { SUBGRAPH_URLS } = await import("@fluencelabs/deal-ts-clients");
       let subgraphUrl: string = SUBGRAPH_URLS[chainEnv];
+      const envConfig = await initEnvConfig();
 
       if (envConfig?.subgraphUrl !== undefined) {
         commandObj.logToStderr(

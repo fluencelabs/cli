@@ -18,11 +18,15 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { collateralWithdraw } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CCFinish extends BaseCommand<typeof CCFinish> {
-  static override aliases = ["provider:ccf"];
-  static override description = `Move resources from deals, withdraw ${FLT_SYMBOL} collateral from capacity commitments, remove compute units from capacity commitments and finish capacity commitments`;
+  static override hiddenAliases = [
+    "provider:ccf",
+    "provider:cc-collateral-withdraw",
+  ];
+  static override description = `Move resources from deals, withdraw ${FLT_SYMBOL} collateral from capacity commitments, remove compute units from capacity commitments and finish capacity commitments${aliasesText.apply(this)}`;
   static override flags = {
     ...CC_FLAGS,
     ...CHAIN_FLAGS,

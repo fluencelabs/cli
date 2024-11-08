@@ -22,11 +22,12 @@ import {
   DEPLOYMENT_NAMES_ARG,
 } from "../../lib/const.js";
 import { match, getDeals } from "../../lib/deal.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Match extends BaseCommand<typeof Match> {
-  static override aliases = ["deal:wa"];
-  static override description = "Add missing workers to the deal";
+  static override hiddenAliases = ["deal:wa"];
+  static override description = `Add missing workers to the deal${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,

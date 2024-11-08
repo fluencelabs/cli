@@ -34,11 +34,7 @@ Defines global config for Fluence CLI
 
 ## [env.yaml](./env.md)
 
-Defines user project preferences
-
-## [docker-compose.yaml](./docker-compose.md)
-
-The Compose file is a YAML file defining a multi-containers based application.
+Defines project user's preferences
 
 ## [provider-artifacts.yaml](./provider-artifacts.md)
 

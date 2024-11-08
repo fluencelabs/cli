@@ -19,13 +19,13 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand.js";
 import { CUSTOM_TYPES_FLAG, USE_F64_FLAG } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { fileToAqua } from "../../lib/helpers/jsToAqua.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Yaml extends BaseCommand<typeof Yaml> {
-  static override aliases = ["aqua:yaml"];
-  static override description =
-    "Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into";
+  static override hiddenAliases = ["aqua:yaml"];
+  static override description = `Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into${aliasesText.apply(this)}`;
   static override flags = {
     ...USE_F64_FLAG,
     ...CUSTOM_TYPES_FLAG,

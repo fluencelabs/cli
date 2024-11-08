@@ -23,6 +23,7 @@ import { jsonStringify } from "../../common.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { CLI_NAME_FULL, JSON_FLAG } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
   getRustToolchainToUse,
@@ -33,9 +34,8 @@ import JSClientPackageJSON from "../../versions/js-client.package.json" with { t
 import { versions } from "../../versions.js";
 
 export default class Versions extends BaseCommand<typeof Versions> {
-  static override aliases = ["dep:v"];
-  static override description =
-    "Get versions of all cli dependencies, including aqua, marine, mrepl and internal";
+  static override hiddenAliases = ["dep:v"];
+  static override description = `Get versions of all cli dependencies, including aqua, marine, mrepl and internal${aliasesText.apply(this)}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     default: Flags.boolean({

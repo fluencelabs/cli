@@ -54,7 +54,7 @@ import {
 } from "./chain/chainConfig.js";
 import { chainFlags } from "./chainFlags.js";
 import { commandObj, isInteractive } from "./commandObj.js";
-import { initEnvConfig } from "./configs/project/env.js";
+import { initEnvConfig } from "./configs/project/env/env.js";
 import { CLI_NAME_FULL, PRIV_KEY_FLAG_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";

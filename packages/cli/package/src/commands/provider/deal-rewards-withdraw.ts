@@ -26,6 +26,7 @@ import {
   PT_SYMBOL,
 } from "../../lib/const.js";
 import { getContracts, getEventValue, sign } from "../../lib/dealClient.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -35,8 +36,8 @@ const REWARD_WITHDRAWN_EVENT = "RewardWithdrawn";
 export default class DealRewardsWithdraw extends BaseCommand<
   typeof DealRewardsWithdraw
 > {
-  static override aliases = ["provider:drw"];
-  static override description = `Withdraw ${PT_SYMBOL} rewards from deals`;
+  static override hiddenAliases = ["provider:drw"];
+  static override description = `Withdraw ${PT_SYMBOL} rewards from deals${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,

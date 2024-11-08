@@ -18,11 +18,12 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { removeOffers } from "../../lib/chain/offer/updateOffers.js";
 import { CHAIN_FLAGS, OFFER_FLAGS } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class OfferRemove extends BaseCommand<typeof OfferRemove> {
-  static override aliases = ["provider:or"];
-  static override description = "Remove offers";
+  static override hiddenAliases = ["provider:or"];
+  static override description = `Remove offers${aliasesText.apply(this)}`;
   static override flags = {
     ...OFFER_FLAGS,
     ...CHAIN_FLAGS,

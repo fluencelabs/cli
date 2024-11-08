@@ -38,8 +38,6 @@ import { removeProperties } from "../helpers/utils.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 
-import { userConfig } from "./globalConfigs.js";
-
 type EnsureSchemaArg = {
   name: string;
   configDirPath: string;
@@ -205,7 +203,7 @@ export type Migrations<Config> = Array<
   (config: Config) => Config | Promise<Config>
 >;
 export type GetDefaultConfig = () => string | Promise<string>;
-type GetPath = () => string | Promise<string>;
+export type GetPath = () => string | Promise<string>;
 
 export type ConfigValidateFunction<LatestConfig> = (
   config: LatestConfig,
@@ -398,16 +396,11 @@ export function getReadonlyConfigInitFunction<
 
       const defConf = await getDefaultConfig();
 
-      configString =
-        // this is basically the only place where userConfig is undefined until it's initialized in initCli
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        (userConfig?.docsInConfigs ?? false)
-          ? `${schemaPathComment}\n\n${documentationLinkComment}\n${defConf}`
-          : yamlDiffPatch(
-              `${schemaPathComment}\n${description}\n\n${documentationLinkComment}\n`,
-              {},
-              parse(defConf),
-            );
+      configString = yamlDiffPatch(
+        `${schemaPathComment}\n${description}\n\n${documentationLinkComment}\n`,
+        {},
+        parse(defConf),
+      );
 
       await saveConfig(configPath, configString);
     }
@@ -520,7 +513,7 @@ export function getReadonlyConfigInitFunction<
 
 const initializedConfigs = new Map<string, InitializedConfig<unknown>>();
 
-function formatConfig(configString: string) {
+export function formatConfig(configString: string) {
   const formattedConfig = configString
     .trim()
     .split("\n")

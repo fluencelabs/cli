@@ -1006,7 +1006,6 @@ __metadata:
     "@vitejs/plugin-react-swc": "npm:3.7.0"
     buffer: "npm:^6.0.3"
     eslint: "npm:9.10.0"
-    hotscript: "npm:1.0.13"
     npm-check-updates: "npm:^17.1.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -4665,13 +4664,6 @@ __metadata:
     minimalistic-assert: "npm:^1.0.0"
     minimalistic-crypto-utils: "npm:^1.0.1"
   checksum: 10c0/f3d9ba31b40257a573f162176ac5930109816036c59a09f901eb2ffd7e5e705c6832bedfff507957125f2086a0ab8f853c0df225642a88bf1fcaea945f20600d
-  languageName: node
-  linkType: hard
-
-"hotscript@npm:1.0.13":
-  version: 1.0.13
-  resolution: "hotscript@npm:1.0.13"
-  checksum: 10c0/423ea2aa437befeeffc32ea5a364b0d833f442fecdd7531c6fe8dc3df092c58d31145f757ad505ec7629ce4bb0eb8ff58889c8a58fe36312f975ff682f5cd422
   languageName: node
   linkType: hard
 

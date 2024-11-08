@@ -20,24 +20,24 @@ import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { jsonStringify } from "./common.js";
-import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
-import { envSchema } from "./lib/configs/project/env.js";
+import { addTitleDescriptionAndVersionToSchemas } from "./lib/configs/initConfigNew.js";
+import { options as envOptions } from "./lib/configs/project/env/env.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
 import { moduleSchema } from "./lib/configs/project/module.js";
-import { providerSchema } from "./lib/configs/project/provider.js";
-import { providerArtifactsSchema } from "./lib/configs/project/providerArtifacts.js";
-import { providerSecretsSchema } from "./lib/configs/project/providerSecrets.js";
+import { options as providerOptions } from "./lib/configs/project/provider/provider.js";
+import { options as providerArtifactsOptions } from "./lib/configs/project/providerArtifacts/providerArtifacts.js";
+import { options as providerSecretsOptions } from "./lib/configs/project/providerSecrets/providerSecrets.js";
 import { serviceSchema } from "./lib/configs/project/service.js";
 import { spellSchema } from "./lib/configs/project/spell.js";
 import { workersSchema } from "./lib/configs/project/workers.js";
-import { userConfigSchema } from "./lib/configs/user/config.js";
+import { options as userConfigOptions } from "./lib/configs/user/config/config.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   JSON_EXT,
   MODULE_CONFIG_FILE_NAME,
   SCHEMAS_DIR_NAME,
   SERVICE_CONFIG_FILE_NAME,
-  GLOBAL_CONFIG_FILE_NAME,
+  USER_CONFIG_FILE_NAME,
   WORKERS_CONFIG_FILE_NAME,
   SPELL_CONFIG_FILE_NAME,
   FS_OPTIONS,
@@ -45,7 +45,6 @@ import {
   CLI_NAME_FULL,
   PROVIDER_CONFIG_FILE_NAME,
   ENV_CONFIG_FILE_NAME,
-  DOCKER_COMPOSE_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FILE_NAME,
 } from "./lib/const.js";
@@ -55,18 +54,40 @@ import CLIPackageJSON from "./versions/cli.package.json";
 const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
 const DOCS_COMMANDS_PATH = join("docs", "commands", "README.md");
 
+function getLatestConfigOptionsSchema<
+  T extends { schema: { description?: string } },
+>(arr: T[]) {
+  const latestOptions = arr[arr.length - 1];
+
+  assert(
+    latestOptions !== undefined,
+    "Unreachable. There is always at least one element in the array",
+  );
+
+  return latestOptions.schema;
+}
+
 const configsInfo = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
-  [PROVIDER_CONFIG_FILE_NAME]: providerSchema,
-  [PROVIDER_SECRETS_CONFIG_FILE_NAME]: providerSecretsSchema,
+  [PROVIDER_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
+    await addTitleDescriptionAndVersionToSchemas(providerOptions),
+  ),
+  [PROVIDER_SECRETS_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
+    await addTitleDescriptionAndVersionToSchemas(providerSecretsOptions),
+  ),
   [MODULE_CONFIG_FILE_NAME]: moduleSchema,
   [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
   [SPELL_CONFIG_FILE_NAME]: spellSchema,
   [WORKERS_CONFIG_FILE_NAME]: workersSchema,
-  [GLOBAL_CONFIG_FILE_NAME]: userConfigSchema,
-  [ENV_CONFIG_FILE_NAME]: envSchema,
-  [DOCKER_COMPOSE_FILE_NAME]: dockerComposeSchema,
-  [PROVIDER_ARTIFACTS_CONFIG_FILE_NAME]: providerArtifactsSchema,
+  [USER_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
+    await addTitleDescriptionAndVersionToSchemas(userConfigOptions),
+  ),
+  [ENV_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
+    await addTitleDescriptionAndVersionToSchemas(envOptions),
+  ),
+  [PROVIDER_ARTIFACTS_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
+    await addTitleDescriptionAndVersionToSchemas(providerArtifactsOptions),
+  ),
 }).map(([filename, schema]) => {
   return {
     schemaPath: join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),

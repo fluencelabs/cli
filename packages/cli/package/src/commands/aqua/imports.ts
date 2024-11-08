@@ -24,7 +24,6 @@ import { initCli } from "../../lib/lifeCycle.js";
 export default class Json extends BaseCommand<typeof Json> {
   static override description =
     "Returns a list of aqua imports that CLI produces";
-  static override flags = {};
 
   async run(): Promise<void> {
     await initCli(this, await this.parse(Json));

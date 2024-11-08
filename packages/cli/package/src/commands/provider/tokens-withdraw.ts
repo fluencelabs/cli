@@ -25,13 +25,14 @@ import {
   MAX_TOKEN_AMOUNT_KEYWORD,
   NOX_NAMES_FLAG,
 } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 const AMOUNT_FLAG_NAME = "amount";
 
 export default class TokensWithdraw extends BaseCommand<typeof TokensWithdraw> {
-  static override aliases = ["provider:tw"];
-  static override description = `Withdraw ${FLT_SYMBOL} tokens from noxes`;
+  static override hiddenAliases = ["provider:tw"];
+  static override description = `Withdraw ${FLT_SYMBOL} tokens from noxes${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,

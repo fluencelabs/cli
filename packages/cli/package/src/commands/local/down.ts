@@ -15,17 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { dirname } from "path";
+
 import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand.js";
-import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { ensureDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
   DOCKER_COMPOSE_FULL_FILE_NAME,
   DOCKER_COMPOSE_FLAGS,
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
 export default class Down extends BaseCommand<typeof Down> {
   static override description = `Stop and remove currently running ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
@@ -41,24 +42,16 @@ export default class Down extends BaseCommand<typeof Down> {
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Down));
-    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
-
-    await input({
-      message: `Stopping and removing ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose. Are you sure?`,
-    });
+    const dockerComposeConfigPath = await ensureDockerComposeConfig();
 
     await dockerCompose({
       args: [
         "down",
         ...(flags.flags === undefined ? [] : flags.flags.split(" ")),
       ],
-      flags: {
-        v: flags.volumes,
-      },
+      flags: { v: flags.volumes },
       printOutput: true,
-      options: {
-        cwd: dockerComposeConfig.$getDirPath(),
-      },
+      options: { cwd: dirname(dockerComposeConfigPath) },
     });
   }
 }

@@ -21,9 +21,9 @@ import { Flags } from "@oclif/core";
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
-  initNewReadonlyProviderConfig,
-  initReadonlyProviderConfig,
-} from "../../lib/configs/project/provider.js";
+  initNewProviderConfig,
+  initProviderConfig,
+} from "../../lib/configs/project/provider/provider.js";
 import {
   CHAIN_FLAGS,
   NOXES_FLAG,
@@ -45,7 +45,7 @@ export default class Init extends BaseCommand<typeof Init> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
 
-    let providerConfig = await initReadonlyProviderConfig();
+    let providerConfig = await initProviderConfig();
 
     if (providerConfig !== null) {
       return commandObj.error(
@@ -55,7 +55,7 @@ export default class Init extends BaseCommand<typeof Init> {
       );
     }
 
-    providerConfig = await initNewReadonlyProviderConfig(flags);
+    providerConfig = await initNewProviderConfig(flags);
 
     commandObj.logToStderr(
       `Provider config is at ${color.yellow(providerConfig.$getPath())}`,

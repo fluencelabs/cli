@@ -30,13 +30,14 @@ import {
   populateTx,
   signBatch,
 } from "../../lib/dealClient.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class DealExit extends BaseCommand<typeof DealExit> {
-  static override aliases = ["provider:de"];
-  static override description = "Exit from deal";
+  static override hiddenAliases = ["provider:de"];
+  static override description = `Exit from deal${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,

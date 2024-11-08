@@ -26,11 +26,11 @@ import { commandObj } from "../../commandObj.js";
 import {
   ensureComputerPeerConfigs,
   ensureReadonlyProviderConfig,
-} from "../../configs/project/provider.js";
+} from "../../configs/project/provider/provider.js";
 import {
   initNewProviderArtifactsConfig,
-  initReadonlyProviderArtifactsConfig,
-} from "../../configs/project/providerArtifacts.js";
+  initProviderArtifactsConfig,
+} from "../../configs/project/providerArtifacts/providerArtifacts.js";
 import {
   ALL_FLAG_VALUE,
   CLI_NAME,
@@ -658,7 +658,7 @@ export type EnsureOfferConfig = Awaited<
 
 async function ensureOfferConfigs() {
   const providerConfig = await ensureReadonlyProviderConfig();
-  const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
+  const providerArtifactsConfig = await initProviderArtifactsConfig();
   const { randomBytes } = await import("ethers");
   const fluenceEnv = await ensureFluenceEnv();
 
@@ -754,7 +754,7 @@ export async function resolveCreatedOffers(flags: OfferArtifactsArgs) {
     });
   }
 
-  const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
+  const providerArtifactsConfig = await initProviderArtifactsConfig();
 
   if (providerArtifactsConfig === null) {
     return commandObj.error(

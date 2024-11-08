@@ -20,11 +20,12 @@ import { Args } from "@oclif/core";
 import { BaseCommand } from "../../baseCommand.js";
 import { collateralRewardWithdraw } from "../../lib/chain/commitment.js";
 import { CC_IDS_FLAG_NAME, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class RewardWithdraw extends BaseCommand<typeof RewardWithdraw> {
-  static override aliases = ["delegator:rw"];
-  static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitment`;
+  static override hiddenAliases = ["delegator:rw"];
+  static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitment${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
   };

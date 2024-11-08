@@ -18,11 +18,12 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Register extends BaseCommand<typeof Register> {
-  static override aliases = ["provider:r"];
-  static override description = "Register as a provider";
+  static override hiddenAliases = ["provider:r"];
+  static override description = `Register as a provider${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
   };

@@ -23,7 +23,6 @@ const BASE_58_PREFIX = "z";
 export async function peerIdBase58ToUint8Array(peerIdBase58: string) {
   const [{ digest }, { base58btc }] = await Promise.all([
     import("multiformats"),
-
     import("multiformats/bases/base58"),
   ]);
 

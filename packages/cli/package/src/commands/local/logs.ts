@@ -15,9 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { dirname } from "path";
+
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { checkDockerComposeConfigExists } from "../../lib/configs/project/dockerCompose.js";
 import {
   DOCKER_COMPOSE_FULL_FILE_NAME,
   DOCKER_COMPOSE_FLAGS,
@@ -33,9 +35,9 @@ export default class Logs extends BaseCommand<typeof Logs> {
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Logs));
-    const dockerComposeConfig = await initReadonlyDockerComposeConfig();
+    const dockerComposeConfigPath = await checkDockerComposeConfigExists();
 
-    if (dockerComposeConfig === null) {
+    if (dockerComposeConfigPath === null) {
       commandObj.error(
         `Cannot find ${DOCKER_COMPOSE_FULL_FILE_NAME}. Aborting.`,
       );
@@ -46,9 +48,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
         "logs",
         ...(flags.flags === undefined ? [] : flags.flags.split(" ")),
       ],
-      options: {
-        cwd: dockerComposeConfig.$getDirPath(),
-      },
+      options: { cwd: dirname(dockerComposeConfigPath) },
     });
 
     commandObj.log(logs);

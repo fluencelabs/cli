@@ -18,11 +18,12 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { CC_FLAGS, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
-  static override description = `Add ${FLT_SYMBOL} collateral to capacity commitment to activate it`;
-  static override aliases = ["provider:ca"];
+  static override hiddenAliases = ["provider:ca"];
+  static override description = `Add ${FLT_SYMBOL} collateral to capacity commitment to activate it${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...CC_FLAGS,

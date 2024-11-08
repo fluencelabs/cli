@@ -74,7 +74,7 @@
 
 ## `fluence air beautify [PATH]`
 
-Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
+Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals. Alias: fluence air b
 
 ```
 USAGE
@@ -88,10 +88,7 @@ FLAGS
 
 DESCRIPTION
   Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended
-  to be read by mere mortals.
-
-ALIASES
-  $ fluence air b
+  to be read by mere mortals. Alias: fluence air b
 ```
 
 _See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/air/beautify.ts)_
@@ -183,7 +180,7 @@ _See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/f
 
 ## `fluence aqua yml [INPUT] [OUTPUT]`
 
-Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
+Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into. Alias: fluence aqua yaml
 
 ```
 USAGE
@@ -204,10 +201,7 @@ DESCRIPTION
   Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua
   object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation
   https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and
-  what they translate into
-
-ALIASES
-  $ fluence aqua yaml
+  what they translate into. Alias: fluence aqua yaml
 ```
 
 _See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/aqua/yml.ts)_
@@ -504,7 +498,7 @@ _See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence deal workers-add [DEPLOYMENT-NAMES]`
 
-Add missing workers to the deal
+Add missing workers to the deal. Alias: fluence deal wa
 
 ```
 USAGE
@@ -524,17 +518,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Add missing workers to the deal
-
-ALIASES
-  $ fluence deal wa
+  Add missing workers to the deal. Alias: fluence deal wa
 ```
 
 _See code: [src/commands/deal/workers-add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/deal/workers-add.ts)_
 
 ## `fluence deal workers-remove [WORKER-IDS]`
 
-Remove unit from the deal
+Remove unit from the deal. Alias: fluence deal wr
 
 ```
 USAGE
@@ -555,10 +546,7 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Remove unit from the deal
-
-ALIASES
-  $ fluence deal wr
+  Remove unit from the deal. Alias: fluence deal wr
 ```
 
 _See code: [src/commands/deal/workers-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/deal/workers-remove.ts)_
@@ -611,7 +599,7 @@ _See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence delegator collateral-add [IDS]`
 
-Add FLT collateral to capacity commitment
+Add FLT collateral to capacity commitment. Alias: fluence delegator ca
 
 ```
 USAGE
@@ -630,17 +618,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Add FLT collateral to capacity commitment
-
-ALIASES
-  $ fluence delegator ca
+  Add FLT collateral to capacity commitment. Alias: fluence delegator ca
 ```
 
 _See code: [src/commands/delegator/collateral-add.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/delegator/collateral-add.ts)_
 
 ## `fluence delegator collateral-withdraw [IDS]`
 
-Withdraw FLT collateral from capacity commitment
+Withdraw FLT collateral from capacity commitment. Alias: fluence delegator cw
 
 ```
 USAGE
@@ -660,17 +645,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Withdraw FLT collateral from capacity commitment
-
-ALIASES
-  $ fluence delegator cw
+  Withdraw FLT collateral from capacity commitment. Alias: fluence delegator cw
 ```
 
 _See code: [src/commands/delegator/collateral-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/delegator/collateral-withdraw.ts)_
 
 ## `fluence delegator reward-withdraw [IDS]`
 
-Withdraw FLT rewards from capacity commitment
+Withdraw FLT rewards from capacity commitment. Alias: fluence delegator rw
 
 ```
 USAGE
@@ -689,17 +671,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Withdraw FLT rewards from capacity commitment
-
-ALIASES
-  $ fluence delegator rw
+  Withdraw FLT rewards from capacity commitment. Alias: fluence delegator rw
 ```
 
 _See code: [src/commands/delegator/reward-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/delegator/reward-withdraw.ts)_
 
 ## `fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
+Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies). Alias: fluence dep i
 
 ```
 USAGE
@@ -714,10 +693,8 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
-
-ALIASES
-  $ fluence dep i
+  Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies). Alias:
+  fluence dep i
 
 EXAMPLES
   $ fluence dep install
@@ -727,7 +704,7 @@ _See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob
 
 ## `fluence dep reset`
 
-Reset all project dependencies to recommended versions
+Reset all project dependencies to recommended versions. Alias: fluence dep r
 
 ```
 USAGE
@@ -737,10 +714,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Reset all project dependencies to recommended versions
-
-ALIASES
-  $ fluence dep r
+  Reset all project dependencies to recommended versions. Alias: fluence dep r
 
 EXAMPLES
   $ fluence dep reset
@@ -750,7 +724,7 @@ _See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/f
 
 ## `fluence dep uninstall PACKAGE-NAME`
 
-Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
+Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies). Alias: fluence dep un
 
 ```
 USAGE
@@ -763,10 +737,8 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
-
-ALIASES
-  $ fluence dep un
+  Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies). Alias:
+  fluence dep un
 
 EXAMPLES
   $ fluence dep uninstall
@@ -776,7 +748,7 @@ _See code: [src/commands/dep/uninstall.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence dep versions`
 
-Get versions of all cli dependencies, including aqua, marine, mrepl and internal
+Get versions of all cli dependencies, including aqua, marine, mrepl and internal. Alias: fluence dep v
 
 ```
 USAGE
@@ -789,10 +761,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Get versions of all cli dependencies, including aqua, marine, mrepl and internal
-
-ALIASES
-  $ fluence dep v
+  Get versions of all cli dependencies, including aqua, marine, mrepl and internal. Alias: fluence dep v
 
 EXAMPLES
   $ fluence dep versions
@@ -1215,7 +1184,7 @@ _See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence provider cc-activate`
 
-Add FLT collateral to capacity commitment to activate it
+Add FLT collateral to capacity commitment to activate it. Alias: fluence provider ca
 
 ```
 USAGE
@@ -1236,17 +1205,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Add FLT collateral to capacity commitment to activate it
-
-ALIASES
-  $ fluence provider ca
+  Add FLT collateral to capacity commitment to activate it. Alias: fluence provider ca
 ```
 
 _See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/cc-activate.ts)_
 
 ## `fluence provider cc-create`
 
-Create Capacity commitment
+Create Capacity commitment. Alias: fluence provider cc
 
 ```
 USAGE
@@ -1266,17 +1232,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Create Capacity commitment
-
-ALIASES
-  $ fluence provider cc
+  Create Capacity commitment. Alias: fluence provider cc
 ```
 
 _See code: [src/commands/provider/cc-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/cc-create.ts)_
 
 ## `fluence provider cc-finish`
 
-Move resources from deals, withdraw FLT collateral from capacity commitments, remove compute units from capacity commitments and finish capacity commitments
+Move resources from deals, withdraw FLT collateral from capacity commitments, remove compute units from capacity commitments and finish capacity commitments. Aliases: fluence provider ccf, fluence provider cc-collateral-withdraw
 
 ```
 USAGE
@@ -1298,17 +1261,14 @@ FLAGS
 
 DESCRIPTION
   Move resources from deals, withdraw FLT collateral from capacity commitments, remove compute units from capacity
-  commitments and finish capacity commitments
-
-ALIASES
-  $ fluence provider ccf
+  commitments and finish capacity commitments. Aliases: fluence provider ccf, fluence provider cc-collateral-withdraw
 ```
 
 _See code: [src/commands/provider/cc-finish.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/cc-finish.ts)_
 
 ## `fluence provider cc-info`
 
-Get info about capacity commitments
+Get info about capacity commitments. Alias: fluence provider ci
 
 ```
 USAGE
@@ -1330,17 +1290,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Get info about capacity commitments
-
-ALIASES
-  $ fluence provider ci
+  Get info about capacity commitments. Alias: fluence provider ci
 ```
 
 _See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/cc-info.ts)_
 
 ## `fluence provider cc-remove`
 
-Remove Capacity commitment. You can remove it only BEFORE you activated it by depositing collateral
+Remove Capacity commitment. You can remove it only BEFORE you activated it by depositing collateral. Alias: fluence provider cr
 
 ```
 USAGE
@@ -1361,17 +1318,15 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Remove Capacity commitment. You can remove it only BEFORE you activated it by depositing collateral
-
-ALIASES
-  $ fluence provider cr
+  Remove Capacity commitment. You can remove it only BEFORE you activated it by depositing collateral. Alias: fluence
+  provider cr
 ```
 
 _See code: [src/commands/provider/cc-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/cc-remove.ts)_
 
 ## `fluence provider cc-rewards-withdraw`
 
-Withdraw FLT rewards from capacity commitments
+Withdraw FLT rewards from capacity commitments. Alias: fluence provider crw
 
 ```
 USAGE
@@ -1392,17 +1347,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Withdraw FLT rewards from capacity commitments
-
-ALIASES
-  $ fluence provider crw
+  Withdraw FLT rewards from capacity commitments. Alias: fluence provider crw
 ```
 
 _See code: [src/commands/provider/cc-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/cc-rewards-withdraw.ts)_
 
 ## `fluence provider deal-exit`
 
-Exit from deal
+Exit from deal. Alias: fluence provider de
 
 ```
 USAGE
@@ -1420,17 +1372,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Exit from deal
-
-ALIASES
-  $ fluence provider de
+  Exit from deal. Alias: fluence provider de
 ```
 
 _See code: [src/commands/provider/deal-exit.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/deal-exit.ts)_
 
 ## `fluence provider deal-list`
 
-List all deals
+List all deals. Alias: fluence provider dl
 
 ```
 USAGE
@@ -1445,17 +1394,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  List all deals
-
-ALIASES
-  $ fluence provider dl
+  List all deals. Alias: fluence provider dl
 ```
 
 _See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/deal-list.ts)_
 
 ## `fluence provider deal-rewards-info [DEAL-ADDRESS] [ON-CHAIN-WORKER-ID]`
 
-Deal rewards info
+Deal rewards info. Alias: fluence provider dri
 
 ```
 USAGE
@@ -1475,17 +1421,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Deal rewards info
-
-ALIASES
-  $ fluence provider dri
+  Deal rewards info. Alias: fluence provider dri
 ```
 
 _See code: [src/commands/provider/deal-rewards-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/deal-rewards-info.ts)_
 
 ## `fluence provider deal-rewards-withdraw`
 
-Withdraw USDC rewards from deals
+Withdraw USDC rewards from deals. Alias: fluence provider drw
 
 ```
 USAGE
@@ -1502,10 +1445,7 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Withdraw USDC rewards from deals
-
-ALIASES
-  $ fluence provider drw
+  Withdraw USDC rewards from deals. Alias: fluence provider drw
 ```
 
 _See code: [src/commands/provider/deal-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/deal-rewards-withdraw.ts)_
@@ -1543,7 +1483,7 @@ _See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blo
 
 ## `fluence provider info`
 
-Print nox signing wallets and peer ids
+Print nox signing wallets and peer ids. Alias: fluence provider i
 
 ```
 USAGE
@@ -1563,10 +1503,7 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Print nox signing wallets and peer ids
-
-ALIASES
-  $ fluence provider i
+  Print nox signing wallets and peer ids. Alias: fluence provider i
 ```
 
 _See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/info.ts)_
@@ -1598,7 +1535,7 @@ _See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence provider offer-create`
 
-Create offers. You have to be registered as a provider to do that
+Create offers. You have to be registered as a provider to do that. Alias: fluence provider oc
 
 ```
 USAGE
@@ -1616,17 +1553,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Create offers. You have to be registered as a provider to do that
-
-ALIASES
-  $ fluence provider oc
+  Create offers. You have to be registered as a provider to do that. Alias: fluence provider oc
 ```
 
 _See code: [src/commands/provider/offer-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/offer-create.ts)_
 
 ## `fluence provider offer-info`
 
-Get info about offers
+Get info about offers. Alias: fluence provider oi
 
 ```
 USAGE
@@ -1646,17 +1580,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Get info about offers
-
-ALIASES
-  $ fluence provider oi
+  Get info about offers. Alias: fluence provider oi
 ```
 
 _See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/offer-info.ts)_
 
 ## `fluence provider offer-remove`
 
-Remove offers
+Remove offers. Alias: fluence provider or
 
 ```
 USAGE
@@ -1676,17 +1607,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Remove offers
-
-ALIASES
-  $ fluence provider or
+  Remove offers. Alias: fluence provider or
 ```
 
 _See code: [src/commands/provider/offer-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/offer-remove.ts)_
 
 ## `fluence provider offer-update`
 
-Update offers
+Update offers. Alias: fluence provider ou
 
 ```
 USAGE
@@ -1704,17 +1632,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Update offers
-
-ALIASES
-  $ fluence provider ou
+  Update offers. Alias: fluence provider ou
 ```
 
 _See code: [src/commands/provider/offer-update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/offer-update.ts)_
 
 ## `fluence provider register`
 
-Register as a provider
+Register as a provider. Alias: fluence provider r
 
 ```
 USAGE
@@ -1729,17 +1654,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Register as a provider
-
-ALIASES
-  $ fluence provider r
+  Register as a provider. Alias: fluence provider r
 ```
 
 _See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/register.ts)_
 
 ## `fluence provider tokens-distribute`
 
-Distribute FLT tokens to noxes
+Distribute FLT tokens to noxes. Alias: fluence provider td
 
 ```
 USAGE
@@ -1760,17 +1682,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Distribute FLT tokens to noxes
-
-ALIASES
-  $ fluence provider td
+  Distribute FLT tokens to noxes. Alias: fluence provider td
 ```
 
 _See code: [src/commands/provider/tokens-distribute.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/tokens-distribute.ts)_
 
 ## `fluence provider tokens-withdraw`
 
-Withdraw FLT tokens from noxes
+Withdraw FLT tokens from noxes. Alias: fluence provider tw
 
 ```
 USAGE
@@ -1790,17 +1709,14 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Withdraw FLT tokens from noxes
-
-ALIASES
-  $ fluence provider tw
+  Withdraw FLT tokens from noxes. Alias: fluence provider tw
 ```
 
 _See code: [src/commands/provider/tokens-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/tokens-withdraw.ts)_
 
 ## `fluence provider update`
 
-Update provider info
+Update provider info. Alias: fluence provider u
 
 ```
 USAGE
@@ -1815,10 +1731,7 @@ FLAGS
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Update provider info
-
-ALIASES
-  $ fluence provider u
+  Update provider info. Alias: fluence provider u
 ```
 
 _See code: [src/commands/provider/update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/update.ts)_

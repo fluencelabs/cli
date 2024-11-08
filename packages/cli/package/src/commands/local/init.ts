@@ -22,10 +22,10 @@ import { color } from "@oclif/color";
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
-  initNewReadonlyDockerComposeConfig,
-  initReadonlyDockerComposeConfig,
+  ensureDockerComposeConfig,
+  checkDockerComposeConfigExists,
 } from "../../lib/configs/project/dockerCompose.js";
-import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
+import { initNewProviderConfig } from "../../lib/configs/project/provider/provider.js";
 import {
   DOCKER_COMPOSE_FULL_FILE_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
@@ -42,28 +42,27 @@ export default class Init extends BaseCommand<typeof Init> {
   };
   async run(): Promise<void> {
     await initCli(this, await this.parse(Init));
-    await initNewReadonlyProviderConfig();
-    const existingDockerCompose = await initReadonlyDockerComposeConfig();
+    await initNewProviderConfig();
+    const existingDockerComposePath = await checkDockerComposeConfigExists();
 
-    if (existingDockerCompose !== null) {
+    if (existingDockerComposePath !== null) {
       const isOverwriting = await confirm({
         message: `Do you want to replace existing ${color.yellow(
-          existingDockerCompose.$getPath(),
+          existingDockerComposePath,
         )}`,
         default: false,
       });
 
       if (!isOverwriting) {
         commandObj.error(
-          `The config already exists at ${existingDockerCompose.$getPath()}. Aborting.`,
+          `The config already exists at ${existingDockerComposePath}. Aborting.`,
         );
       }
 
-      await rm(existingDockerCompose.$getPath());
+      await rm(existingDockerComposePath);
     }
 
-    const dockerCompose = await initNewReadonlyDockerComposeConfig();
-
-    commandObj.logToStderr(`Created new config at ${dockerCompose.$getPath()}`);
+    const dockerComposePath = await ensureDockerComposeConfig();
+    commandObj.logToStderr(`Created new config at ${dockerComposePath}`);
   }
 }

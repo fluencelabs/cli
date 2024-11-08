@@ -20,4 +20,6 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react()],
+  // Disable chunk size warning cause this frontend is only used on local server
+  build: { chunkSizeWarningLimit: Infinity },
 });

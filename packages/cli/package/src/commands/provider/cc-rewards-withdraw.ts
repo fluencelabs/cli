@@ -18,13 +18,14 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { collateralRewardWithdraw } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CCRewardsWithdraw extends BaseCommand<
   typeof CCRewardsWithdraw
 > {
-  static override aliases = ["provider:crw"];
-  static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitments`;
+  static override hiddenAliases = ["provider:crw"];
+  static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitments${aliasesText.apply(this)}`;
   static override flags = {
     ...CC_FLAGS,
     ...CHAIN_FLAGS,

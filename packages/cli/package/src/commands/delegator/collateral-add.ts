@@ -20,11 +20,12 @@ import { Args } from "@oclif/core";
 import { BaseCommand } from "../../baseCommand.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { CC_IDS_FLAG_NAME, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CollateralAdd extends BaseCommand<typeof CollateralAdd> {
-  static override aliases = ["delegator:ca"];
-  static override description = `Add ${FLT_SYMBOL} collateral to capacity commitment`;
+  static override hiddenAliases = ["delegator:ca"];
+  static override description = `Add ${FLT_SYMBOL} collateral to capacity commitment${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
   };

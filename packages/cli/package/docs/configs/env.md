@@ -1,12 +1,12 @@
 # env.yaml
 
-Defines user project preferences
+Defines project user's preferences
 
 ## Properties
 
 | Property        | Type                  | Required | Description                                                                                    |
 |-----------------|-----------------------|----------|------------------------------------------------------------------------------------------------|
-| `version`       | integer               | **Yes**  |                                                                                                |
+| `version`       | integer               | **Yes**  | Config version                                                                                 |
 | `blockScoutUrl` | string                | No       | BlockScout URL to use                                                                          |
 | `chainId`       | number                | No       | Chain ID to use                                                                                |
 | `deployment`    | [object](#deployment) | No       | Deployed contract address overrides                                                            |

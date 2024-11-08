@@ -25,13 +25,14 @@ import {
   FINISH_COMMITMENT_FLAG_NAME,
   FLT_SYMBOL,
 } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CollateralWithdraw extends BaseCommand<
   typeof CollateralWithdraw
 > {
-  static override aliases = ["delegator:cw"];
-  static override description = `Withdraw ${FLT_SYMBOL} collateral from capacity commitment`;
+  static override hiddenAliases = ["delegator:cw"];
+  static override description = `Withdraw ${FLT_SYMBOL} collateral from capacity commitment${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     [FINISH_COMMITMENT_FLAG_NAME]: Flags.boolean({

@@ -22,8 +22,8 @@ import {
   PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import { removeSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { removeSecretKey } from "../../lib/secretKeys.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove key-pair from ${USER_SECRETS_CONFIG_FULL_FILE_NAME} or ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}`;

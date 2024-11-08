@@ -21,11 +21,12 @@ import {
   printCommitmentsInfoJSON,
 } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, CC_FLAGS, JSON_FLAG } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CCInfo extends BaseCommand<typeof CCInfo> {
-  static override aliases = ["provider:ci"];
-  static override description = "Get info about capacity commitments";
+  static override hiddenAliases = ["provider:ci"];
+  static override description = `Get info about capacity commitments${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...CC_FLAGS,

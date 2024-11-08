@@ -18,11 +18,12 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { updateProvider } from "../../lib/chain/providerInfo.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Update extends BaseCommand<typeof Update> {
-  static override aliases = ["provider:u"];
-  static override description = "Update provider info";
+  static override hiddenAliases = ["provider:u"];
+  static override description = `Update provider info${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
   };

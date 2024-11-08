@@ -39,7 +39,6 @@ const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove service from ${FLUENCE_CONFIG_FULL_FILE_NAME} services property and from all of the workers`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {};
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
       description: `Service name from ${FLUENCE_CONFIG_FULL_FILE_NAME}, path to a service or url to .tar.gz archive`,

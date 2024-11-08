@@ -23,11 +23,12 @@ import {
 } from "../../lib/chain/offer/offer.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS, OFFER_FLAGS } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
-  static override aliases = ["provider:oi"];
-  static override description = "Get info about offers";
+  static override hiddenAliases = ["provider:oi"];
+  static override description = `Get info about offers${aliasesText.apply(this)}`;
   static override flags = {
     ...OFFER_FLAGS,
     ...CHAIN_FLAGS,

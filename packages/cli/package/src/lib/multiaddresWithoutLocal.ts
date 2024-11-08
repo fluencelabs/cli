@@ -27,7 +27,7 @@ import { color } from "@oclif/color";
 import { type PublicFluenceEnv } from "../common.js";
 
 import { commandObj } from "./commandObj.js";
-import { initEnvConfig } from "./configs/project/env.js";
+import { initEnvConfig } from "./configs/project/env/env.js";
 import type { FluenceEnv } from "./const.js";
 
 export function getPeerId(addr: string): string {

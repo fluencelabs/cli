@@ -18,11 +18,12 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { updateOffers } from "../../lib/chain/offer/updateOffers.js";
 import { CHAIN_FLAGS, OFFER_FLAG } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class OfferUpdate extends BaseCommand<typeof OfferUpdate> {
-  static override aliases = ["provider:ou"];
-  static override description = "Update offers";
+  static override hiddenAliases = ["provider:ou"];
+  static override description = `Update offers${aliasesText.apply(this)}`;
   static override flags = {
     ...OFFER_FLAG,
     ...CHAIN_FLAGS,

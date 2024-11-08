@@ -16,9 +16,9 @@
  */
 
 import assert from "assert";
+import { writeFile } from "fs/promises";
 import { join, relative } from "path";
 
-import type { JSONSchemaType } from "ajv";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { CHAIN_RPC_PORT } from "../../../common.js";
@@ -27,7 +27,6 @@ import {
   CHAIN_DEPLOY_SCRIPT_NAME,
   CHAIN_RPC_CONTAINER_NAME,
   CONFIGS_DIR_NAME,
-  DOCKER_COMPOSE_FILE_NAME,
   GRAPH_NODE_CONTAINER_NAME,
   GRAPH_NODE_PORT,
   HTTP_PORT_START,
@@ -40,19 +39,15 @@ import {
   WEB_SOCKET_PORT_START,
 } from "../../const.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
+import { pathExists } from "../../helpers/utils.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureFluenceConfigsDir, getFluenceDir } from "../../paths.js";
-import {
-  getConfigInitFunction,
-  type GetDefaultConfig,
-  getReadonlyConfigInitFunction,
-  type InitializedConfig,
-  type InitializedReadonlyConfig,
-  type Migrations,
-} from "../initConfig.js";
+import { ensureDockerComposeConfigPath } from "../../paths.js";
 
-import schema from "./compose.schema.json" with { type: "json" };
-import { ensureComputerPeerConfigs, getConfigTomlName } from "./provider.js";
+import {
+  ensureComputerPeerConfigs,
+  getConfigTomlName,
+} from "./provider/provider.js";
 
 type Service = {
   image?: string;
@@ -67,15 +62,11 @@ type Service = {
 };
 
 type ConfigV0 = {
-  version: "3";
   services: Record<string, Service>;
   volumes?: Record<string, null>;
   include?: string[];
   secrets?: Record<string, { file?: string }>;
 };
-
-// @ts-expect-error - this schema is from official github and it's valid
-const configSchemaV0: JSONSchemaType<ConfigV0> = schema;
 
 type GenNoxImageArgs = {
   name: string;
@@ -147,7 +138,7 @@ function genNox({
   ];
 }
 
-async function genDockerCompose(): Promise<LatestConfig> {
+async function genDefaultDockerCompose(): Promise<ConfigV0> {
   const configsDir = await ensureFluenceConfigsDir();
   const fluenceDir = getFluenceDir();
   const computePeers = await ensureComputerPeerConfigs();
@@ -182,7 +173,6 @@ async function genDockerCompose(): Promise<LatestConfig> {
   } = bootstrap;
 
   return {
-    version: "3",
     volumes: {
       "chain-rpc": null,
       [IPFS_CONTAINER_NAME]: null,
@@ -320,51 +310,20 @@ async function genDockerCompose(): Promise<LatestConfig> {
   };
 }
 
-async function genDefaultDockerCompose(): Promise<GetDefaultConfig> {
-  const def = await genDockerCompose();
+export async function ensureDockerComposeConfig() {
+  const configPath = await ensureDockerComposeConfigPath();
 
-  return () => {
-    return yamlDiffPatch("", {}, def);
-  };
+  if (!(await pathExists(configPath))) {
+    await writeFile(
+      configPath,
+      yamlDiffPatch("", {}, await genDefaultDockerCompose()),
+    );
+  }
+
+  return configPath;
 }
 
-const migrations: Migrations<Config> = [];
-
-type Config = ConfigV0;
-type LatestConfig = ConfigV0;
-export type DockerComposeConfig = InitializedConfig<LatestConfig>;
-export type DockerComposeConfigReadonly =
-  InitializedReadonlyConfig<LatestConfig>;
-
-export function dockerComposeDirPath() {
-  return getFluenceDir();
+export async function checkDockerComposeConfigExists() {
+  const configPath = await ensureDockerComposeConfigPath();
+  return (await pathExists(configPath)) ? configPath : null;
 }
-
-const initConfigOptions = {
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
-  migrations,
-  name: DOCKER_COMPOSE_FILE_NAME,
-  getConfigOrConfigDirPath: dockerComposeDirPath,
-};
-
-export async function initNewDockerComposeConfig() {
-  return getConfigInitFunction(
-    initConfigOptions,
-    await genDefaultDockerCompose(),
-  )();
-}
-
-export async function initNewReadonlyDockerComposeConfig() {
-  return getReadonlyConfigInitFunction(
-    initConfigOptions,
-    await genDefaultDockerCompose(),
-  )();
-}
-
-export const initDockerComposeConfig = getConfigInitFunction(initConfigOptions);
-
-export const initReadonlyDockerComposeConfig =
-  getReadonlyConfigInitFunction(initConfigOptions);
-
-export const dockerComposeSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

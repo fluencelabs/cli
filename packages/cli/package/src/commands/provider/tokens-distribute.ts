@@ -25,13 +25,14 @@ import {
   NOX_NAMES_FLAG,
   OFFER_FLAG,
 } from "../../lib/const.js";
+import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class TokensDistribute extends BaseCommand<
   typeof TokensDistribute
 > {
-  static override aliases = ["provider:td"];
-  static override description = `Distribute ${FLT_SYMBOL} tokens to noxes`;
+  static override hiddenAliases = ["provider:td"];
+  static override description = `Distribute ${FLT_SYMBOL} tokens to noxes${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...NOX_NAMES_FLAG,
