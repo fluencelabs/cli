@@ -16,10 +16,12 @@
  */
 
 import { BaseCommand } from "../../baseCommand.js";
+import { jsonStringify } from "../../common.js";
 import {
-  printCommitmentsInfo,
-  printCommitmentsInfoJSON,
+  getDetailedCommitmentsInfoGroupedByStatus,
+  stringifyDetailedCommitmentsInfo,
 } from "../../lib/chain/commitment.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS, CC_FLAGS, JSON_FLAG } from "../../lib/const.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -36,10 +38,16 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CCInfo));
 
-    if (flags.json) {
-      await printCommitmentsInfoJSON(flags);
-    } else {
-      await printCommitmentsInfo(flags);
-    }
+    const ccInfo = await getDetailedCommitmentsInfoGroupedByStatus(flags);
+
+    commandObj.log(
+      flags.json
+        ? jsonStringify(
+            ccInfo.flatMap(({ CCs }) => {
+              return CCs;
+            }),
+          )
+        : stringifyDetailedCommitmentsInfo(ccInfo),
+    );
   }
 }

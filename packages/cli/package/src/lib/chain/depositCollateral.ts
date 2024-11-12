@@ -19,31 +19,30 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { getContracts, getReadonlyContracts, sign } from "../dealClient.js";
+import { ccIdsAndStatuses } from "../gql/gql.js";
 import { splitErrorsAndResults } from "../helpers/utils.js";
 
 import {
   stringifyBasicCommitmentInfo,
-  getCommitmentsInfo,
+  getCommitmentsGroupedByStatus,
   basicCCInfoAndStatusToString,
 } from "./commitment.js";
 import { type CCFlags } from "./commitment.js";
+import { peerIdHexStringToBase58String } from "./conversions.js";
 import { fltFormatWithSymbol } from "./currencies.js";
 
 export async function depositCollateral(flags: CCFlags) {
-  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
-
   const [commitmentsWithInvalidStatus, commitmentsWithWaitDelegation] =
-    splitErrorsAndResults(await getCommitmentsInfo(flags), (c) => {
-      if (c.status === CommitmentStatus.WaitDelegation) {
-        return { result: c };
-      }
-
-      return { error: c };
-    });
+    splitErrorsAndResults(
+      await getCommitmentsGroupedByStatus(flags, ccIdsAndStatuses),
+      (c) => {
+        return c.status === "WaitDelegation" ? { result: c } : { error: c };
+      },
+    );
 
   if (commitmentsWithInvalidStatus.length > 0) {
     commandObj.warn(
-      `It's only possible to deposit collateral to the capacity commitments in the "WaitDelegation" status. The following commitments have invalid status:\n\n${await basicCCInfoAndStatusToString(
+      `It's only possible to deposit collateral to the capacity commitments in the "WaitDelegation" status. The following commitments have invalid status:\n\n${basicCCInfoAndStatusToString(
         commitmentsWithInvalidStatus,
       )}`,
     );
@@ -71,7 +70,7 @@ export async function depositCollateral(flags: CCFlags) {
     commitments.map(async (commitment) => {
       return {
         ...commitment,
-        collateral: await getCollateral(commitment.commitmentId),
+        collateral: await getCollateral(commitment.infoFromSubgraph.id),
       };
     }),
   );
@@ -84,15 +83,23 @@ export async function depositCollateral(flags: CCFlags) {
   );
 
   await sign({
-    title: `Deposit ${await fltFormatWithSymbol(collateralToApproveCommitment)} collateral to the following capacity commitments:\n\n${commitments
-      .map(({ commitmentId, noxName, peerId }) => {
-        return [noxName, peerId, commitmentId].filter(Boolean).join("\n");
-      })
-      .join("\n\n")}`,
+    title: `Deposit ${await fltFormatWithSymbol(collateralToApproveCommitment)} collateral to the following capacity commitments:\n\n${(
+      await Promise.all(
+        commitments.map(async ({ infoFromSubgraph, name }) => {
+          return [
+            name,
+            await peerIdHexStringToBase58String(infoFromSubgraph.peer.id),
+            infoFromSubgraph.id,
+          ]
+            .filter(Boolean)
+            .join("\n");
+        }),
+      )
+    ).join("\n\n")}`,
     method: contracts.diamond.depositCollateral,
     args: [
-      commitments.map(({ commitmentId }) => {
-        return commitmentId;
+      commitments.map(({ infoFromSubgraph }) => {
+        return infoFromSubgraph.id;
       }),
       { value: collateralToApproveCommitment },
     ],
@@ -114,7 +121,7 @@ Deposited ${color.yellow(
 ${(
   await Promise.all(
     commitmentsWithCollateral.map(async (c) => {
-      return `Capacity commitment successfully activated!\n${stringifyBasicCommitmentInfo(
+      return `Capacity commitment successfully activated!\n${await stringifyBasicCommitmentInfo(
         c,
       )}\nCollateral: ${color.yellow(await fltFormatWithSymbol(c.collateral))}`;
     }),

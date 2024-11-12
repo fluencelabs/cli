@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ComputeUnit } from "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/types/schemes.js";
 import { color } from "@oclif/color";
 import omit from "lodash-es/omit.js";
 
@@ -46,7 +45,10 @@ import {
 } from "./offer.js";
 
 type PeersOnChain = {
-  computeUnits: ComputeUnit[];
+  computeUnits: {
+    id: string;
+    workerId: string | undefined;
+  }[];
   peerIdBase58: string;
   hexPeerId: string;
 }[];
@@ -58,7 +60,7 @@ export async function updateOffers(flags: OffersArgs) {
   const offersFoundOnChain = await filterOffersFoundOnChain(offers);
   const populatedTxs = await populateUpdateOffersTxs(offersFoundOnChain);
 
-  const updateOffersTxs = [
+  const [firstUpdateOffersTx, ...restUpdateOffersTxs] = [
     populatedTxs.flatMap(({ removePeersFromOffersTxs }) => {
       return removePeersFromOffersTxs.map(({ tx }) => {
         return tx;
@@ -71,7 +73,7 @@ export async function updateOffers(flags: OffersArgs) {
     }),
   ].flat();
 
-  if (updateOffersTxs.length === 0) {
+  if (firstUpdateOffersTx === undefined) {
     commandObj.logToStderr("No changes found for selected offers");
     return;
   }
@@ -94,7 +96,7 @@ export async function updateOffers(flags: OffersArgs) {
         return `${offerName} (${offerId})`;
       })
       .join("\n")}`,
-    updateOffersTxs,
+    [firstUpdateOffersTx, ...restUpdateOffersTxs],
     assertProviderIsRegistered,
   );
 }
@@ -104,7 +106,7 @@ export async function removeOffers(flags: OffersArgs) {
   const offersFoundOnChain = await filterOffersFoundOnChain(offers);
   const populatedTxs = await populateRemoveOffersTxs(offersFoundOnChain);
 
-  const removeOffersTxs = [
+  const [firstRemoveOffersTx, ...restRemoveOffersTxs] = [
     populatedTxs.flatMap(({ cuToRemoveTxs: txs }) => {
       return txs.map(({ tx }) => {
         return tx;
@@ -120,7 +122,7 @@ export async function removeOffers(flags: OffersArgs) {
     }),
   ].flat();
 
-  if (removeOffersTxs.length === 0) {
+  if (firstRemoveOffersTx === undefined) {
     commandObj.logToStderr("Nothing to remove for selected offers");
     return;
   }
@@ -143,7 +145,7 @@ export async function removeOffers(flags: OffersArgs) {
         return `${offerName} (${offerId})`;
       })
       .join("\n")}`,
-    removeOffersTxs,
+    [firstRemoveOffersTx, ...restRemoveOffersTxs],
     assertProviderIsRegistered,
   );
 

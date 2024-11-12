@@ -17,7 +17,9 @@
 
 import assert from "node:assert";
 
+import type { MarketFacet } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
+import type { Typed } from "ethers";
 
 import { versions } from "../versions.js";
 
@@ -35,18 +37,28 @@ import {
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import {
+  type MulticallReadItem,
   sign,
   getContracts,
-  getDealMatcherClient,
   getEventValue,
   getEventValues,
   getReadonlyContracts,
-  batchRead,
+  multicallRead,
 } from "./dealClient.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
+import {
+  DEFAULT_PAGE_LIMIT,
+  getDealForMatching,
+  getOffersForMatching,
+} from "./gql/gql.js";
+import type { OffersForMatchingQueryVariables } from "./gql/gqlGenerated.js";
 import { setTryTimeout } from "./helpers/setTryTimeout.js";
 import { stringifyUnknown } from "./helpers/stringifyUnknown.js";
-import { bigintToStr } from "./helpers/typesafeStringify.js";
+import {
+  bigintToStr,
+  nullableToString,
+  numToStr,
+} from "./helpers/typesafeStringify.js";
 import { commaSepStrToArr, splitErrorsAndResults } from "./helpers/utils.js";
 import { checkboxes, input, list } from "./prompt.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
@@ -176,25 +188,60 @@ export async function createAndMatchDealsForPeerIds({
       const peerIdUint8Array = await peerIdBase58ToUint8Array(peerId);
       const ccIds = await contracts.diamond.getComputeUnitIds(peerIdUint8Array);
 
-      const computeUnits = (
-        await batchRead(
-          ccIds.map((unitId) => {
-            return async () => {
-              const { deal } = await contracts.diamond.getComputeUnit(unitId);
-              return { unitId, deal };
-            };
-          }),
-        )
-      )
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const [{ offerId }, ...computeUnitInfos] = (await multicallRead([
+        {
+          target: contracts.deployment.diamond,
+          callData: contracts.diamond.interface.encodeFunctionData(
+            "getComputePeer",
+            [peerIdUint8Array],
+          ),
+          decode(returnData) {
+            return contracts.diamond.interface.decodeFunctionResult(
+              "getComputePeer",
+              returnData,
+            );
+          },
+        },
+        ...ccIds.map((unitId): MulticallReadItem => {
+          return {
+            target: contracts.deployment.diamond,
+            callData: contracts.diamond.interface.encodeFunctionData(
+              "getComputeUnit",
+              [unitId],
+            ),
+            decode(returnData) {
+              return contracts.diamond.interface.decodeFunctionResult(
+                "getComputeUnit",
+                returnData,
+              );
+            },
+          };
+        }),
+      ])) as [
+        Awaited<ReturnType<typeof contracts.diamond.getComputePeer>>,
+        ...Awaited<ReturnType<typeof contracts.diamond.getComputeUnit>>[],
+      ];
+
+      const computeUnits = ccIds
+        .map((unitId, i) => {
+          return {
+            unitId,
+            deal:
+              computeUnitInfos[i]?.deal ??
+              (() => {
+                throw new Error(
+                  `Unreachable. Couldn't get deal for compute unit ${unitId}`,
+                );
+              })(),
+          };
+        })
         .filter(({ deal }) => {
           return deal === ZeroAddress;
         })
         .map(({ unitId }) => {
           return unitId;
         });
-
-      const { offerId } =
-        await contracts.diamond.getComputePeer(peerIdUint8Array);
 
       return { computeUnits, offerId, peerId };
     }),
@@ -279,7 +326,6 @@ export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
 
 export async function match(dealAddress: string) {
   const { contracts } = await getContracts();
-  const dealMatcherClient = await getDealMatcherClient();
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
 
   dbg(
@@ -291,7 +337,7 @@ export async function match(dealAddress: string) {
   const matchedOffers = await setTryTimeout(
     "get matched offers by deal id",
     () => {
-      return dealMatcherClient.getMatchedOffersByDealId(dealAddress);
+      return getMatchedOffersByDealId(dealAddress);
     },
     (err) => {
       commandObj.error(
@@ -327,6 +373,445 @@ export async function match(dealAddress: string) {
       dealAddress,
     )}`,
   );
+}
+
+type MatchDealParm<T extends number> = Exclude<
+  Parameters<MarketFacet["matchDeal"]>[T],
+  Typed
+>;
+
+type GetMatchedOffersOut = {
+  offers: MatchDealParm<1>;
+  computeUnits: MatchDealParm<2>;
+} | null;
+
+async function getMatchedOffersByDealId(dealId: string) {
+  const { deal, _meta, graphNetworks } = await getDealForMatching(dealId);
+
+  if (deal === null || deal === undefined) {
+    commandObj.error(`Deal not found. Searched for: ${dealId}`);
+  }
+
+  const [graphNetwork] = graphNetworks;
+
+  if (graphNetwork === undefined) {
+    throw new Error("graphNetworks array is empty");
+  }
+
+  if (
+    graphNetwork.initTimestamp === null ||
+    graphNetwork.initTimestamp === undefined
+  ) {
+    throw new Error(
+      `graphNetwork.initTimestamp is not a number. Got: ${nullableToString(graphNetwork.initTimestamp)}`,
+    );
+  }
+
+  if (
+    graphNetwork.coreEpochDuration === null ||
+    graphNetwork.coreEpochDuration === undefined
+  ) {
+    throw new Error(
+      `graphNetwork.coreEpochDuration is not a number. Got: ${nullableToString(graphNetwork.coreEpochDuration)}`,
+    );
+  }
+
+  if (
+    graphNetwork.coreMinDealRematchingEpochs === null ||
+    graphNetwork.coreMinDealRematchingEpochs === undefined
+  ) {
+    throw new Error(
+      `graphNetwork.coreMinDealRematchingEpochs is not a number. Got: ${nullableToString(graphNetwork.coreMinDealRematchingEpochs)}`,
+    );
+  }
+
+  if (_meta === null || _meta === undefined) {
+    throw new Error(`_meta is expected to be ${nullableToString(_meta)}`);
+  }
+
+  if (_meta.block.timestamp === null || _meta.block.timestamp === undefined) {
+    throw new Error(
+      `_meta.block.timestamp is not a number. Got: ${nullableToString(_meta.block.timestamp)}`,
+    );
+  }
+
+  const { initTimestamp, coreEpochDuration, coreMinDealRematchingEpochs } =
+    graphNetwork;
+
+  if (deal.effectors === null || deal.effectors === undefined) {
+    throw new Error(
+      `deal.effectors is ${nullableToString(deal.effectors)} for dealId: ${dealId}. Array is expected.`,
+    );
+  }
+
+  const alreadyMatchedCU = deal.joinedWorkers?.length ?? 0;
+
+  if (alreadyMatchedCU % deal.cuCountPerWorker !== 0) {
+    throw new Error(
+      `Unreachable. Deal already has matched compute units, but the number of compute units is not a multiple of cuCountPerWorker. Already matched CU: ${numToStr(alreadyMatchedCU)}, cuCountPerWorker: ${numToStr(deal.cuCountPerWorker)}`,
+    );
+  }
+
+  const alreadyMatchedWorkers = alreadyMatchedCU / deal.cuCountPerWorker;
+  const targetWorkersToMatch = deal.targetWorkers - alreadyMatchedWorkers;
+
+  if (targetWorkersToMatch < 0) {
+    throw new Error(
+      `Deal already has more workers matched than target. In theory this should never be the case. Already matched: ${numToStr(alreadyMatchedWorkers)}, target: ${numToStr(deal.targetWorkers * deal.cuCountPerWorker)}`,
+    );
+  }
+
+  if (targetWorkersToMatch === 0) {
+    throw new Error(`Deal already has target number of workers matched.`);
+  }
+
+  const currentEpoch = calculateEpoch(
+    _meta.block.timestamp,
+    initTimestamp,
+    coreEpochDuration,
+  );
+
+  const matchedAtEpoch =
+    deal.matchedAt !== undefined
+      ? calculateEpoch(Number(deal.matchedAt), initTimestamp, coreEpochDuration)
+      : 0;
+
+  const nextEpochToRematch = matchedAtEpoch + coreMinDealRematchingEpochs;
+
+  if (currentEpoch <= nextEpochToRematch) {
+    throw new Error(
+      `Deal ${dealId} has been matched recently at: ${deal.matchedAt ?? "unknown"} (${numToStr(matchedAtEpoch)} epoch). Wait for ${numToStr(nextEpochToRematch)} epoch to rematch`,
+    );
+  }
+
+  const minWorkersToMatch = Math.max(
+    deal.minWorkers - alreadyMatchedWorkers,
+    0,
+  );
+
+  const { whitelist: providersWhiteList, blacklist: providersBlackList } =
+    prepareDealProviderAccessLists(
+      deal.providersAccessType,
+      deal.providersAccessList,
+    );
+
+  // Request page as big as allowed (remember about indexer limit).
+  // Shortens the query response for that rule as additional query size optimization.
+  const offersPerPageLimit = Math.min(targetWorkersToMatch, DEFAULT_PAGE_LIMIT);
+
+  // Request page of peers and CUs as big as allowed (remember about indexer limit).
+  const peersPerPageLimit = Math.min(
+    deal.maxWorkersPerProvider,
+    DEFAULT_PAGE_LIMIT,
+  );
+
+  const matchedOffers: NonNullable<GetMatchedOffersOut> = {
+    offers: [],
+    computeUnits: [],
+  };
+
+  let workersMatched = 0;
+
+  // Go through indexer pages until the end condition: one of {fulfilled | end of offers, and peers, and CUs.}
+  let lastPageReached = false;
+  let offersOffset = 0;
+  let peersOffset = 0;
+  let computeUnitsOffset = 0;
+
+  while (!lastPageReached) {
+    const offers = await getMatchedOffersPage(
+      {
+        dealId,
+        pricePerCuPerEpoch: deal.pricePerCuPerEpoch,
+        cuCountPerWorker: deal.cuCountPerWorker,
+        effectors: deal.effectors.map(({ effector: { id } }) => {
+          return id;
+        }),
+        paymentToken: deal.paymentToken.id,
+        targetWorkersToMatch,
+        minWorkersToMatch,
+        maxWorkersPerProvider: deal.maxWorkersPerProvider,
+        currentEpoch,
+        providersWhiteList,
+        providersBlackList,
+      },
+      offersPerPageLimit,
+      peersPerPageLimit,
+      offersOffset,
+      peersOffset,
+      computeUnitsOffset,
+    );
+
+    if (offers.length === 0) {
+      dbg("Got empty data from indexer, break search.");
+      break;
+    }
+
+    // Analyze fetched data to understand if we need to fetch next page and what
+    // params {offset, ...} to use for the next page.
+    for (const { peers, id: offerId } of offers) {
+      // Check if peers are empty and need to fetch next offer page.
+      // It could happen because we have after fetch filter: not more than cuCountPerWorker per peer
+      // that filters
+      if (peers === null || peers === undefined || peers.length === 0) {
+        offersOffset = offersOffset + DEFAULT_PAGE_LIMIT;
+        peersOffset = 0;
+        computeUnitsOffset = 0;
+        break;
+      }
+
+      const peersToReturn: NonNullable<GetMatchedOffersOut>["computeUnits"][number] =
+        [];
+
+      for (const { computeUnits } of peers) {
+        if (computeUnits === null || computeUnits === undefined) {
+          continue;
+        }
+
+        if (computeUnits.length >= deal.cuCountPerWorker) {
+          workersMatched = workersMatched + 1;
+
+          peersToReturn.push(
+            computeUnits.slice(0, deal.cuCountPerWorker).map((cu) => {
+              return cu.id;
+            }),
+          );
+        }
+
+        if (workersMatched === targetWorkersToMatch) {
+          matchedOffers.offers.push(offerId);
+          matchedOffers.computeUnits.push(peersToReturn);
+          return matchedOffers;
+        }
+
+        if (computeUnits.length < DEFAULT_PAGE_LIMIT) {
+          if (peers.length < DEFAULT_PAGE_LIMIT) {
+            if (offers.length < DEFAULT_PAGE_LIMIT) {
+              lastPageReached = true;
+            } else {
+              offersOffset = offersOffset + DEFAULT_PAGE_LIMIT;
+              peersOffset = 0;
+              computeUnitsOffset = 0;
+            }
+          } else {
+            peersOffset = peersOffset + DEFAULT_PAGE_LIMIT;
+            computeUnitsOffset = 0;
+          }
+        } else {
+          computeUnitsOffset = computeUnitsOffset + DEFAULT_PAGE_LIMIT;
+        }
+      }
+
+      matchedOffers.offers.push(offerId);
+      matchedOffers.computeUnits.push(peersToReturn);
+    }
+  }
+
+  if (workersMatched < minWorkersToMatch) {
+    dbg("workersMatched < minWorkersToMatch");
+    matchedOffers.offers = [];
+    matchedOffers.computeUnits = [];
+  }
+
+  if (
+    matchedOffers.offers.length === 0 ||
+    matchedOffers.computeUnits.length === 0
+  ) {
+    return null;
+  }
+
+  return matchedOffers;
+}
+
+function calculateEpoch(
+  timestamp: number,
+  epochControllerStorageInitTimestamp: number,
+  epochControllerStorageEpochDuration: number,
+) {
+  dbg(
+    `timestamp: ${numToStr(timestamp)} epochControllerStorageInitTimestamp: ${numToStr(epochControllerStorageInitTimestamp)} epochControllerStorageEpochDuration: ${numToStr(epochControllerStorageEpochDuration)}`,
+  );
+
+  return Math.floor(
+    1 +
+      (timestamp - epochControllerStorageInitTimestamp) /
+        epochControllerStorageEpochDuration,
+  );
+}
+
+function prepareDealProviderAccessLists(
+  providersAccessType: number,
+  providersAccessList:
+    | {
+        __typename?: "DealToProvidersAccess";
+        provider: { __typename?: "Provider"; id: string };
+      }[]
+    | null
+    | undefined,
+): { whitelist: string[]; blacklist: string[] } {
+  const res: { whitelist: string[]; blacklist: string[] } = {
+    whitelist: [],
+    blacklist: [],
+  };
+
+  if (
+    providersAccessType === 0 ||
+    providersAccessList === null ||
+    providersAccessList === undefined
+  ) {
+    // None
+    return res;
+  }
+
+  const providersAccessListStrings = providersAccessList.map((providerObj) => {
+    return providerObj.provider.id;
+  });
+
+  if (providersAccessType === 1) {
+    // whitelist
+    res.whitelist = providersAccessListStrings;
+  } else if (providersAccessType === 2) {
+    // whitelist
+    res.blacklist = providersAccessListStrings;
+  }
+
+  return res;
+}
+
+type GetMatchedOffersIn = {
+  dealId: string;
+  pricePerCuPerEpoch: string;
+  cuCountPerWorker: number;
+  effectors: string[];
+  paymentToken: string;
+  targetWorkersToMatch: number;
+  minWorkersToMatch: number;
+  maxWorkersPerProvider: number;
+  currentEpoch: number;
+  providersWhiteList: string[];
+  providersBlackList: string[];
+};
+
+// must match market.matchDeal logic
+async function getMatchedOffersPage(
+  getMatchedOffersIn: GetMatchedOffersIn,
+  offersPerPageLimit: number, // Possibility to optimize query size.
+  peersPerPageLimit: number, // Possibility to control, e.g. maxWorkersPerProvider.
+  offersOffset: number,
+  peersOffset: number,
+  computeUnitsOffset: number,
+) {
+  const currentEpochString = numToStr(getMatchedOffersIn.currentEpoch);
+
+  const filters: NonNullable<OffersForMatchingQueryVariables["filters"]> = {
+    // TODO: We do not need Offers with ALL peers already linked to the Deal (protocol restriction).
+    pricePerEpoch_lte: getMatchedOffersIn.pricePerCuPerEpoch,
+    paymentToken: getMatchedOffersIn.paymentToken.toLowerCase(),
+    // Check if any of compute units are available in the offer and do not even fetch unrelated offers.
+    computeUnitsAvailable_gt: 0,
+
+    // Check if provider whitelisted/blacklisted below, and if CC Active below in case without whitelist below.
+  };
+
+  const peersFilter: NonNullable<
+    NonNullable<OffersForMatchingQueryVariables["peersFilters"]>["and"]
+  >[number] = {
+    deleted: false,
+    computeUnits_: { worker: null, deleted: false },
+    // Check for CC Active status below and depends on provider whitelist filter.
+  };
+
+  // Some filters per peers, capacity commitments and compute units are copied
+  // and implemented with different fields for the same filtration - it is so
+  // because in subgraph it is impossible to filter on nested fields
+  // and we do not want to reduce fetched data size (e.g. do to fetch offers
+  // with no peers with our conditions)
+  const indexerGetOffersParams: OffersForMatchingQueryVariables = {
+    limit: offersPerPageLimit,
+    filters,
+    peersFilters: {
+      and: [
+        peersFilter,
+        {
+          // We do not need peers that already linked to the Deal (protocol restriction).
+          or: [
+            { joinedDeals_: { deal_not: getMatchedOffersIn.dealId } },
+            { isAnyJoinedDeals: false },
+          ],
+        },
+      ],
+    },
+    computeUnitsFilters: { worker: null, deleted: false },
+    peersLimit: peersPerPageLimit,
+    // We do not need more than cuCountPerWorker per peer. Apply restriction to already fetched and filtered data.
+    computeUnitsLimit: getMatchedOffersIn.cuCountPerWorker,
+    offset: offersOffset,
+    peersOffset,
+    computeUnitsOffset,
+  };
+
+  if (getMatchedOffersIn.effectors.length > 0) {
+    filters.effectors_ = { effector_in: getMatchedOffersIn.effectors };
+  }
+
+  // Check for blacklisted Providers.
+  if (getMatchedOffersIn.providersBlackList.length > 0) {
+    filters.provider_ = { id_not_in: getMatchedOffersIn.providersBlackList };
+  }
+
+  // We require rather CU to be in Active CC (and not in blacklist if blacklist exists)
+  // or CU from Deal whitelist of Providers.
+  if (getMatchedOffersIn.providersWhiteList.length > 0) {
+    filters.provider_ = { id_in: getMatchedOffersIn.providersWhiteList };
+  } else {
+    // No whitelist, thus, check for active cc status is required.
+    // For Peers.
+    filters.peers_ = {
+      deleted: false,
+      // Do not fetch peers with no any of compute units in "active" status at all.
+      // Check if CU status is Active - if it has current capacity commitment and
+      // cc.info.startEpoch <= currentEpoch_.
+      currentCapacityCommitment_not: null,
+      // Since it is not possible to filter by currentCapacityCommitment_.startEpoch_lt
+      // we use this help field.
+      currentCCCollateralDepositedAt_lte: currentEpochString,
+      currentCCEndEpoch_gt: currentEpochString,
+      currentCCNextCCFailedEpoch_gt: currentEpochString,
+    };
+
+    // For CUs.
+    // Check if CU status is Active - if it has current capacity commitment and
+    // cc.info.startEpoch <= currentEpoch_.
+    peersFilter.currentCapacityCommitment_not = null;
+
+    peersFilter.currentCapacityCommitment_ = {
+      // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
+      startEpoch_lte: currentEpochString,
+      endEpoch_gt: currentEpochString,
+      // On each submitProof indexer should save nextCCFailedEpoch, and
+      // in query we relay on that field to filter Failed CC.
+      nextCCFailedEpoch_gt: currentEpochString,
+      deleted: false,
+      // Wait delegation is duplicating startEpoch_lte check, though.
+      status_not_in: ["WaitDelegation", "Removed", "Failed"],
+    };
+  }
+
+  dbg(
+    `[getMatchedOffersPage] Requesting indexer for page with page params: ${JSON.stringify(
+      indexerGetOffersParams,
+      null,
+      2,
+    )}...`,
+  );
+
+  const fetched = await getOffersForMatching(indexerGetOffersParams);
+
+  dbg(
+    `[getMatchedOffersPage] Fetched data: ${JSON.stringify(fetched, null, 2)}`,
+  );
+
+  return fetched.offers;
 }
 
 export type DealNameAndId = {

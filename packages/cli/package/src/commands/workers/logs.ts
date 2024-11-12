@@ -162,6 +162,12 @@ const getLogsArg = async ({
       ? workerNamesSet
       : commaSepStrToArr(maybeWorkerNamesString);
 
+  if (workersToGetLogsFor.length === 0) {
+    commandObj.error(
+      `No worker names provided. Please provide worker names to get logs for`,
+    );
+  }
+
   const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
     (workerName) => {
       return !workerNamesSet.includes(workerName);

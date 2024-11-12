@@ -20,9 +20,14 @@ import { access } from "node:fs/promises";
 import { numToStr } from "./typesafeStringify.js";
 
 export function commaSepStrToArr(commaSepStr: string) {
-  return commaSepStr.split(",").map((s) => {
-    return s.trim();
-  });
+  return commaSepStr
+    .split(",")
+    .map((s) => {
+      return s.trim();
+    })
+    .filter((s) => {
+      return s !== "";
+    });
 }
 
 function comment(commentToken: string) {

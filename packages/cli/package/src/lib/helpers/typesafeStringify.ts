@@ -41,3 +41,7 @@ export function bufferToStr(buffer: Buffer): string {
 export function urlToStr(url: URL) {
   return url.toString();
 }
+
+export function nullableToString(value: null | undefined): string {
+  return value === null ? "null" : "undefined";
+}

@@ -51,11 +51,19 @@ export default class DealRewardsWithdraw extends BaseCommand<
 
     const dealIds = commaSepStrToArr(
       flags[DEAL_IDS_FLAG_NAME] ??
-        (await input({ message: "Enter comma-separated deal ids" })),
+        (await input({
+          message: "Enter comma-separated deal ids",
+          validate(val: string) {
+            return (
+              commaSepStrToArr(val).length > 0 ||
+              "Please enter at least one deal id"
+            );
+          },
+        })),
     );
 
     if (dealIds.length === 0) {
-      return commandObj.error("Got empty list of deal ids. Aborting");
+      return commandObj.error("No deal ids provided");
     }
 
     const { contracts } = await getContracts();

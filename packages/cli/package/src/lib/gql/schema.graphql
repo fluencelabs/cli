@@ -1,28 +1,75 @@
-query DealsQuery(
-  $filters: Deal_filter
-  $offset: Int
-  $limit: Int
+query Deals(
+  $where: Deal_filter
+  $skip: Int
+  $first: Int
   $orderBy: Deal_orderBy
-  $orderType: OrderDirection
+  $orderDirection: OrderDirection
 ) {
   deals(
-    where: $filters
-    first: $limit
-    skip: $offset
+    where: $where
+    skip: $skip
+    first: $first
     orderBy: $orderBy
-    orderDirection: $orderType
+    orderDirection: $orderDirection
   ) {
     id
   }
 }
 
-# Exclude deleted CUs.
-# Exclude deleted Peers.
+query DealForMatching($id: ID!) {
+  deal(id: $id) {
+    maxWorkersPerProvider
+    minWorkers
+    pricePerCuPerEpoch
+    matchedAt
+    paymentToken {
+      id
+    }
+    targetWorkers
+    cuCountPerWorker
+    joinedWorkers {
+      computeUnits {
+        id
+      }
+    }
+    effectors {
+      effector {
+        id
+      }
+    }
+    providersAccessType
+    providersAccessList {
+      provider {
+        id
+      }
+    }
+  }
 
-query OfferDetailsQuery(
+  _meta {
+    block {
+      timestamp
+    }
+  }
+
+  graphNetworks(first: 1) {
+    coreEpochDuration
+    initTimestamp
+    coreMinDealRematchingEpochs
+  }
+}
+
+query OffersForMatching(
   $filters: Offer_filter
-  $orderType: OrderDirection
+  $peersFilters: Peer_filter
+  $computeUnitsFilters: ComputeUnit_filter
+  $peersLimit: Int
+  $computeUnitsLimit: Int
+  $offset: Int
+  $peersOffset: Int
+  $computeUnitsOffset: Int
+  $limit: Int
   $orderBy: Offer_orderBy
+  $orderType: OrderDirection
 ) {
   offers(
     where: {
@@ -32,8 +79,43 @@ query OfferDetailsQuery(
         { deleted: false }
       ]
     }
+    first: $limit
+    skip: $offset
     orderBy: $orderBy
     orderDirection: $orderType
+  ) {
+    id
+    peers(where: $peersFilters, first: $peersLimit, skip: $peersOffset) {
+      id
+      computeUnits(
+        where: $computeUnitsFilters
+        first: $computeUnitsLimit
+        skip: $computeUnitsOffset
+      ) {
+        id
+      }
+    }
+  }
+}
+
+# Exclude deleted CUs.
+# Exclude deleted Peers.
+
+query OfferDetails(
+  $where: Offer_filter
+  $orderDirection: OrderDirection
+  $orderBy: Offer_orderBy
+) {
+  offers(
+    where: {
+      and: [
+        $where
+        # Exclude deleted offers.
+        { deleted: false }
+      ]
+    }
+    orderBy: $orderBy
+    orderDirection: $orderDirection
   ) {
     id
     createdAt
@@ -61,5 +143,46 @@ query OfferDetailsQuery(
         }
       }
     }
+  }
+}
+
+query CCIds($where: CapacityCommitment_filter) {
+  capacityCommitments(where: $where) {
+    id
+    peer {
+      id
+    }
+  }
+}
+
+query CCIdsAndStatuses($where: CapacityCommitment_filter) {
+  capacityCommitments(where: $where) {
+    id
+    status
+    peer {
+      id
+    }
+  }
+}
+
+query CCDetails($where: CapacityCommitment_filter) {
+  capacityCommitments(where: $where) {
+    id
+    peer {
+      id
+    }
+    status
+    delegator {
+      id
+    }
+    rewardDelegatorRate
+    startEpoch
+    endEpoch
+    computeUnitsCount
+    totalFailCount
+    exitedUnitCount
+    collateralPerUnit
+    ccRewardsWithdrawn
+    dealStakerRewardsWithdrawn
   }
 }

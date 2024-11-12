@@ -42,7 +42,7 @@ import {
   guessTxSizeAndSign,
   getEventValue,
 } from "../../dealClient.js";
-import { getOffers } from "../../gql/gqlClient.js";
+import { getOffers } from "../../gql/gql.js";
 import { setTryTimeout } from "../../helpers/setTryTimeout.js";
 import { stringifyUnknown } from "../../helpers/stringifyUnknown.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";

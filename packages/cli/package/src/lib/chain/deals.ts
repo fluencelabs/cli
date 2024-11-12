@@ -16,9 +16,12 @@
  */
 
 import { getSignerAddress } from "../dealClient.js";
-import { getDealsByProviderId } from "../gql/gqlClient.js";
+import { getDealIdsByProviderId } from "../gql/gql.js";
 
 export async function getProviderDeals() {
-  const signerAddress = await getSignerAddress();
-  return getDealsByProviderId(signerAddress);
+  return (await getDealIdsByProviderId(await getSignerAddress())).deals.map(
+    ({ id }) => {
+      return id;
+    },
+  );
 }

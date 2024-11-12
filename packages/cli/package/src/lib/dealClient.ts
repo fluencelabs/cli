@@ -17,12 +17,7 @@
 
 import assert from "node:assert";
 
-import type {
-  Contracts,
-  DealMatcherClient,
-  DealExplorerClient,
-  Deployment,
-} from "@fluencelabs/deal-ts-clients";
+import type { Contracts, Deployment } from "@fluencelabs/deal-ts-clients";
 import type {
   TypedContractMethod,
   StateMutability,
@@ -36,8 +31,9 @@ import type {
   Wallet,
   ContractTransaction,
   TransactionReceipt,
+  BytesLike,
+  Result,
 } from "ethers";
-import chunk from "lodash-es/chunk.js";
 import stripAnsi from "strip-ansi";
 
 import {
@@ -45,12 +41,7 @@ import {
   LOCAL_NET_DEFAULT_WALLET_KEY,
 } from "../common.js";
 
-import {
-  getChainId,
-  getNetworkName,
-  getRpcUrl,
-  getSubgraphUrl,
-} from "./chain/chainConfig.js";
+import { getChainId, getNetworkName, getRpcUrl } from "./chain/chainConfig.js";
 import { chainFlags } from "./chainFlags.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { initEnvConfig } from "./configs/project/env/env.js";
@@ -107,33 +98,6 @@ export async function getSignerAddress() {
       ? providerOrWallet.address
       : await getAddressFromConnector()
   ).toLowerCase();
-}
-
-let dealMatcherClient: DealMatcherClient | undefined = undefined;
-
-export async function getDealMatcherClient() {
-  if (dealMatcherClient === undefined) {
-    const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
-    dealMatcherClient = new DealMatcherClient(await getSubgraphUrl());
-  }
-
-  return dealMatcherClient;
-}
-
-let dealExplorerClient: DealExplorerClient | undefined = undefined;
-
-export async function getDealExplorerClient() {
-  if (dealExplorerClient === undefined) {
-    const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
-    const { readonlyContracts } = await getReadonlyContracts();
-
-    dealExplorerClient = await DealExplorerClient.create(
-      readonlyContracts,
-      await getSubgraphUrl(),
-    );
-  }
-
-  return dealExplorerClient;
 }
 
 let deployment: Promise<Deployment> | undefined = undefined;
@@ -477,27 +441,30 @@ let batchTxMessage: string | undefined;
 
 export async function signBatch(
   title: string,
-  populatedTxsWithDebugInfo: Array<ReturnType<typeof populateTx>>,
+  populatedTxsWithDebugInfo: [
+    ReturnType<typeof populateTx>,
+    ...ReturnType<typeof populateTx>[],
+  ],
   validateAddress?: ValidateAddress,
 ) {
-  const populatedTxsWithDebugInfoResolved = await Promise.all(
-    populatedTxsWithDebugInfo.map(async ({ populate, debugInfo }) => {
-      return {
-        populated: await populate(),
-        debugInfo,
-      };
+  const [
+    { populate: firstPopulate, debugInfo: firstDebugInfo },
+    ...restPopulatedTxsWithDebugInfo
+  ] = populatedTxsWithDebugInfo;
+
+  const [
+    {
+      populated: { to: firstAddr },
+    },
+    ...restPopulatedTxs
+  ] = await Promise.all([
+    (async () => {
+      return { populated: await firstPopulate(), debugInfo: firstDebugInfo };
+    })(),
+    ...restPopulatedTxsWithDebugInfo.map(async ({ populate, debugInfo }) => {
+      return { populated: await populate(), debugInfo };
     }),
-  );
-
-  const [firstPopulatedTx, ...restPopulatedTxs] =
-    populatedTxsWithDebugInfoResolved;
-
-  const firstAddr = firstPopulatedTx?.populated.to;
-
-  if (firstAddr === undefined) {
-    // if populatedTxsPromises is an empty array - do nothing
-    return;
-  }
+  ]);
 
   if (
     restPopulatedTxs.some(({ populated: { to } }) => {
@@ -674,23 +641,36 @@ export function getEventValues<T extends string, U extends Contract<T>>({
   });
 }
 
-export async function batchRead<T>(rpcReadCalls: Array<() => Promise<T>>) {
-  let rpcResults: Array<T> = [];
+export type MulticallReadItem = {
+  callData: BytesLike;
+  decode: (returnData: string) => Result;
+  target: string;
+};
 
-  for (const rpcReadCallBatch of chunk(
-    rpcReadCalls,
-    20, // it's our guess on the max number of concurrent requests to RPC
-  )) {
-    rpcResults = rpcResults.concat(
-      await Promise.all(
-        rpcReadCallBatch.map((rpcReadCall) => {
-          return rpcReadCall();
-        }),
-      ),
+/**
+ * There is no good way to type this function correctly, so you have to use type-assertions when using it
+ */
+export async function multicallRead(
+  multicallReadItems: MulticallReadItem[],
+): Promise<unknown[]> {
+  const { contracts } = await getContracts();
+
+  const results = await contracts.multicall3.aggregate3.staticCall(
+    multicallReadItems.map(({ callData, target }) => {
+      return { callData, target, allowFailure: false };
+    }),
+  );
+
+  return multicallReadItems.map(({ decode }, i): unknown => {
+    const res = results[i];
+
+    assert(
+      res !== undefined,
+      "Unreachable. For each call we must have a result",
     );
-  }
 
-  return rpcResults;
+    return res.success ? decode(res.returnData)[0] : null;
+  });
 }
 
 export async function guessTxSizeAndSign<
