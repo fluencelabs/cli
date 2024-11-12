@@ -15,12 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import assert from "assert";
+
 import type { Contracts } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import parse from "parse-duration";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { jsonStringify } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { initProviderConfig } from "../configs/project/provider/provider.js";
 import {
@@ -39,6 +40,7 @@ import {
   sign,
   multicallRead,
   type MulticallReadItem,
+  batchRead,
 } from "../dealClient.js";
 import { ccIds, ccDetails } from "../gql/gql.js";
 import type { CapacityCommitmentStatus } from "../gql/gqlGenerated.js";
@@ -741,24 +743,13 @@ export async function getCommitmentsGroupedByStatus<
   const commitments = await getCommitments(...args);
   const { contracts } = await getContracts();
 
-  const statuses = await multicallRead(
-    commitments.map(({ infoFromSubgraph: { id } }): MulticallReadItem => {
-      return {
-        target: contracts.deployment.diamond,
-        callData: contracts.diamond.interface.encodeFunctionData("getStatus", [
-          id,
-        ]),
-        decode(returnData) {
-          return contracts.diamond.interface.decodeFunctionResult(
-            "getStatus",
-            returnData,
-          );
-        },
+  const rpcCCInfos = await batchRead(
+    commitments.map(({ infoFromSubgraph: { id } }) => {
+      return () => {
+        return contracts.diamond.getCommitment(id);
       };
     }),
   );
-
-  dbg(`Statuses: ${jsonStringify(statuses)}`);
 
   return Array.from(
     (await getCommitments(...args))
@@ -770,13 +761,12 @@ export async function getCommitmentsGroupedByStatus<
           >[]
         >
       >((acc, v, i) => {
-        if (typeof statuses[i] !== "bigint") {
-          throw new Error(
-            `Expected status from RPC to be a bigint, got ${stringifyUnknown(statuses[i])}`,
-          );
-        }
+        assert(
+          rpcCCInfos[i] !== undefined,
+          "Unreachable. Expected getCommitment from RPC not to be undefined",
+        );
 
-        const statusFromRPC = ccStatusToString(statuses[i]);
+        const statusFromRPC = ccStatusToString(rpcCCInfos[i].status);
         const infos = acc.get(statusFromRPC) ?? [];
 
         infos.push({

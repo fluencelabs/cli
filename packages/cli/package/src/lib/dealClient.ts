@@ -34,6 +34,7 @@ import type {
   BytesLike,
   Result,
 } from "ethers";
+import chunk from "lodash-es/chunk.js";
 import stripAnsi from "strip-ansi";
 
 import {
@@ -672,6 +673,25 @@ export async function multicallRead(
 
     return res.success ? decode(res.returnData)[0] : null;
   });
+}
+
+export async function batchRead<T>(rpcReadCalls: Array<() => Promise<T>>) {
+  let rpcResults: Array<T> = [];
+
+  for (const rpcReadCallBatch of chunk(
+    rpcReadCalls,
+    20, // it's our guess on the max number of concurrent requests to RPC
+  )) {
+    rpcResults = rpcResults.concat(
+      await Promise.all(
+        rpcReadCallBatch.map((rpcReadCall) => {
+          return rpcReadCall();
+        }),
+      ),
+    );
+  }
+
+  return rpcResults;
 }
 
 export async function guessTxSizeAndSign<
