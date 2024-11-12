@@ -385,7 +385,8 @@ type GetMatchedOffersOut = {
   computeUnits: MatchDealParm<2>;
 } | null;
 
-async function getMatchedOffersByDealId(dealId: string) {
+async function getMatchedOffersByDealId(dealAddress: string) {
+  const dealId = dealAddress.toLowerCase();
   const { deal, _meta, graphNetworks } = await getDealForMatching(dealId);
 
   if (deal === null || deal === undefined) {
