@@ -38,6 +38,7 @@ import stripAnsi from "strip-ansi";
 
 import {
   type TransactionPayload,
+  jsonStringify,
   LOCAL_NET_DEFAULT_WALLET_KEY,
 } from "../common.js";
 
@@ -521,7 +522,7 @@ function methodCallToString([method, ...args]: [
   { name: string },
   ...unknown[],
 ]) {
-  return `${method.name}(${stringifyUnknown(args).slice(1, -1)})`;
+  return `${method.name}(${jsonStringify(args).slice(1, -1)})`;
 }
 
 type Contract<T> = {
@@ -648,7 +649,7 @@ export type MulticallReadItem = {
 };
 
 /**
- * There is no good way to type this function correctly, so you have to use type-assertions when using it
+ * There is no good way to type this function correctly, so you have to use validation or type-assertions when using it
  */
 export async function multicallRead(
   multicallReadItems: MulticallReadItem[],

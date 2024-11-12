@@ -20,6 +20,7 @@ import { color } from "@oclif/color";
 import parse from "parse-duration";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { jsonStringify } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { initProviderConfig } from "../configs/project/provider/provider.js";
 import {
@@ -724,7 +725,7 @@ type CapacityCommitment<T extends { id: string }> = {
 };
 
 type CommitmentGroupedByStatus<T extends CommitmentAndPeerId> = {
-  status: ReturnType<typeof ccStatusToString>;
+  status: CapacityCommitmentStatusString;
   ccInfos: CapacityCommitment<T>[];
 }[];
 
@@ -757,6 +758,8 @@ export async function getCommitmentsGroupedByStatus<
     }),
   );
 
+  dbg(`Statuses: ${jsonStringify(statuses)}`);
+
   return Array.from(
     (await getCommitments(...args))
       .reduce<
@@ -767,13 +770,13 @@ export async function getCommitmentsGroupedByStatus<
           >[]
         >
       >((acc, v, i) => {
-        const statusFromRPC = ccStatusToString(
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          statuses[i] as Awaited<
-            ReturnType<typeof contracts.diamond.getStatus>
-          >,
-        );
+        if (typeof statuses[i] !== "bigint") {
+          throw new Error(
+            `Expected status from RPC to be a bigint, got ${stringifyUnknown(statuses[i])}`,
+          );
+        }
 
+        const statusFromRPC = ccStatusToString(statuses[i]);
         const infos = acc.get(statusFromRPC) ?? [];
 
         infos.push({
@@ -1179,7 +1182,9 @@ type CapacityCommitmentStatusString =
   | Exclude<CapacityCommitmentStatus, "Inactive">
   | "Completed";
 
-function ccStatusToString(status: bigint): CapacityCommitmentStatusString {
+function ccStatusToString(
+  status: Awaited<ReturnType<Contracts["diamond"]["getStatus"]>>,
+): CapacityCommitmentStatusString {
   return (
     (
       [
