@@ -39,7 +39,7 @@ import {
   multicallRead,
   type MulticallReadItem,
 } from "../dealClient.js";
-import { ccIds, ccIdsAndStatuses, ccDetails } from "../gql/gql.js";
+import { ccIds, ccDetails } from "../gql/gql.js";
 import type { CapacityCommitmentStatus } from "../gql/gqlGenerated.js";
 import { bigintSecondsToDate } from "../helpers/bigintOps.js";
 import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
@@ -443,9 +443,13 @@ export async function createCommitments(flags: {
 
 export async function removeCommitments(flags: CCFlags) {
   const [invalidCommitments, commitments] = splitErrorsAndResults(
-    await getCommitments(flags, ccIdsAndStatuses),
+    (await getCommitmentsGroupedByStatus(flags, ccIds)).flatMap(
+      ({ ccInfos }) => {
+        return ccInfos;
+      },
+    ),
     (cc) => {
-      return cc.infoFromSubgraph.status === "WaitDelegation"
+      return cc.infoFromSubgraph.statusFromRPC === "WaitDelegation"
         ? { result: cc }
         : { error: cc };
     },
@@ -456,9 +460,7 @@ export async function removeCommitments(flags: CCFlags) {
       `You can remove commitments only if they have WaitDelegation status. Got:\n\n${(
         await Promise.all(
           invalidCommitments.map(async (cc) => {
-            return `${await stringifyBasicCommitmentInfo(cc)}Status: ${ccStatusToString(
-              cc.infoFromSubgraph.status,
-            )}`;
+            return `${await stringifyBasicCommitmentInfo(cc)}Status: ${cc.infoFromSubgraph.statusFromRPC}`;
           }),
         )
       ).join("\n\n")}`,
@@ -512,7 +514,7 @@ export async function collateralWithdraw(
   const { ZeroAddress } = await import("ethers");
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
-    await getCommitmentsGroupedByStatus(flags, ccIdsAndStatuses),
+    await getCommitmentsGroupedByStatus(flags, ccIds),
     (c) => {
       return c.status === "Completed" || c.status === "Failed"
         ? { result: c }
@@ -522,7 +524,7 @@ export async function collateralWithdraw(
 
   if (invalidCommitments.length > 0) {
     commandObj.warn(
-      `You can withdraw collateral only from commitments with "Inactive" or "Failed" status. The following commitments have invalid status:\n\n${basicCCInfoAndStatusToString(
+      `You can withdraw collateral only from commitments with "Inactive" or "Failed" status. The following commitments have invalid status:\n\n${await basicCCInfoAndStatusToString(
         invalidCommitments,
       )}`,
     );
@@ -716,37 +718,75 @@ export async function stringifyBasicCommitmentInfo<
   return `${color.yellow(`${noxName}PeerId: ${peerId}`)}\nCommitmentId: ${infoFromSubgraph.id}`;
 }
 
-type StatusCommitmentAndPeerId = CommitmentAndPeerId & {
-  status?: CapacityCommitmentStatus | null;
-};
-
 type CapacityCommitment<T extends { id: string }> = {
   infoFromSubgraph: T;
   name?: string;
 };
 
-type CommitmentGroupedByStatus<T extends StatusCommitmentAndPeerId> = {
+type CommitmentGroupedByStatus<T extends CommitmentAndPeerId> = {
   status: ReturnType<typeof ccStatusToString>;
   ccInfos: CapacityCommitment<T>[];
 }[];
 
 export async function getCommitmentsGroupedByStatus<
-  T extends StatusCommitmentAndPeerId,
+  T extends CommitmentAndPeerId,
 >(
   ...args: Parameters<typeof getCommitments<T>>
-): Promise<CommitmentGroupedByStatus<T>> {
+): Promise<
+  CommitmentGroupedByStatus<
+    T & { statusFromRPC: CapacityCommitmentStatusString }
+  >
+> {
+  const commitments = await getCommitments(...args);
+  const { contracts } = await getContracts();
+
+  const statuses = await multicallRead(
+    commitments.map(({ infoFromSubgraph: { id } }): MulticallReadItem => {
+      return {
+        target: contracts.deployment.diamond,
+        callData: contracts.diamond.interface.encodeFunctionData("getStatus", [
+          id,
+        ]),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "getStatus",
+            returnData,
+          );
+        },
+      };
+    }),
+  );
+
   return Array.from(
     (await getCommitments(...args))
-      .reduce<Map<CapacityCommitmentStatusString, CapacityCommitment<T>[]>>(
-        (acc, v) => {
-          const status = ccStatusToString(v.infoFromSubgraph.status);
-          const infos = acc.get(status) ?? [];
-          infos.push(v);
-          acc.set(status, infos);
-          return acc;
-        },
-        new Map(),
-      )
+      .reduce<
+        Map<
+          CapacityCommitmentStatusString,
+          CapacityCommitment<
+            T & { statusFromRPC: CapacityCommitmentStatusString }
+          >[]
+        >
+      >((acc, v, i) => {
+        const statusFromRPC = ccStatusToString(
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          statuses[i] as Awaited<
+            ReturnType<typeof contracts.diamond.getStatus>
+          >,
+        );
+
+        const infos = acc.get(statusFromRPC) ?? [];
+
+        infos.push({
+          ...v,
+          infoFromSubgraph: {
+            ...v.infoFromSubgraph,
+            statusFromRPC,
+          },
+        });
+
+        acc.set(statusFromRPC, infos);
+        return acc;
+      }, new Map())
       .entries(),
   ).map(([status, ccInfos]) => {
     return { status, ccInfos };
@@ -952,7 +992,7 @@ export function stringifyDetailedCommitmentsInfo(
     .join("\n\n");
 }
 
-function getStatusHeading<T extends StatusCommitmentAndPeerId>(
+function getStatusHeading<T extends CommitmentAndPeerId>(
   cc: CommitmentGroupedByStatus<T>[number],
 ) {
   return color.yellow(
@@ -977,7 +1017,6 @@ type DetailedCCInfo = Awaited<
 async function getDetailedCommitmentInfo({
   infoFromSubgraph: {
     id: commitmentId,
-    status,
     startEpoch,
     endEpoch,
     delegator,
@@ -989,6 +1028,7 @@ async function getDetailedCommitmentInfo({
     ccRewardsWithdrawn,
     dealStakerRewardsWithdrawn,
     peer: { id: peerId },
+    statusFromRPC: status,
   },
   name: noxName,
   currentEpoch,
@@ -1034,7 +1074,7 @@ async function getDetailedCommitmentInfo({
     ...(noxName === undefined ? {} : { noxName }),
     peerId: await peerIdHexStringToBase58String(peerId),
     commitmentId,
-    status: ccStatusToString(status),
+    status,
     staker:
       delegator?.id === (await import("ethers")).ZeroAddress
         ? "Anyone can activate capacity commitment"
@@ -1139,26 +1179,35 @@ type CapacityCommitmentStatusString =
   | Exclude<CapacityCommitmentStatus, "Inactive">
   | "Completed";
 
-function ccStatusToString(
-  status: CapacityCommitmentStatus | null | undefined,
-): CapacityCommitmentStatusString {
-  if (status === undefined || status === null) {
-    return "Unknown";
-  }
-
-  return status === "Inactive" ? "Completed" : status;
+function ccStatusToString(status: bigint): CapacityCommitmentStatusString {
+  return (
+    (
+      [
+        "Completed",
+        "Active",
+        "WaitDelegation",
+        "WaitStart",
+        "Failed",
+        "Removed",
+      ] as const
+    )[Number(status)] ?? "Unknown"
+  );
 }
 
-export function basicCCInfoAndStatusToString<
-  T extends StatusCommitmentAndPeerId,
+export async function basicCCInfoAndStatusToString<
+  T extends CommitmentAndPeerId,
 >(ccsGroupedByStatus: CommitmentGroupedByStatus<T>) {
-  return ccsGroupedByStatus
-    .map((cc) => {
-      return `${getStatusHeading(cc)}${cc.ccInfos
-        .map((ccInfo) => {
-          return stringifyBasicCommitmentInfo(ccInfo);
-        })
-        .join("\n\n")} `;
-    })
-    .join("\n\n");
+  return (
+    await Promise.all(
+      ccsGroupedByStatus.map(async (cc) => {
+        return `${getStatusHeading(cc)}${(
+          await Promise.all(
+            cc.ccInfos.map((ccInfo) => {
+              return stringifyBasicCommitmentInfo(ccInfo);
+            }),
+          )
+        ).join("\n\n")} `;
+      }),
+    )
+  ).join("\n\n");
 }

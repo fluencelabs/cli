@@ -19,7 +19,7 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { getContracts, getReadonlyContracts, sign } from "../dealClient.js";
-import { ccIdsAndStatuses } from "../gql/gql.js";
+import { ccIds } from "../gql/gql.js";
 import { splitErrorsAndResults } from "../helpers/utils.js";
 
 import {
@@ -34,7 +34,7 @@ import { fltFormatWithSymbol } from "./currencies.js";
 export async function depositCollateral(flags: CCFlags) {
   const [commitmentsWithInvalidStatus, commitmentsWithWaitDelegation] =
     splitErrorsAndResults(
-      await getCommitmentsGroupedByStatus(flags, ccIdsAndStatuses),
+      await getCommitmentsGroupedByStatus(flags, ccIds),
       (c) => {
         return c.status === "WaitDelegation" ? { result: c } : { error: c };
       },
@@ -42,7 +42,7 @@ export async function depositCollateral(flags: CCFlags) {
 
   if (commitmentsWithInvalidStatus.length > 0) {
     commandObj.warn(
-      `It's only possible to deposit collateral to the capacity commitments in the "WaitDelegation" status. The following commitments have invalid status:\n\n${basicCCInfoAndStatusToString(
+      `It's only possible to deposit collateral to the capacity commitments in the "WaitDelegation" status. The following commitments have invalid status:\n\n${await basicCCInfoAndStatusToString(
         commitmentsWithInvalidStatus,
       )}`,
     );

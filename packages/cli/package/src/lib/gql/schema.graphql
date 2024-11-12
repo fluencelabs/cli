@@ -155,23 +155,12 @@ query CCIds($where: CapacityCommitment_filter) {
   }
 }
 
-query CCIdsAndStatuses($where: CapacityCommitment_filter) {
-  capacityCommitments(where: $where) {
-    id
-    status
-    peer {
-      id
-    }
-  }
-}
-
 query CCDetails($where: CapacityCommitment_filter) {
   capacityCommitments(where: $where) {
     id
     peer {
       id
     }
-    status
     delegator {
       id
     }

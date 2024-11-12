@@ -71,7 +71,7 @@ export async function getOffers(id_in: string[]) {
   });
 }
 
-function getCCQueries<T extends "CCIds" | "CCIdsAndStatuses" | "CCDetails">(
+function getCCQueries<T extends "CCIds" | "CCDetails">(
   queryName: T,
 ): {
   getCCByCCId(ccIds: string[]): ReturnType<Sdk[T]>;
@@ -90,5 +90,4 @@ function getCCQueries<T extends "CCIds" | "CCIdsAndStatuses" | "CCDetails">(
 }
 
 export const ccIds = getCCQueries("CCIds");
-export const ccIdsAndStatuses = getCCQueries("CCIdsAndStatuses");
 export const ccDetails = getCCQueries("CCDetails");
