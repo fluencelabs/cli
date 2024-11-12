@@ -28,6 +28,7 @@ import {
   PRIV_KEY_FLAG_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../src/lib/const.js";
+import { setTryTimeout } from "../../src/lib/helpers/setTryTimeout.js";
 import { stringifyUnknown } from "../../src/lib/helpers/stringifyUnknown.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
@@ -193,6 +194,46 @@ describe("provider tests", () => {
         },
         cwd,
       });
+
+      await setTryTimeout(
+        "wait until all commitments get WaitDelegation status",
+        async () => {
+          const res = JSON.parse(
+            await fluence({
+              args: ["provider", "cc-info"],
+              flags: {
+                [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
+                json: true,
+              },
+              cwd,
+            }),
+          );
+
+          if (!Array.isArray(res)) {
+            throw new Error("Expected an array of commitments");
+          }
+
+          const ccWithInvalidStatus = res.filter((el) => {
+            return (
+              typeof el !== "object" ||
+              el === null ||
+              !("status" in el) ||
+              el.status !== "WaitDelegation"
+            );
+          });
+
+          if (ccWithInvalidStatus.length > 0) {
+            throw new Error(
+              `Some commitments are not in WaitDelegation status: ${JSON.stringify(ccWithInvalidStatus, null, 2)}`,
+            );
+          }
+        },
+        (e) => {
+          throw e;
+        },
+        60_000,
+        5_000,
+      );
 
       await fluence({
         args: ["provider", "cc-activate"],

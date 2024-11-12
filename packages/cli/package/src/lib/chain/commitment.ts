@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import assert from "assert";
-
 import type { Contracts } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import parse from "parse-duration";
@@ -40,7 +38,6 @@ import {
   sign,
   multicallRead,
   type MulticallReadItem,
-  batchRead,
 } from "../dealClient.js";
 import { ccIds, ccDetails } from "../gql/gql.js";
 import type { CapacityCommitmentStatus } from "../gql/gqlGenerated.js";
@@ -743,10 +740,19 @@ export async function getCommitmentsGroupedByStatus<
   const commitments = await getCommitments(...args);
   const { contracts } = await getContracts();
 
-  const rpcCCInfos = await batchRead(
-    commitments.map(({ infoFromSubgraph: { id } }) => {
-      return () => {
-        return contracts.diamond.getCommitment(id);
+  const statuses = await multicallRead(
+    commitments.map(({ infoFromSubgraph: { id } }): MulticallReadItem => {
+      return {
+        target: contracts.deployment.diamond,
+        callData: contracts.diamond.interface.encodeFunctionData("getStatus", [
+          id,
+        ]),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "getStatus",
+            returnData,
+          );
+        },
       };
     }),
   );
@@ -761,12 +767,13 @@ export async function getCommitmentsGroupedByStatus<
           >[]
         >
       >((acc, v, i) => {
-        assert(
-          rpcCCInfos[i] !== undefined,
-          "Unreachable. Expected getCommitment from RPC not to be undefined",
-        );
+        if (typeof statuses[i] !== "bigint") {
+          throw new Error(
+            `Expected status from RPC to be a bigint, got ${stringifyUnknown(statuses[i])}`,
+          );
+        }
 
-        const statusFromRPC = ccStatusToString(rpcCCInfos[i].status);
+        const statusFromRPC = ccStatusToString(statuses[i]);
         const infos = acc.get(statusFromRPC) ?? [];
 
         infos.push({
