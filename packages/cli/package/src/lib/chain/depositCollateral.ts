@@ -34,7 +34,6 @@ import {
   basicCCInfoAndStatusToString,
 } from "./commitment.js";
 import { type CCFlags } from "./commitment.js";
-import { peerIdHexStringToBase58String } from "./conversions.js";
 import { fltFormatWithSymbol } from "./currencies.js";
 
 export async function depositCollateral(flags: CCFlags) {
@@ -105,15 +104,11 @@ export async function depositCollateral(flags: CCFlags) {
   );
 
   await sign({
-    title: `Deposit ${await fltFormatWithSymbol(collateralToApproveCommitment)} collateral to the following capacity commitments:\n\n${(
-      await Promise.all(
-        commitments.map(async ({ ccId, peerId, name }) => {
-          return [name, await peerIdHexStringToBase58String(peerId), ccId]
-            .filter(Boolean)
-            .join("\n");
-        }),
-      )
-    ).join("\n\n")}`,
+    title: `Deposit ${await fltFormatWithSymbol(collateralToApproveCommitment)} collateral to the following capacity commitments:\n\n${commitments
+      .map(({ ccId, peerId, name }) => {
+        return [name, peerId, ccId].filter(Boolean).join("\n");
+      })
+      .join("\n\n")}`,
     method: contracts.diamond.depositCollateral,
     args: [
       commitments.map(({ ccId }) => {
