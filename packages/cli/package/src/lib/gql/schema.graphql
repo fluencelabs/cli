@@ -123,8 +123,23 @@ query OfferDetails($where: Offer_filter) {
   }
 }
 
+query CCIdsByPeerIds($where: CapacityCommitment_filter) {
+  capacityCommitments(
+    where: $where
+    orderBy: createdAt
+    # only get the last cc for each peer
+    orderDirection: desc
+    first: 1
+  ) {
+    id
+    peer {
+      id
+    }
+  }
+}
+
 query CCDetails($where: CapacityCommitment_filter) {
-  capacityCommitments(where: $where, orderBy: createdAt, orderDirection: desc) {
+  capacityCommitments(where: $where) {
     id
     ccRewardsWithdrawn
     dealStakerRewardsWithdrawn

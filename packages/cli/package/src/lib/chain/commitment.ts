@@ -41,7 +41,7 @@ import {
   multicallRead,
   type MulticallReadItem,
 } from "../dealClient.js";
-import { ccDetails } from "../gql/gql.js";
+import { getCCDetails, getCCIdsByHexPeerIds } from "../gql/gql.js";
 import type {
   CapacityCommitmentStatus,
   CcDetailsQuery,
@@ -83,21 +83,34 @@ async function getComputePeersWithCCIds(
 
   const { contracts } = await getContracts();
 
-  const computePeersRPCInfo = await multicallRead(
-    computePeersWithHexPeerIds.map(({ hexPeerId }): MulticallReadItem => {
-      return {
-        target: contracts.deployment.diamond,
-        callData: contracts.diamond.interface.encodeFunctionData(
-          "getComputePeer",
-          [hexPeerId],
-        ),
-        decode(returnData) {
-          return contracts.diamond.interface.decodeFunctionResult(
+  const [computePeersRPCInfo, ccIdsByHexPeerIdsRes] = await Promise.all([
+    multicallRead(
+      computePeersWithHexPeerIds.map(({ hexPeerId }): MulticallReadItem => {
+        return {
+          target: contracts.deployment.diamond,
+          callData: contracts.diamond.interface.encodeFunctionData(
             "getComputePeer",
-            returnData,
-          );
-        },
-      };
+            [hexPeerId],
+          ),
+          decode(returnData) {
+            return contracts.diamond.interface.decodeFunctionResult(
+              "getComputePeer",
+              returnData,
+            );
+          },
+        };
+      }),
+    ),
+    getCCIdsByHexPeerIds(
+      computePeersWithHexPeerIds.map(({ hexPeerId }) => {
+        return hexPeerId;
+      }),
+    ),
+  ]);
+
+  const ccIdsByHexPeerIds = Object.fromEntries(
+    ccIdsByHexPeerIdsRes.capacityCommitments.map(({ peer, id }) => {
+      return [peer.id, id];
     }),
   );
 
@@ -105,12 +118,18 @@ async function getComputePeersWithCCIds(
 
   const [computePeersWithoutCC, computePeersWithCC] = splitErrorsAndResults(
     computePeersWithHexPeerIds,
-    ({ name, peerId }, i) => {
-      const { commitmentId: ccId } =
+    ({ name, peerId, hexPeerId }, i) => {
+      const { commitmentId: ccIdFromRPC } =
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         (computePeersRPCInfo[i] as
           | Awaited<ReturnType<Contracts["diamond"]["getComputePeer"]>>
           | undefined) ?? {};
+
+      // if ccIdFromRPC is undefined or ZeroHash (in case CC was removed), then we try to get last ccId from subgraph
+      const ccId =
+        ccIdFromRPC === undefined || ccIdFromRPC === ZeroHash
+          ? ccIdsByHexPeerIds[hexPeerId]
+          : ccIdFromRPC;
 
       return ccId === undefined || ccId === ZeroHash
         ? { error: { name, peerId } }
@@ -319,7 +338,7 @@ export async function createCommitments(flags: {
 
   if (firstCommitmentTx === undefined) {
     throw new Error(
-      "Unreachable. First commitment tx can't be undefined cause it is checked in resolveComputePeersByNames",
+      "Unreachable. First commitment tx can't be undefined cause it's checked in resolveComputePeersByNames that computePeers array is not empty",
     );
   }
 
@@ -889,7 +908,7 @@ export async function getDetailedCommitmentsInfoGroupedByStatus(
         )[],
       ]
     >,
-    ccDetails(allCCIds),
+    getCCDetails(allCCIds),
   ]);
 
   assert(currentEpoch !== undefined, "currentEpoch is undefined");
@@ -898,14 +917,11 @@ export async function getDetailedCommitmentsInfoGroupedByStatus(
   assert(maxFailedRatio !== undefined, "maxFailedRatio is undefined");
   assert(precision !== undefined, "precision is undefined");
 
-  const commitmentsById = ccInfosFromSubgraph.capacityCommitments.reduce<
-    Record<string, typeof ccInfosFromSubgraph.capacityCommitments>
-  >((acc, cc) => {
-    const ccIds = acc[cc.id] ?? [];
-    ccIds.push(cc);
-    acc[cc.id] = ccIds;
-    return acc;
-  }, {});
+  const commitmentsById = Object.fromEntries(
+    ccInfosFromSubgraph.capacityCommitments.map((cc) => {
+      return [cc.id, cc];
+    }),
+  );
 
   let rewardsCounter = -contractReadsPerCC;
   let infoFromSubgraphCounter = -1;
@@ -918,7 +934,7 @@ export async function getDetailedCommitmentsInfoGroupedByStatus(
           groupedCCs.ccInfos.map(async (cc) => {
             rewardsCounter = rewardsCounter + contractReadsPerCC;
             infoFromSubgraphCounter = infoFromSubgraphCounter + 1;
-            const infoFromSubgraph = commitmentsById[cc.ccId]?.[0];
+            const infoFromSubgraph = commitmentsById[cc.ccId];
 
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             const unlockedRewards = rewards[rewardsCounter] as

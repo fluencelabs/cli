@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import assert from "assert";
-
 import type { Contracts } from "@fluencelabs/deal-ts-clients";
 
 import { BaseCommand } from "../../baseCommand.js";
@@ -45,6 +43,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
   static override flags = {
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
+    // TODO: When we have a way to get all deal ids for a provider address
     // all: Flags.boolean({
     //   default: false,
     //   description:
@@ -99,10 +98,13 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
       const deal = contracts.getDeal(id);
       const workers = workersFromRPC[i];
 
-      assert(
-        workers !== undefined,
-        `Unreachable. Got nothing from RPC for deal id ${id}`,
-      );
+      if (workers === undefined) {
+        commandObj.warn(
+          `Was not able to get workers for deal ${id} from chain. Skipping...`,
+        );
+
+        return [];
+      }
 
       return workers
         .filter((worker) => {

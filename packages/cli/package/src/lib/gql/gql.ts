@@ -91,6 +91,12 @@ export async function getOffers(id_in: string[]) {
   return (await getSdk()).OfferDetails({ where: { id_in, deleted: false } });
 }
 
-export async function ccDetails(ccIds: string[]) {
+export async function getCCIdsByHexPeerIds(hexPeerIds: string[]) {
+  return (await getSdk()).CCIdsByPeerIds({
+    where: { peer_: { id_in: hexPeerIds } },
+  });
+}
+
+export async function getCCDetails(ccIds: string[]) {
   return (await getSdk()).CCDetails({ where: { id_in: ccIds } });
 }
