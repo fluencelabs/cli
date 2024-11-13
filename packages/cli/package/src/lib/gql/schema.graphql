@@ -1,16 +1,10 @@
-query Deals(
-  $where: Deal_filter
-  $skip: Int
-  $first: Int
-  $orderBy: Deal_orderBy
-  $orderDirection: OrderDirection
-) {
+query Deals($where: Deal_filter, $skip: Int, $first: Int) {
   deals(
     where: $where
     skip: $skip
     first: $first
-    orderBy: $orderBy
-    orderDirection: $orderDirection
+    orderBy: createdAt
+    orderDirection: desc
   ) {
     id
   }
@@ -98,25 +92,8 @@ query OffersForMatching(
   }
 }
 
-# Exclude deleted CUs.
-# Exclude deleted Peers.
-
-query OfferDetails(
-  $where: Offer_filter
-  $orderDirection: OrderDirection
-  $orderBy: Offer_orderBy
-) {
-  offers(
-    where: {
-      and: [
-        $where
-        # Exclude deleted offers.
-        { deleted: false }
-      ]
-    }
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-  ) {
+query OfferDetails($where: Offer_filter) {
+  offers(where: $where) {
     id
     createdAt
     updatedAt
@@ -146,31 +123,9 @@ query OfferDetails(
   }
 }
 
-query CCIds($where: CapacityCommitment_filter) {
-  capacityCommitments(where: $where) {
-    id
-    peer {
-      id
-    }
-  }
-}
-
 query CCDetails($where: CapacityCommitment_filter) {
-  capacityCommitments(where: $where) {
+  capacityCommitments(where: $where, orderBy: createdAt, orderDirection: desc) {
     id
-    peer {
-      id
-    }
-    delegator {
-      id
-    }
-    rewardDelegatorRate
-    startEpoch
-    endEpoch
-    computeUnitsCount
-    totalFailCount
-    exitedUnitCount
-    collateralPerUnit
     ccRewardsWithdrawn
     dealStakerRewardsWithdrawn
   }

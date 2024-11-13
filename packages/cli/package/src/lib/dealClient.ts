@@ -658,7 +658,7 @@ export async function multicallRead(
 
   const results = await contracts.multicall3.aggregate3.staticCall(
     multicallReadItems.map(({ callData, target }) => {
-      return { callData, target, allowFailure: false };
+      return { callData, target, allowFailure: true };
     }),
   );
 
@@ -670,7 +670,7 @@ export async function multicallRead(
       "Unreachable. For each call we must have a result",
     );
 
-    return res.success ? decode(res.returnData)[0] : null;
+    return res.success ? decode(res.returnData)[0] : undefined;
   });
 }
 

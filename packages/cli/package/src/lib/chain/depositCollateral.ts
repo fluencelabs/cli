@@ -15,11 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import assert from "assert";
+
 import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
-import { getContracts, getReadonlyContracts, sign } from "../dealClient.js";
-import { ccIds } from "../gql/gql.js";
+import {
+  getContracts,
+  multicallRead,
+  sign,
+  type MulticallReadItem,
+} from "../dealClient.js";
 import { splitErrorsAndResults } from "../helpers/utils.js";
 
 import {
@@ -33,16 +39,13 @@ import { fltFormatWithSymbol } from "./currencies.js";
 
 export async function depositCollateral(flags: CCFlags) {
   const [commitmentsWithInvalidStatus, commitmentsWithWaitDelegation] =
-    splitErrorsAndResults(
-      await getCommitmentsGroupedByStatus(flags, ccIds),
-      (c) => {
-        return c.status === "WaitDelegation" ? { result: c } : { error: c };
-      },
-    );
+    splitErrorsAndResults(await getCommitmentsGroupedByStatus(flags), (c) => {
+      return c.status === "WaitDelegation" ? { result: c } : { error: c };
+    });
 
   if (commitmentsWithInvalidStatus.length > 0) {
     commandObj.warn(
-      `It's only possible to deposit collateral to the capacity commitments in the "WaitDelegation" status. The following commitments have invalid status:\n\n${await basicCCInfoAndStatusToString(
+      `It's only possible to deposit collateral to the capacity commitments in the "WaitDelegation" status. The following commitments have invalid status:\n\n${basicCCInfoAndStatusToString(
         commitmentsWithInvalidStatus,
       )}`,
     );
@@ -66,14 +69,33 @@ export async function depositCollateral(flags: CCFlags) {
 
   const { contracts } = await getContracts();
 
-  const commitmentsWithCollateral = await Promise.all(
-    commitments.map(async (commitment) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const commitmentsFromChain = (await multicallRead(
+    commitments.map(({ ccId }): MulticallReadItem => {
       return {
-        ...commitment,
-        collateral: await getCollateral(commitment.infoFromSubgraph.id),
+        target: contracts.deployment.diamond,
+        callData: contracts.diamond.interface.encodeFunctionData(
+          "getCommitment",
+          [ccId],
+        ),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "getCommitment",
+            returnData,
+          );
+        },
       };
     }),
-  );
+  )) as Array<Awaited<ReturnType<typeof contracts.diamond.getCommitment>>>;
+
+  const commitmentsWithCollateral = commitments.map((commitment, i) => {
+    const ccFromChain = commitmentsFromChain[i];
+    assert(ccFromChain !== undefined, "ccFromChain is undefined");
+    return {
+      ...commitment,
+      collateral: ccFromChain.collateralPerUnit * ccFromChain.unitCount,
+    };
+  });
 
   const collateralToApproveCommitment = commitmentsWithCollateral.reduce(
     (acc, c) => {
@@ -85,12 +107,8 @@ export async function depositCollateral(flags: CCFlags) {
   await sign({
     title: `Deposit ${await fltFormatWithSymbol(collateralToApproveCommitment)} collateral to the following capacity commitments:\n\n${(
       await Promise.all(
-        commitments.map(async ({ infoFromSubgraph, name }) => {
-          return [
-            name,
-            await peerIdHexStringToBase58String(infoFromSubgraph.peer.id),
-            infoFromSubgraph.id,
-          ]
+        commitments.map(async ({ ccId, peerId, name }) => {
+          return [name, await peerIdHexStringToBase58String(peerId), ccId]
             .filter(Boolean)
             .join("\n");
         }),
@@ -98,8 +116,8 @@ export async function depositCollateral(flags: CCFlags) {
     ).join("\n\n")}`,
     method: contracts.diamond.depositCollateral,
     args: [
-      commitments.map(({ infoFromSubgraph }) => {
-        return infoFromSubgraph.id;
+      commitments.map(({ ccId }) => {
+        return ccId;
       }),
       { value: collateralToApproveCommitment },
     ],
@@ -121,20 +139,11 @@ Deposited ${color.yellow(
 ${(
   await Promise.all(
     commitmentsWithCollateral.map(async (c) => {
-      return `Capacity commitment successfully activated!\n${await stringifyBasicCommitmentInfo(
+      return `Capacity commitment successfully activated!\n${stringifyBasicCommitmentInfo(
         c,
       )}\nCollateral: ${color.yellow(await fltFormatWithSymbol(c.collateral))}`;
     }),
   )
 ).join("\n\n")}`,
   );
-}
-
-async function getCollateral(commitmentId: string) {
-  const { readonlyContracts } = await getReadonlyContracts();
-
-  const commitment =
-    await readonlyContracts.diamond.getCommitment(commitmentId);
-
-  return commitment.collateralPerUnit * commitment.unitCount;
 }

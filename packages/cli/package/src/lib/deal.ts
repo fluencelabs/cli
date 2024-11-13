@@ -189,7 +189,7 @@ export async function createAndMatchDealsForPeerIds({
       const ccIds = await contracts.diamond.getComputeUnitIds(peerIdUint8Array);
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const [{ offerId }, ...computeUnitInfos] = (await multicallRead([
+      const [{ offerId } = {}, ...computeUnitInfos] = (await multicallRead([
         {
           target: contracts.deployment.diamond,
           callData: contracts.diamond.interface.encodeFunctionData(
@@ -219,9 +219,17 @@ export async function createAndMatchDealsForPeerIds({
           };
         }),
       ])) as [
-        Awaited<ReturnType<typeof contracts.diamond.getComputePeer>>,
-        ...Awaited<ReturnType<typeof contracts.diamond.getComputeUnit>>[],
+        (
+          | Awaited<ReturnType<typeof contracts.diamond.getComputePeer>>
+          | undefined
+        ),
+        ...(
+          | Awaited<ReturnType<typeof contracts.diamond.getComputeUnit>>
+          | undefined
+        )[],
       ];
+
+      assert(offerId !== undefined, "wasn't able to find offerId");
 
       const computeUnits = ccIds
         .map((unitId, i) => {

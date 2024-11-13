@@ -16,8 +16,9 @@
  */
 
 import { BaseCommand } from "../../baseCommand.js";
-import { getProviderDeals } from "../../lib/chain/deals.js";
 import { commandObj } from "../../lib/commandObj.js";
+// import { getProviderDeals } from "../../lib/chain/deals.js";
+// import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -31,6 +32,10 @@ export default class DealsList extends BaseCommand<typeof DealsList> {
 
   async run(): Promise<void> {
     await initCli(this, await this.parse(DealsList));
-    commandObj.log((await getProviderDeals()).join("\n"));
+
+    commandObj.error(
+      "This command is temporary not working. Please use explorer to see deals",
+    );
+    // commandObj.log((await getProviderDeals()).join("\n"));
   }
 }

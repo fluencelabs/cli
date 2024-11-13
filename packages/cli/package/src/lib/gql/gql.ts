@@ -39,17 +39,41 @@ async function getSdk() {
 
 export const DEFAULT_PAGE_LIMIT = 1000;
 
+async function getAllPages<T>(getter: (skip: number) => Promise<T[]>) {
+  let result: T[] = [];
+  let skip = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const res = await getter(skip);
+    result = result.concat(res);
+
+    if (res.length === DEFAULT_PAGE_LIMIT) {
+      skip = skip + DEFAULT_PAGE_LIMIT;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  return result;
+}
+
 export async function getDealIdsByProviderId(providerId: string) {
-  return (await getSdk()).Deals({
-    where: {
-      joinedWorkers_: {
-        peer_: { provider_: { id: providerId.toLowerCase() } },
-      },
-    },
-    skip: 0,
-    first: DEFAULT_PAGE_LIMIT,
-    orderBy: "createdAt",
-    orderDirection: "desc",
+  const sdk = await getSdk();
+
+  return getAllPages(async (skip) => {
+    return (
+      await sdk.Deals({
+        where: {
+          joinedWorkers_: {
+            // TODO: must be just provider_: { id: providerId.toLowerCase() }
+            peer_: { provider_: { id: providerId.toLowerCase() } },
+          },
+        },
+        skip,
+        first: DEFAULT_PAGE_LIMIT,
+      })
+    ).deals;
   });
 }
 
@@ -64,30 +88,9 @@ export async function getOffersForMatching(
 }
 
 export async function getOffers(id_in: string[]) {
-  return (await getSdk()).OfferDetails({
-    where: { id_in },
-    orderBy: "createdAt",
-    orderDirection: "desc",
-  });
+  return (await getSdk()).OfferDetails({ where: { id_in, deleted: false } });
 }
 
-function getCCQueries<T extends "CCIds" | "CCDetails">(
-  queryName: T,
-): {
-  getCCByCCId(ccIds: string[]): ReturnType<Sdk[T]>;
-  getCCByHexPeerId(hexPeerIds: string[]): ReturnType<Sdk[T]>;
-} {
-  return {
-    // @ts-expect-error Don't know how to satisfy the type system here
-    async getCCByCCId(ccIds: string[]) {
-      return (await getSdk())[queryName]({ where: { id_in: ccIds } });
-    },
-    // @ts-expect-error Don't know how to satisfy the type system here
-    async getCCByHexPeerId(hexPeerIds: string[]) {
-      return (await getSdk())[queryName]({ where: { peer_in: hexPeerIds } });
-    },
-  };
+export async function ccDetails(ccIds: string[]) {
+  return (await getSdk()).CCDetails({ where: { id_in: ccIds } });
 }
-
-export const ccIds = getCCQueries("CCIds");
-export const ccDetails = getCCQueries("CCDetails");
