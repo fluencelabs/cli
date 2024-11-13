@@ -1359,10 +1359,9 @@ Exit from deal. Alias: fluence provider de
 ```
 USAGE
   $ fluence provider deal-exit [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--deal-ids <id-1,id-2>] [--all]
+    [--deal-ids <id-1,id-2>]
 
 FLAGS
-  --all                                      To use all deal ids that indexer is aware of for your provider address
   --deal-ids=<id-1,id-2>                     Comma-separated deal ids
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
