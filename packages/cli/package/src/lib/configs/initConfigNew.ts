@@ -32,6 +32,7 @@ import {
   CLI_NAME_FULL,
   SCHEMAS_DIR_NAME,
 } from "../const.js";
+import { dbg } from "../dbg.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
 import { removeProperties } from "../helpers/utils.js";
 
@@ -301,6 +302,26 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
   let configString: string;
   let actualConfigPath = expectedConfigPath;
 
+  async function getDefaultConfigString() {
+    if (getDefaultConfig === undefined) {
+      return null;
+    }
+
+    const latestConfigOptions = options[options.length - 1];
+    const { description } = latestConfigOptions.schema;
+
+    assert(
+      description !== undefined,
+      `Unreachable. addVersionTitleAndDescriptionToConfigOptions function must ensure that description is defined`,
+    );
+
+    return yamlDiffPatch(
+      `# ${description}\n\n`,
+      {},
+      { version: options.length - 1, ...(await getDefaultConfig()) },
+    );
+  }
+
   try {
     // try reading config file
     // if it fails, try replacing .yaml with .yml or vice versa and read again
@@ -320,23 +341,23 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
       actualConfigPath = newConfigPath;
     }
   } catch {
-    if (getDefaultConfig === undefined) {
+    const defaultConfigString = await getDefaultConfigString();
+
+    if (defaultConfigString === null) {
       return null;
     }
 
-    const latestConfigOptions = options[options.length - 1];
-    const { description } = latestConfigOptions.schema;
+    configString = defaultConfigString;
+  }
 
-    assert(
-      description !== undefined,
-      `Unreachable. addVersionTitleAndDescriptionToConfigOptions function must ensure that description is defined`,
-    );
+  // if config file is empty for some reason - try using default
+  if (configString.trim() === "") {
+    dbg(`Config at ${actualConfigPath} is empty. Using default config`);
+    const defaultConfigString = await getDefaultConfigString();
 
-    configString = yamlDiffPatch(
-      `# ${description}\n\n`,
-      {},
-      { version: options.length - 1, ...(await getDefaultConfig()) },
-    );
+    if (defaultConfigString !== null) {
+      configString = defaultConfigString;
+    }
   }
 
   const currentConfigUnknown: unknown = parse(configString);
@@ -346,7 +367,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     currentConfigUnknown === null
   ) {
     return commandObj.error(
-      `Invalid config at ${color.yellow(actualConfigPath)}. Expected to be an object`,
+      `Invalid config at ${color.yellow(actualConfigPath)}. Expected to be an object. Got: ${configString}`,
     );
   }
 
