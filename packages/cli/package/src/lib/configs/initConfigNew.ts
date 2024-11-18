@@ -157,6 +157,7 @@ export function getConfigInitFunction<
         expectedConfigPath,
         getDefaultConfig,
         getSchemaDirPath,
+        description,
       });
 
       if (getLatestConfigRes === null) {
@@ -275,6 +276,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
   expectedConfigPath,
   getDefaultConfig,
   getSchemaDirPath,
+  description,
 }: {
   options: OptionsTuple<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>;
   expectedConfigPath: string;
@@ -282,6 +284,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     | GetDefaultConfig<GetLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>>
     | undefined;
   getSchemaDirPath: GetPath | undefined;
+  description: string;
 }): Promise<{
   latestConfig: GetLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>;
   latestConfigString: string;
@@ -306,14 +309,6 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     if (getDefaultConfig === undefined) {
       return null;
     }
-
-    const latestConfigOptions = options[options.length - 1];
-    const { description } = latestConfigOptions.schema;
-
-    assert(
-      description !== undefined,
-      `Unreachable. addVersionTitleAndDescriptionToConfigOptions function must ensure that description is defined`,
-    );
 
     return yamlDiffPatch(
       `# ${description}\n\n`,
