@@ -42,7 +42,7 @@ export async function initNewUserConfig() {
       isInteractive &&
       (await confirm({
         message: `Help me improve ${CLI_NAME_FULL} by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
-          "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data.",
+          "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Cloudless Labs hosts a Countly instance to record anonymous usage data.",
         )}\nOK?`,
       }))
     ) {

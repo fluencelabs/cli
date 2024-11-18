@@ -10,7 +10,7 @@
   "bugs": "https://github.com/fluencelabs/cli/issues",
   "repository": "fluencelabs/cli",
   "license": "AGPL-3.0",
-  "author": "Fluence Labs",
+  "author": "Cloudless Labs",
   "type": "module",
   "exports": "./lib/index.js",
   "types": "dist/index.d.ts",
