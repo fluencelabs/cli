@@ -46,7 +46,7 @@ import type {
   CapacityCommitmentStatus,
   CcDetailsQuery,
 } from "../gql/gqlGenerated.js";
-import { bigintSecondsToDate } from "../helpers/bigintOps.js";
+import { secondsToDate } from "../helpers/bigintOps.js";
 import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import { splitErrorsAndResults, commaSepStrToArr } from "../helpers/utils.js";
@@ -1041,6 +1041,23 @@ async function getDetailedCommitmentInfo({
     | undefined;
   ccFromChain: Awaited<ReturnType<Contracts["diamond"]["getCommitment"]>>;
 }) {
+  const { calculateTimestamp } = await import(
+    "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/utils.js"
+  );
+
+  function getStartOrExpirationDate(epoch: bigint) {
+    // if startEpoch is 0, then it's not yet started - no need to show anything
+    return ccFromChain.startEpoch === 0n
+      ? "-"
+      : secondsToDate(
+          calculateTimestamp(
+            Number(epoch),
+            Number(initTimestamp),
+            Number(epochDuration),
+          ),
+        ).toLocaleString();
+  }
+
   const totalRewardsSplit = splitRewards(
     totalRewards,
     ccFromChain.rewardDelegatorRate,
@@ -1081,12 +1098,8 @@ async function getDetailedCommitmentInfo({
     startEpoch: bigintToStr(ccFromChain.startEpoch),
     endEpoch: bigintToStr(ccFromChain.endEpoch),
     currentEpoch: bigintToStr(currentEpoch),
-    startDate: bigintSecondsToDate(
-      initTimestamp + ccFromChain.startEpoch * epochDuration,
-    ).toLocaleString(),
-    expirationDate: bigintSecondsToDate(
-      initTimestamp + ccFromChain.endEpoch * epochDuration,
-    ).toLocaleString(),
+    startDate: getStartOrExpirationDate(ccFromChain.startEpoch),
+    expirationDate: getStartOrExpirationDate(ccFromChain.endEpoch),
     totalCU: bigintToStr(ccFromChain.unitCount),
     missedProofs: bigintToStr(ccFromChain.totalFailCount),
     threshold: bigintToStr(maxFailedRatio * ccFromChain.unitCount),

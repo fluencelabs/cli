@@ -15,6 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export function bigintSecondsToDate(bigSec: bigint): Date {
-  return new Date(Number(bigSec * 1000n));
+export function secondsToDate(bigSec: bigint | number): Date {
+  return new Date(Number(bigSec) * 1000);
 }

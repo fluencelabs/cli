@@ -474,6 +474,10 @@ async function getMatchedOffersByDealId(dealAddress: string) {
     throw new Error(`Deal already has target number of workers matched.`);
   }
 
+  const { calculateEpoch } = await import(
+    "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/utils.js"
+  );
+
   const currentEpoch = calculateEpoch(
     _meta.block.timestamp,
     initTimestamp,
@@ -630,22 +634,6 @@ async function getMatchedOffersByDealId(dealAddress: string) {
   }
 
   return matchedOffers;
-}
-
-function calculateEpoch(
-  timestamp: number,
-  epochControllerStorageInitTimestamp: number,
-  epochControllerStorageEpochDuration: number,
-) {
-  dbg(
-    `timestamp: ${numToStr(timestamp)} epochControllerStorageInitTimestamp: ${numToStr(epochControllerStorageInitTimestamp)} epochControllerStorageEpochDuration: ${numToStr(epochControllerStorageEpochDuration)}`,
-  );
-
-  return Math.floor(
-    1 +
-      (timestamp - epochControllerStorageInitTimestamp) /
-        epochControllerStorageEpochDuration,
-  );
 }
 
 function prepareDealProviderAccessLists(
