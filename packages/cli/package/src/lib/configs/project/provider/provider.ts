@@ -393,15 +393,11 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         };
       }),
     ({ secretKey, signingWallet, computePeerName, computePeer }) => {
-      if (secretKey === undefined || signingWallet === undefined) {
-        return {
-          error: { computePeerName, computePeer },
-        };
-      }
-
-      return {
-        result: { secretKey, signingWallet, computePeerName, computePeer },
-      };
+      return secretKey === undefined || signingWallet === undefined
+        ? { error: { computePeerName, computePeer } }
+        : {
+            result: { secretKey, signingWallet, computePeerName, computePeer },
+          };
     },
   );
 

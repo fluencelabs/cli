@@ -10,6 +10,8 @@
     "build": "turbo run build --cache-dir=.turbo",
     "install-yarn-dependencies": "turbo run install-yarn-dependencies --cache-dir=.turbo",
     "install-npm-dependencies": "turbo run install-npm-dependencies --cache-dir=.turbo",
+    "gen-gql-schema": "turbo run gen-gql-schema --cache-dir=.turbo",
+    "gql-codegen": "turbo run gql-codegen --cache-dir=.turbo",
     "pack-ci": "turbo run pack-ci --cache-dir=.turbo && node ./rename-packed.js",
     "pack-linux-x64": "turbo run pack-linux-x64 --cache-dir=.turbo && node ./rename-packed.js",
     "pack-darwin-x64": "turbo run pack-darwin-x64 --cache-dir=.turbo && node ./rename-packed.js",

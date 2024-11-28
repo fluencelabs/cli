@@ -23,11 +23,7 @@ import isEmpty from "lodash-es/isEmpty.js";
 import mapValues from "lodash-es/mapValues.js";
 import mergeWith from "lodash-es/mergeWith.js";
 
-import {
-  jsonStringify,
-  CHAIN_RPC_PORT,
-  type ChainENV,
-} from "../../../../common.js";
+import { jsonStringify, type ChainENV } from "../../../../common.js";
 import { versions } from "../../../../versions.js";
 import { getChainId } from "../../../chain/chainConfig.js";
 import {
@@ -46,10 +42,7 @@ import {
   DEFAULT_CC_STAKER_REWARD,
   DURATION_EXAMPLE,
   WS_CHAIN_URLS,
-  CHAIN_RPC_CONTAINER_NAME,
   DEFAULT_VM_EFFECTOR_CID,
-  IPFS_CONTAINER_NAME,
-  IPFS_PORT,
 } from "../../../const.js";
 import { resolveDeployment } from "../../../dealClient.js";
 import { ensureChainEnv } from "../../../ensureChainNetwork.js";
@@ -60,6 +53,9 @@ import {
 import { validateBatchAsync } from "../../../helpers/validations.js";
 import { resolveRelaysWithoutLocal } from "../../../multiaddresWithoutLocal.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
+import { CHAIN_RPC_CONTAINER_NAME } from "../chainContainers.js";
+import { IPFS_CONTAINER_NAME } from "../chainContainers.js";
+import { CHAIN_RPC_PORT, IPFS_PORT } from "../chainContainers.js";
 import { initEnvConfig } from "../env/env.js";
 
 import { providerNameSchema } from "./provider0.js";

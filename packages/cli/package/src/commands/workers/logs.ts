@@ -32,7 +32,8 @@ import {
   type FluenceEnv,
 } from "../../lib/const.js";
 import { formatAquaLogs } from "../../lib/helpers/formatAquaLogs.js";
-import { stringifyUnknown, commaSepStrToArr } from "../../lib/helpers/utils.js";
+import { stringifyUnknown } from "../../lib/helpers/stringifyUnknown.js";
+import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,
@@ -160,6 +161,12 @@ const getLogsArg = async ({
     maybeWorkerNamesString === undefined
       ? workerNamesSet
       : commaSepStrToArr(maybeWorkerNamesString);
+
+  if (workersToGetLogsFor.length === 0) {
+    commandObj.error(
+      `No worker names provided. Please provide worker names to get logs for`,
+    );
+  }
 
   const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
     (workerName) => {

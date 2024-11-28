@@ -77,6 +77,10 @@ export default class Remove extends BaseCommand<typeof Remove> {
         ? Object.keys(deployedWorkersForEnv)
         : commaSepStrToArr(args["WORKER-NAMES"]);
 
+    if (workersToRemove.length === 0) {
+      return commandObj.error("No worker names provided");
+    }
+
     const deployedWorkersForEnvArr = Object.entries(deployedWorkersForEnv);
 
     const removeArg: RemoveArgWorkers = {

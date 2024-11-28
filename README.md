@@ -92,5 +92,5 @@ you read and follow some basic [rules](./CONTRIBUTING.md).
 
 ## License
 
-All software code is copyright (c) Fluence Labs, Inc. under the
+All software code is copyright (c) Fluence DAO. under the
 [GNU Affero General Public License version 3](./LICENSE) license.

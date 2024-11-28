@@ -19,7 +19,7 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import { type FluenceClientFlags } from "./const.js";
-import { stringifyUnknown } from "./helpers/utils.js";
+import { stringifyUnknown } from "./helpers/stringifyUnknown.js";
 import { base64ToUint8Array } from "./keyPairs.js";
 import { resolveRelay } from "./multiaddres.js";
 import { getExistingSecretKey } from "./secretKeys.js";

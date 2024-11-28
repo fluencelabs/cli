@@ -31,6 +31,11 @@ export async function peerIdBase58ToUint8Array(peerIdBase58: string) {
     .bytes.subarray(PREFIX.length);
 }
 
+export async function peerIdBase58ToHexString(peerIdBase58: string) {
+  const { hexlify } = await import("ethers");
+  return hexlify(await peerIdBase58ToUint8Array(peerIdBase58));
+}
+
 export async function peerIdHexStringToBase58String(peerIdHex: string) {
   const [{ base58btc }] = await Promise.all([
     import("multiformats/bases/base58"),

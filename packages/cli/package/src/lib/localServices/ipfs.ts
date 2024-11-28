@@ -23,7 +23,8 @@ import { jsonStringify } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS } from "../const.js";
 import { dbg } from "../dbg.js";
-import { setTryTimeout, stringifyUnknown } from "../helpers/utils.js";
+import { setTryTimeout } from "../helpers/setTryTimeout.js";
+import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
 
 // !IMPORTANT for some reason when in tsconfig.json "moduleResolution" is set to "nodenext" - "ipfs-http-client" types all become "any"
 // so when working with this module - remove "nodenext" from "moduleResolution" so you can make sure types are correct

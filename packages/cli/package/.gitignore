@@ -16,6 +16,7 @@ tmp
 /.f
 .env
 rust-toolchain.toml
+docker-compose.yaml
 
 # recommended by Fluence
 .idea
@@ -27,6 +28,8 @@ rust-toolchain.toml
 # ignore compiled files
 src/lib/compiled-aqua
 src/lib/compiled-aqua-with-tracing
+src/lib/gql/gqlGenerated.ts
+src/lib/gql/gqlSchema.json
 src/versions
 src/aqua-dependencies
 src/common.ts

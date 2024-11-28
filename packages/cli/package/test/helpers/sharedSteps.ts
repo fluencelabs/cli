@@ -42,11 +42,11 @@ import {
   WORKER_SPELL,
   DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
 } from "../../src/lib/const.js";
+import { setTryTimeout } from "../../src/lib/helpers/setTryTimeout.js";
+import { stringifyUnknown } from "../../src/lib/helpers/stringifyUnknown.js";
 import {
   LOGS_GET_ERROR_START,
   LOGS_RESOLVE_SUBNET_ERROR_START,
-  setTryTimeout,
-  stringifyUnknown,
 } from "../../src/lib/helpers/utils.js";
 import { addrsToNodes } from "../../src/lib/multiaddresWithoutLocal.js";
 import { getAquaMainPath } from "../../src/lib/paths.js";

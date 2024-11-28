@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Flags } from "@oclif/core";
+import type { Contracts } from "@fluencelabs/deal-ts-clients";
 
 import { BaseCommand } from "../../baseCommand.js";
-import { getProviderDeals } from "../../lib/chain/deals.js";
+import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
@@ -27,8 +27,10 @@ import {
 import {
   getContracts,
   getSignerAddress,
+  multicallRead,
   populateTx,
   signBatch,
+  type MulticallReadItem,
 } from "../../lib/dealClient.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
@@ -41,11 +43,12 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
   static override flags = {
     ...CHAIN_FLAGS,
     ...DEAL_IDS_FLAG,
-    all: Flags.boolean({
-      default: false,
-      description:
-        "To use all deal ids that indexer is aware of for your provider address",
-    }),
+    // TODO: When we have a way to get all deal ids for a provider address
+    // all: Flags.boolean({
+    //   default: false,
+    //   description:
+    //     "To use all deal ids that indexer is aware of for your provider address",
+    // }),
   };
 
   async run(): Promise<void> {
@@ -53,25 +56,72 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     const { contracts } = await getContracts();
     const signerAddress = await getSignerAddress();
 
-    const dealIds = flags.all
-      ? await getProviderDeals()
-      : commaSepStrToArr(
-          flags[DEAL_IDS_FLAG_NAME] ??
-            (await input({
-              message: "Enter comma-separated deal ids",
-            })),
+    const dealIds =
+      // flags.all
+      //   ? await getProviderDeals()
+      //   :
+      commaSepStrToArr(
+        flags[DEAL_IDS_FLAG_NAME] ??
+          (await input({
+            message: "Enter comma-separated deal ids",
+            validate(input: string) {
+              return (
+                commaSepStrToArr(input).length > 0 ||
+                "Please enter at least one deal id"
+              );
+            },
+          })),
+      );
+
+    if (dealIds.length === 0) {
+      return commandObj.error("No deal ids provided");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const workersFromRPC = (await multicallRead(
+      dealIds.map((id): MulticallReadItem => {
+        const deal = contracts.getDeal(id);
+        return {
+          target: id,
+          callData: deal.interface.encodeFunctionData("getWorkers"),
+          decode(returnData) {
+            return deal.interface.decodeFunctionResult(
+              "getWorkers",
+              returnData,
+            );
+          },
+        };
+      }),
+    )) as Awaited<ReturnType<ReturnType<Contracts["getDeal"]>["getWorkers"]>>[];
+
+    const workers = dealIds.flatMap((id, i) => {
+      const deal = contracts.getDeal(id);
+      const workers = workersFromRPC[i];
+
+      if (workers === undefined) {
+        commandObj.warn(
+          `Was not able to get workers for deal ${id} from chain. Skipping...`,
         );
 
-    const workers = (
-      await Promise.all(
-        dealIds.map(async (id) => {
-          const deal = contracts.getDeal(id);
-          return (await deal.getWorkers()).map((worker) => {
-            return { deal, worker };
-          });
-        }),
-      )
-    ).flat();
+        return [];
+      }
+
+      return workers
+        .filter((worker) => {
+          return worker.provider.toLowerCase() === signerAddress;
+        })
+        .map((worker) => {
+          return { worker, deal };
+        });
+    });
+
+    const [firstWorker, ...restWorkers] = workers;
+
+    if (firstWorker === undefined) {
+      return commandObj.error(
+        `No workers found for address ${signerAddress} and deal ids: ${dealIds.join(", ")}`,
+      );
+    }
 
     await signBatch(
       `Remove the following workers from deals:\n\n${workers
@@ -79,13 +129,12 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
           return onchainId;
         })
         .join("\n")}`,
-      workers
-        .filter(({ worker }) => {
-          return worker.provider.toLowerCase() === signerAddress;
-        })
-        .map(({ deal, worker: { onchainId } }) => {
+      [
+        populateTx(firstWorker.deal.removeWorker, firstWorker.worker.onchainId),
+        ...restWorkers.map(({ deal, worker: { onchainId } }) => {
           return populateTx(deal.removeWorker, onchainId);
         }),
+      ],
     );
   }
 }

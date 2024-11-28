@@ -1,0 +1,147 @@
+query Deals($where: Deal_filter, $skip: Int, $first: Int) {
+  deals(
+    where: $where
+    skip: $skip
+    first: $first
+    orderBy: createdAt
+    orderDirection: desc
+  ) {
+    id
+  }
+}
+
+query DealForMatching($id: ID!) {
+  deal(id: $id) {
+    maxWorkersPerProvider
+    minWorkers
+    pricePerCuPerEpoch
+    matchedAt
+    paymentToken {
+      id
+    }
+    targetWorkers
+    cuCountPerWorker
+    joinedWorkers {
+      computeUnits {
+        id
+      }
+    }
+    effectors {
+      effector {
+        id
+      }
+    }
+    providersAccessType
+    providersAccessList {
+      provider {
+        id
+      }
+    }
+  }
+
+  _meta {
+    block {
+      timestamp
+    }
+  }
+
+  graphNetworks(first: 1) {
+    coreEpochDuration
+    initTimestamp
+    coreMinDealRematchingEpochs
+  }
+}
+
+query OffersForMatching(
+  $filters: Offer_filter
+  $peersFilters: Peer_filter
+  $computeUnitsFilters: ComputeUnit_filter
+  $peersLimit: Int
+  $computeUnitsLimit: Int
+  $offset: Int
+  $peersOffset: Int
+  $computeUnitsOffset: Int
+  $limit: Int
+  $orderBy: Offer_orderBy
+  $orderType: OrderDirection
+) {
+  offers(
+    where: {
+      and: [
+        $filters
+        # Exclude deleted offers.
+        { deleted: false }
+      ]
+    }
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    id
+    peers(where: $peersFilters, first: $peersLimit, skip: $peersOffset) {
+      id
+      computeUnits(
+        where: $computeUnitsFilters
+        first: $computeUnitsLimit
+        skip: $computeUnitsOffset
+      ) {
+        id
+      }
+    }
+  }
+}
+
+query OfferDetails($where: Offer_filter) {
+  offers(where: $where) {
+    id
+    createdAt
+    updatedAt
+    pricePerEpoch
+    paymentToken {
+      id
+    }
+    computeUnitsTotal
+    computeUnitsAvailable
+    effectors {
+      effector {
+        id
+      }
+    }
+    provider {
+      id
+    }
+    peers(where: { deleted: false }) {
+      id
+      computeUnits(where: { deleted: false }) {
+        id
+        worker {
+          id
+        }
+      }
+    }
+  }
+}
+
+query CCIdsByPeerIds($where: CapacityCommitment_filter) {
+  capacityCommitments(
+    where: $where
+    orderBy: createdAt
+    # only get the last cc for each peer
+    orderDirection: desc
+    first: 1
+  ) {
+    id
+    peer {
+      id
+    }
+  }
+}
+
+query CCDetails($where: CapacityCommitment_filter) {
+  capacityCommitments(where: $where) {
+    id
+    ccRewardsWithdrawn
+    dealStakerRewardsWithdrawn
+  }
+}

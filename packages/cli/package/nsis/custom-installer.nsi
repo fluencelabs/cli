@@ -22,7 +22,7 @@ Section "@fluencelabs/cli CLI ${VERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\fluence" \
                    "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\fluence" \
-                   "Publisher" "Fluence Labs"
+                   "Publisher" "Cloudless Labs"
 
   WriteRegExpandStr ${env_hkcu} "FLUENCE_OCLIF_CLIENT_HOME" "$INSTDIR\client"
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000

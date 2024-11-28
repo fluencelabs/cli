@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// In Firefox: client variable can be undefined - that's why we need to use optional chaining
-
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
   type CLIToConnectorFullMsg,

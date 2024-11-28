@@ -49,6 +49,13 @@ export type OptionalFlags<T extends string> = Partial<
   Record<T, string | number | boolean | undefined | Array<string | undefined>>
 >;
 
+/**
+ * Useful for debugging. Merges any compound type into a final flat object type
+ */
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
+
 export const isObject = (
   unknown: unknown,
 ): unknown is Record<string, unknown> => {

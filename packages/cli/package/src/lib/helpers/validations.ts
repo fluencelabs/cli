@@ -15,8 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { stringifyUnknown } from "./stringifyUnknown.js";
 import { numToStr } from "./typesafeStringify.js";
-import { splitErrorsAndResults, stringifyUnknown } from "./utils.js";
+import { splitErrorsAndResults } from "./utils.js";
 
 export type ValidationResult = string | true;
 

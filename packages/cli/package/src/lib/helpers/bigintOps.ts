@@ -15,11 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export function bigintSecondsToDate(bigSec: bigint): Date | undefined {
-  if (bigSec > Number.MAX_SAFE_INTEGER) {
-    return undefined;
-  }
-
-  const sec = Number(bigSec * BigInt(1000));
-  return new Date(sec);
+export function secondsToDate(bigSec: bigint | number): Date {
+  return new Date(Number(bigSec) * 1000);
 }

@@ -15,14 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { CommitmentStatus, ICapacity } from "@fluencelabs/deal-ts-clients";
+import assert from "assert";
+
+import type { Contracts } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
-import isUndefined from "lodash-es/isUndefined.js";
-import omitBy from "lodash-es/omitBy.js";
 import parse from "parse-duration";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { jsonStringify } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { initProviderConfig } from "../configs/project/provider/provider.js";
 import {
@@ -34,22 +33,23 @@ import {
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
-  batchRead,
   getContracts,
   getEventValues,
   signBatch,
   populateTx,
-  getReadonlyContracts,
   sign,
-  getDealExplorerClient,
+  multicallRead,
+  type MulticallReadItem,
 } from "../dealClient.js";
-import { bigintSecondsToDate } from "../helpers/bigintOps.js";
+import { getCCDetails, getCCIdsByHexPeerIds } from "../gql/gql.js";
+import type {
+  CapacityCommitmentStatus,
+  CcDetailsQuery,
+} from "../gql/gqlGenerated.js";
+import { secondsToDate } from "../helpers/bigintOps.js";
+import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
-import {
-  splitErrorsAndResults,
-  stringifyUnknown,
-  commaSepStrToArr,
-} from "../helpers/utils.js";
+import { splitErrorsAndResults, commaSepStrToArr } from "../helpers/utils.js";
 import { input } from "../prompt.js";
 import {
   resolveComputePeersByNames,
@@ -57,105 +57,90 @@ import {
 } from "../resolveComputePeersByNames.js";
 
 import {
-  peerIdHexStringToBase58String,
   peerIdBase58ToUint8Array,
+  peerIdBase58ToHexString,
+  peerIdHexStringToBase58String,
 } from "./conversions.js";
 import { fltFormatWithSymbol } from "./currencies.js";
 
 const HUNDRED_PERCENT = 100;
 
 export type ComputePeersWithCC = Awaited<
-  ReturnType<typeof getComputePeersWithCC>
+  ReturnType<typeof getComputePeersWithCCIds>
 >;
 
-export async function getComputePeersWithCC(
+async function getComputePeersWithCCIds(
   computePeers: ResolvedComputePeer[],
-) {
-  const { readonlyContracts } = await getReadonlyContracts();
+): Promise<[Required<CapacityCommitment>, ...Required<CapacityCommitment>[]]> {
+  const computePeersWithHexPeerIds = await Promise.all(
+    computePeers.map(async (computePeer) => {
+      return {
+        ...computePeer,
+        hexPeerId: await peerIdBase58ToHexString(computePeer.peerId),
+      };
+    }),
+  );
 
-  const commitmentCreatedEvents = Object.fromEntries(
-    await Promise.all(
-      (
-        await readonlyContracts.diamond.queryFilter(
-          readonlyContracts.diamond.filters.CommitmentCreated,
-        )
-      ).map(async (event) => {
-        return [
-          await peerIdHexStringToBase58String(event.args.peerId),
-          event,
-        ] as const;
+  const { contracts } = await getContracts();
+
+  const [computePeersRPCInfo, ccIdsByHexPeerIdsRes] = await Promise.all([
+    multicallRead(
+      computePeersWithHexPeerIds.map(({ hexPeerId }): MulticallReadItem => {
+        return {
+          target: contracts.deployment.diamond,
+          callData: contracts.diamond.interface.encodeFunctionData(
+            "getComputePeer",
+            [hexPeerId],
+          ),
+          decode(returnData) {
+            return contracts.diamond.interface.decodeFunctionResult(
+              "getComputePeer",
+              returnData,
+            );
+          },
+        };
       }),
     ),
+    getCCIdsByHexPeerIds(
+      computePeersWithHexPeerIds.map(({ hexPeerId }) => {
+        return hexPeerId;
+      }),
+    ),
+  ]);
+
+  const ccIdsByHexPeerIds = Object.fromEntries(
+    ccIdsByHexPeerIdsRes.capacityCommitments.map(({ peer, id }) => {
+      return [peer.id, id];
+    }),
   );
 
   const { ZeroHash } = await import("ethers");
 
-  const computePeersWithChainInfo = (
-    await Promise.all(
-      computePeers.map(async (computePeer) => {
-        const peerIdUint8Array = await peerIdBase58ToUint8Array(
-          computePeer.peerId,
-        );
+  const [computePeersWithoutCC, computePeersWithCC] = splitErrorsAndResults(
+    computePeersWithHexPeerIds,
+    ({ name, peerId, hexPeerId }, i) => {
+      const { commitmentId: ccIdFromRPC } =
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        (computePeersRPCInfo[i] as
+          | Awaited<ReturnType<Contracts["diamond"]["getComputePeer"]>>
+          | undefined) ?? {};
 
-        const commitmentCreatedEvent =
-          commitmentCreatedEvents[computePeer.peerId];
+      // if ccIdFromRPC is undefined or ZeroHash (in case CC was removed), then we try to get last ccId from subgraph
+      const ccId =
+        ccIdFromRPC === undefined || ccIdFromRPC === ZeroHash
+          ? ccIdsByHexPeerIds[hexPeerId]
+          : ccIdFromRPC;
 
-        const marketGetComputePeerRes = await (async () => {
-          try {
-            return await readonlyContracts.diamond.getComputePeer(
-              peerIdUint8Array,
-            );
-          } catch {
-            return undefined;
-          }
-        })();
-
-        return {
-          providerConfigComputePeer: computePeer,
-          ...(commitmentCreatedEvent === undefined
-            ? {}
-            : {
-                commitmentCreatedEvent,
-              }),
-          ...(marketGetComputePeerRes === undefined
-            ? {}
-            : {
-                marketGetComputePeerRes,
-              }),
-        };
-      }),
-    )
-  ).map((c) => {
-    const commitmentId =
-      c.commitmentCreatedEvent?.args.commitmentId ??
-      c.marketGetComputePeerRes?.commitmentId;
-
-    if (commitmentId === undefined || commitmentId === ZeroHash) {
-      return c;
-    }
-
-    return { ...c, commitmentId };
-  });
-
-  const [computePeersWithoutCCId, computePeersWithCCId] = splitErrorsAndResults(
-    computePeersWithChainInfo,
-    (computePeerWithChainInfo) => {
-      if ("commitmentId" in computePeerWithChainInfo) {
-        return {
-          result: computePeerWithChainInfo,
-        };
-      }
-
-      return {
-        error: computePeerWithChainInfo,
-      };
+      return ccId === undefined || ccId === ZeroHash
+        ? { error: { name, peerId } }
+        : { result: { name, peerId, ccId } satisfies CapacityCommitment };
     },
   );
 
-  if (computePeersWithoutCCId.length > 0) {
+  if (computePeersWithoutCC.length > 0) {
     commandObj.warn(
-      `Some of the commitments are not found on chain for:\n${computePeersWithoutCCId
-        .map(({ providerConfigComputePeer: { name, peerId } }) => {
+      `Some of the commitments were not found for:\n${computePeersWithoutCC
+        .map(({ name, peerId }) => {
           return `Nox: ${name}, PeerId: ${peerId}`;
         })
         .join(
@@ -164,13 +149,74 @@ export async function getComputePeersWithCC(
     );
   }
 
-  if (computePeersWithCCId.length === 0) {
+  const [firstComputePeerWithCC, ...restComputePeersWithCC] =
+    computePeersWithCC;
+
+  if (firstComputePeerWithCC === undefined) {
     return commandObj.error(
-      "No compute peers with capacity commitments were found on chain.",
+      "No compute peers with capacity commitments were found",
     );
   }
 
-  return computePeersWithCCId;
+  return [firstComputePeerWithCC, ...restComputePeersWithCC];
+}
+
+async function getCCs(
+  ccIdsString: string,
+): Promise<[CapacityCommitment, ...CapacityCommitment[]]> {
+  const ccIds = commaSepStrToArr(ccIdsString);
+  const { contracts } = await getContracts();
+
+  const computePeers = await multicallRead(
+    ccIds.map((ccId): MulticallReadItem => {
+      return {
+        target: contracts.deployment.diamond,
+        callData: contracts.diamond.interface.encodeFunctionData(
+          "getCommitment",
+          [ccId],
+        ),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "getCommitment",
+            returnData,
+          );
+        },
+      };
+    }),
+  );
+
+  const [ccIdsWithoutInfo, ccInfos] = splitErrorsAndResults(
+    ccIds,
+    (ccId, i) => {
+      const { peerId: peerIdHex } =
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        (computePeers[i] as
+          | Awaited<ReturnType<Contracts["diamond"]["getCommitment"]>>
+          | undefined) ?? {};
+
+      return peerIdHex === undefined
+        ? { error: ccId }
+        : { result: { peerIdHex, ccId } };
+    },
+  );
+
+  if (ccIdsWithoutInfo.length > 0) {
+    commandObj.warn(
+      `Some of the commitments were not found on chain:\n${ccIdsWithoutInfo.join("\n")}`,
+    );
+  }
+
+  const [firstCCInfo, ...restCCInfos] = await Promise.all(
+    ccInfos.map(async ({ ccId, peerIdHex }) => {
+      return { ccId, peerId: await peerIdHexStringToBase58String(peerIdHex) };
+    }),
+  );
+
+  if (firstCCInfo === undefined) {
+    return commandObj.error("No commitments were found");
+  }
+
+  return [firstCCInfo, ...restCCInfos];
 }
 
 export type CCFlags = {
@@ -179,29 +225,31 @@ export type CCFlags = {
   [CC_IDS_FLAG_NAME]?: string | undefined;
 };
 
-export async function getCommitments(
+export async function getCommitmentsIds(
   flags: CCFlags,
-): Promise<{ commitmentId: string }[] | ComputePeersWithCC> {
+): Promise<[CapacityCommitment, ...CapacityCommitment[]]> {
   if (flags[CC_IDS_FLAG_NAME] !== undefined) {
-    return commaSepStrToArr(flags[CC_IDS_FLAG_NAME]).map((commitmentId) => {
-      return { commitmentId };
-    });
+    return getCCs(flags[CC_IDS_FLAG_NAME]);
   }
 
   if (
     flags[NOX_NAMES_FLAG_NAME] === undefined &&
     (await initProviderConfig()) === null
   ) {
-    return commaSepStrToArr(
+    return getCCs(
       await input({
         message: "Enter comma-separated list of Capacity Commitment IDs",
+        validate(val: string) {
+          return (
+            commaSepStrToArr(val).length > 0 ||
+            "Please enter at least one commitment id"
+          );
+        },
       }),
-    ).map((commitmentId) => {
-      return { commitmentId };
-    });
+    );
   }
 
-  return getComputePeersWithCC(await resolveComputePeersByNames(flags));
+  return getComputePeersWithCCIds(await resolveComputePeersByNames(flags));
 }
 
 export async function createCommitments(flags: {
@@ -280,9 +328,17 @@ export async function createCommitments(flags: {
 
   if (createCommitmentsTxsErrors.length > 0) {
     return commandObj.error(
-      `Failed to create commitments for some of the compute peers:\n${createCommitmentsTxsErrors.join(
+      `Failed to populate transactions to create commitments for some of the compute peers:\n${createCommitmentsTxsErrors.join(
         "\n",
       )}`,
+    );
+  }
+
+  const [firstCommitmentTx, ...restCommitmentTxs] = createCommitmentsTxs;
+
+  if (firstCommitmentTx === undefined) {
+    throw new Error(
+      "Unreachable. First commitment tx can't be undefined cause it's checked in resolveComputePeersByNames that computePeers array is not empty",
     );
   }
 
@@ -295,7 +351,7 @@ export async function createCommitments(flags: {
           return `Nox: ${name}\nPeerId: ${peerId}`;
         })
         .join("\n\n")}`,
-      createCommitmentsTxs,
+      [firstCommitmentTx, ...restCommitmentTxs],
     );
   } catch (e) {
     const errorString = stringifyUnknown(e);
@@ -313,12 +369,6 @@ export async function createCommitments(flags: {
     throw e;
   }
 
-  if (createCommitmentsTxReceipts === undefined) {
-    return commandObj.error(
-      "The are no compute peers to create commitments for",
-    );
-  }
-
   const commitmentIds = createCommitmentsTxReceipts.flatMap((txReceipt) => {
     return getEventValues({
       txReceipt,
@@ -331,17 +381,15 @@ export async function createCommitments(flags: {
   const [notStringCommitmentIds, stringCommitmentIds] = splitErrorsAndResults(
     commitmentIds,
     (id) => {
-      if (typeof id !== "string") {
-        return { error: stringifyUnknown(id) };
-      }
-
-      return { result: id };
+      return typeof id === "string"
+        ? { result: id }
+        : { error: stringifyUnknown(id) };
     },
   );
 
   if (notStringCommitmentIds.length > 0) {
     return commandObj.error(
-      `Wasn't able to get id for some of the commitments. Got: ${notStringCommitmentIds.join(
+      `Wasn't able to get ids for some of the commitments. Got: ${notStringCommitmentIds.join(
         ", ",
       )}`,
     );
@@ -353,88 +401,69 @@ export async function createCommitments(flags: {
     )}`,
   );
 
-  await printCommitmentsInfo({
-    "nox-names": computePeers
-      .map(({ name }) => {
-        return name;
-      })
-      .join(", "),
-  });
+  commandObj.logToStderr(
+    stringifyDetailedCommitmentsInfo(
+      await getDetailedCommitmentsInfoGroupedByStatus({
+        "nox-names": computePeers
+          .map(({ name }) => {
+            return name;
+          })
+          .join(", "),
+      }),
+    ),
+  );
 }
 
 export async function removeCommitments(flags: CCFlags) {
-  const commitments = await getCommitments(flags);
-  const { contracts } = await getContracts();
+  const [invalidCommitments, ccWithWaitDelegationStatusGroup] =
+    splitErrorsAndResults(await getCommitmentsGroupedByStatus(flags), (cc) => {
+      return cc.status === "WaitDelegation" ? { result: cc } : { error: cc };
+    });
 
-  const [commitmentInfoErrors, commitmentInfo] = splitErrorsAndResults(
-    await Promise.all(
-      commitments.map(async (commitment) => {
-        try {
-          return {
-            result: {
-              commitment,
-              info: await contracts.diamond.getCommitment(
-                commitment.commitmentId,
-              ),
-            },
-          };
-        } catch (error) {
-          return { error: { commitment, error } };
-        }
-      }),
-    ),
-    (res) => {
-      return res;
+  if (invalidCommitments.length > 0) {
+    commandObj.warn(
+      `You can remove commitments only if they have WaitDelegation status. Got:\n\n${basicCCInfoAndStatusToString(invalidCommitments)}`,
+    );
+  }
+
+  const CCsWithWaitDelegationStatus = ccWithWaitDelegationStatusGroup.flatMap(
+    ({ ccInfos }) => {
+      return ccInfos;
     },
   );
 
-  if (commitmentInfoErrors.length > 0) {
-    commandObj.error(
-      `Wasn't able to get commitments from chain:\n${commitmentInfoErrors
-        .map(({ commitment, error }) => {
-          return `${stringifyBasicCommitmentInfo(commitment)}\n\n${color.red(
-            stringifyUnknown(error),
-          )}`;
-        })
-        .join("\n\n")}`,
+  const [firstCCWithWaitDelegationStatus, ...restCCsWithWaitDelegationStatus] =
+    CCsWithWaitDelegationStatus;
+
+  if (firstCCWithWaitDelegationStatus === undefined) {
+    return commandObj.error(
+      "No commitments with 'WaitDelegation' status found",
     );
   }
 
-  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
+  const { contracts } = await getContracts();
 
-  const commitmentsWithInvalidStatus = commitmentInfo.filter(({ info }) => {
-    return Number(info.status) !== Number(CommitmentStatus.WaitDelegation);
-  });
-
-  if (commitmentsWithInvalidStatus.length > 0) {
-    commandObj.error(
-      `You can remove commitments only if they have WaitDelegation status. Got:\n\n${commitmentsWithInvalidStatus
-        .map(({ commitment, info }) => {
-          return `${stringifyBasicCommitmentInfo(commitment)}Status: ${
-            CommitmentStatus[Number(info.status)] ?? "Unknown"
-          }`;
-        })
-        .join("\n\n")}`,
-    );
-  }
+  const CCsWithWaitDelegationStatusString = CCsWithWaitDelegationStatus.map(
+    (commitment) => {
+      return stringifyBasicCommitmentInfo(commitment);
+    },
+  ).join("\n\n");
 
   await signBatch(
-    `Remove the following commitments:\n\n${commitments
-      .map((commitment) => {
-        return stringifyBasicCommitmentInfo(commitment);
-      })
-      .join("\n\n")}`,
-    commitments.map(({ commitmentId }) => {
-      return populateTx(contracts.diamond.removeCommitment, commitmentId);
-    }),
+    `Remove the following commitments:\n\n${CCsWithWaitDelegationStatusString}`,
+    [
+      populateTx(
+        contracts.diamond.removeCommitment,
+        firstCCWithWaitDelegationStatus.ccId,
+      ),
+      ...restCCsWithWaitDelegationStatus.map(({ ccId }) => {
+        return populateTx(contracts.diamond.removeCommitment, ccId);
+      }),
+    ],
   );
 
   commandObj.logToStderr(
-    `Removed commitments:\n\n${commitments
-      .map((commitment) => {
-        return stringifyBasicCommitmentInfo(commitment);
-      })
-      .join("\n")}`,
+    `Removed commitments:\n\n${CCsWithWaitDelegationStatusString}`,
   );
 }
 
@@ -444,25 +473,19 @@ export async function collateralWithdraw(
   },
 ) {
   const { ZeroAddress } = await import("ethers");
-  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
-    await getCommitmentsInfo(flags),
+    await getCommitmentsGroupedByStatus(flags),
     (c) => {
-      if (
-        c.status === CommitmentStatus.Inactive ||
-        c.status === CommitmentStatus.Failed
-      ) {
-        return { result: c };
-      }
-
-      return { error: c };
+      return c.status === "Completed" || c.status === "Failed"
+        ? { result: c }
+        : { error: c };
     },
   );
 
   if (invalidCommitments.length > 0) {
     commandObj.warn(
-      `You can withdraw collateral only from commitments with "Inactive" or "Failed" status. The following commitments have invalid status:\n\n${await basicCCInfoAndStatusToString(
+      `You can withdraw collateral only from commitments with "Inactive" or "Failed" status. The following commitments have invalid status:\n\n${basicCCInfoAndStatusToString(
         invalidCommitments,
       )}`,
     );
@@ -479,28 +502,52 @@ export async function collateralWithdraw(
   for (const commitment of commitments.flatMap(({ ccInfos }) => {
     return ccInfos;
   })) {
-    const { commitmentId, noxName } = commitment;
+    const { ccId, name: noxName } = commitment;
 
     const [unitIds, isExitedStatuses] =
-      await contracts.diamond.getUnitExitStatuses(commitmentId);
+      await contracts.diamond.getUnitExitStatuses(ccId);
 
-    const units = await batchRead(
-      unitIds.map((unitId, i) => {
-        return async () => {
-          return {
-            unitId,
-            unitInfo: await contracts.diamond.getComputeUnit(unitId),
-            isExited:
-              isExitedStatuses[i] ??
-              (() => {
-                throw new Error(
-                  `Unreachable. No exit status returned from getUnitExitStatuses for unit ${unitId}`,
-                );
-              })(),
-          };
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const computeUnitInfos = (await multicallRead(
+      unitIds.map((unitId): MulticallReadItem => {
+        return {
+          target: contracts.deployment.diamond,
+          callData: contracts.diamond.interface.encodeFunctionData(
+            "getComputeUnit",
+            [unitId],
+          ),
+          decode(returnData) {
+            return contracts.diamond.interface.decodeFunctionResult(
+              "getComputeUnit",
+              returnData,
+            );
+          },
         };
       }),
-    );
+    )) as (
+      | Awaited<ReturnType<typeof contracts.diamond.getComputeUnit>>
+      | undefined
+    )[];
+
+    const units = unitIds.map((unitId, i) => {
+      return {
+        unitId,
+        unitInfo:
+          computeUnitInfos[i] ??
+          (() => {
+            throw new Error(
+              `Unreachable. Unit ${unitId} not found after running getComputeUnit`,
+            );
+          })(),
+        isExited:
+          isExitedStatuses[i] ??
+          (() => {
+            throw new Error(
+              `Unreachable. No exit status returned from getUnitExitStatuses for unit ${unitId}`,
+            );
+          })(),
+      };
+    });
 
     const unitsWithDeals = units.filter((unit) => {
       return unit.unitInfo.deal !== ZeroAddress;
@@ -531,6 +578,9 @@ export async function collateralWithdraw(
       });
     });
 
+    const [firstMoveResourcesFromDealTx, ...restMoveResourcesFromDealTxs] =
+      moveResourcesFromDealTxs;
+
     const dealsString = Array.from(
       new Set(
         unitsWithDeals.map(({ unitInfo }) => {
@@ -539,24 +589,26 @@ export async function collateralWithdraw(
       ),
     ).join("\n");
 
-    try {
-      await signBatch(
-        `Moving resources from the following deals:\n${dealsString}`,
-        moveResourcesFromDealTxs,
-      );
-    } catch (e) {
-      commandObj.warn(
-        `Wasn't able to move resources from deals for ${stringifyBasicCommitmentInfo(commitment)}. Most likely the reason is you must wait until the provider exits from all the following deals:\n${dealsString}`,
-      );
+    if (firstMoveResourcesFromDealTx !== undefined) {
+      try {
+        await signBatch(
+          `Moving resources from the following deals:\n${dealsString}`,
+          [firstMoveResourcesFromDealTx, ...restMoveResourcesFromDealTxs],
+        );
+      } catch (e) {
+        commandObj.warn(
+          `Wasn't able to move resources from deals for ${stringifyBasicCommitmentInfo(commitment)}. Most likely the reason is you must wait until the provider exits from all the following deals:\n${dealsString}`,
+        );
 
-      dbg(stringifyUnknown(e));
-      continue;
+        dbg(stringifyUnknown(e));
+        continue;
+      }
     }
 
     await sign({
-      title: `withdraw collateral from: ${commitment.commitmentId}`,
+      title: `withdraw collateral from: ${ccId}`,
       method: contracts.diamond.withdrawCollateral,
-      args: [commitmentId],
+      args: [ccId],
     });
 
     commandObj.logToStderr(
@@ -569,199 +621,113 @@ export async function collateralWithdraw(
       continue;
     }
 
+    const [firstNotExitedUnit, ...restNotExitedUnits] = units.filter(
+      ({ isExited }) => {
+        return !isExited;
+      },
+    );
+
     await signBatch(
-      `Remove compute units from capacity commitments and finish commitment ${noxName === undefined ? commitmentId : `for ${noxName} (${commitmentId})`} ${commitmentId}`,
-      [
-        ...units
-          .filter(({ isExited }) => {
-            return !isExited;
-          })
-          .map(({ unitId }) => {
-            return populateTx(contracts.diamond.removeCUFromCC, commitmentId, [
-              unitId,
-            ]);
-          }),
-        populateTx(contracts.diamond.finishCommitment, commitmentId),
-      ],
+      `${firstNotExitedUnit === undefined ? "F" : "Remove compute units from capacity commitments and f"}inish commitment ${noxName === undefined ? ccId : `for ${noxName} (${ccId})`} ${ccId}`,
+      firstNotExitedUnit === undefined
+        ? [populateTx(contracts.diamond.finishCommitment, ccId)]
+        : [
+            populateTx(contracts.diamond.removeCUFromCC, ccId, [
+              firstNotExitedUnit.unitId,
+            ]),
+            ...restNotExitedUnits.map(({ unitId }) => {
+              return populateTx(contracts.diamond.removeCUFromCC, ccId, [
+                unitId,
+              ]);
+            }),
+            populateTx(contracts.diamond.finishCommitment, ccId),
+          ],
     );
   }
 }
 
 export async function collateralRewardWithdraw(flags: CCFlags) {
-  const commitments = await getCommitments(flags);
+  const commitments = await getCommitmentsIds(flags);
+  const [firstCommitment, ...restCommitments] = commitments;
   const { contracts } = await getContracts();
 
-  // TODO: add logs here
   await signBatch(
     `Withdraw rewards for commitments:\n\n${commitments
-      .map(({ commitmentId }) => {
-        return commitmentId;
+      .map(({ ccId }) => {
+        return ccId;
       })
       .join("\n")}`,
-    commitments.map(({ commitmentId }) => {
-      return populateTx(contracts.diamond.withdrawReward, commitmentId);
-    }),
+    [
+      populateTx(contracts.diamond.withdrawReward, firstCommitment.ccId),
+      ...restCommitments.map(({ ccId }) => {
+        return populateTx(contracts.diamond.withdrawReward, ccId);
+      }),
+    ],
   );
 }
 
-export function stringifyBasicCommitmentInfo(
-  commitment:
-    | Awaited<ReturnType<typeof getCommitments>>[number]
-    | Awaited<ReturnType<typeof getCommitmentsInfo>>[number]["ccInfos"][number],
-) {
-  if ("providerConfigComputePeer" in commitment) {
-    return `${color.yellow(
-      `Nox: ${commitment.providerConfigComputePeer.name}`,
-    )}\n${yamlDiffPatch(
-      "",
-      {},
-      {
-        PeerId: commitment.providerConfigComputePeer.peerId,
-        CommitmentId: commitment.commitmentId,
-      },
-    )}`;
-  }
-
-  if ("noxName" in commitment) {
-    return `${color.yellow(`Nox: ${commitment.noxName}`)}\n${yamlDiffPatch(
-      "",
-      {},
-      {
-        PeerId: commitment.peerId,
-        CommitmentId: commitment.commitmentId,
-      },
-    )}`;
-  }
-
-  return color.yellow(`CommitmentId: ${commitment.commitmentId}`);
+export function stringifyBasicCommitmentInfo({
+  name,
+  peerId,
+  ccId,
+}: CapacityCommitment) {
+  const noxName = name === undefined ? "" : `Nox: ${name}\n`;
+  return `${color.yellow(`${noxName}PeerId: ${peerId}`)}\nCommitmentId: ${ccId}`;
 }
 
-export async function getCommitmentsInfo(flags: CCFlags) {
-  const { readonlyContracts } = await getReadonlyContracts();
-  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
+type CapacityCommitment = {
+  ccId: string;
+  peerId: string;
+  name?: string;
+};
 
-  const [
-    commitments,
-    currentEpoch,
-    epochDuration,
-    initTimestamp,
-    maxFailedRatio,
-  ] = await Promise.all([
-    getCommitments(flags),
-    readonlyContracts.diamond.currentEpoch(),
-    readonlyContracts.diamond.epochDuration(),
-    readonlyContracts.diamond.initTimestamp(),
-    readonlyContracts.diamond.maxFailedRatio(),
-  ]);
+type CommitmentGroupedByStatus = {
+  status: CapacityCommitmentStatusString;
+  ccInfos: (CapacityCommitment & { status: CapacityCommitmentStatusString })[];
+}[];
 
-  const dealExplorerClient = await getDealExplorerClient();
+export async function getCommitmentsGroupedByStatus(
+  flags: CCFlags,
+): Promise<CommitmentGroupedByStatus> {
+  const commitments = await getCommitmentsIds(flags);
+  const { contracts } = await getContracts();
 
-  const commitmentsInfo = await Promise.all(
-    commitments.map(async (c) => {
-      let commitment: Partial<ICapacity.CommitmentViewStructOutput> =
-        "commitmentCreatedEvent" in c
-          ? {
-              peerId: c.commitmentCreatedEvent.args.peerId,
-              rewardDelegatorRate:
-                c.commitmentCreatedEvent.args.rewardDelegationRate,
-              collateralPerUnit:
-                c.commitmentCreatedEvent.args.fltCollateralPerUnit,
-              delegator: c.commitmentCreatedEvent.args.delegator,
-            }
-          : {};
-
-      try {
-        commitment = await readonlyContracts.diamond.getCommitment(
-          c.commitmentId,
-        );
-      } catch (e) {
-        dbg(
-          `Failed to get commitment from chain ${c.commitmentId}. Error: ${stringifyUnknown(e)}`,
-        );
-      }
-
-      const cuFailThreshold =
-        commitment.unitCount === undefined
-          ? undefined
-          : maxFailedRatio * commitment.unitCount;
-
-      let ccFromExplorer: Awaited<
-        ReturnType<typeof dealExplorerClient.getCapacityCommitment>
-      > = null;
-
-      try {
-        ccFromExplorer = await dealExplorerClient.getCapacityCommitment(
-          c.commitmentId,
-        );
-      } catch (e) {
-        dbg(
-          `Failed to get commitment ${c.commitmentId} from explorer. Error: ${stringifyUnknown(
-            e,
-          )}`,
-        );
-      }
-
-      const ccStartDate =
-        commitment.startEpoch === undefined
-          ? undefined
-          : bigintSecondsToDate(
-              initTimestamp + commitment.startEpoch * epochDuration,
-            );
-
-      const ccEndDate =
-        commitment.endEpoch === undefined
-          ? undefined
-          : bigintSecondsToDate(
-              initTimestamp + commitment.endEpoch * epochDuration,
-            );
-
-      const status = Number(commitment.status);
-
+  const statuses = await multicallRead(
+    commitments.map(({ ccId }): MulticallReadItem => {
       return {
-        ...("providerConfigComputePeer" in c
-          ? {
-              noxName: c.providerConfigComputePeer.name,
-              peerId: c.providerConfigComputePeer.peerId,
-            }
-          : {}),
-        ccFromExplorer,
-        commitmentId: c.commitmentId,
-        status: status in CommitmentStatus ? status : undefined,
-        currentEpoch: bigintToStr(currentEpoch),
-        startEpoch: optBigIntToStr(commitment.startEpoch),
-        startDate: ccStartDate,
-        endEpoch: optBigIntToStr(commitment.endEpoch),
-        endDate: ccEndDate,
-        stakerReward: await stakerRewardToString(
-          commitment.rewardDelegatorRate,
-        ),
-        delegator: commitment.delegator,
-        totalCU: optBigIntToStr(commitment.unitCount),
-        failedEpoch: optBigIntToStr(commitment.failedEpoch),
-        totalCUFailCount: optBigIntToStr(commitment.totalFailCount),
-        cuFailThreshold: optBigIntToStr(cuFailThreshold),
-        collateralPerUnit: commitment.collateralPerUnit,
-        exitedUnitCount: optBigIntToStr(commitment.exitedUnitCount),
+        target: contracts.deployment.diamond,
+        callData: contracts.diamond.interface.encodeFunctionData("getStatus", [
+          ccId,
+        ]),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "getStatus",
+            returnData,
+          );
+        },
       };
     }),
   );
 
-  // group commitments by status
   return Array.from(
-    commitmentsInfo
+    commitments
       .reduce<
-        Map<CommitmentStatus | undefined, (typeof commitmentsInfo)[number][]>
-      >((acc, v) => {
-        const infos = acc.get(v.status) ?? [];
-        infos.push(v);
-
-        acc.set(
-          v.status !== undefined && v.status in CommitmentStatus
-            ? v.status
-            : undefined,
-          infos,
+        Map<
+          CapacityCommitmentStatusString,
+          (CapacityCommitment & {
+            status: CapacityCommitmentStatusString;
+          })[]
+        >
+      >((acc, v, i) => {
+        assert(
+          typeof statuses[i] === "bigint",
+          `Unreachable. Didn't get status for commitment ${v.ccId} from chain`,
         );
 
+        const status = ccStatusToString(statuses[i]);
+        const infos = acc.get(status) ?? [];
+        infos.push({ ...v, status });
+        acc.set(status, infos);
         return acc;
       }, new Map())
       .entries(),
@@ -770,172 +736,489 @@ export async function getCommitmentsInfo(flags: CCFlags) {
   });
 }
 
-function optBigIntToStr(value: bigint | undefined) {
-  return value === undefined ? undefined : bigintToStr(value);
-}
-
-async function stakerRewardToString(stakerReward: bigint | undefined) {
-  if (stakerReward === undefined) {
-    return undefined;
-  }
-
-  const { readonlyContracts } = await getReadonlyContracts();
-  const precision = await readonlyContracts.diamond.precision();
+function stakerRewardToString(stakerReward: bigint, precision: bigint) {
   return `${numToStr(
     (Number(stakerReward) * HUNDRED_PERCENT) / Number(precision),
   )}%`;
 }
 
-export async function printCommitmentsInfo(flags: CCFlags) {
-  const ccInfos = await getCommitmentsInfo(flags);
+function getRewardsMulticallReads(
+  commitmentId: string,
+  diamondContract: Contracts["diamond"],
+  diamondContractAddress: string,
+): MulticallReadItem[] {
+  return [
+    {
+      target: diamondContractAddress,
+      callData: diamondContract.interface.encodeFunctionData(
+        "unlockedRewards",
+        [commitmentId],
+      ),
+      decode(returnData) {
+        return diamondContract.interface.decodeFunctionResult(
+          "unlockedRewards",
+          returnData,
+        );
+      },
+    },
+    {
+      target: diamondContractAddress,
+      callData: diamondContract.interface.encodeFunctionData("totalRewards", [
+        commitmentId,
+      ]),
+      decode(returnData) {
+        return diamondContract.interface.decodeFunctionResult(
+          "totalRewards",
+          returnData,
+        );
+      },
+    },
+    {
+      target: diamondContractAddress,
+      callData: diamondContract.interface.encodeFunctionData("getCommitment", [
+        commitmentId,
+      ]),
+      decode(returnData) {
+        return diamondContract.interface.decodeFunctionResult(
+          "getCommitment",
+          returnData,
+        );
+      },
+    },
+  ];
+}
 
-  commandObj.logToStderr(
-    (
-      await Promise.all(
-        ccInfos.map(async ({ status, ccInfos }) => {
-          return `${await getStatusHeading(status, ccInfos)}${(
-            await Promise.all(
-              ccInfos.map(async (ccInfo) => {
-                const noxName =
-                  ccInfo.noxName === undefined
-                    ? ""
-                    : color.yellow(`Nox: ${ccInfo.noxName}\n`);
+export async function getDetailedCommitmentsInfoGroupedByStatus(
+  flags: CCFlags,
+) {
+  const ccGroupedByStatus = await getCommitmentsGroupedByStatus(flags);
+  const { contracts } = await getContracts();
 
-                return `${noxName}${await getCommitmentInfoString(ccInfo)}`;
-              }),
-            )
-          ).join("\n\n")}`;
-        }),
-      )
-    ).join("\n\n"),
+  const allCCIds = ccGroupedByStatus.flatMap(({ ccInfos }) => {
+    return ccInfos.map(({ ccId }) => {
+      return ccId;
+    });
+  });
+
+  const rewardsMulticallReads = allCCIds.flatMap((id) => {
+    return getRewardsMulticallReads(
+      id,
+      contracts.diamond,
+      contracts.deployment.diamond,
+    );
+  });
+
+  const contractReadsPerCC = rewardsMulticallReads.length / allCCIds.length;
+
+  const [
+    [
+      currentEpoch,
+      epochDuration,
+      initTimestamp,
+      maxFailedRatio,
+      precision,
+      ...rewards
+    ],
+    ccInfosFromSubgraph,
+  ] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    multicallRead([
+      {
+        target: contracts.deployment.diamond,
+        callData:
+          contracts.diamond.interface.encodeFunctionData("currentEpoch"),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "currentEpoch",
+            returnData,
+          );
+        },
+      },
+      {
+        target: contracts.deployment.diamond,
+        callData:
+          contracts.diamond.interface.encodeFunctionData("epochDuration"),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "epochDuration",
+            returnData,
+          );
+        },
+      },
+      {
+        target: contracts.deployment.diamond,
+        callData:
+          contracts.diamond.interface.encodeFunctionData("initTimestamp"),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "initTimestamp",
+            returnData,
+          );
+        },
+      },
+      {
+        target: contracts.deployment.diamond,
+        callData:
+          contracts.diamond.interface.encodeFunctionData("maxFailedRatio"),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "maxFailedRatio",
+            returnData,
+          );
+        },
+      },
+      {
+        target: contracts.deployment.diamond,
+        callData: contracts.diamond.interface.encodeFunctionData("precision"),
+        decode(returnData) {
+          return contracts.diamond.interface.decodeFunctionResult(
+            "precision",
+            returnData,
+          );
+        },
+      },
+      ...ccGroupedByStatus.flatMap(({ ccInfos }) => {
+        return ccInfos.flatMap(({ ccId }) => {
+          return getRewardsMulticallReads(
+            ccId,
+            contracts.diamond,
+            contracts.deployment.diamond,
+          );
+        });
+      }),
+    ]) as Promise<
+      [
+        Awaited<ReturnType<typeof contracts.diamond.currentEpoch>> | undefined,
+        Awaited<ReturnType<typeof contracts.diamond.epochDuration>> | undefined,
+        Awaited<ReturnType<typeof contracts.diamond.initTimestamp>> | undefined,
+        (
+          | Awaited<ReturnType<typeof contracts.diamond.maxFailedRatio>>
+          | undefined
+        ),
+        Awaited<ReturnType<typeof contracts.diamond.precision>> | undefined,
+        ...(
+          | Awaited<
+              ReturnType<
+                | typeof contracts.diamond.unlockedRewards
+                | typeof contracts.diamond.totalRewards
+                | typeof contracts.diamond.getCommitment
+              >
+            >
+          | undefined
+        )[],
+      ]
+    >,
+    getCCDetails(allCCIds),
+  ]);
+
+  assert(currentEpoch !== undefined, "currentEpoch is undefined");
+  assert(epochDuration !== undefined, "epochDuration is undefined");
+  assert(initTimestamp !== undefined, "initTimestamp is undefined");
+  assert(maxFailedRatio !== undefined, "maxFailedRatio is undefined");
+  assert(precision !== undefined, "precision is undefined");
+
+  const commitmentsById = Object.fromEntries(
+    ccInfosFromSubgraph.capacityCommitments.map((cc) => {
+      return [cc.id, cc];
+    }),
+  );
+
+  let rewardsCounter = -contractReadsPerCC;
+  let infoFromSubgraphCounter = -1;
+
+  return Promise.all(
+    ccGroupedByStatus.map(async (groupedCCs) => {
+      return {
+        statusInfo: groupedCCs,
+        CCs: await Promise.all(
+          groupedCCs.ccInfos.map(async (cc) => {
+            rewardsCounter = rewardsCounter + contractReadsPerCC;
+            infoFromSubgraphCounter = infoFromSubgraphCounter + 1;
+            const infoFromSubgraph = commitmentsById[cc.ccId];
+
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            const unlockedRewards = rewards[rewardsCounter] as
+              | Awaited<ReturnType<typeof contracts.diamond.unlockedRewards>>
+              | undefined;
+
+            assert(
+              unlockedRewards !== undefined,
+              "Unreachable. unlockedRewards must be defined",
+            );
+
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            const totalRewards = rewards[rewardsCounter + 1] as
+              | Awaited<ReturnType<typeof contracts.diamond.totalRewards>>
+              | undefined;
+
+            assert(
+              totalRewards !== undefined,
+              "Unreachable. totalRewards must be defined",
+            );
+
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            const ccFromChain = rewards[rewardsCounter + 2] as
+              | Awaited<ReturnType<typeof contracts.diamond.getCommitment>>
+              | undefined;
+
+            assert(
+              ccFromChain !== undefined,
+              "Unreachable. ccFromChain must be defined",
+            );
+
+            return getDetailedCommitmentInfo({
+              ...cc,
+              infoFromSubgraph,
+              currentEpoch,
+              epochDuration,
+              initTimestamp,
+              maxFailedRatio,
+              precision,
+              ccFromChain,
+              unlockedRewards,
+              totalRewards,
+            });
+          }),
+        ),
+      };
+    }),
   );
 }
 
-async function getStatusHeading(
-  status: CommitmentStatus | undefined,
-  ccInfos: { noxName?: undefined | string; commitmentId: string }[],
+export function stringifyDetailedCommitmentsInfo(
+  detailedCommitmentsInfoGroupedByStatus: Awaited<
+    ReturnType<typeof getDetailedCommitmentsInfoGroupedByStatus>
+  >,
 ) {
+  return detailedCommitmentsInfoGroupedByStatus
+    .map(({ statusInfo, CCs }) => {
+      return `${getStatusHeading(statusInfo)}${CCs.map((cc) => {
+        const noxNameString =
+          "noxName" in cc ? color.yellow(`Nox: ${cc.noxName}\n`) : "";
+
+        return `${noxNameString}${getDetailedCommitmentInfoString(cc)}`;
+      }).join("\n\n")}`;
+    })
+    .join("\n\n");
+}
+
+function getStatusHeading(cc: CommitmentGroupedByStatus[number]) {
   return color.yellow(
-    `Status: ${await ccStatusToString(status)} (${ccInfos
-      .map(({ commitmentId, noxName }) => {
-        return noxName ?? commitmentId;
+    `Status: ${cc.status} (${cc.ccInfos
+      .map(({ ccId, name }) => {
+        return name ?? ccId;
       })
       .join(",")})\n\n`,
   );
 }
 
-export async function printCommitmentsInfoJSON(flags: CCFlags) {
-  commandObj.log(jsonStringify(await getCommitmentsInfo(flags)));
+async function getDetailedCommitmentInfo({
+  infoFromSubgraph: { ccRewardsWithdrawn, dealStakerRewardsWithdrawn } = {},
+  ccFromChain,
+  status,
+  peerId,
+  ccId,
+  name: noxName,
+  currentEpoch,
+  epochDuration,
+  initTimestamp,
+  maxFailedRatio,
+  precision,
+  totalRewards,
+  unlockedRewards,
+}: Awaited<
+  ReturnType<typeof getCommitmentsGroupedByStatus>
+>[number]["ccInfos"][number] & {
+  currentEpoch: bigint;
+  epochDuration: bigint;
+  initTimestamp: bigint;
+  maxFailedRatio: bigint;
+  precision: bigint;
+  totalRewards: Rewards;
+  unlockedRewards: Rewards;
+  infoFromSubgraph:
+    | Partial<CcDetailsQuery["capacityCommitments"][number]>
+    | undefined;
+  ccFromChain: Awaited<ReturnType<Contracts["diamond"]["getCommitment"]>>;
+}) {
+  const { calculateTimestamp } = await import(
+    "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/utils.js"
+  );
+
+  function getStartOrExpirationDate(epoch: bigint) {
+    // if startEpoch is 0, then it's not yet started - no need to show anything
+    return ccFromChain.startEpoch === 0n
+      ? "-"
+      : secondsToDate(
+          calculateTimestamp(
+            Number(epoch),
+            Number(initTimestamp),
+            Number(epochDuration),
+          ),
+        ).toLocaleString();
+  }
+
+  const totalRewardsSplit = splitRewards(
+    totalRewards,
+    ccFromChain.rewardDelegatorRate,
+    precision,
+  );
+
+  const unlockedRewardsSplit = splitRewards(
+    unlockedRewards,
+    ccFromChain.rewardDelegatorRate,
+    precision,
+  );
+
+  const withdrawnRewardsSplit =
+    ccRewardsWithdrawn !== undefined && dealStakerRewardsWithdrawn !== undefined
+      ? splitRewards(
+          {
+            ccRewards: BigInt(ccRewardsWithdrawn),
+            dealStakerRewards: BigInt(dealStakerRewardsWithdrawn),
+          },
+          ccFromChain.rewardDelegatorRate,
+          precision,
+        )
+      : undefined;
+
+  return {
+    ...(noxName === undefined ? {} : { noxName }),
+    peerId,
+    commitmentId: ccId,
+    status,
+    staker:
+      ccFromChain.delegator === (await import("ethers")).ZeroAddress
+        ? "Anyone can activate capacity commitment"
+        : ccFromChain.delegator,
+    stakerReward: stakerRewardToString(
+      ccFromChain.rewardDelegatorRate,
+      precision,
+    ),
+    startEpoch: bigintToStr(ccFromChain.startEpoch),
+    endEpoch: bigintToStr(ccFromChain.endEpoch),
+    currentEpoch: bigintToStr(currentEpoch),
+    startDate: getStartOrExpirationDate(ccFromChain.startEpoch),
+    expirationDate: getStartOrExpirationDate(ccFromChain.endEpoch),
+    totalCU: bigintToStr(ccFromChain.unitCount),
+    missedProofs: bigintToStr(ccFromChain.totalFailCount),
+    threshold: bigintToStr(maxFailedRatio * ccFromChain.unitCount),
+    collateralPerUnit: await fltFormatWithSymbol(ccFromChain.collateralPerUnit),
+    exitedUnitCount: bigintToStr(ccFromChain.exitedUnitCount),
+    totalCCRewardsOverTime: await fltFormatWithSymbol(
+      BigInt(totalRewards.ccRewards) + BigInt(totalRewards.dealStakerRewards),
+    ),
+    providerRewardsInVesting: await fltFormatWithSymbol(
+      totalRewardsSplit.provider - unlockedRewardsSplit.provider,
+    ),
+    providerRewardsAvailable: await fltFormatWithSymbol(
+      unlockedRewardsSplit.provider,
+    ),
+    providerRewardsTotalClaimed:
+      withdrawnRewardsSplit === undefined
+        ? "Didn't get claimed rewards from indexer"
+        : await fltFormatWithSymbol(withdrawnRewardsSplit.provider),
+    stakerRewardsInVesting: await fltFormatWithSymbol(
+      totalRewardsSplit.staker - unlockedRewardsSplit.staker,
+    ),
+    stakerRewardsAvailable: await fltFormatWithSymbol(
+      unlockedRewardsSplit.staker,
+    ),
+    stakerRewardsTotalClaimed:
+      withdrawnRewardsSplit === undefined
+        ? "Didn't get claimed rewards from indexer"
+        : await fltFormatWithSymbol(withdrawnRewardsSplit.staker),
+  } satisfies Record<string, string>;
 }
 
-async function getCommitmentInfoString(
-  ccInfo: Awaited<
-    ReturnType<typeof getCommitmentsInfo>
-  >[number]["ccInfos"][number],
+function getDetailedCommitmentInfoString(
+  detailedCommitmentInfo: Awaited<ReturnType<typeof getDetailedCommitmentInfo>>,
 ) {
-  const { ZeroAddress } = await import("ethers");
-
-  const staker =
-    ccInfo.delegator ?? ccInfo.ccFromExplorer?.stakerAddress ?? undefined;
-
-  const startEndCurrentEpoch =
-    ccInfo.startEpoch === undefined || ccInfo.endEpoch === undefined
-      ? undefined
-      : [ccInfo.startEpoch, ccInfo.endEpoch, ccInfo.currentEpoch].join(" / ");
-
-  const missedProofsThreshold =
-    ccInfo.totalCUFailCount === undefined ||
-    ccInfo.cuFailThreshold === undefined
-      ? undefined
-      : [ccInfo.totalCUFailCount, ccInfo.cuFailThreshold].join(" / ");
-
   return yamlDiffPatch(
     "",
     {},
-    omitBy(
-      {
-        PeerId: ccInfo.peerId,
-        "Capacity commitment ID": ccInfo.commitmentId,
-        Status: await ccStatusToString(ccInfo.status),
-        Staker:
-          staker === ZeroAddress
-            ? "Anyone can activate capacity commitment"
-            : staker,
-        "Staker reward":
-          ccInfo.stakerReward === undefined ? undefined : ccInfo.stakerReward,
-        "Start / End / Current epoch": startEndCurrentEpoch,
-        "Start date": ccInfo.startDate?.toLocaleString(),
-        "Expiration date": ccInfo.endDate?.toLocaleString(),
-        "Total CU": ccInfo.totalCU,
-        "Missed proofs / Threshold": missedProofsThreshold,
-        "Collateral per unit":
-          ccInfo.collateralPerUnit === undefined
-            ? undefined
-            : await fltFormatWithSymbol(ccInfo.collateralPerUnit),
-        "Exited unit count": ccInfo.exitedUnitCount,
-        ...(ccInfo.ccFromExplorer === null
-          ? {}
-          : {
-              "Total CC rewards over time": await fltFormatWithSymbol(
-                ccInfo.ccFromExplorer.rewards.total,
-              ),
-              "In vesting / Available / Total claimed (Provider)": (
-                await Promise.all(
-                  [
-                    ccInfo.ccFromExplorer.rewards.provider.inVesting,
-                    ccInfo.ccFromExplorer.rewards.provider.availableToClaim,
-                    ccInfo.ccFromExplorer.rewards.provider.claimed,
-                  ].map((val) => {
-                    return fltFormatWithSymbol(val);
-                  }),
-                )
-              ).join(" / "),
-              "In vesting / Available / Total claimed (Staker)": (
-                await Promise.all(
-                  [
-                    ccInfo.ccFromExplorer.rewards.staker.inVesting,
-                    ccInfo.ccFromExplorer.rewards.staker.availableToClaim,
-                    ccInfo.ccFromExplorer.rewards.staker.claimed,
-                  ].map((val) => {
-                    return fltFormatWithSymbol(val);
-                  }),
-                )
-              ).join(" / "),
-            }),
-      } satisfies Record<string, string | undefined>,
-      isUndefined,
-    ),
+    {
+      PeerId: detailedCommitmentInfo.peerId,
+      "Capacity commitment ID": detailedCommitmentInfo.commitmentId,
+      Status: detailedCommitmentInfo.status,
+      Staker: detailedCommitmentInfo.staker,
+      "Staker reward": detailedCommitmentInfo.stakerReward,
+      "Start / End / Current epoch": [
+        detailedCommitmentInfo.startEpoch,
+        detailedCommitmentInfo.endEpoch,
+        detailedCommitmentInfo.currentEpoch,
+      ].join(" / "),
+      "Start date": detailedCommitmentInfo.startDate,
+      "Expiration date": detailedCommitmentInfo.expirationDate,
+      "Total CU": detailedCommitmentInfo.totalCU,
+      "Missed proofs / Threshold": [
+        detailedCommitmentInfo.missedProofs,
+        detailedCommitmentInfo.threshold,
+      ].join(" / "),
+      "Collateral per unit": detailedCommitmentInfo.collateralPerUnit,
+      "Exited unit count": detailedCommitmentInfo.exitedUnitCount,
+      "Total CC rewards over time":
+        detailedCommitmentInfo.totalCCRewardsOverTime,
+      "In vesting / Available / Total claimed (Provider)": [
+        detailedCommitmentInfo.providerRewardsInVesting,
+        detailedCommitmentInfo.providerRewardsAvailable,
+        detailedCommitmentInfo.providerRewardsTotalClaimed,
+      ].join(" / "),
+      "In vesting / Available / Total claimed (Staker)": [
+        detailedCommitmentInfo.stakerRewardsInVesting,
+        detailedCommitmentInfo.stakerRewardsAvailable,
+        detailedCommitmentInfo.stakerRewardsTotalClaimed,
+      ].join(" / "),
+    },
   );
 }
 
-async function ccStatusToString(status: number | undefined) {
-  const { CommitmentStatus } = await import("@fluencelabs/deal-ts-clients");
+type Rewards = { ccRewards: bigint; dealStakerRewards: bigint };
 
-  if (status === undefined) {
-    return "Unknown";
-  }
-
-  const statusStr = CommitmentStatus[status];
-
-  if (statusStr === undefined) {
-    return `Unknown (${numToStr(status)})`;
-  }
-
-  return statusStr === "Inactive" ? "Completed" : statusStr;
+function splitRewards(
+  { ccRewards, dealStakerRewards }: Rewards,
+  stakerRate: bigint,
+  precision: bigint,
+) {
+  const stakerCCReward = (ccRewards * stakerRate) / precision;
+  return {
+    provider: ccRewards - stakerCCReward,
+    staker: stakerCCReward + dealStakerRewards,
+  };
 }
 
-export async function basicCCInfoAndStatusToString(
-  ccInfos: Awaited<ReturnType<typeof getCommitmentsInfo>>,
-) {
+type CapacityCommitmentStatusString =
+  | "Unknown"
+  | Exclude<CapacityCommitmentStatus, "Inactive">
+  | "Completed";
+
+function ccStatusToString(
+  status: Awaited<ReturnType<Contracts["diamond"]["getStatus"]>>,
+): CapacityCommitmentStatusString {
   return (
-    await Promise.all(
-      ccInfos.map(async ({ status, ccInfos }) => {
-        return `${await getStatusHeading(status, ccInfos)}${ccInfos
-          .map((ccInfo) => {
-            return stringifyBasicCommitmentInfo(ccInfo);
-          })
-          .join("\n\n")} `;
-      }),
-    )
-  ).join("\n\n");
+    (
+      [
+        "Completed",
+        "Active",
+        "WaitDelegation",
+        "WaitStart",
+        "Failed",
+        "Removed",
+      ] as const
+    )[Number(status)] ?? "Unknown"
+  );
+}
+
+export function basicCCInfoAndStatusToString(
+  ccsGroupedByStatus: CommitmentGroupedByStatus,
+) {
+  return ccsGroupedByStatus
+    .map((cc) => {
+      return `${getStatusHeading(cc)}${cc.ccInfos
+        .map((ccInfo) => {
+          return stringifyBasicCommitmentInfo(ccInfo);
+        })
+        .join("\n\n")} `;
+    })
+    .join("\n\n");
 }

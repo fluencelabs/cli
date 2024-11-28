@@ -46,10 +46,12 @@ export default class Build extends BaseCommand<typeof Build> {
       args["SPELL-NAMES"] ?? Object.keys(fluenceConfig.spells ?? {}).join(","),
     );
 
-    await compileSpells(flags.import, spellNames);
+    if (spellNames.length > 0) {
+      await compileSpells(flags.import, spellNames);
 
-    commandObj.log(
-      `Compiled ${color.yellow(spellNames.join(", "))} successfully`,
-    );
+      commandObj.log(
+        `Compiled ${color.yellow(spellNames.join(", "))} successfully`,
+      );
+    }
   }
 }

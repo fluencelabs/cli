@@ -15,10 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getDealCliClient, getSignerAddress } from "../dealClient.js";
+import { getSignerAddress } from "../dealClient.js";
+import { getDealIdsByProviderId } from "../gql/gql.js";
 
 export async function getProviderDeals() {
-  const dealCliClient = await getDealCliClient();
-  const signerAddress = await getSignerAddress();
-  return dealCliClient.getDealsByProvider(signerAddress);
+  return (await getDealIdsByProviderId(await getSignerAddress())).map(
+    ({ id }) => {
+      return id;
+    },
+  );
 }

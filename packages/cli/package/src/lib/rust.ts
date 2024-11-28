@@ -38,7 +38,7 @@ import { findEntryInPATH, prependEntryToPATH } from "./env.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { stringifyUnknown } from "./helpers/utils.js";
+import { stringifyUnknown } from "./helpers/stringifyUnknown.js";
 import {
   projectRootDir,
   ensureUserFluenceCargoDir,

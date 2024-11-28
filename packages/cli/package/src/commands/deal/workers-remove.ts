@@ -65,11 +65,18 @@ export default class WorkersRemove extends BaseCommand<typeof WorkersRemove> {
       args["WORKER-IDS"] ??
         (await input({
           message: "Enter comma-separated worker ids",
-          validate: (v: string) => {
-            return commaSepStrToArr(v).length > 0;
+          validate(v: string) {
+            return (
+              commaSepStrToArr(v).length > 0 ||
+              "Please provide at least one worker id"
+            );
           },
         })),
     );
+
+    if (workerIds.length === 0) {
+      commandObj.error("No worker ids provided");
+    }
 
     for (const workerId of workerIds) {
       await sign({

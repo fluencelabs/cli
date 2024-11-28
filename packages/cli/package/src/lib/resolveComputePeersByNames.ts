@@ -37,31 +37,56 @@ export async function resolveComputePeersByNames(
     [NOX_NAMES_FLAG_NAME]?: string | undefined;
     [OFFER_FLAG_NAME]?: string | undefined;
   } = {},
-) {
+): Promise<[ResolvedComputePeer, ...ResolvedComputePeer[]]> {
   const computePeers = await ensureComputerPeerConfigs();
 
   if (flags[NOX_NAMES_FLAG_NAME] === ALL_FLAG_VALUE) {
-    return computePeers;
+    const [firstComputePeer, ...restComputePeers] = computePeers;
+
+    if (firstComputePeer === undefined) {
+      commandObj.error("No compute peers found");
+    }
+
+    return [firstComputePeer, ...restComputePeers];
   }
 
   const providerConfig = await ensureReadonlyProviderConfig();
 
   if (flags[OFFER_FLAG_NAME] !== undefined) {
-    const computerPeerNamesFromOffers = (
-      await resolveOffersFromProviderConfig(flags)
-    ).flatMap(({ computePeersFromProviderConfig }) => {
-      return computePeersFromProviderConfig.map(({ name }) => {
-        return name;
-      });
-    });
+    const offers = await resolveOffersFromProviderConfig(flags);
 
-    return computePeers.filter(({ name }) => {
-      return computerPeerNamesFromOffers.includes(name);
-    });
+    const computerPeerNamesFromOffers = offers.flatMap(
+      ({ computePeersFromProviderConfig }) => {
+        return computePeersFromProviderConfig.map(({ name }) => {
+          return name;
+        });
+      },
+    );
+
+    const [firstComputerPeer, ...restComputerPeers] = computePeers.filter(
+      ({ name }) => {
+        return computerPeerNamesFromOffers.includes(name);
+      },
+    );
+
+    if (firstComputerPeer === undefined) {
+      commandObj.error(
+        `No compute peers found for offers: ${offers
+          .map(({ offerName }) => {
+            return offerName;
+          })
+          .join(", ")}`,
+      );
+    }
+
+    return [firstComputerPeer, ...restComputerPeers];
   }
 
   if (flags[NOX_NAMES_FLAG_NAME] === undefined) {
-    return checkboxes<EnsureComputerPeerConfig, never>({
+    const [firstComputePeer, ...restComputePeers] = await checkboxes<
+      EnsureComputerPeerConfig,
+      never
+    >({
       message: `Select one or more nox names from ${providerConfig.$getPath()}`,
       options: computePeers.map((computePeer) => {
         return {
@@ -88,6 +113,14 @@ export async function resolveComputePeersByNames(
       },
       flagName: NOX_NAMES_FLAG_NAME,
     });
+
+    if (firstComputePeer === undefined) {
+      throw new Error(
+        "Unreachable. It's checked there are compute peers in checkboxes",
+      );
+    }
+
+    return [firstComputePeer, ...restComputePeers];
   }
 
   const noxNames = commaSepStrToArr(flags[NOX_NAMES_FLAG_NAME]);
@@ -117,11 +150,21 @@ export async function resolveComputePeersByNames(
     );
   }
 
-  return computePeers.filter(({ name }) => {
-    return validNoxNames.includes(name);
-  });
+  const [firstComputePeer, ...restComputePeers] = computePeers.filter(
+    ({ name }) => {
+      return validNoxNames.includes(name);
+    },
+  );
+
+  if (firstComputePeer === undefined) {
+    commandObj.error(
+      `No compute peers found for nox names: ${validNoxNames.join(", ")}`,
+    );
+  }
+
+  return [firstComputePeer, ...restComputePeers];
 }
 
 export type ResolvedComputePeer = Awaited<
-  ReturnType<typeof resolveComputePeersByNames>
+  Awaited<ReturnType<typeof ensureComputerPeerConfigs>>
 >[number];
