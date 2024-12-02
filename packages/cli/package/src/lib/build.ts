@@ -292,7 +292,7 @@ async function overrideModuleConfig(
   );
 
   if (moduleConfig === null) {
-    return commandObj.error(`Cant find module config at ${color.yellow(get)}`);
+    return commandObj.error(`Can't find module config at ${color.yellow(get)}`);
   }
 
   return overrideModule(

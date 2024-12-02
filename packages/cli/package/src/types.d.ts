@@ -304,7 +304,7 @@ declare namespace xbytes {
     add(bytes: HybridByte | HybridByte[]): ByteUnitObject;
     /**
      * Subtract byte(s) from the internal bytes, resulting in a new ByteUnitObject object with the value
-     * @param bytes Byte(s) to subract from the root byte
+     * @param bytes Byte(s) to subtract from the root byte
      */
     subtract(bytes: HybridByte | HybridByte[]): ByteUnitObject;
     /**
