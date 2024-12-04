@@ -113,7 +113,7 @@ query OfferDetails($where: Offer_filter) {
     }
     peers(where: { deleted: false }) {
       id
-      computeUnits(where: { deleted: false }) {
+      computeUnits(first: 1000, where: { deleted: false }) {
         id
         worker {
           id
