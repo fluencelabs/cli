@@ -57,26 +57,20 @@ export type TransactionPayload = {
   transactionData: TransactionRequest;
 };
 
+export enum CLIToConnectorTag {
+  ADDRESS = "address",
+  PREVIEW_TRANSACTION = "previewTransaction",
+  SEND_TRANSACTION = "sendTransaction",
+  PING = "ping",
+  RETURN_TO_CLI = "returnToCLI",
+}
+
 export type CLIToConnectorMsg =
-  | {
-      tag: "address";
-    }
-  | {
-      tag: "previewTransaction";
-      payload: TransactionPayload;
-    }
-  | {
-      tag: "sendTransaction";
-      payload: TransactionPayload;
-    }
-  | {
-      tag: "ping";
-      addressUsedByCLI: string | null;
-      CLIVersion: string;
-    }
-  | {
-      tag: "returnToCLI";
-    };
+  | { tag: CLIToConnectorTag.ADDRESS }
+  | { tag: CLIToConnectorTag.PREVIEW_TRANSACTION; payload: TransactionPayload }
+  | { tag: CLIToConnectorTag.SEND_TRANSACTION; payload: TransactionPayload }
+  | { tag: CLIToConnectorTag.PING; addressUsedByCLI: string | null; CLIVersion: string }
+  | { tag: CLIToConnectorTag.RETURN_TO_CLI };
 
 export type CLIToConnectorFullMsg = {
   chain: {
@@ -136,7 +130,7 @@ export function bufferToHex(buffer: Buffer): string {
 }
 
 export function uint8ArrayToHex(uint8Array: Uint8Array): string {
-  return `0x${bufferToHex(Buffer.from(uint8Array))}`;
+  return `0x${Buffer.from(uint8Array).toString("hex")}`;
 }
 
 export function jsonStringify(unknown: unknown, noSpace = false): string {
