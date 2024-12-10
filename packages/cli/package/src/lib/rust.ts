@@ -183,7 +183,7 @@ targets = [
   "x86_64-unknown-linux-gnu",
   "x86_64-unknown-linux-musl",
   "x86_64-apple-darwin",
-  "wasm32-wasi",
+  "wasm32-wasip1",
   "wasm32-unknown-unknown",
 ]`,
     FS_OPTIONS,

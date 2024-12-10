@@ -167,7 +167,7 @@ export function getModuleWasmPath(moduleConfig: {
   const fileName = `${moduleConfig.name}.${WASM_EXT}`;
   const configDirName = moduleConfig.$getDirPath();
   return moduleConfig.type === MODULE_TYPE_RUST
-    ? resolve(projectRootDir, "target", "wasm32-wasi", "release", fileName)
+    ? resolve(projectRootDir, "target", "wasm32-wasip1", "release", fileName)
     : resolve(configDirName, fileName);
 }
 

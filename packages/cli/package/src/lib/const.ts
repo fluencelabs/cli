@@ -48,7 +48,7 @@ export const PT_SYMBOL = "USDC";
 
 export const MAX_TOKEN_AMOUNT_KEYWORD = "max";
 
-export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
+export const RUST_WASM32_WASI_TARGET = "wasm32-wasip1";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
