@@ -98,17 +98,9 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
       const deal = contracts.getDeal(id);
       const workers = workersFromRPC[i];
 
-      if (workers === undefined) {
-        commandObj.warn(
-          `Was not able to get workers for deal ${id} from chain. Skipping...`,
-        );
-
-        return { dealId: id, workers: [] };
-      }
-
       return {
         dealId: id,
-        workers: workers
+        workers: (workers ?? [])
           .filter((worker) => {
             return worker.provider.toLowerCase() === signerAddress;
           })
