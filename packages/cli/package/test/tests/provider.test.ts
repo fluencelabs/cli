@@ -53,7 +53,7 @@ describe("provider tests", () => {
     "should be able to register and update provider with a new name",
     async () => {
       const cwd = join("test", "tmp", "fullLifeCycle");
-      await initializeTemplate(cwd, "quickstart");
+      await initializeTemplate(cwd);
 
       const providerConfig = await initProviderConfigWithPath(cwd);
 
@@ -162,44 +162,6 @@ describe("provider tests", () => {
       await fluence({
         args: ["provider", "offer-remove"],
         ...TEST_DEFAULT,
-      });
-
-      // SET UP FOR THE REST OF THE TESTS
-
-      providerConfig.capacityCommitments = Object.fromEntries(
-        Object.values(providerConfig.capacityCommitments).map((config, i) => {
-          return [
-            `nox-${numToStr(i)}`,
-            { ...config, duration: `8 hours` },
-          ] as const;
-        }),
-      );
-
-      await providerConfig.$commit();
-      await fluence({ args: ["provider", "register"], cwd });
-
-      await fluence({
-        args: ["provider", "offer-create"],
-        flags: {
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
-      });
-
-      await fluence({
-        args: ["provider", "cc-create"],
-        flags: {
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
-      });
-
-      await fluence({
-        args: ["provider", "cc-activate"],
-        flags: {
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
-        cwd,
       });
     },
   );

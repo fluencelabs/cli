@@ -21,18 +21,11 @@ import {
 } from "../errorInterceptor.js";
 
 import { commandObj } from "./commandObj.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
 import { initNewUserConfig } from "./configs/user/config/config.js";
 import { IS_DEVELOPMENT } from "./const.js";
 import { ensureDir, getUserCountlyDir } from "./paths.js";
 
-type InitCountlyArgs = {
-  maybeFluenceConfig: FluenceConfig | null;
-};
-
-export async function initCountly({
-  maybeFluenceConfig,
-}: InitCountlyArgs): Promise<void> {
+export async function initCountly(): Promise<void> {
   const userCountlyDir = await getUserCountlyDir();
   const userConfig = await initNewUserConfig();
 
@@ -54,80 +47,10 @@ export async function initCountly({
       segmentation: {
         userAgent: commandObj.config.userAgent,
         platform: commandObj.config.platform,
-        ...dependenciesToSegmentation(
-          maybeFluenceConfig?.aquaDependencies,
-          "aqua",
-        ),
-        ...dependenciesToSegmentation(
-          maybeFluenceConfig?.marineVersion === undefined
-            ? {}
-            : {
-                marine: maybeFluenceConfig.marineVersion,
-              },
-          "marine",
-        ),
-        ...dependenciesToSegmentation(
-          maybeFluenceConfig?.mreplVersion === undefined
-            ? {}
-            : {
-                mrepl: maybeFluenceConfig.mreplVersion,
-              },
-          "mrepl",
-        ),
       },
     });
   }
 }
-
-const dependenciesToSegmentation = (
-  dependencies: Record<string, string> | null | undefined,
-  prefix: string,
-): Record<string, string> => {
-  return Object.entries(dependencies ?? {}).reduce((acc, [dep, version]) => {
-    return {
-      ...acc,
-      [`[${prefix}]${dep}`]: version,
-    };
-  }, {});
-};
-
-/**
- * Add log that will be sent to Countly together with crash report
- * @param message - message to be logged
- * @returns void
- */
-export const addCountlyLog = async (message: string): Promise<void> => {
-  if (!(await isCountlyInitialized())) {
-    return;
-  }
-
-  const Countly = (await import("countly-sdk-nodejs")).default;
-  Countly.add_log(message);
-};
-
-/**
- * Add error log
- * @param message - message to be logged
- * @returns void
- */
-export const logErrorToCountly = async (message: string): Promise<void> => {
-  if (!(await isCountlyInitialized())) {
-    return;
-  }
-
-  const Countly = (await import("countly-sdk-nodejs")).default;
-  Countly.log_error(message);
-};
-
-export const addCountlyEvent = async (key: string): Promise<void> => {
-  if (!(await isCountlyInitialized())) {
-    return;
-  }
-
-  const Countly = (await import("countly-sdk-nodejs")).default;
-
-  Countly.add_event({ key });
-};
 
 export const haltCountly = async (): Promise<void> => {
   if (!(await isCountlyInitialized())) {

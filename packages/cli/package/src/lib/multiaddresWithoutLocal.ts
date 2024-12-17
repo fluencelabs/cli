@@ -30,7 +30,7 @@ import { commandObj } from "./commandObj.js";
 import { initEnvConfig } from "./configs/project/env/env.js";
 import type { FluenceEnv } from "./const.js";
 
-export function getPeerId(addr: string): string {
+function getPeerId(addr: string): string {
   const id = multiaddr(addr).getPeerId();
 
   if (id === null) {

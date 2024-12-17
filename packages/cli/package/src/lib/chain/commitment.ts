@@ -65,10 +65,6 @@ import { fltFormatWithSymbol } from "./currencies.js";
 
 const HUNDRED_PERCENT = 100;
 
-export type ComputePeersWithCC = Awaited<
-  ReturnType<typeof getComputePeersWithCCIds>
->;
-
 async function getComputePeersWithCCIds(
   computePeers: ResolvedComputePeer[],
 ): Promise<[Required<CapacityCommitment>, ...Required<CapacityCommitment>[]]> {
@@ -225,7 +221,7 @@ export type CCFlags = {
   [CC_IDS_FLAG_NAME]?: string | undefined;
 };
 
-export async function getCommitmentsIds(
+async function getCommitmentsIds(
   flags: CCFlags,
 ): Promise<[CapacityCommitment, ...CapacityCommitment[]]> {
   if (flags[CC_IDS_FLAG_NAME] !== undefined) {

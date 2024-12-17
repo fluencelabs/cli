@@ -64,7 +64,7 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
   return env;
 }
 
-export async function fluenceEnvPrompt(
+async function fluenceEnvPrompt(
   message = "Select Fluence Environment to use",
   defaultVal: FluenceEnv = DEFAULT_PUBLIC_FLUENCE_ENV,
 ): Promise<FluenceEnv> {

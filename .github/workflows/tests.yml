@@ -27,40 +27,8 @@ on:
         description: "subgraph-deploy-script image tag"
         type: string
         default: "null"
-      marine-version:
-        description: "marine version"
-        type: string
-        default: "null"
-      mrepl-version:
-        description: "mrepl version"
-        type: string
-        default: "null"
-      marine-rs-sdk-version:
-        description: "marine-rs-sdk version"
-        type: string
-        default: "null"
-      marine-rs-sdk-test-version:
-        description: "marine-rs-sdk-test version"
-        type: string
-        default: "null"
-      js-client-snapshots:
-        description: "js-client snapshots"
-        type: string
-        default: "null"
-      aqua-snapshots:
-        description: "aqua snapshots"
-        type: string
-        default: "null"
       deal-ts-clients-version:
         description: "deal-ts-clients version"
-        type: string
-        default: "null"
-      spell-version:
-        description: "@fluencelabs/spell version"
-        type: string
-        default: "null"
-      installation-spell-version:
-        description: "@fluencelabs/installation-spell version"
         type: string
         default: "null"
       node-version:
@@ -78,7 +46,6 @@ env:
   DEBUG: "fcli:*,deal-ts-clients:*"
   FLUENCE_ENV: "${{ inputs.fluence-env }}"
   FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
-  CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
   NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
   FLUENCE_LOG_DISPLAY_SPAN_LIST: true
 
@@ -120,7 +87,6 @@ jobs:
             kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
             kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD ;
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN;
-            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
 
       - name: Set nox image
         run: |
@@ -178,9 +144,6 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Setup Rust toolchain
-        uses: dsherret/rust-toolchain-file@v1
-
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
         with:
@@ -196,24 +159,6 @@ jobs:
 
       - run: yarn install
 
-      - name: Set js-client version
-        if: inputs.js-client-snapshots != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
-        with:
-          package: "@fluencelabs/js-client"
-          version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
-          package-manager: yarn
-          working-directory: packages/cli/package
-
-      - name: Set aqua-api version
-        if: inputs.aqua-snapshots != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
-        with:
-          package: "@fluencelabs/aqua-api"
-          version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
-          package-manager: yarn
-          working-directory: packages/cli/package
-
       - name: Set deal-ts-clients version
         if: inputs.deal-ts-clients-version != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
@@ -221,16 +166,6 @@ jobs:
           package: "@fluencelabs/deal-ts-clients"
           version: "${{ inputs.deal-ts-clients-version }}"
           package-manager: yarn
-          working-directory: packages/cli/package
-
-      - name: Set installation-spell version
-        if: inputs.installation-spell-version != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
-        with:
-          package: "@fluencelabs/installation-spell"
-          version: "${{ inputs.installation-spell-version }}"
-          package-manager: yarn
-          flags: "--dev"
           working-directory: packages/cli/package
 
       - name: Update versions.json
@@ -242,15 +177,6 @@ jobs:
               "chain-rpc": "${{ env.CHAIN_RPC_IMAGE }}",
               "chain-deploy-script": "${{ env.CHAIN_DEPLOY_SCRIPT_IMAGE }}",
               "subgraph-deploy-script": "${{ env.SUBGRAPH_DEPLOY_SCRIPT_IMAGE }}",
-              "npm": {
-                "@fluencelabs/spell": "${{ inputs.spell-version == 'null' && 'null' || inputs.spell-version }}"
-              },
-              "cargo": {
-                "marine": "${{ inputs.marine-version }}",
-                "mrepl": "${{ inputs.mrepl-version }}",
-                "marine-rs-sdk": "${{ inputs.marine-rs-sdk-version }}",
-                "marine-rs-sdk-test": "${{ inputs.marine-rs-sdk-test-version }}"
-              }
             }
 
       - name: Cache turbo build setup
@@ -273,9 +199,6 @@ jobs:
       - name: Pack Fluence CLI for Linux
         run: yarn pack-${{ inputs.platform }}
 
-      - name: Download Marine and Mrepl
-        run: yarn download-marine-and-mrepl
-
       - name: Generate templates
         run: yarn generate-templates
 
@@ -285,18 +208,6 @@ jobs:
 
       - name: Run provider tests
         run: yarn vitest-provider
-
-      - name: Run deal deploy tests
-        run: yarn vitest-deal-deploy
-
-      - name: Run deal update tests
-        run: yarn vitest-deal-update
-
-      - name: Run smoke tests
-        run: yarn vitest-smoke
-
-      - name: Run js-to-aqua tests
-        run: yarn vitest-js-to-aqua
 
       - name: Show Runner Load Average
         run: uptime

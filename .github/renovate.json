@@ -27,14 +27,6 @@
       ],
       "matchStringsStrategy": "any",
       "datasourceTemplate": "npm"
-    },
-    {
-      "fileMatch": ["^packages/cli/package/src/versions\\.json$"],
-      "matchStrings": [
-        "\"(?<depName>[marine|mrepl|marine\\-rs\\-sdk|marine\\-rs\\-sdk\\-test]+)\": \"(?<currentValue>[^\"\n]+)\""
-      ],
-      "matchStringsStrategy": "any",
-      "datasourceTemplate": "crate"
     }
   ],
   "packageRules": [

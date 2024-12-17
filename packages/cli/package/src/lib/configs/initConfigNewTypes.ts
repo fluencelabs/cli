@@ -19,8 +19,6 @@ import type { JSONSchemaType } from "ajv";
 
 import type { ValidationResult } from "../helpers/validations.js";
 
-import type { GetPath } from "./initConfig.js";
-
 export type InitializedConfig<LatestConfig> = LatestConfig & {
   $getPath(): string;
   $commit(): Promise<void>;
@@ -82,6 +80,8 @@ export type OptionsTuple<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9> = [
   ...(C8 extends undefined ? [] : ConfigOptions<C7, C8>[]),
   ...(C9 extends undefined ? [] : ConfigOptions<C8, C9>[]),
 ];
+
+export type GetPath = () => string | Promise<string>;
 
 export type InitConfigOptions<
   C0,
