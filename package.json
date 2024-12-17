@@ -9,7 +9,6 @@
   "scripts": {
     "build": "turbo run build --cache-dir=.turbo",
     "install-yarn-dependencies": "turbo run install-yarn-dependencies --cache-dir=.turbo",
-    "install-npm-dependencies": "turbo run install-npm-dependencies --cache-dir=.turbo",
     "gen-gql-schema": "turbo run gen-gql-schema --cache-dir=.turbo",
     "gql-codegen": "turbo run gql-codegen --cache-dir=.turbo",
     "pack-ci": "turbo run pack-ci --cache-dir=.turbo && node ./rename-packed.js",
@@ -21,9 +20,6 @@
     "generate-templates": "yarn ./packages/cli/package generate-templates",
     "local-up": "yarn ./packages/cli/package local-up",
     "vitest-provider": "yarn ./packages/cli/package vitest-provider",
-    "vitest-deal-deploy": "yarn ./packages/cli/package vitest-deal-deploy",
-    "vitest-deal-update": "yarn ./packages/cli/package vitest-deal-update",
-    "vitest-smoke": "yarn ./packages/cli/package vitest-smoke",
     "vitest": "yarn vitest-provider",
     "test": "yarn generate-templates && yarn local-up && yarn vitest",
     "test-linux-x64": "yarn pack-linux-x64 && yarn test",
