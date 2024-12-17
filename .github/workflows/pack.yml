@@ -94,7 +94,7 @@ jobs:
 
       - name: Cache node binaries
         id: cache-node-binaries
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-binaries
         with:
@@ -132,7 +132,7 @@ jobs:
 
       - name: Upload archive to release
         if: inputs.tag != 'null' && inputs.platform != 'win32-x64'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: fluence-cli-${{ inputs.platform }}.tar.gz
           tag_name: ${{ inputs.tag }}
@@ -150,7 +150,7 @@ jobs:
 
       - name: Upload windows installer to release
         if: inputs.tag != 'null' && inputs.platform == 'win32-x64'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: fluence-cli-${{ inputs.platform }}.exe
           tag_name: ${{ inputs.tag }}

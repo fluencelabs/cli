@@ -81,7 +81,7 @@ jobs:
 
       - name: Cache node binaries linux-x64
         id: cache-node-binaries-linux-x64
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-binaries
         with:
@@ -90,7 +90,7 @@ jobs:
 
       - name: Cache node binaries darwin-arm64
         id: cache-node-binaries-darwin-arm64
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-binaries
         with:
