@@ -19,7 +19,6 @@ import { color } from "@oclif/color";
 
 import { commandObj, isInteractive } from "../../../commandObj.js";
 import { CLI_NAME_FULL, AUTO_GENERATED } from "../../../const.js";
-import { createSecretKey, getUserSecretKeys } from "../../../keyPairs.js";
 import { getUserConfigPath } from "../../../paths.js";
 import { confirm } from "../../../prompt.js";
 import { getConfigInitFunction } from "../../initConfigNew.js";
@@ -56,26 +55,5 @@ export async function initNewUserConfig() {
     return { countlyConsent, defaultSecretKeyName: AUTO_GENERATED };
   })();
 
-  const userSecretKey = await getUserSecretKey(AUTO_GENERATED);
-
-  if (userSecretKey === undefined) {
-    await createSecretKey({
-      name: AUTO_GENERATED,
-      isUser: true,
-      askToSetKeyAsDefaultInteractively: false,
-      userOrProjectConfig: userConfig,
-    });
-  }
-
   return userConfig;
-}
-
-export type UserConfig = Awaited<ReturnType<typeof initNewUserConfig>>;
-
-export async function getUserSecretKey(
-  secretKeyName: string | undefined,
-): Promise<string | undefined> {
-  return (await getUserSecretKeys())[
-    secretKeyName ?? (await initNewUserConfig()).defaultSecretKeyName
-  ];
 }

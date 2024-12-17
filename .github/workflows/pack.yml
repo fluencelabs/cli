@@ -23,30 +23,6 @@ on:
         description: "Promote version to channel"
         type: string
         default: "null"
-      marine-version:
-        description: "marine version"
-        type: string
-        default: "null"
-      mrepl-version:
-        description: "mrepl version"
-        type: string
-        default: "null"
-      marine-rs-sdk-version:
-        description: "marine-rs-sdk version"
-        type: string
-        default: "null"
-      marine-rs-sdk-test-version:
-        description: "marine-rs-sdk-test version"
-        type: string
-        default: "null"
-      js-client-snapshots:
-        description: "js-client snapshots"
-        type: string
-        default: "null"
-      aqua-snapshots:
-        description: "aqua snapshots"
-        type: string
-        default: "null"
       node-version:
         description: "Node version"
         type: string
@@ -91,12 +67,8 @@ jobs:
           exportToken: false
           secrets: |
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN;
-            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN;
             kv/ci/fcli-binaries id | AWS_ACCESS_KEY_ID ;
             kv/ci/fcli-binaries secret | AWS_SECRET_ACCESS_KEY
-
-      - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
@@ -106,40 +78,6 @@ jobs:
           cache: "yarn"
 
       - run: yarn install
-
-      - name: Set js-client version
-        if: inputs.js-client-snapshots != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
-        with:
-          package: "@fluencelabs/js-client"
-          version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
-          package-manager: yarn
-          working-directory: packages/cli/package
-
-      - name: Set aqua-api version
-        if: inputs.aqua-snapshots != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
-        with:
-          package: "@fluencelabs/aqua-api"
-          version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
-          package-manager: yarn
-          working-directory: packages/cli/package
-
-      - name: Update versions.json
-        uses: ./.github/actions/replace-version
-        with:
-          versions: |
-            {
-              "npm": {
-                "@fluencelabs/js-client": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client'] }}"
-              },
-              "cargo": {
-                "marine": "${{ inputs.marine-version }}",
-                "mrepl": "${{ inputs.mrepl-version }}",
-                "marine-rs-sdk": "${{ inputs.marine-rs-sdk-version }}",
-                "marine-rs-sdk-test": "${{ inputs.marine-rs-sdk-test-version }}"
-              }
-            }
 
       - name: Generate snapshot version
         if: inputs.upload-to-s3 != true
@@ -156,7 +94,7 @@ jobs:
 
       - name: Cache node binaries
         id: cache-node-binaries
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-binaries
         with:
@@ -194,7 +132,7 @@ jobs:
 
       - name: Upload archive to release
         if: inputs.tag != 'null' && inputs.platform != 'win32-x64'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: fluence-cli-${{ inputs.platform }}.tar.gz
           tag_name: ${{ inputs.tag }}
@@ -212,7 +150,7 @@ jobs:
 
       - name: Upload windows installer to release
         if: inputs.tag != 'null' && inputs.platform == 'win32-x64'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: fluence-cli-${{ inputs.platform }}.exe
           tag_name: ${{ inputs.tag }}

@@ -25,7 +25,7 @@ import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import type { ValidationResult } from "../helpers/validations.js";
 
-export async function getMinCCDuration(): Promise<bigint> {
+async function getMinCCDuration(): Promise<bigint> {
   let minDuration: bigint = 0n;
 
   if ((await ensureChainEnv()) !== "local") {

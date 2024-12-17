@@ -150,7 +150,7 @@ async function createContracts(signerOrProvider: Provider | Signer) {
   return contracts;
 }
 
-export async function ensureProvider(): Promise<Provider> {
+async function ensureProvider(): Promise<Provider> {
   if (provider === undefined) {
     const { JsonRpcProvider } = await import("ethers");
 

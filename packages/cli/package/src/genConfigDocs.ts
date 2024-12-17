@@ -22,25 +22,14 @@ import { join } from "node:path";
 import { jsonStringify } from "./common.js";
 import { addTitleDescriptionAndVersionToSchemas } from "./lib/configs/initConfigNew.js";
 import { options as envOptions } from "./lib/configs/project/env/env.js";
-import { fluenceSchema } from "./lib/configs/project/fluence.js";
-import { moduleSchema } from "./lib/configs/project/module.js";
 import { options as providerOptions } from "./lib/configs/project/provider/provider.js";
 import { options as providerArtifactsOptions } from "./lib/configs/project/providerArtifacts/providerArtifacts.js";
 import { options as providerSecretsOptions } from "./lib/configs/project/providerSecrets/providerSecrets.js";
-import { serviceSchema } from "./lib/configs/project/service.js";
-import { spellSchema } from "./lib/configs/project/spell.js";
-import { workersSchema } from "./lib/configs/project/workers.js";
 import { options as userConfigOptions } from "./lib/configs/user/config/config.js";
 import {
-  FLUENCE_CONFIG_FILE_NAME,
   JSON_EXT,
-  MODULE_CONFIG_FILE_NAME,
   SCHEMAS_DIR_NAME,
-  SERVICE_CONFIG_FILE_NAME,
   USER_CONFIG_FILE_NAME,
-  WORKERS_CONFIG_FILE_NAME,
-  SPELL_CONFIG_FILE_NAME,
-  FS_OPTIONS,
   YAML_EXT,
   CLI_NAME_FULL,
   PROVIDER_CONFIG_FILE_NAME,
@@ -68,17 +57,12 @@ function getLatestConfigOptionsSchema<
 }
 
 const configsInfo = Object.entries({
-  [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
   [PROVIDER_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
     await addTitleDescriptionAndVersionToSchemas(providerOptions),
   ),
   [PROVIDER_SECRETS_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
     await addTitleDescriptionAndVersionToSchemas(providerSecretsOptions),
   ),
-  [MODULE_CONFIG_FILE_NAME]: moduleSchema,
-  [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
-  [SPELL_CONFIG_FILE_NAME]: spellSchema,
-  [WORKERS_CONFIG_FILE_NAME]: workersSchema,
   [USER_CONFIG_FILE_NAME]: getLatestConfigOptionsSchema(
     await addTitleDescriptionAndVersionToSchemas(userConfigOptions),
   ),
@@ -102,7 +86,7 @@ await mkdir(DOCS_CONFIGS_DIR_PATH, { recursive: true });
 
 await Promise.all(
   configsInfo.map(({ schemaPath, schema }): Promise<void> => {
-    return writeFile(schemaPath, jsonStringify(schema), FS_OPTIONS);
+    return writeFile(schemaPath, jsonStringify(schema), "utf8");
   }),
 );
 
@@ -114,7 +98,7 @@ await Promise.all(
       args: ["-schema", schemaPath],
     });
 
-    await writeFile(join(DOCS_CONFIGS_DIR_PATH, docFileName), md, FS_OPTIONS);
+    await writeFile(join(DOCS_CONFIGS_DIR_PATH, docFileName), md, "utf8");
   }),
 );
 
@@ -136,7 +120,7 @@ ${configsInfo
   .join("\n\n")}`,
 );
 
-const commandsContent = await readFile(DOCS_COMMANDS_PATH, FS_OPTIONS);
+const commandsContent = await readFile(DOCS_COMMANDS_PATH, "utf8");
 
 await writeFile(
   DOCS_COMMANDS_PATH,

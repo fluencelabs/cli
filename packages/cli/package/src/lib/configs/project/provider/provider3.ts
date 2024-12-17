@@ -255,7 +255,7 @@ async function validateProtocolVersions(providerConfig: Config) {
   return true;
 }
 
-export async function validateEffectors(
+async function validateEffectors(
   providerConfig: Config,
 ): Promise<ValidationResult> {
   const errors = (
@@ -548,14 +548,14 @@ const EXTERNAL_API_MULTIADDRS: Record<ChainENV, string> = {
   local: LOCAL_IPFS_ADDRESS,
 };
 
-export const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
+const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
 
 const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
   ...EXTERNAL_API_MULTIADDRS,
   local: NOX_IPFS_MULTIADDR,
 };
 
-export async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
+async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
   const { RPC_URLS } = await import("@fluencelabs/deal-ts-clients");

@@ -17,13 +17,13 @@
 
 import { fluence } from "../helpers/commonWithSetupTests.js";
 import { fluenceEnv } from "../helpers/constants.js";
-import { pathToTheTemplateWhereLocalEnvironmentIsSpunUp } from "../helpers/paths.js";
+import { initializedTemplatePath } from "../helpers/paths.js";
 
 if (fluenceEnv === "local") {
   await fluence({
     args: ["local", "up"],
     flags: { "no-set-up": true },
-    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+    cwd: initializedTemplatePath,
     timeout: 1000 * 60 * 5, // 5 minutes
   });
 }

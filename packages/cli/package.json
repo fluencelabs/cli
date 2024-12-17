@@ -7,7 +7,6 @@
   },
   "scripts": {
     "install-yarn-dependencies": "yarn ./package install",
-    "install-npm-dependencies": "npm --prefix ./package/src/cli-aqua-dependencies install",
     "gen-gql-schema": "yarn ./package gen-gql-schema",
     "gql-codegen": "yarn ./package gql-codegen",
     "before-build": "yarn ./package before-build",
@@ -18,11 +17,6 @@
     "pack-darwin-arm64": "yarn ./package pack-darwin-arm64",
     "pack-win32-x64": "yarn ./package pack-win32-x64",
     "on-each-commit": "yarn ./package on-each-commit",
-    "generate-templates": "yarn ./package generate-templates",
-    "vitest-provider": "yarn ./package vitest-provider",
-    "vitest-deal-deploy": "yarn ./package vitest-deal-deploy",
-    "vitest-deal-update": "yarn ./package vitest-deal-update",
-    "vitest-smoke": "yarn ./package vitest-smoke",
-    "vitest-js-to-aqua": "yarn ./package vitest-js-to-aqua"
+    "vitest-provider": "yarn ./package vitest-provider"
   }
 }
