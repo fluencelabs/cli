@@ -26,7 +26,7 @@ import { commandObj } from "../commandObj.js";
 import { initProviderConfig } from "../configs/project/provider/provider.js";
 import {
   CLI_NAME,
-  NOX_NAMES_FLAG_NAME,
+  PEER_NAMES_FLAG_NAME,
   OFFER_FLAG_NAME,
   CC_IDS_FLAG_NAME,
   FINISH_COMMITMENT_FLAG_NAME,
@@ -216,7 +216,7 @@ async function getCCs(
 }
 
 export type CCFlags = {
-  [NOX_NAMES_FLAG_NAME]?: string | undefined;
+  [PEER_NAMES_FLAG_NAME]?: string | undefined;
   [OFFER_FLAG_NAME]?: string | undefined;
   [CC_IDS_FLAG_NAME]?: string | undefined;
 };
@@ -229,7 +229,7 @@ async function getCommitmentsIds(
   }
 
   if (
-    flags[NOX_NAMES_FLAG_NAME] === undefined &&
+    flags[PEER_NAMES_FLAG_NAME] === undefined &&
     (await initProviderConfig()) === null
   ) {
     return getCCs(
@@ -249,7 +249,7 @@ async function getCommitmentsIds(
 }
 
 export async function createCommitments(flags: {
-  [NOX_NAMES_FLAG_NAME]?: string | undefined;
+  [PEER_NAMES_FLAG_NAME]?: string | undefined;
   [OFFER_FLAG_NAME]?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
@@ -400,7 +400,7 @@ export async function createCommitments(flags: {
   commandObj.logToStderr(
     stringifyDetailedCommitmentsInfo(
       await getDetailedCommitmentsInfoGroupedByStatus({
-        "nox-names": computePeers
+        "peer-names": computePeers
           .map(({ name }) => {
             return name;
           })

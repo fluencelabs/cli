@@ -25,7 +25,7 @@ import {
   type EnsureComputerPeerConfig,
 } from "./configs/project/provider/provider.js";
 import {
-  NOX_NAMES_FLAG_NAME,
+  PEER_NAMES_FLAG_NAME,
   ALL_FLAG_VALUE,
   OFFER_FLAG_NAME,
 } from "./const.js";
@@ -34,13 +34,13 @@ import { checkboxes } from "./prompt.js";
 
 export async function resolveComputePeersByNames(
   flags: {
-    [NOX_NAMES_FLAG_NAME]?: string | undefined;
+    [PEER_NAMES_FLAG_NAME]?: string | undefined;
     [OFFER_FLAG_NAME]?: string | undefined;
   } = {},
 ): Promise<[ResolvedComputePeer, ...ResolvedComputePeer[]]> {
   const computePeers = await ensureComputerPeerConfigs();
 
-  if (flags[NOX_NAMES_FLAG_NAME] === ALL_FLAG_VALUE) {
+  if (flags[PEER_NAMES_FLAG_NAME] === ALL_FLAG_VALUE) {
     const [firstComputePeer, ...restComputePeers] = computePeers;
 
     if (firstComputePeer === undefined) {
@@ -82,7 +82,7 @@ export async function resolveComputePeersByNames(
     return [firstComputerPeer, ...restComputerPeers];
   }
 
-  if (flags[NOX_NAMES_FLAG_NAME] === undefined) {
+  if (flags[PEER_NAMES_FLAG_NAME] === undefined) {
     const [firstComputePeer, ...restComputePeers] = await checkboxes<
       EnsureComputerPeerConfig,
       never
@@ -111,7 +111,7 @@ export async function resolveComputePeersByNames(
           `You must have at least one nox specified in ${providerConfig.$getPath()}`,
         );
       },
-      flagName: NOX_NAMES_FLAG_NAME,
+      flagName: PEER_NAMES_FLAG_NAME,
     });
 
     if (firstComputePeer === undefined) {
@@ -123,7 +123,7 @@ export async function resolveComputePeersByNames(
     return [firstComputePeer, ...restComputePeers];
   }
 
-  const noxNames = commaSepStrToArr(flags[NOX_NAMES_FLAG_NAME]);
+  const noxNames = commaSepStrToArr(flags[PEER_NAMES_FLAG_NAME]);
 
   const [unknownNoxNames, validNoxNames] = splitErrorsAndResults(
     noxNames,

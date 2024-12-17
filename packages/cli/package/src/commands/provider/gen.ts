@@ -49,7 +49,7 @@ import {
 } from "../../lib/paths.js";
 import { confirm } from "../../lib/prompt.js";
 
-const RESET_NOX_SECRETS_FLAG_NAME = "reset-nox-secrets";
+const RESET_PEER_SECRETS_FLAG_NAME = "reset-peer-secrets";
 const NO_WITHDRAW_FLAG_NAME = "no-withdraw";
 
 export default class Gen extends BaseCommand<typeof Gen> {
@@ -57,12 +57,12 @@ export default class Gen extends BaseCommand<typeof Gen> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...CHAIN_FLAGS,
-    [RESET_NOX_SECRETS_FLAG_NAME]: Flags.boolean({
-      description: `Withdraw remaining tokens from your noxes, backup nox secrets from ${DOT_FLUENCE_DIR_NAME}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME} and ${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME} (if they exist) to ${DOT_FLUENCE_DIR_NAME}/${BACKUPS_DIR_NAME} and generate new ones`,
+    [RESET_PEER_SECRETS_FLAG_NAME]: Flags.boolean({
+      description: `Withdraw remaining tokens from your peers, backup peer secrets from ${DOT_FLUENCE_DIR_NAME}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME} and ${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME} (if they exist) to ${DOT_FLUENCE_DIR_NAME}/${BACKUPS_DIR_NAME} and generate new ones`,
       default: false,
     }),
     [NO_WITHDRAW_FLAG_NAME]: Flags.boolean({
-      description: `Is used only when --${RESET_NOX_SECRETS_FLAG_NAME} flag is present. Will not withdraw tokens from noxes (if you don't need it or it fails for some reason)`,
+      description: `Is used only when --${RESET_PEER_SECRETS_FLAG_NAME} flag is present. Will not withdraw tokens from noxes (if you don't need it or it fails for some reason)`,
       default: false,
     }),
   };
@@ -77,10 +77,10 @@ export default class Gen extends BaseCommand<typeof Gen> {
     );
 
     if (
-      flags[RESET_NOX_SECRETS_FLAG_NAME] &&
+      flags[RESET_PEER_SECRETS_FLAG_NAME] &&
       (await confirm({
         message: `Are you sure you want to backup nox secrets ${color.yellow(providerSecretsConfigPath)} and ${color.yellow(fluenceSecretsDir)} (if they exist) to ${color.yellow(backupDirPath)} and generate new ones`,
-        default: flags[RESET_NOX_SECRETS_FLAG_NAME],
+        default: flags[RESET_PEER_SECRETS_FLAG_NAME],
       }))
     ) {
       if (
@@ -93,7 +93,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
       ) {
         try {
           await withdrawFromNox({
-            "nox-names": ALL_FLAG_VALUE,
+            "peer-names": ALL_FLAG_VALUE,
             amount: MAX_TOKEN_AMOUNT_KEYWORD,
           });
         } catch (e) {

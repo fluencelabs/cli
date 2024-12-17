@@ -144,15 +144,15 @@ export const ENV_ARG = {
 
 export const ALL_FLAG_VALUE = "all";
 
-export const NOX_NAMES_FLAG_NAME = "nox-names";
+export const PEER_NAMES_FLAG_NAME = "peer-names";
 
 const NOX_NAMES_FLAG_CONFIG = {
-  description: `Comma-separated names of noxes from ${PROVIDER_CONFIG_FULL_FILE_NAME}. To use all of your noxes: --${NOX_NAMES_FLAG_NAME} ${ALL_FLAG_VALUE}`,
-  helpValue: "<nox-1,nox-2>",
+  description: `Comma-separated names of peers from ${PROVIDER_CONFIG_FULL_FILE_NAME}. To use all of your peers: --${PEER_NAMES_FLAG_NAME} ${ALL_FLAG_VALUE}`,
+  helpValue: "<peer-1,peer-2>",
 };
 
 export const NOX_NAMES_FLAG = {
-  [NOX_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
+  [PEER_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
 };
 
 export const NOXES_FLAG = {
@@ -227,13 +227,13 @@ export const DOCKER_COMPOSE_FLAGS = {
 export const CC_IDS_FLAG_NAME = "cc-ids";
 
 export const CC_FLAGS = {
-  [NOX_NAMES_FLAG_NAME]: Flags.string({
+  [PEER_NAMES_FLAG_NAME]: Flags.string({
     ...NOX_NAMES_FLAG_CONFIG,
     exclusive: [CC_IDS_FLAG_NAME],
   }),
   [CC_IDS_FLAG_NAME]: Flags.string({
     description: "Comma separated capacity commitment IDs",
-    exclusive: [NOX_NAMES_FLAG_NAME],
+    exclusive: [PEER_NAMES_FLAG_NAME],
   }),
   ...OFFER_FLAG,
 };
