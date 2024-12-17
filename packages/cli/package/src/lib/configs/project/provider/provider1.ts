@@ -642,8 +642,89 @@ export const ccpConfigYAMLSchema = {
   additionalProperties: false,
 } as const satisfies JSONSchemaType<CCPConfigYAML>;
 
+type IPSupply =
+  | {
+      start: string;
+      end?: string;
+    }
+  | {
+      cidr: string;
+    };
+
+const supplySchema = {
+  type: "object",
+  oneOf: [
+    {
+      additionalProperties: false,
+      properties: {
+        start: {
+          type: "string",
+          format: "ipv4",
+          description: "Start of the IP range or individual IP",
+        },
+        end: {
+          nullable: true,
+          type: "string",
+          format: "ipv4",
+          description: "End of the IP range",
+        },
+      },
+      required: ["start"],
+    },
+    {
+      additionalProperties: false,
+      properties: {
+        cidr: {
+          type: "string",
+          description: "CIDR notation of the IP range",
+        },
+      },
+      required: ["cidr"],
+    },
+  ],
+  required: [],
+  nullable: true,
+} as const satisfies JSONSchemaType<IPSupply>;
+
+export type IPSupplies = Array<IPSupply>;
+
+type IP = {
+  supply: IPSupplies;
+};
+
+const ipSchema = {
+  type: "object",
+  description: "IP configuration",
+  additionalProperties: false,
+  properties: {
+    supply: {
+      type: "array",
+      items: supplySchema,
+      description: "IP supply",
+    },
+  },
+  required: ["supply"],
+} as const satisfies JSONSchemaType<IP>;
+
+type Resources = {
+  ip: IP;
+};
+
+const resourcesSchema = {
+  type: "object",
+  description: "Resources configuration",
+  additionalProperties: false,
+  properties: {
+    ip: ipSchema,
+  },
+  required: ["ip"],
+  nullable: true,
+} as const satisfies JSONSchemaType<Resources>;
+
 export type ComputePeer = {
   computeUnits: number;
+  resources?: Resources;
+  kubeconfigPath?: string;
   nox?: NoxConfigYAML;
   ccp?: CCPConfigYAML;
 };
@@ -658,6 +739,12 @@ const computePeerSchema = {
       description: `How many compute units should nox have. Default: ${numToStr(
         DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
       )} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
+    },
+    resources: resourcesSchema,
+    kubeconfigPath: {
+      nullable: true,
+      type: "string",
+      description: `Path to the kubeconfig file`,
     },
     nox: noxConfigYAMLSchema,
     ccp: ccpConfigYAMLSchema,

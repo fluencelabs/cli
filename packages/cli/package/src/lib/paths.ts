@@ -110,6 +110,14 @@ export const getGitignorePath = (): string => {
   return join(projectRootDir, GITIGNORE_FILE_NAME);
 };
 
+export function k8sManifestsDir() {
+  return join(projectRootDir, "k8s-manifests");
+}
+
+export function ensureK8sManifestsDir() {
+  return ensureDir(k8sManifestsDir());
+}
+
 // Project .fluence paths:
 
 export const getFluenceDir = (cwd?: string): string => {

@@ -25,7 +25,11 @@ import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
 import { type ChainENV } from "../../../../common.js";
-import { ajv } from "../../../ajvInstance.js";
+import {
+  getChainId,
+  getIpfsGateway,
+  getRpcUrl,
+} from "../../../chain/chainConfig.js";
 import { commandObj, isInteractive } from "../../../commandObj.js";
 import {
   DEFAULT_OFFER_NAME,
@@ -37,13 +41,14 @@ import {
   DEFAULT_CC_DURATION,
   DEFAULT_CC_STAKER_REWARD,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
-  DEFAULT_CURL_EFFECTOR_CID,
   CLI_NAME,
   DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
-  DEFAULT_VM_EFFECTOR_CID,
+  WS_CHAIN_URLS,
 } from "../../../const.js";
+import { resolveDeployment } from "../../../dealClient.js";
 import { ensureChainEnv } from "../../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../../generateUserProviderConfig.js";
+import { genManifest } from "../../../genManifest.js";
 import { getPeerIdFromSecretKey } from "../../../helpers/getPeerIdFromSecretKey.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../../helpers/utils.js";
@@ -54,6 +59,7 @@ import {
   getFluenceDir,
   ensureFluenceSecretsFilePath,
   ensureFluenceCCPConfigsDir,
+  ensureK8sManifestsDir,
 } from "../../../paths.js";
 import { input } from "../../../prompt.js";
 import { getConfigInitFunction } from "../../initConfigNew.js";
@@ -90,21 +96,11 @@ export const options: InitConfigOptions<Config0, Config1, Config2, Config3> = {
 
 export type ProviderConfig = Awaited<ReturnType<typeof initNewProviderConfig>>;
 
-const ipValidator = ajv.compile({
-  type: "string",
-  format: "ipv4",
-});
-
-function validateIp(value: string) {
-  return ipValidator(value) ? true : "Must be a valid IPv4 address";
-}
-
 function getDefault(args: ProviderConfigArgs) {
   return async () => {
     const chainEnv = await ensureChainEnv();
     await initNewEnvConfig(chainEnv);
     const isLocal = chainEnv === "local";
-    const hasVM = !isLocal && args["no-vm"] !== true;
 
     const numberOfNoxes =
       args.noxes ??
@@ -124,28 +120,10 @@ function getDefault(args: ProviderConfigArgs) {
     const computePeerEntries: [string, ComputePeer][] = [];
 
     for (const i of times(numberOfNoxes)) {
-      const peerConfig = hasVM
-        ? {
-            nox: {
-              vm: {
-                network: {
-                  publicIp: isInteractive
-                    ? await input({
-                        message: `Enter public IP address for nox-${numToStr(i)}`,
-                        validate: validateIp,
-                      })
-                    : "",
-                },
-              },
-            },
-          }
-        : {};
-
       computePeerEntries.push([
-        `nox-${numToStr(i)}`,
+        `peer-${numToStr(i)}`,
         {
           computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
-          ...peerConfig,
         },
       ] as const);
     }
@@ -154,24 +132,11 @@ function getDefault(args: ProviderConfigArgs) {
 
     return {
       providerName: "defaultProvider",
-      nox: {
-        effectors: {
-          curl: {
-            wasmCID: DEFAULT_CURL_EFFECTOR_CID,
-            allowedBinaries: { curl: "/usr/bin/curl" },
-          },
-          ...(hasVM ? { vm: { wasmCID: DEFAULT_VM_EFFECTOR_CID } } : {}),
-        },
-      },
       computePeers,
       offers: {
         [DEFAULT_OFFER_NAME]: {
           ...defaultNumberProperties,
           computePeers: Object.keys(computePeers),
-          effectors: [
-            DEFAULT_CURL_EFFECTOR_CID,
-            ...(hasVM ? [DEFAULT_VM_EFFECTOR_CID] : []),
-          ],
         },
       },
       capacityCommitments: Object.fromEntries(
@@ -495,6 +460,13 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
     }
   }
 
+  const k8sManifestsDir = await ensureK8sManifestsDir();
+  const { diamond: diamondContract } = await resolveDeployment();
+  const networkId = numToStr(await getChainId());
+  const ipfsGatewayEndpoint = await getIpfsGateway();
+  const wsEndpoint = WS_CHAIN_URLS[env];
+  const httpEndpoint = await getRpcUrl();
+
   return Promise.all(
     computePeersWithCC.map(
       async (
@@ -510,6 +482,25 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         await writeFile(
           await ensureFluenceSecretsFilePath(computePeerName),
           secretKey,
+          "utf8",
+        );
+
+        const peerId = await getPeerIdFromSecretKey(secretKey);
+
+        const manifest = genManifest({
+          chainPrivateKey: secretKey,
+          IPSupplies: computePeer.resources?.ip.supply ?? [],
+          httpEndpoint,
+          wsEndpoint,
+          ipfsGatewayEndpoint,
+          peerId,
+          networkId,
+          diamondContract,
+        });
+
+        await writeFile(
+          join(k8sManifestsDir, `${computePeerName}.yaml`),
+          manifest,
           "utf8",
         );
 
@@ -546,7 +537,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
           name: computePeerName,
           overriddenNoxConfig,
           secretKey,
-          peerId: await getPeerIdFromSecretKey(secretKey),
+          peerId,
           computeUnits: computePeer.computeUnits,
           walletKey: signingWallet,
           walletAddress: await new Wallet(signingWallet).getAddress(),

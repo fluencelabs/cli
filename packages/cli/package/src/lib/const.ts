@@ -251,6 +251,8 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
+.terraform
+.terraform.lock.hcl
 `;
 export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";

@@ -41,10 +41,11 @@ import { pathExists } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
   getFluenceSecretsDir,
-  ensureFluenceConfigsDir,
   ensureProviderSecretsConfigPath,
   getFluenceBackupsDir,
   ensureDir,
+  ensureFluenceConfigsDir,
+  ensureK8sManifestsDir,
 } from "../../lib/paths.js";
 import { confirm } from "../../lib/prompt.js";
 
@@ -112,7 +113,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
     await ensureComputerPeerConfigs();
 
     commandObj.logToStderr(
-      `Config.toml files for nox are generated at:\n${await ensureFluenceConfigsDir()}\n\nsecrets are generated at:\n${getFluenceSecretsDir()}`,
+      `Config.toml files for nox are generated at:\n${await ensureFluenceConfigsDir()}\n\nsecrets are generated at:\n${getFluenceSecretsDir()}\n\nManifest files are generated at:\n${await ensureK8sManifestsDir()}`,
     );
   }
 }
