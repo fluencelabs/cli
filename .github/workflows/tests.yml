@@ -176,7 +176,7 @@ jobs:
               "nox": "${{ env.NOX_IMAGE }}",
               "chain-rpc": "${{ env.CHAIN_RPC_IMAGE }}",
               "chain-deploy-script": "${{ env.CHAIN_DEPLOY_SCRIPT_IMAGE }}",
-              "subgraph-deploy-script": "${{ env.SUBGRAPH_DEPLOY_SCRIPT_IMAGE }}",
+              "subgraph-deploy-script": "${{ env.SUBGRAPH_DEPLOY_SCRIPT_IMAGE }}"
             }
 
       - name: Cache turbo build setup
