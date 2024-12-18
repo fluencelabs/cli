@@ -27,7 +27,7 @@ type GenManifestsArgs = {
   httpEndpoint: string;
   wsEndpoint: string;
   ipfsGatewayEndpoint: string;
-  peerId: string;
+  peerIdHex: string;
   networkId: string;
   diamondContract: string;
 };
@@ -38,7 +38,7 @@ export function genManifest({
   httpEndpoint,
   wsEndpoint,
   ipfsGatewayEndpoint,
-  peerId,
+  peerIdHex,
   networkId,
   diamondContract,
 }: GenManifestsArgs) {
@@ -114,7 +114,7 @@ ${stringify({
             httpEndpoint,
             wsEndpoint,
             ipfsGatewayEndpoint,
-            peerId,
+            peerId: peerIdHex,
             networkId,
             diamondContract,
             privateKeySecretRef: PRIVATE_KEY_SECRET_REF,

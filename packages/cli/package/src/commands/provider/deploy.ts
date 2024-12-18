@@ -19,7 +19,7 @@ import assert from "node:assert";
 import { readFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
 
-import k8s, { loadAllYaml } from "@kubernetes/client-node";
+import type k8s from "@kubernetes/client-node";
 
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -71,6 +71,7 @@ export async function kubectlApply(
     `Applying manifest for computePeer ${peerName}\nKubeconfig: ${kubeconfigAbsolutePath}\nManifest: ${specPath}`,
   );
 
+  const k8s = await import("@kubernetes/client-node");
   const kc = new k8s.KubeConfig(kubeconfigAbsolutePath);
   kc.loadFromFile(kubeconfigAbsolutePath);
 
@@ -78,7 +79,7 @@ export async function kubectlApply(
   const client = k8s.KubernetesObjectApi.makeApiClient(kc);
 
   const specString = await readFile(specPath, "utf8");
-  const specs: k8s.KubernetesObject[] = loadAllYaml(specString);
+  const specs: k8s.KubernetesObject[] = k8s.loadAllYaml(specString);
 
   const validSpecs = specs.filter((s) => {
     return s && s.kind && s.metadata;
