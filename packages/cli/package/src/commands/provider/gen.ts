@@ -35,6 +35,7 @@ import {
   ALL_FLAG_VALUE,
   MAX_TOKEN_AMOUNT_KEYWORD,
   CLI_NAME,
+  PEER_NAMES_FLAG_NAME,
 } from "../../lib/const.js";
 import { stringifyUnknown } from "../../lib/helpers/stringifyUnknown.js";
 import { pathExists } from "../../lib/helpers/utils.js";
@@ -93,7 +94,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
       ) {
         try {
           await withdrawFromNox({
-            "peer-names": ALL_FLAG_VALUE,
+            [PEER_NAMES_FLAG_NAME]: ALL_FLAG_VALUE,
             amount: MAX_TOKEN_AMOUNT_KEYWORD,
           });
         } catch (e) {

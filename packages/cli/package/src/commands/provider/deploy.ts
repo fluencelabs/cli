@@ -15,33 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Flags } from "@oclif/core";
-
 import { BaseCommand } from "../../baseCommand.js";
-import { distributeToNox } from "../../lib/chain/distributeToNox.js";
-import {
-  CHAIN_FLAGS,
-  FLT_SYMBOL,
-  PEER_AND_OFFER_NAMES_FLAGS,
-} from "../../lib/const.js";
-import { aliasesText } from "../../lib/helpers/aliasesText.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { CHAIN_FLAGS, PEER_AND_OFFER_NAMES_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveComputePeersByNames } from "../../lib/resolveComputePeersByNames.js";
 
-export default class TokensDistribute extends BaseCommand<
-  typeof TokensDistribute
-> {
-  static override hiddenAliases = ["provider:td"];
-  static override description = `Distribute ${FLT_SYMBOL} tokens to noxes${aliasesText.apply(this)}`;
+export default class Deploy extends BaseCommand<typeof Deploy> {
+  static override description = "Deploy manifests";
+  static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...CHAIN_FLAGS,
     ...PEER_AND_OFFER_NAMES_FLAGS,
-    amount: Flags.string({
-      description: `Amount of ${FLT_SYMBOL} tokens to distribute to noxes`,
-    }),
   };
-
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(TokensDistribute));
-    await distributeToNox(flags);
+    const { flags } = await initCli(this, await this.parse(Deploy));
+
+    await resolveComputePeersByNames(flags);
+
+    commandObj.log("TODO: implement deploy command");
   }
 }

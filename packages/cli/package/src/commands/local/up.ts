@@ -35,7 +35,7 @@ import {
   OFFER_FLAG_NAME,
   ALL_FLAG_VALUE,
   DOCKER_COMPOSE_FULL_FILE_NAME,
-  NOXES_FLAG,
+  SERVERS_FLAG,
   PRIV_KEY_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
@@ -52,7 +52,7 @@ export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using all the offers from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} config using default wallet key ${LOCAL_NET_DEFAULT_WALLET_KEY}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NOXES_FLAG,
+    ...SERVERS_FLAG,
     timeout: Flags.integer({
       description:
         "Timeout in seconds for attempting to register local network on local peers",

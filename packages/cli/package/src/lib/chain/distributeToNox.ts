@@ -21,10 +21,9 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import {
-  PEER_NAMES_FLAG_NAME,
   FLT_SYMBOL,
-  OFFER_FLAG_NAME,
   MAX_TOKEN_AMOUNT_KEYWORD,
+  type PeerAndOfferNameFlags,
 } from "../const.js";
 import {
   getWallet,
@@ -36,11 +35,9 @@ import { resolveComputePeersByNames } from "../resolveComputePeersByNames.js";
 
 import { fltFormatWithSymbol, fltParse } from "./currencies.js";
 
-export async function distributeToNox(flags: {
-  amount?: string | undefined;
-  [PEER_NAMES_FLAG_NAME]?: string | undefined;
-  [OFFER_FLAG_NAME]?: string | undefined;
-}) {
+export async function distributeToNox(
+  flags: { amount?: string | undefined } & PeerAndOfferNameFlags,
+) {
   const computePeers = await resolveComputePeersByNames(flags);
 
   const amount =
@@ -69,10 +66,11 @@ export async function distributeToNox(flags: {
   }
 }
 
-export async function withdrawFromNox(flags: {
-  amount?: string | undefined;
-  [PEER_NAMES_FLAG_NAME]?: string | undefined;
-}) {
+export async function withdrawFromNox(
+  flags: {
+    amount?: string | undefined;
+  } & PeerAndOfferNameFlags,
+) {
   const computePeers = await resolveComputePeersByNames(flags);
 
   const amount =

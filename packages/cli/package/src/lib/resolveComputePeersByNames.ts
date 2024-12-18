@@ -25,6 +25,7 @@ import {
   type EnsureComputerPeerConfig,
 } from "./configs/project/provider/provider.js";
 import {
+  type PeerAndOfferNameFlags,
   PEER_NAMES_FLAG_NAME,
   ALL_FLAG_VALUE,
   OFFER_FLAG_NAME,
@@ -33,10 +34,7 @@ import { commaSepStrToArr, splitErrorsAndResults } from "./helpers/utils.js";
 import { checkboxes } from "./prompt.js";
 
 export async function resolveComputePeersByNames(
-  flags: {
-    [PEER_NAMES_FLAG_NAME]?: string | undefined;
-    [OFFER_FLAG_NAME]?: string | undefined;
-  } = {},
+  flags: PeerAndOfferNameFlags,
 ): Promise<[ResolvedComputePeer, ...ResolvedComputePeer[]]> {
   const computePeers = await ensureComputerPeerConfigs();
 

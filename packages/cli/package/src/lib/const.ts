@@ -151,13 +151,13 @@ const NOX_NAMES_FLAG_CONFIG = {
   helpValue: "<peer-1,peer-2>",
 };
 
-export const NOX_NAMES_FLAG = {
+const PEER_NAMES_FLAG = {
   [PEER_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
 };
 
-export const NOXES_FLAG = {
-  noxes: Flags.integer({
-    description: `Number of Compute Peers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
+export const SERVERS_FLAG = {
+  servers: Flags.integer({
+    description: `Number of servers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
   }),
 };
 
@@ -183,6 +183,16 @@ export const OFFER_FLAGS = {
     helpValue: "<id-1,id-2>",
     exclusive: [OFFER_FLAG_NAME],
   }),
+};
+
+export const PEER_AND_OFFER_NAMES_FLAGS = {
+  ...PEER_NAMES_FLAG,
+  ...OFFER_FLAG,
+};
+
+export type PeerAndOfferNameFlags = {
+  [PEER_NAMES_FLAG_NAME]?: string | undefined;
+  [OFFER_FLAG_NAME]?: string | undefined;
 };
 
 export const PRIV_KEY_FLAG_NAME = "priv-key";

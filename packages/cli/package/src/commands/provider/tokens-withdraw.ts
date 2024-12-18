@@ -23,7 +23,7 @@ import {
   CHAIN_FLAGS,
   FLT_SYMBOL,
   MAX_TOKEN_AMOUNT_KEYWORD,
-  NOX_NAMES_FLAG,
+  PEER_AND_OFFER_NAMES_FLAGS,
 } from "../../lib/const.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -35,7 +35,7 @@ export default class TokensWithdraw extends BaseCommand<typeof TokensWithdraw> {
   static override description = `Withdraw ${FLT_SYMBOL} tokens from noxes${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
-    ...NOX_NAMES_FLAG,
+    ...PEER_AND_OFFER_NAMES_FLAGS,
     [AMOUNT_FLAG_NAME]: Flags.string({
       description: `Amount of ${FLT_SYMBOL} tokens to withdraw from noxes. Use --${AMOUNT_FLAG_NAME} ${MAX_TOKEN_AMOUNT_KEYWORD} to withdraw maximum possible amount`,
     }),
