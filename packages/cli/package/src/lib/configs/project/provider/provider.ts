@@ -498,11 +498,8 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
           diamondContract,
         });
 
-        await writeFile(
-          join(k8sManifestsDir, `${computePeerName}.yaml`),
-          manifest,
-          "utf8",
-        );
+        const manifestPath = join(k8sManifestsDir, `${computePeerName}.yaml`);
+        await writeFile(manifestPath, manifest, "utf8");
 
         const overridenCCPConfig = resolveCCPConfigYAML(
           providerConfig.ccp,
@@ -539,6 +536,8 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
           secretKey,
           peerId,
           computeUnits: computePeer.computeUnits,
+          kubeconfigPath: computePeer.kubeconfigPath,
+          manifestPath,
           walletKey: signingWallet,
           walletAddress: await new Wallet(signingWallet).getAddress(),
           capacityCommitment,
