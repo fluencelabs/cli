@@ -29,7 +29,7 @@ import {
   getIpfsGateway,
   getRpcUrl,
 } from "../../../chain/chainConfig.js";
-import { hexStringToBase64String } from "../../../chain/conversions.js";
+import { hexStringToUTF8ToBase64String } from "../../../chain/conversions.js";
 import { peerIdBase58ToHexString } from "../../../chain/conversions.js";
 import { commandObj, isInteractive } from "../../../commandObj.js";
 import {
@@ -473,7 +473,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         const peerId = await getPeerIdFromSecretKey(secretKey);
 
         const manifest = genManifest({
-          chainPrivateKey: hexStringToBase64String(signingWallet),
+          chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
           IPSupplies: computePeer.resources?.ip.supply ?? [],
           httpEndpoint,
           wsEndpoint,

@@ -67,7 +67,7 @@ export async function cidHexStringToBase32(cidHex: string): Promise<string> {
   return base32.encode(new Uint8Array(Buffer.from(cidHex, "hex")));
 }
 
-export function hexStringToBase64String(hexString: string): string {
+export function hexStringToUTF8ToBase64String(hexString: string): string {
   const cleanHexString = hexString.startsWith("0x")
     ? hexString.slice(2)
     : hexString;
