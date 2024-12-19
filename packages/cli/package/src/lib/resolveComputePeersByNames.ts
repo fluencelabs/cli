@@ -25,7 +25,8 @@ import {
   type EnsureComputerPeerConfig,
 } from "./configs/project/provider/provider.js";
 import {
-  NOX_NAMES_FLAG_NAME,
+  type PeerAndOfferNameFlags,
+  PEER_NAMES_FLAG_NAME,
   ALL_FLAG_VALUE,
   OFFER_FLAG_NAME,
 } from "./const.js";
@@ -33,14 +34,11 @@ import { commaSepStrToArr, splitErrorsAndResults } from "./helpers/utils.js";
 import { checkboxes } from "./prompt.js";
 
 export async function resolveComputePeersByNames(
-  flags: {
-    [NOX_NAMES_FLAG_NAME]?: string | undefined;
-    [OFFER_FLAG_NAME]?: string | undefined;
-  } = {},
+  flags: PeerAndOfferNameFlags,
 ): Promise<[ResolvedComputePeer, ...ResolvedComputePeer[]]> {
   const computePeers = await ensureComputerPeerConfigs();
 
-  if (flags[NOX_NAMES_FLAG_NAME] === ALL_FLAG_VALUE) {
+  if (flags[PEER_NAMES_FLAG_NAME] === ALL_FLAG_VALUE) {
     const [firstComputePeer, ...restComputePeers] = computePeers;
 
     if (firstComputePeer === undefined) {
@@ -82,12 +80,12 @@ export async function resolveComputePeersByNames(
     return [firstComputerPeer, ...restComputerPeers];
   }
 
-  if (flags[NOX_NAMES_FLAG_NAME] === undefined) {
+  if (flags[PEER_NAMES_FLAG_NAME] === undefined) {
     const [firstComputePeer, ...restComputePeers] = await checkboxes<
       EnsureComputerPeerConfig,
       never
     >({
-      message: `Select one or more nox names from ${providerConfig.$getPath()}`,
+      message: `Select one or more peer names from ${providerConfig.$getPath()}`,
       options: computePeers.map((computePeer) => {
         return {
           name: computePeer.name,
@@ -102,16 +100,16 @@ export async function resolveComputePeersByNames(
         return true;
       },
       oneChoiceMessage(choice) {
-        return `One nox found at ${providerConfig.$getPath()}: ${color.yellow(
+        return `One peer found at ${providerConfig.$getPath()}: ${color.yellow(
           choice,
         )}. Do you want to select it`;
       },
       onNoChoices() {
         commandObj.error(
-          `You must have at least one nox specified in ${providerConfig.$getPath()}`,
+          `You must have at least one peer specified in ${providerConfig.$getPath()}`,
         );
       },
-      flagName: NOX_NAMES_FLAG_NAME,
+      flagName: PEER_NAMES_FLAG_NAME,
     });
 
     if (firstComputePeer === undefined) {
@@ -123,10 +121,10 @@ export async function resolveComputePeersByNames(
     return [firstComputePeer, ...restComputePeers];
   }
 
-  const noxNames = commaSepStrToArr(flags[NOX_NAMES_FLAG_NAME]);
+  const peerNames = commaSepStrToArr(flags[PEER_NAMES_FLAG_NAME]);
 
-  const [unknownNoxNames, validNoxNames] = splitErrorsAndResults(
-    noxNames,
+  const [unknownPeerNames, validPeerNames] = splitErrorsAndResults(
+    peerNames,
     (name) => {
       if (
         computePeers.find((cp) => {
@@ -140,10 +138,10 @@ export async function resolveComputePeersByNames(
     },
   );
 
-  if (unknownNoxNames.length > 0) {
+  if (unknownPeerNames.length > 0) {
     commandObj.error(
-      `nox names: ${color.yellow(
-        unknownNoxNames.join(", "),
+      `peer names: ${color.yellow(
+        unknownPeerNames.join(", "),
       )} not found in ${color.yellow(
         "computePeers",
       )} property of ${providerConfig.$getPath()}`,
@@ -152,13 +150,13 @@ export async function resolveComputePeersByNames(
 
   const [firstComputePeer, ...restComputePeers] = computePeers.filter(
     ({ name }) => {
-      return validNoxNames.includes(name);
+      return validPeerNames.includes(name);
     },
   );
 
   if (firstComputePeer === undefined) {
     commandObj.error(
-      `No compute peers found for nox names: ${validNoxNames.join(", ")}`,
+      `No compute peers found by names: ${validPeerNames.join(", ")} in ${providerConfig.$getPath()}`,
     );
   }
 

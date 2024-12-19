@@ -15,7 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { PEERS_FLAG_NAME } from "./const.js";
+
 export type ProviderConfigArgs = {
-  noxes?: number | undefined;
-  "no-vm"?: boolean | undefined;
+  [PEERS_FLAG_NAME]?: number | undefined;
 };

@@ -355,7 +355,7 @@ function validateNoDuplicateNoxNamesInOffers(config: Config): ValidationResult {
   if (duplicateNoxNames.length > 0) {
     return duplicateNoxNames
       .map(([noxName, offerNames]) => {
-        return `Nox ${color.yellow(
+        return `Peer ${color.yellow(
           noxName,
         )} is present in multiple offers: ${color.yellow(
           offerNames.join(", "),

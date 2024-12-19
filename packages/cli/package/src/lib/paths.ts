@@ -29,7 +29,6 @@ import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
-  CCP_CONFIGS_DIR_NAME,
   BACKUPS_DIR_NAME,
   ENV_CONFIG_FULL_FILE_NAME,
   USER_CONFIG_FULL_FILE_NAME,
@@ -110,6 +109,14 @@ export const getGitignorePath = (): string => {
   return join(projectRootDir, GITIGNORE_FILE_NAME);
 };
 
+export function k8sManifestsDir() {
+  return join(projectRootDir, "k8s-manifests");
+}
+
+export function ensureK8sManifestsDir() {
+  return ensureDir(k8sManifestsDir());
+}
+
 // Project .fluence paths:
 
 export const getFluenceDir = (cwd?: string): string => {
@@ -159,8 +166,4 @@ export const ensureFluenceSecretsFilePath = async (
 
 export async function ensureFluenceConfigsDir(): Promise<string> {
   return ensureDir(join(getFluenceDir(), CONFIGS_DIR_NAME));
-}
-
-export async function ensureFluenceCCPConfigsDir(): Promise<string> {
-  return ensureDir(join(getFluenceDir(), CCP_CONFIGS_DIR_NAME));
 }

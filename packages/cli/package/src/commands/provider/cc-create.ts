@@ -17,7 +17,7 @@
 
 import { BaseCommand } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
-import { NOX_NAMES_FLAG, CHAIN_FLAGS, OFFER_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS, PEER_AND_OFFER_NAMES_FLAGS } from "../../lib/const.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -28,8 +28,7 @@ export default class CreateCommitment extends BaseCommand<
   static override description = `Create Capacity commitment${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
-    ...NOX_NAMES_FLAG,
-    ...OFFER_FLAG,
+    ...PEER_AND_OFFER_NAMES_FLAGS,
   };
 
   async run(): Promise<void> {

@@ -26,8 +26,8 @@ import { commandObj } from "../commandObj.js";
 import { initProviderConfig } from "../configs/project/provider/provider.js";
 import {
   CLI_NAME,
-  NOX_NAMES_FLAG_NAME,
-  OFFER_FLAG_NAME,
+  PEER_NAMES_FLAG_NAME,
+  type PeerAndOfferNameFlags,
   CC_IDS_FLAG_NAME,
   FINISH_COMMITMENT_FLAG_NAME,
 } from "../const.js";
@@ -137,7 +137,7 @@ async function getComputePeersWithCCIds(
     commandObj.warn(
       `Some of the commitments were not found for:\n${computePeersWithoutCC
         .map(({ name, peerId }) => {
-          return `Nox: ${name}, PeerId: ${peerId}`;
+          return `Peer: ${name}, PeerId: ${peerId}`;
         })
         .join(
           "\n",
@@ -215,9 +215,7 @@ async function getCCs(
   return [firstCCInfo, ...restCCInfos];
 }
 
-export type CCFlags = {
-  [NOX_NAMES_FLAG_NAME]?: string | undefined;
-  [OFFER_FLAG_NAME]?: string | undefined;
+export type CCFlags = PeerAndOfferNameFlags & {
   [CC_IDS_FLAG_NAME]?: string | undefined;
 };
 
@@ -229,7 +227,7 @@ async function getCommitmentsIds(
   }
 
   if (
-    flags[NOX_NAMES_FLAG_NAME] === undefined &&
+    flags[PEER_NAMES_FLAG_NAME] === undefined &&
     (await initProviderConfig()) === null
   ) {
     return getCCs(
@@ -248,10 +246,7 @@ async function getCommitmentsIds(
   return getComputePeersWithCCIds(await resolveComputePeersByNames(flags));
 }
 
-export async function createCommitments(flags: {
-  [NOX_NAMES_FLAG_NAME]?: string | undefined;
-  [OFFER_FLAG_NAME]?: string | undefined;
-}) {
+export async function createCommitments(flags: PeerAndOfferNameFlags) {
   const computePeers = await resolveComputePeersByNames(flags);
   const { contracts } = await getContracts();
   const precision = await contracts.diamond.precision();
@@ -342,9 +337,9 @@ export async function createCommitments(flags: {
 
   try {
     createCommitmentsTxReceipts = await signBatch(
-      `Create commitments for the following noxes:\n\n${computePeers
+      `Create commitments for the following peers:\n\n${computePeers
         .map(({ name, peerId }) => {
-          return `Nox: ${name}\nPeerId: ${peerId}`;
+          return `Peer: ${name}\nPeerId: ${peerId}`;
         })
         .join("\n\n")}`,
       [firstCommitmentTx, ...restCommitmentTxs],
@@ -400,7 +395,7 @@ export async function createCommitments(flags: {
   commandObj.logToStderr(
     stringifyDetailedCommitmentsInfo(
       await getDetailedCommitmentsInfoGroupedByStatus({
-        "nox-names": computePeers
+        [PEER_NAMES_FLAG_NAME]: computePeers
           .map(({ name }) => {
             return name;
           })
@@ -498,7 +493,7 @@ export async function collateralWithdraw(
   for (const commitment of commitments.flatMap(({ ccInfos }) => {
     return ccInfos;
   })) {
-    const { ccId, name: noxName } = commitment;
+    const { ccId, name: peerName } = commitment;
 
     const [unitIds, isExitedStatuses] =
       await contracts.diamond.getUnitExitStatuses(ccId);
@@ -624,7 +619,7 @@ export async function collateralWithdraw(
     );
 
     await signBatch(
-      `${firstNotExitedUnit === undefined ? "F" : "Remove compute units from capacity commitments and f"}inish commitment ${noxName === undefined ? ccId : `for ${noxName} (${ccId})`} ${ccId}`,
+      `${firstNotExitedUnit === undefined ? "Finish" : "Remove compute units from capacity commitments and finish"} commitment ${peerName === undefined ? ccId : `for ${peerName} (${ccId})`} ${ccId}`,
       firstNotExitedUnit === undefined
         ? [populateTx(contracts.diamond.finishCommitment, ccId)]
         : [
@@ -667,8 +662,8 @@ export function stringifyBasicCommitmentInfo({
   peerId,
   ccId,
 }: CapacityCommitment) {
-  const noxName = name === undefined ? "" : `Nox: ${name}\n`;
-  return `${color.yellow(`${noxName}PeerId: ${peerId}`)}\nCommitmentId: ${ccId}`;
+  const peerName = name === undefined ? "" : `Peer: ${name}\n`;
+  return `${color.yellow(`${peerName}PeerId: ${peerId}`)}\nCommitmentId: ${ccId}`;
 }
 
 type CapacityCommitment = {
@@ -989,10 +984,10 @@ export function stringifyDetailedCommitmentsInfo(
   return detailedCommitmentsInfoGroupedByStatus
     .map(({ statusInfo, CCs }) => {
       return `${getStatusHeading(statusInfo)}${CCs.map((cc) => {
-        const noxNameString =
-          "noxName" in cc ? color.yellow(`Nox: ${cc.noxName}\n`) : "";
+        const peerNameString =
+          "peerName" in cc ? color.yellow(`Peer: ${cc.peerName}\n`) : "";
 
-        return `${noxNameString}${getDetailedCommitmentInfoString(cc)}`;
+        return `${peerNameString}${getDetailedCommitmentInfoString(cc)}`;
       }).join("\n\n")}`;
     })
     .join("\n\n");
@@ -1014,7 +1009,7 @@ async function getDetailedCommitmentInfo({
   status,
   peerId,
   ccId,
-  name: noxName,
+  name: peerName,
   currentEpoch,
   epochDuration,
   initTimestamp,
@@ -1079,7 +1074,7 @@ async function getDetailedCommitmentInfo({
       : undefined;
 
   return {
-    ...(noxName === undefined ? {} : { noxName }),
+    ...(peerName === undefined ? {} : { peerName }),
     peerId,
     commitmentId: ccId,
     status,
