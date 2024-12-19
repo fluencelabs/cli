@@ -94,47 +94,49 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
       }),
     )) as Awaited<ReturnType<ReturnType<Contracts["getDeal"]>["getWorkers"]>>[];
 
-    const workers = dealIds.flatMap((id, i) => {
+    const dealWorkers = dealIds.map((id, i) => {
       const deal = contracts.getDeal(id);
       const workers = workersFromRPC[i];
 
-      if (workers === undefined) {
-        commandObj.warn(
-          `Was not able to get workers for deal ${id} from chain. Skipping...`,
-        );
-
-        return [];
-      }
-
-      return workers
-        .filter((worker) => {
-          return worker.provider.toLowerCase() === signerAddress;
-        })
-        .map((worker) => {
-          return { worker, deal };
-        });
+      return {
+        dealId: id,
+        workers: (workers ?? [])
+          .filter((worker) => {
+            return worker.provider.toLowerCase() === signerAddress;
+          })
+          .map((worker) => {
+            return { worker, deal };
+          }),
+      };
     });
 
-    const [firstWorker, ...restWorkers] = workers;
+    for (const { dealId, workers } of dealWorkers) {
+      const [firstWorker, ...restWorkers] = workers;
 
-    if (firstWorker === undefined) {
-      return commandObj.error(
-        `No workers found for address ${signerAddress} and deal ids: ${dealIds.join(", ")}`,
+      if (firstWorker === undefined) {
+        commandObj.warn(
+          `No workers found for address ${signerAddress} and deal id: ${dealId}`,
+        );
+
+        continue;
+      }
+
+      await signBatch(
+        `Remove the following workers from deal ${dealId}:\n\n${workers
+          .map(({ worker: { onchainId } }) => {
+            return onchainId;
+          })
+          .join("\n")}`,
+        [
+          populateTx(
+            firstWorker.deal.removeWorker,
+            firstWorker.worker.onchainId,
+          ),
+          ...restWorkers.map(({ deal, worker: { onchainId } }) => {
+            return populateTx(deal.removeWorker, onchainId);
+          }),
+        ],
       );
     }
-
-    await signBatch(
-      `Remove the following workers from deals:\n\n${workers
-        .map(({ worker: { onchainId } }) => {
-          return onchainId;
-        })
-        .join("\n")}`,
-      [
-        populateTx(firstWorker.deal.removeWorker, firstWorker.worker.onchainId),
-        ...restWorkers.map(({ deal, worker: { onchainId } }) => {
-          return populateTx(deal.removeWorker, onchainId);
-        }),
-      ],
-    );
   }
 }
