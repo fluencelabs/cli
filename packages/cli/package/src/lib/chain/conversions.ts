@@ -17,6 +17,8 @@
 
 import type { CIDV1Struct } from "@fluencelabs/deal-ts-clients/dist/typechain-types/Config.js";
 
+import { bufferToBase64 } from "../helpers/typesafeStringify.js";
+
 const PREFIX = new Uint8Array([0, 36, 8, 1, 18, 32]);
 const BASE_58_PREFIX = "z";
 
@@ -63,4 +65,12 @@ export async function cidStringToCIDV1Struct(
 export async function cidHexStringToBase32(cidHex: string): Promise<string> {
   const { base32 } = await import("multiformats/bases/base32");
   return base32.encode(new Uint8Array(Buffer.from(cidHex, "hex")));
+}
+
+export function hexStringToBase64String(hexString: string): string {
+  const cleanHexString = hexString.startsWith("0x")
+    ? hexString.slice(2)
+    : hexString;
+
+  return bufferToBase64(Buffer.from(cleanHexString, "hex"));
 }
