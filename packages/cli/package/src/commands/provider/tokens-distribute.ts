@@ -18,7 +18,7 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand.js";
-import { distributeToNox } from "../../lib/chain/distributeToNox.js";
+import { distributeToPeer } from "../../lib/chain/distributeToNox.js";
 import {
   CHAIN_FLAGS,
   FLT_SYMBOL,
@@ -31,17 +31,17 @@ export default class TokensDistribute extends BaseCommand<
   typeof TokensDistribute
 > {
   static override hiddenAliases = ["provider:td"];
-  static override description = `Distribute ${FLT_SYMBOL} tokens to noxes${aliasesText.apply(this)}`;
+  static override description = `Distribute ${FLT_SYMBOL} tokens to peers${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...PEER_AND_OFFER_NAMES_FLAGS,
     amount: Flags.string({
-      description: `Amount of ${FLT_SYMBOL} tokens to distribute to noxes`,
+      description: `Amount of ${FLT_SYMBOL} tokens to distribute to peers`,
     }),
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(TokensDistribute));
-    await distributeToNox(flags);
+    await distributeToPeer(flags);
   }
 }

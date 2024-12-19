@@ -18,7 +18,6 @@
 import { writeFile } from "node:fs/promises";
 
 import { color } from "@oclif/color";
-import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -28,7 +27,7 @@ import {
 } from "../../lib/configs/project/provider/provider.js";
 import {
   CHAIN_FLAGS,
-  SERVERS_FLAG,
+  PEERS_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   RECOMMENDED_GITIGNORE_CONTENT,
 } from "../../lib/const.js";
@@ -38,12 +37,8 @@ import { getGitignorePath } from "../../lib/paths.js";
 export default class Init extends BaseCommand<typeof Init> {
   static override description = `Init provider config. Creates a ${PROVIDER_CONFIG_FULL_FILE_NAME} file`;
   static override flags = {
-    ...SERVERS_FLAG,
+    ...PEERS_FLAG,
     ...CHAIN_FLAGS,
-    "no-vm": Flags.boolean({
-      description: `Generate ${PROVIDER_CONFIG_FULL_FILE_NAME} without vm configuration`,
-      default: false,
-    }),
   };
 
   async run(): Promise<void> {

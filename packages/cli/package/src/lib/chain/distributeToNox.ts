@@ -35,7 +35,7 @@ import { resolveComputePeersByNames } from "../resolveComputePeersByNames.js";
 
 import { fltFormatWithSymbol, fltParse } from "./currencies.js";
 
-export async function distributeToNox(
+export async function distributeToPeer(
   flags: { amount?: string | undefined } & PeerAndOfferNameFlags,
 ) {
   const computePeers = await resolveComputePeersByNames(flags);
@@ -43,7 +43,7 @@ export async function distributeToNox(
   const amount =
     flags.amount ??
     (await input({
-      message: `Enter the amount of ${FLT_SYMBOL} tokens to distribute to noxes`,
+      message: `Enter the amount of ${FLT_SYMBOL} tokens to distribute to peers`,
     }));
 
   const parsedAmount = await fltParse(amount);
@@ -66,7 +66,7 @@ export async function distributeToNox(
   }
 }
 
-export async function withdrawFromNox(
+export async function withdrawFromPeer(
   flags: {
     amount?: string | undefined;
   } & PeerAndOfferNameFlags,
@@ -76,7 +76,7 @@ export async function withdrawFromNox(
   const amount =
     flags.amount ??
     (await input({
-      message: `Enter the amount of ${FLT_SYMBOL} tokens to distribute to noxes. Use ${color.yellow(
+      message: `Enter the amount of ${FLT_SYMBOL} tokens to distribute to peers. Use ${color.yellow(
         MAX_TOKEN_AMOUNT_KEYWORD,
       )} to withdraw maximum possible amount`,
       async validate(val: string) {
@@ -100,13 +100,16 @@ export async function withdrawFromNox(
       },
     }));
 
-  for (const { walletKey: noxWalletKey, name: noxName } of computePeers) {
-    const { amountBigInt, txReceipt, noxAddress } =
+  for (const { walletKey: peerWalletKey, name: peerName } of computePeers) {
+    const { amountBigInt, txReceipt, peerAddress } =
       amount === MAX_TOKEN_AMOUNT_KEYWORD
-        ? await withdrawMaxAmount({ noxWalletKey, noxName })
+        ? await withdrawMaxAmount({
+            peerWalletKey,
+            peerName,
+          })
         : await withdrawSpecificAmount({
-            noxWalletKey,
-            noxName,
+            peerWalletKey,
+            peerName,
             amountBigInt: await fltParse(amount),
           });
 
@@ -117,33 +120,33 @@ export async function withdrawFromNox(
         `Successfully withdrawn ${color.yellow(
           await fltFormatWithSymbol(amountBigInt),
         )} from ${color.yellow(
-          noxName,
-        )} (${noxAddress}) to ${color.yellow(providerAddress)} with tx hash: ${color.yellow(txReceipt.hash)}\n`,
+          peerName,
+        )} (${peerAddress}) to ${color.yellow(providerAddress)} with tx hash: ${color.yellow(txReceipt.hash)}\n`,
       );
     }
   }
 }
 
 type WithdrawMaxAmountArgs = {
-  noxWalletKey: string;
-  noxName: string;
+  peerWalletKey: string;
+  peerName: string;
 };
 
 async function withdrawMaxAmount({
-  noxWalletKey,
-  noxName,
+  peerWalletKey,
+  peerName,
 }: WithdrawMaxAmountArgs) {
-  const noxWallet = await getWallet(noxWalletKey);
-  const noxAddress = await getSignerAddress();
+  const peerWallet = await getWallet(peerWalletKey);
+  const peerAddress = await getSignerAddress();
 
-  const gasLimit = await noxWallet.estimateGas({
-    to: noxAddress,
+  const gasLimit = await peerWallet.estimateGas({
+    to: peerAddress,
     value: 0n,
   });
 
-  const noxProvider = noxWallet.provider;
-  assert(noxProvider !== null, "Unreachable. We ensure provider is not null");
-  const gasPrice = await noxProvider.getFeeData();
+  const peerProvider = peerWallet.provider;
+  assert(peerProvider !== null, "Unreachable. We ensure provider is not null");
+  const gasPrice = await peerProvider.getFeeData();
 
   if (
     gasPrice.maxFeePerGas === null ||
@@ -157,18 +160,18 @@ async function withdrawMaxAmount({
   const feeAmount =
     (gasPrice.maxFeePerGas + gasPrice.maxPriorityFeePerGas) * gasLimit;
 
-  const totalBalance = await noxProvider.getBalance(noxAddress);
+  const totalBalance = await peerProvider.getBalance(peerAddress);
   const amountBigInt = totalBalance - feeAmount;
 
   if (amountBigInt <= 0n) {
     commandObj.logToStderr(
-      `No ${FLT_SYMBOL} tokens to withdraw from ${noxName} (${noxAddress})`,
+      `No ${FLT_SYMBOL} tokens to withdraw from ${peerName} (${peerAddress})`,
     );
 
     return {
       txReceipt: undefined,
       amountBigInt: undefined,
-      noxAddress: undefined,
+      peerAddress: undefined,
     };
   }
 
@@ -176,7 +179,7 @@ async function withdrawMaxAmount({
 
   const result = {
     txReceipt: await sendRawTransaction(
-      `Withdraw max amount of ${await fltFormatWithSymbol(amountBigInt)} from ${noxName} (${noxAddress}) to ${providerAddress}`,
+      `Withdraw max amount of ${await fltFormatWithSymbol(amountBigInt)} from ${peerName} (${peerAddress}) to ${providerAddress}`,
       {
         to: providerAddress,
         value: amountBigInt,
@@ -184,29 +187,29 @@ async function withdrawMaxAmount({
         maxFeePerGas: gasPrice.maxFeePerGas,
         maxPriorityFeePerGas: gasPrice.maxPriorityFeePerGas,
       },
-      noxWallet,
+      peerWallet,
     ),
     amountBigInt,
-    noxAddress,
+    peerAddress,
   };
 
   return result;
 }
 
 async function withdrawSpecificAmount({
-  noxWalletKey,
-  noxName,
+  peerWalletKey,
+  peerName,
   amountBigInt,
 }: WithdrawMaxAmountArgs & { amountBigInt: bigint }) {
   const providerAddress = await getSignerAddress();
-  const { address: noxAddress } = await getWallet(noxWalletKey);
+  const { address: peerAddress } = await getWallet(peerWalletKey);
 
   return {
     txReceipt: await sendRawTransaction(
-      `Withdraw ${await fltFormatWithSymbol(amountBigInt)} from ${noxName} (${noxAddress}) to ${providerAddress}`,
+      `Withdraw ${await fltFormatWithSymbol(amountBigInt)} from ${peerName} (${peerAddress}) to ${providerAddress}`,
       { to: providerAddress, value: amountBigInt },
     ),
     amountBigInt,
-    noxAddress,
+    peerAddress,
   };
 }

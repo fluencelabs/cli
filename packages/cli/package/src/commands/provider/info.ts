@@ -37,7 +37,7 @@ import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override hiddenAliases = ["provider:i"];
-  static override description = `Print nox signing wallets and peer ids${aliasesText.apply(this)}`;
+  static override description = `Print peer signing wallets and peer ids${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
     ...PEER_AND_OFFER_NAMES_FLAGS,

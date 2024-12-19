@@ -22,7 +22,7 @@ import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand.js";
-import { withdrawFromNox } from "../../lib/chain/distributeToNox.js";
+import { withdrawFromPeer } from "../../lib/chain/distributeToNox.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ensureComputerPeerConfigs } from "../../lib/configs/project/provider/provider.js";
 import {
@@ -62,7 +62,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
       default: false,
     }),
     [NO_WITHDRAW_FLAG_NAME]: Flags.boolean({
-      description: `Is used only when --${RESET_PEER_SECRETS_FLAG_NAME} flag is present. Will not withdraw tokens from noxes (if you don't need it or it fails for some reason)`,
+      description: `Is used only when --${RESET_PEER_SECRETS_FLAG_NAME} flag is present. Will not withdraw tokens from peers (if you don't need it or it fails for some reason)`,
       default: false,
     }),
   };
@@ -79,7 +79,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
     if (
       flags[RESET_PEER_SECRETS_FLAG_NAME] &&
       (await confirm({
-        message: `Are you sure you want to backup nox secrets ${color.yellow(providerSecretsConfigPath)} and ${color.yellow(fluenceSecretsDir)} (if they exist) to ${color.yellow(backupDirPath)} and generate new ones`,
+        message: `Are you sure you want to backup peer secrets ${color.yellow(providerSecretsConfigPath)} and ${color.yellow(fluenceSecretsDir)} (if they exist) to ${color.yellow(backupDirPath)} and generate new ones`,
         default: flags[RESET_PEER_SECRETS_FLAG_NAME],
       }))
     ) {
@@ -87,18 +87,18 @@ export default class Gen extends BaseCommand<typeof Gen> {
         !flags[NO_WITHDRAW_FLAG_NAME] &&
         (await confirm({
           message:
-            "Do you want to withdraw remaining tokens from your noxes before continuing",
+            "Do you want to withdraw remaining tokens from your peers before continuing",
           default: !flags[NO_WITHDRAW_FLAG_NAME],
         }))
       ) {
         try {
-          await withdrawFromNox({
+          await withdrawFromPeer({
             [PEER_NAMES_FLAG_NAME]: ALL_FLAG_VALUE,
             amount: MAX_TOKEN_AMOUNT_KEYWORD,
           });
         } catch (e) {
           return commandObj.error(
-            `Failed to withdraw tokens from noxes. Try using ${color.yellow(`${CLI_NAME} provider tokens-withdraw`)} command with specific nox names and amounts or don't withdraw anything if you don't need to by using --${NO_WITHDRAW_FLAG_NAME} flag. Error: ${stringifyUnknown(e)}`,
+            `Failed to withdraw tokens from peers. Try using ${color.yellow(`${CLI_NAME} provider tokens-withdraw`)} command with specific peer names and amounts or don't withdraw anything if you don't need to by using --${NO_WITHDRAW_FLAG_NAME} flag. Error: ${stringifyUnknown(e)}`,
           );
         }
       }

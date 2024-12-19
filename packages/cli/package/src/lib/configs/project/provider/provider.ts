@@ -41,9 +41,9 @@ import {
   defaultNumberProperties,
   DEFAULT_CC_DURATION,
   DEFAULT_CC_STAKER_REWARD,
-  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
   CLI_NAME,
-  DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
+  DEFAULT_NUMBER_OF_LOCAL_NET_PEERS,
   WS_CHAIN_URLS,
 } from "../../../const.js";
 import { resolveDeployment } from "../../../dealClient.js";
@@ -103,7 +103,7 @@ function getDefault(args: ProviderConfigArgs) {
     const isLocal = chainEnv === "local";
 
     const numberOfNoxes =
-      args.noxes ??
+      args.peers ??
       (isInteractive && !isLocal
         ? Number(
             await input({
@@ -115,7 +115,7 @@ function getDefault(args: ProviderConfigArgs) {
               },
             }),
           )
-        : DEFAULT_NUMBER_OF_LOCAL_NET_NOXES);
+        : DEFAULT_NUMBER_OF_LOCAL_NET_PEERS);
 
     const computePeerEntries: [string, ComputePeer][] = [];
 
@@ -123,7 +123,7 @@ function getDefault(args: ProviderConfigArgs) {
       computePeerEntries.push([
         `peer-${numToStr(i)}`,
         {
-          computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+          computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
         },
       ] as const);
     }

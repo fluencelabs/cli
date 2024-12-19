@@ -53,7 +53,7 @@ export const DEFAULT_CURL_EFFECTOR_CID =
 export const DEFAULT_VM_EFFECTOR_CID =
   "bafkreidfw2so3evkkkky7bodnamzg32zweunfkthna362r7e6a63cnqxiy";
 
-export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
+export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER = 32;
 
 export type FluenceEnv = (typeof CHAIN_ENV)[number];
 export const isFluenceEnv = getIsUnion(CHAIN_ENV);
@@ -77,7 +77,7 @@ export const TCP_PORT_START = 977;
 export const WEB_SOCKET_PORT_START = 999;
 export const HTTP_PORT_START = 918;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
-export const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
+export const DEFAULT_NUMBER_OF_LOCAL_NET_PEERS = 3;
 
 export const WS_CHAIN_URLS: Record<ChainENV, string> = {
   mainnet: "wss://ws.mainnet.fluence.dev",
@@ -146,18 +146,20 @@ export const ALL_FLAG_VALUE = "all";
 
 export const PEER_NAMES_FLAG_NAME = "peer-names";
 
-const NOX_NAMES_FLAG_CONFIG = {
+const PEER_NAMES_FLAG_CONFIG = {
   description: `Comma-separated names of peers from ${PROVIDER_CONFIG_FULL_FILE_NAME}. To use all of your peers: --${PEER_NAMES_FLAG_NAME} ${ALL_FLAG_VALUE}`,
   helpValue: "<peer-1,peer-2>",
 };
 
 const PEER_NAMES_FLAG = {
-  [PEER_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
+  [PEER_NAMES_FLAG_NAME]: Flags.string(PEER_NAMES_FLAG_CONFIG),
 };
 
-export const SERVERS_FLAG = {
-  servers: Flags.integer({
-    description: `Number of servers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
+export const PEERS_FLAG_NAME = "peers";
+
+export const PEERS_FLAG = {
+  [PEERS_FLAG_NAME]: Flags.integer({
+    description: `Number of peers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
   }),
 };
 
@@ -238,7 +240,7 @@ export const CC_IDS_FLAG_NAME = "cc-ids";
 
 export const CC_FLAGS = {
   [PEER_NAMES_FLAG_NAME]: Flags.string({
-    ...NOX_NAMES_FLAG_CONFIG,
+    ...PEER_NAMES_FLAG_CONFIG,
     exclusive: [CC_IDS_FLAG_NAME],
   }),
   [CC_IDS_FLAG_NAME]: Flags.string({

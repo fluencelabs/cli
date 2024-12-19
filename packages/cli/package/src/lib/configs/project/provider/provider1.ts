@@ -26,7 +26,7 @@ import {
   HTTP_PORT_START,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
-  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
 } from "../../../const.js";
 import { boolToStr, numToStr } from "../../../helpers/typesafeStringify.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
@@ -737,7 +737,7 @@ const computePeerSchema = {
     computeUnits: {
       type: "integer",
       description: `How many compute units should nox have. Default: ${numToStr(
-        DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+        DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
       )} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
     },
     resources: resourcesSchema,
