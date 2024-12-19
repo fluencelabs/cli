@@ -72,5 +72,5 @@ export function hexStringToBase64String(hexString: string): string {
     ? hexString.slice(2)
     : hexString;
 
-  return bufferToBase64(Buffer.from(cleanHexString, "hex"));
+  return bufferToBase64(Buffer.from(cleanHexString, "utf-8"));
 }
