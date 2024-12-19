@@ -18,7 +18,7 @@
 import { commandObj } from "./commandObj.js";
 import { ENV_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "./const.js";
 
-export type ChainFlags = {
+type ChainFlags = {
   [ENV_FLAG_NAME]?: string | undefined;
   [PRIV_KEY_FLAG_NAME]?: string | undefined;
 };

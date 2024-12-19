@@ -16,151 +16,21 @@
  */
 
 // @ts-check
-import { cp, mkdir, rm, writeFile, readFile } from "node:fs/promises";
+import { cp, mkdir, rm } from "node:fs/promises";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-
-import { compileFromPath } from "@fluencelabs/aqua-api";
-import aquaToJs from "@fluencelabs/aqua-to-js";
-import { gatherImportsFromNpm } from "@fluencelabs/npm-aqua-compiler";
-
-import { versions } from "./versions.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const root = resolve(__dirname, "..");
 
-const WORKSPACE_NODE_MODULES_PATH = resolve(root, "node_modules");
-
-const aquaDependenciesDirPath = join(root, "src", "aqua-dependencies");
-
-const rustToolchainPath = join(root, "..", "..", "..", "rust-toolchain.toml");
-const toolchainFileContent = await readFile(rustToolchainPath, "utf-8");
-
-await writeFile(
-  rustToolchainPath,
-  toolchainFileContent.replace(/channel = "(.*)"/, () => {
-    return `channel = "${versions["rust-toolchain"]}"`;
-  }),
-  "utf-8",
-);
-
-await mkdir(aquaDependenciesDirPath, { recursive: true });
-
-await writeFile(
-  join(aquaDependenciesDirPath, "package.json"),
-  JSON.stringify({ dependencies: versions.npm }, null, 2),
-  "utf-8",
-);
-
 const VERSIONS_DIR_PATH = join(root, "src", "versions");
-const SRC_LIB_PATH = join(root, "src", "lib");
-const COMPILED_AQUA_PATH = join(SRC_LIB_PATH, "compiled-aqua");
-
-const COMPILED_AQUA_WITH_TRACING_PATH = join(
-  SRC_LIB_PATH,
-  "compiled-aqua-with-tracing",
-);
-
-const COMPILED_INSTALLATION_SPELL_AQUA_PATH = join(
-  COMPILED_AQUA_PATH,
-  "installation-spell",
-);
-
-const COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH = join(
-  COMPILED_AQUA_WITH_TRACING_PATH,
-  "installation-spell",
-);
-
-const CLI_AQUA_DEPENDENCIES_DIR_PATH = resolve(
-  join(root, "src", "cli-aqua-dependencies"),
-);
-
-const INSTALLATION_SPELL_DIR_PATH = join(
-  CLI_AQUA_DEPENDENCIES_DIR_PATH,
-  "node_modules",
-  "@fluencelabs",
-  "installation-spell",
-);
-
-const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
-  INSTALLATION_SPELL_DIR_PATH,
-  "src",
-  "aqua",
-);
-
-const imports = await gatherImportsFromNpm({
-  npmProjectDirPath: CLI_AQUA_DEPENDENCIES_DIR_PATH,
-  aquaToCompileDirPath: INSTALLATION_SPELL_DIR_PATH,
-});
-
-async function compileInstallationSpellAqua(tracing = false) {
-  return Promise.all(
-    ["upload", "cli", "deal_spell", "files", "deploy"].map(async (fileName) => {
-      const filePath = join(
-        INSTALLATION_SPELL_AQUA_DIR_PATH,
-        `${fileName}.aqua`,
-      );
-
-      const compilationResult = await compileFromPath({
-        filePath,
-        imports,
-        tracing,
-      });
-
-      if (compilationResult.errors.length !== 0) {
-        throw new Error(compilationResult.errors.join("\n\n"));
-      }
-
-      const { sources } = (await aquaToJs(compilationResult, "ts")) ?? {};
-
-      if (sources === undefined) {
-        throw new Error(
-          `File ${filePath} no longer exposes anything. Please expose something from it or remove it from compilation`,
-        );
-      }
-
-      await writeFile(
-        join(
-          tracing
-            ? COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH
-            : COMPILED_INSTALLATION_SPELL_AQUA_PATH,
-          `${fileName}.ts`,
-        ),
-        sources,
-        "utf-8",
-      );
-    }),
-  );
-}
 
 await rm(VERSIONS_DIR_PATH, { recursive: true, force: true });
 await mkdir(VERSIONS_DIR_PATH, { recursive: true });
 await cp("package.json", join(VERSIONS_DIR_PATH, "cli.package.json"));
 
 await cp(
-  join(
-    WORKSPACE_NODE_MODULES_PATH,
-    "@fluencelabs",
-    "js-client",
-    "package.json",
-  ),
-  join(VERSIONS_DIR_PATH, "js-client.package.json"),
-);
-
-await cp(
   resolve(root, "..", "..", "common", "src", "index.ts"),
   resolve(root, "src", "common.ts"),
 );
-
-await rm(COMPILED_AQUA_PATH, { recursive: true, force: true });
-await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_PATH, { recursive: true });
-
-await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH, {
-  recursive: true,
-});
-
-await Promise.all([
-  compileInstallationSpellAqua(),
-  compileInstallationSpellAqua(true),
-]);

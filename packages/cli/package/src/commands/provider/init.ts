@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { writeFile } from "node:fs/promises";
+
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
@@ -28,8 +30,10 @@ import {
   CHAIN_FLAGS,
   NOXES_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
+  RECOMMENDED_GITIGNORE_CONTENT,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { getGitignorePath } from "../../lib/paths.js";
 
 export default class Init extends BaseCommand<typeof Init> {
   static override description = `Init provider config. Creates a ${PROVIDER_CONFIG_FULL_FILE_NAME} file`;
@@ -56,6 +60,8 @@ export default class Init extends BaseCommand<typeof Init> {
     }
 
     providerConfig = await initNewProviderConfig(flags);
+
+    await writeFile(getGitignorePath(), RECOMMENDED_GITIGNORE_CONTENT, "utf8");
 
     commandObj.logToStderr(
       `Provider config is at ${color.yellow(providerConfig.$getPath())}`,

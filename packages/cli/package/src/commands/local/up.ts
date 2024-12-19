@@ -30,8 +30,6 @@ import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { setChainFlags } from "../../lib/chainFlags.js";
 import { ensureDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env/env.js";
-import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
-import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   DOCKER_COMPOSE_FLAGS,
   OFFER_FLAG_NAME,
@@ -43,7 +41,6 @@ import {
   type FluenceEnv,
   PRIV_KEY_FLAG_NAME,
 } from "../../lib/const.js";
-import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
@@ -125,17 +122,6 @@ export default class Up extends BaseCommand<typeof Up> {
       try {
         await rm(await ensureProviderArtifactsConfigPath());
       } catch {}
-
-      const workersConfig = await initNewWorkersConfig();
-
-      if (workersConfig.deals !== undefined) {
-        delete workersConfig.deals.local;
-        await workersConfig.$commit();
-
-        if ((await initFluenceConfig()) !== null) {
-          await ensureAquaFileWithWorkerInfo();
-        }
-      }
     }
 
     await ensureDockerComposeConfig();

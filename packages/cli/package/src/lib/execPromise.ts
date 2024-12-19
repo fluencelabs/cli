@@ -21,7 +21,7 @@ import { join } from "path";
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/errors";
 
-import { CLI_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
+import { CLI_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { numToStr, bufferToStr } from "./helpers/typesafeStringify.js";
@@ -150,22 +150,6 @@ export const execPromise = async ({
 
       if (execTimeout !== false) {
         clearTimeout(execTimeout);
-      }
-
-      if (
-        stderr.includes("linker `cc` not found") ||
-        stderr.includes("linking with `cc` failed")
-      ) {
-        const expectedErrorMessage = `\n${color.yellow(
-          MARINE_CARGO_DEPENDENCY,
-        )} requires ${color.yellow(
-          "build-essential",
-        )} to be installed. Please install it and try again.\nOn debian-based systems (e.g. Ubuntu) you can install it using this command:\n\n${color.yellow(
-          "sudo apt install build-essential",
-        )}\n`;
-
-        res(new CLIError(expectedErrorMessage));
-        return;
       }
 
       if (code !== 0) {

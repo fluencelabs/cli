@@ -30,7 +30,6 @@ import { commandObj, isInteractive } from "../../../commandObj.js";
 import {
   DEFAULT_OFFER_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
-  FS_OPTIONS,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
   TOML_EXT,
@@ -511,7 +510,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         await writeFile(
           await ensureFluenceSecretsFilePath(computePeerName),
           secretKey,
-          FS_OPTIONS,
+          "utf8",
         );
 
         const overridenCCPConfig = resolveCCPConfigYAML(
@@ -522,7 +521,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         await writeFile(
           join(ccpConfigsDir, getCCPConfigTomlName(computePeerName)),
           stringify(ccpConfigYAMLToConfigToml(overridenCCPConfig)),
-          FS_OPTIONS,
+          "utf8",
         );
 
         const overriddenNoxConfig = await resolveNoxConfigYAML(
@@ -540,7 +539,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
               env,
             ),
           ),
-          FS_OPTIONS,
+          "utf8",
         );
 
         return {

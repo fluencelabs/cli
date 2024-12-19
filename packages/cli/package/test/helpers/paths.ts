@@ -17,53 +17,9 @@
 
 import { join } from "node:path";
 
-import type { Template } from "../../src/lib/const.js";
-import {
-  getServicesDir,
-  getSpellsDir,
-  getSrcPath,
-} from "../../src/lib/paths.js";
-
-export const TEST_AQUA_DIR_PATH = join("test", "_resources", "aqua");
-export const pathToTheTemplateWhereLocalEnvironmentIsSpunUp = join(
+export const initializedTemplatePath = join(
   "test",
   "tmp",
   "templates",
-  "quickstart",
+  "provider",
 );
-
-export function getServiceDirPath(cwd: string, serviceName: string) {
-  return join(getServicesDir(cwd), serviceName);
-}
-
-export function getModuleDirPath(
-  cwd: string,
-  moduleName: string,
-  serviceName?: string,
-) {
-  if (serviceName === undefined) {
-    return join(getSrcPath(cwd), "modules", moduleName);
-  }
-
-  return join(getServiceDirPath(cwd, serviceName), moduleName);
-}
-
-export function getMainRsPath(
-  cwd: string,
-  moduleName: string,
-  serviceName?: string,
-) {
-  return join(getModuleDirPath(cwd, moduleName, serviceName), "src", "main.rs");
-}
-
-export function getSpellAquaPath(cwd: string, spellName: string) {
-  return join(getSrcPath(cwd), "spells", spellName, "spell.aqua");
-}
-
-export function getSpellDirPath(cwd: string, spellName: string) {
-  return join(getSpellsDir(cwd), spellName);
-}
-
-export const getInitializedTemplatePath = (template: Template) => {
-  return join("test", "tmp", "templates", template);
-};

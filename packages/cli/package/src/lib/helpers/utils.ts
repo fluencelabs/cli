@@ -30,24 +30,6 @@ export function commaSepStrToArr(commaSepStr: string) {
     });
 }
 
-function comment(commentToken: string) {
-  return (text: string): string => {
-    return text
-      .split("\n")
-      .map((line) => {
-        return line === ""
-          ? ""
-          : line.replaceAll(/(^|\n)\s*/g, (spaces) => {
-              return `${spaces}${commentToken} `;
-            });
-      })
-      .join("\n");
-  };
-}
-
-export const jsComment = comment("//");
-export const aquaComment = comment("--");
-
 function flagToArg(
   flagName: string,
   flagValue: string | number | boolean | undefined,
@@ -95,9 +77,6 @@ export function removeProperties<T>(
     }),
   );
 }
-
-export const LOGS_RESOLVE_SUBNET_ERROR_START = `Failed to resolve subnet:`;
-export const LOGS_GET_ERROR_START = `Failed to get logs:`;
 
 export function splitErrorsAndResults<T, U, V>(
   array: Array<T>,

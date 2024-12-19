@@ -15,75 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cp, rm } from "fs/promises";
-import { join } from "path";
+import { rm, mkdir } from "fs/promises";
 
-import {
-  DOT_FLUENCE_DIR_NAME,
-  PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
-  SECRETS_DIR_NAME,
-  type Template,
-  TEMPLATES,
-  TMP_DIR_NAME,
-} from "../../src/lib/const.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
-import { fluenceEnv, NO_PROJECT_TEST_NAME } from "../helpers/constants.js";
-import {
-  getInitializedTemplatePath,
-  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-} from "../helpers/paths.js";
+import { fluenceEnv } from "../helpers/constants.js";
+import { initializedTemplatePath } from "../helpers/paths.js";
 
-const [, ...restTemplatePaths] = await Promise.all(
-  TEMPLATES.map((template) => {
-    return initFirstTime(template);
-  }),
-);
+await rm(initializedTemplatePath, { force: true, recursive: true });
+await mkdir(initializedTemplatePath, { recursive: true });
 
-const secretsPath = join(
-  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-  DOT_FLUENCE_DIR_NAME,
-  SECRETS_DIR_NAME,
-);
-
-const secretsConfigPath = join(
-  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-  DOT_FLUENCE_DIR_NAME,
-  PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
-);
-
-await Promise.all(
-  [...restTemplatePaths, join(TMP_DIR_NAME, NO_PROJECT_TEST_NAME)].flatMap(
-    (path) => {
-      return [
-        cp(secretsPath, join(path, DOT_FLUENCE_DIR_NAME, SECRETS_DIR_NAME), {
-          force: true,
-          recursive: true,
-        }),
-        cp(
-          secretsConfigPath,
-          join(
-            path,
-            DOT_FLUENCE_DIR_NAME,
-            PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
-          ),
-          {
-            force: true,
-            recursive: true,
-          },
-        ),
-      ];
-    },
-  ),
-);
-
-async function initFirstTime(template: Template) {
-  const templatePath = getInitializedTemplatePath(template);
-  await rm(templatePath, { force: true, recursive: true });
-
-  await fluence({
-    args: ["init", templatePath],
-    flags: { template, env: fluenceEnv, "no-input": true },
-  });
-
-  return templatePath;
-}
+await fluence({
+  args: ["provider", "init"],
+  flags: { env: fluenceEnv, "no-input": true },
+  cwd: initializedTemplatePath,
+});

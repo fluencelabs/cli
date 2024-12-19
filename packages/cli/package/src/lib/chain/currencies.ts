@@ -25,7 +25,7 @@ export async function fltParse(value: string): Promise<bigint> {
   return parseEther(value);
 }
 
-export async function fltFormat(value: bigint): Promise<string> {
+async function fltFormat(value: bigint): Promise<string> {
   const { formatEther } = await import("ethers");
   return formatEther(value);
 }
@@ -50,7 +50,7 @@ export async function ptFormatWithSymbol(value: bigint): Promise<string> {
 
 let ptDecimalsPromise: Promise<number> | undefined;
 
-export async function getPtDecimals() {
+async function getPtDecimals() {
   if (ptDecimalsPromise === undefined) {
     ptDecimalsPromise = (async () => {
       const { id } = await import("ethers");

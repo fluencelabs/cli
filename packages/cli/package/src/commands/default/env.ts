@@ -20,11 +20,8 @@ import { color } from "@oclif/color";
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env/env.js";
-import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { ENV_ARG } from "../../lib/const.js";
-import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { updateRelaysJSON } from "../../lib/multiaddres.js";
 import { ensureValidFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Env extends BaseCommand<typeof Env> {
@@ -39,11 +36,6 @@ export default class Env extends BaseCommand<typeof Env> {
     const fluenceEnv = await ensureValidFluenceEnv(args.ENV);
     envConfig.fluenceEnv = fluenceEnv;
     await envConfig.$commit();
-
-    if ((await initFluenceConfig()) !== null) {
-      await updateRelaysJSON();
-      await ensureAquaFileWithWorkerInfo();
-    }
 
     commandObj.log(
       `Successfully set default fluence environment to ${color.yellow(

@@ -15,11 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-declare module "node_modules-path" {
-  export = node_modules;
-  declare function node_modules(): string;
-}
-
 declare module "countly-sdk-nodejs" {
   export const device_id: string | undefined;
   function init(config: unknown): void;
