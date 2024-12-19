@@ -11,6 +11,7 @@ Defines project user's preferences
 | `chainId`       | number                | No       | Chain ID to use                                                                                |
 | `deployment`    | [object](#deployment) | No       | Deployed contract address overrides                                                            |
 | `fluenceEnv`    | string                | No       | Fluence environment to connect to Possible values are: `testnet`, `mainnet`, `stage`, `local`. |
+| `ipfsGateway`   | string                | No       | IPFS gateway URL to use                                                                        |
 | `relays`        | string[]              | No       | List of custom relay multiaddresses to use when connecting to Fluence network                  |
 | `rpcUrl`        | string                | No       | RPC URL to use                                                                                 |
 | `subgraphUrl`   | string                | No       | Subgraph URL to use                                                                            |

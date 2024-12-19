@@ -23,12 +23,12 @@ import { getProviderInfo } from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initNewProviderArtifactsConfig } from "../../lib/configs/project/providerArtifacts/providerArtifacts.js";
 import {
-  NOX_NAMES_FLAG,
   CHAIN_FLAGS,
   JSON_FLAG,
   ADDRESS_FLAG,
   ADDRESS_FLAG_NAME,
   PRIV_KEY_FLAG_NAME,
+  PEER_AND_OFFER_NAMES_FLAGS,
 } from "../../lib/const.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -40,7 +40,7 @@ export default class Info extends BaseCommand<typeof Info> {
   static override description = `Print nox signing wallets and peer ids${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
-    ...NOX_NAMES_FLAG,
+    ...PEER_AND_OFFER_NAMES_FLAGS,
     ...JSON_FLAG,
     ...ADDRESS_FLAG,
   };

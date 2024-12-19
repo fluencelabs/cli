@@ -22,8 +22,7 @@ import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import {
   CHAIN_FLAGS,
   FLT_SYMBOL,
-  NOX_NAMES_FLAG,
-  OFFER_FLAG,
+  PEER_AND_OFFER_NAMES_FLAGS,
 } from "../../lib/const.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -35,8 +34,7 @@ export default class TokensDistribute extends BaseCommand<
   static override description = `Distribute ${FLT_SYMBOL} tokens to noxes${aliasesText.apply(this)}`;
   static override flags = {
     ...CHAIN_FLAGS,
-    ...NOX_NAMES_FLAG,
-    ...OFFER_FLAG,
+    ...PEER_AND_OFFER_NAMES_FLAGS,
     amount: Flags.string({
       description: `Amount of ${FLT_SYMBOL} tokens to distribute to noxes`,
     }),

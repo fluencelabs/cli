@@ -26,8 +26,8 @@ import { commandObj } from "../commandObj.js";
 import { initProviderConfig } from "../configs/project/provider/provider.js";
 import {
   CLI_NAME,
-  NOX_NAMES_FLAG_NAME,
-  OFFER_FLAG_NAME,
+  PEER_NAMES_FLAG_NAME,
+  type PeerAndOfferNameFlags,
   CC_IDS_FLAG_NAME,
   FINISH_COMMITMENT_FLAG_NAME,
 } from "../const.js";
@@ -215,9 +215,7 @@ async function getCCs(
   return [firstCCInfo, ...restCCInfos];
 }
 
-export type CCFlags = {
-  [NOX_NAMES_FLAG_NAME]?: string | undefined;
-  [OFFER_FLAG_NAME]?: string | undefined;
+export type CCFlags = PeerAndOfferNameFlags & {
   [CC_IDS_FLAG_NAME]?: string | undefined;
 };
 
@@ -229,7 +227,7 @@ async function getCommitmentsIds(
   }
 
   if (
-    flags[NOX_NAMES_FLAG_NAME] === undefined &&
+    flags[PEER_NAMES_FLAG_NAME] === undefined &&
     (await initProviderConfig()) === null
   ) {
     return getCCs(
@@ -248,10 +246,7 @@ async function getCommitmentsIds(
   return getComputePeersWithCCIds(await resolveComputePeersByNames(flags));
 }
 
-export async function createCommitments(flags: {
-  [NOX_NAMES_FLAG_NAME]?: string | undefined;
-  [OFFER_FLAG_NAME]?: string | undefined;
-}) {
+export async function createCommitments(flags: PeerAndOfferNameFlags) {
   const computePeers = await resolveComputePeersByNames(flags);
   const { contracts } = await getContracts();
   const precision = await contracts.diamond.precision();
@@ -400,7 +395,7 @@ export async function createCommitments(flags: {
   commandObj.logToStderr(
     stringifyDetailedCommitmentsInfo(
       await getDetailedCommitmentsInfoGroupedByStatus({
-        "nox-names": computePeers
+        [PEER_NAMES_FLAG_NAME]: computePeers
           .map(({ name }) => {
             return name;
           })

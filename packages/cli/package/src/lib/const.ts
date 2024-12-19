@@ -144,20 +144,20 @@ export const ENV_ARG = {
 
 export const ALL_FLAG_VALUE = "all";
 
-export const NOX_NAMES_FLAG_NAME = "nox-names";
+export const PEER_NAMES_FLAG_NAME = "peer-names";
 
 const NOX_NAMES_FLAG_CONFIG = {
-  description: `Comma-separated names of noxes from ${PROVIDER_CONFIG_FULL_FILE_NAME}. To use all of your noxes: --${NOX_NAMES_FLAG_NAME} ${ALL_FLAG_VALUE}`,
-  helpValue: "<nox-1,nox-2>",
+  description: `Comma-separated names of peers from ${PROVIDER_CONFIG_FULL_FILE_NAME}. To use all of your peers: --${PEER_NAMES_FLAG_NAME} ${ALL_FLAG_VALUE}`,
+  helpValue: "<peer-1,peer-2>",
 };
 
-export const NOX_NAMES_FLAG = {
-  [NOX_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
+const PEER_NAMES_FLAG = {
+  [PEER_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
 };
 
-export const NOXES_FLAG = {
-  noxes: Flags.integer({
-    description: `Number of Compute Peers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
+export const SERVERS_FLAG = {
+  servers: Flags.integer({
+    description: `Number of servers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
   }),
 };
 
@@ -183,6 +183,16 @@ export const OFFER_FLAGS = {
     helpValue: "<id-1,id-2>",
     exclusive: [OFFER_FLAG_NAME],
   }),
+};
+
+export const PEER_AND_OFFER_NAMES_FLAGS = {
+  ...PEER_NAMES_FLAG,
+  ...OFFER_FLAG,
+};
+
+export type PeerAndOfferNameFlags = {
+  [PEER_NAMES_FLAG_NAME]?: string | undefined;
+  [OFFER_FLAG_NAME]?: string | undefined;
 };
 
 export const PRIV_KEY_FLAG_NAME = "priv-key";
@@ -227,13 +237,13 @@ export const DOCKER_COMPOSE_FLAGS = {
 export const CC_IDS_FLAG_NAME = "cc-ids";
 
 export const CC_FLAGS = {
-  [NOX_NAMES_FLAG_NAME]: Flags.string({
+  [PEER_NAMES_FLAG_NAME]: Flags.string({
     ...NOX_NAMES_FLAG_CONFIG,
     exclusive: [CC_IDS_FLAG_NAME],
   }),
   [CC_IDS_FLAG_NAME]: Flags.string({
     description: "Comma separated capacity commitment IDs",
-    exclusive: [NOX_NAMES_FLAG_NAME],
+    exclusive: [PEER_NAMES_FLAG_NAME],
   }),
   ...OFFER_FLAG,
 };
@@ -251,6 +261,8 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
+.terraform
+.terraform.lock.hcl
 `;
 export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";

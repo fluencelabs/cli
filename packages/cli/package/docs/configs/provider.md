@@ -110,11 +110,13 @@ Defines a compute peer
 
 #### Properties
 
-| Property       | Type           | Required | Description                                                                                     |
-|----------------|----------------|----------|-------------------------------------------------------------------------------------------------|
-| `computeUnits` | integer        | **Yes**  | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
-| `ccp`          | [object](#ccp) | No       | Configuration to pass to the Capacity Commitment Prover                                         |
-| `nox`          | [object](#nox) | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
+| Property         | Type                 | Required | Description                                                                                     |
+|------------------|----------------------|----------|-------------------------------------------------------------------------------------------------|
+| `computeUnits`   | integer              | **Yes**  | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
+| `ccp`            | [object](#ccp)       | No       | Configuration to pass to the Capacity Commitment Prover                                         |
+| `kubeconfigPath` | string               | No       | Path to the kubeconfig file                                                                     |
+| `nox`            | [object](#nox)       | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
+| `resources`      | [object](#resources) | No       | Resources configuration                                                                         |
 
 #### ccp
 
@@ -365,6 +367,31 @@ iptables-mapped port range from Host to VM
 |----------|---------|----------|---------------------------------------------------------|
 | `end`    | integer | No       | End of the iptables-mapped port range from Host to VM   |
 | `start`  | integer | No       | Start of the iptables-mapped port range from Host to VM |
+
+#### resources
+
+Resources configuration
+
+##### Properties
+
+| Property | Type          | Required | Description      |
+|----------|---------------|----------|------------------|
+| `ip`     | [object](#ip) | **Yes**  | IP configuration |
+
+##### ip
+
+IP configuration
+
+###### Properties
+
+| Property | Type                | Required | Description |
+|----------|---------------------|----------|-------------|
+| `supply` | [object](#supply)[] | **Yes**  | IP supply   |
+
+###### supply
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
 
 ## nox
 

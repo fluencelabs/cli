@@ -66,7 +66,7 @@ describe("provider tests", () => {
       providerConfig.capacityCommitments = Object.fromEntries(
         Object.values(providerConfig.capacityCommitments).map((config, i) => {
           return [
-            `nox-${numToStr(i)}`,
+            `peer-${numToStr(i)}`,
             { ...config, duration: `${numToStr(CC_DURATION_SECONDS)} seconds` },
           ] as const;
         }),

@@ -35,20 +35,21 @@ import {
   ALL_FLAG_VALUE,
   MAX_TOKEN_AMOUNT_KEYWORD,
   CLI_NAME,
+  PEER_NAMES_FLAG_NAME,
 } from "../../lib/const.js";
 import { stringifyUnknown } from "../../lib/helpers/stringifyUnknown.js";
 import { pathExists } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
   getFluenceSecretsDir,
-  ensureFluenceConfigsDir,
   ensureProviderSecretsConfigPath,
   getFluenceBackupsDir,
   ensureDir,
+  ensureK8sManifestsDir,
 } from "../../lib/paths.js";
 import { confirm } from "../../lib/prompt.js";
 
-const RESET_NOX_SECRETS_FLAG_NAME = "reset-nox-secrets";
+const RESET_PEER_SECRETS_FLAG_NAME = "reset-peer-secrets";
 const NO_WITHDRAW_FLAG_NAME = "no-withdraw";
 
 export default class Gen extends BaseCommand<typeof Gen> {
@@ -56,12 +57,12 @@ export default class Gen extends BaseCommand<typeof Gen> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...CHAIN_FLAGS,
-    [RESET_NOX_SECRETS_FLAG_NAME]: Flags.boolean({
-      description: `Withdraw remaining tokens from your noxes, backup nox secrets from ${DOT_FLUENCE_DIR_NAME}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME} and ${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME} (if they exist) to ${DOT_FLUENCE_DIR_NAME}/${BACKUPS_DIR_NAME} and generate new ones`,
+    [RESET_PEER_SECRETS_FLAG_NAME]: Flags.boolean({
+      description: `Withdraw remaining tokens from your peers, backup peer secrets from ${DOT_FLUENCE_DIR_NAME}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME} and ${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME} (if they exist) to ${DOT_FLUENCE_DIR_NAME}/${BACKUPS_DIR_NAME} and generate new ones`,
       default: false,
     }),
     [NO_WITHDRAW_FLAG_NAME]: Flags.boolean({
-      description: `Is used only when --${RESET_NOX_SECRETS_FLAG_NAME} flag is present. Will not withdraw tokens from noxes (if you don't need it or it fails for some reason)`,
+      description: `Is used only when --${RESET_PEER_SECRETS_FLAG_NAME} flag is present. Will not withdraw tokens from noxes (if you don't need it or it fails for some reason)`,
       default: false,
     }),
   };
@@ -76,10 +77,10 @@ export default class Gen extends BaseCommand<typeof Gen> {
     );
 
     if (
-      flags[RESET_NOX_SECRETS_FLAG_NAME] &&
+      flags[RESET_PEER_SECRETS_FLAG_NAME] &&
       (await confirm({
         message: `Are you sure you want to backup nox secrets ${color.yellow(providerSecretsConfigPath)} and ${color.yellow(fluenceSecretsDir)} (if they exist) to ${color.yellow(backupDirPath)} and generate new ones`,
-        default: flags[RESET_NOX_SECRETS_FLAG_NAME],
+        default: flags[RESET_PEER_SECRETS_FLAG_NAME],
       }))
     ) {
       if (
@@ -92,7 +93,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
       ) {
         try {
           await withdrawFromNox({
-            "nox-names": ALL_FLAG_VALUE,
+            [PEER_NAMES_FLAG_NAME]: ALL_FLAG_VALUE,
             amount: MAX_TOKEN_AMOUNT_KEYWORD,
           });
         } catch (e) {
@@ -112,7 +113,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
     await ensureComputerPeerConfigs();
 
     commandObj.logToStderr(
-      `Config.toml files for nox are generated at:\n${await ensureFluenceConfigsDir()}\n\nsecrets are generated at:\n${getFluenceSecretsDir()}`,
+      `Secrets are generated at:\n${getFluenceSecretsDir()}\n\nManifest files are generated at:\n${await ensureK8sManifestsDir()}`,
     );
   }
 }
