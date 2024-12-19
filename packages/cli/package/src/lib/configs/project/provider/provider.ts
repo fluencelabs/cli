@@ -19,7 +19,6 @@ import { writeFile } from "fs/promises";
 import { join } from "path";
 
 import { type JsonMap } from "@iarna/toml";
-import kebabCase from "lodash-es/kebabCase.js";
 import mapKeys from "lodash-es/mapKeys.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
@@ -59,7 +58,6 @@ import {
   getProviderConfigPath,
   getFluenceDir,
   ensureFluenceSecretsFilePath,
-  ensureFluenceCCPConfigsDir,
   ensureK8sManifestsDir,
 } from "../../../paths.js";
 import { input } from "../../../prompt.js";
@@ -266,12 +264,6 @@ function noxConfigYAMLToConfigToml(
   }) as JsonMap;
 }
 
-function ccpConfigYAMLToConfigToml(config: CCPConfigYAML) {
-  // Would be too hard to properly type this
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return camelCaseKeysToKebabCase(config) as JsonMap;
-}
-
 function camelCaseToDifferentCase(caseFn: (str: string) => string) {
   const camelCaseToDifferentCaseImpl = (val: unknown): unknown => {
     if (typeof val === "object" && val !== null) {
@@ -300,10 +292,6 @@ function camelCaseKeysToSnakeCase(val: unknown): unknown {
   return camelCaseToDifferentCase(snakeCase)(val);
 }
 
-function camelCaseKeysToKebabCase(val: unknown): unknown {
-  return camelCaseToDifferentCase(kebabCase)(val);
-}
-
 function getDefaultCCPConfigYAML(): CCPConfigYAML {
   return {
     rpcEndpoint: {
@@ -323,10 +311,6 @@ function getDefaultCCPConfigYAML(): CCPConfigYAML {
 }
 
 export function getConfigTomlName(noxName: string) {
-  return `${noxName}_Config.${TOML_EXT}`;
-}
-
-function getCCPConfigTomlName(noxName: string) {
   return `${noxName}_Config.${TOML_EXT}`;
 }
 
@@ -433,7 +417,6 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
 
   const { stringify } = await import("@iarna/toml");
   const configsDir = await ensureFluenceConfigsDir();
-  const ccpConfigsDir = await ensureFluenceCCPConfigsDir();
   const env = await ensureChainEnv();
 
   if (env === "local") {
@@ -505,12 +488,6 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         const overridenCCPConfig = resolveCCPConfigYAML(
           providerConfig.ccp,
           computePeer.ccp,
-        );
-
-        await writeFile(
-          join(ccpConfigsDir, getCCPConfigTomlName(computePeerName)),
-          stringify(ccpConfigYAMLToConfigToml(overridenCCPConfig)),
-          "utf8",
         );
 
         const overriddenNoxConfig = await resolveNoxConfigYAML(

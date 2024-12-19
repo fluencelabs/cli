@@ -29,7 +29,6 @@ import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
-  CCP_CONFIGS_DIR_NAME,
   BACKUPS_DIR_NAME,
   ENV_CONFIG_FULL_FILE_NAME,
   USER_CONFIG_FULL_FILE_NAME,
@@ -167,8 +166,4 @@ export const ensureFluenceSecretsFilePath = async (
 
 export async function ensureFluenceConfigsDir(): Promise<string> {
   return ensureDir(join(getFluenceDir(), CONFIGS_DIR_NAME));
-}
-
-export async function ensureFluenceCCPConfigsDir(): Promise<string> {
-  return ensureDir(join(getFluenceDir(), CCP_CONFIGS_DIR_NAME));
 }
