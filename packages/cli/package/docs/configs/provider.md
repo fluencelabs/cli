@@ -390,6 +390,8 @@ IP configuration
 
 ###### supply
 
+Either specify only a `start` property (if you want a single IP) or `start` and `end` properties (if you want a range) or `cidr` property (if you want a CIDR notation)
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 
