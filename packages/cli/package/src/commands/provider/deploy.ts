@@ -15,15 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import assert from "node:assert";
 import { readFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
 
 import type k8s from "@kubernetes/client-node";
+import { color } from "@oclif/color";
 
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { ensureReadonlyProviderConfig } from "../../lib/configs/project/provider/provider.js";
 import { CHAIN_FLAGS, PEER_AND_OFFER_NAMES_FLAGS } from "../../lib/const.js";
+import { splitErrorsAndResults } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { projectRootDir } from "../../lib/paths.js";
 import { resolveComputePeersByNames } from "../../lib/resolveComputePeersByNames.js";
@@ -39,7 +41,35 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     const { flags } = await initCli(this, await this.parse(Deploy));
     const computePeers = await resolveComputePeersByNames(flags);
 
-    for (const { kubeconfigPath, name, manifestPath } of computePeers) {
+    const [invalidPeers, peers] = splitErrorsAndResults(
+      computePeers,
+      ({ kubeconfigPath, ipSupplies, name, ...restPeer }) => {
+        return kubeconfigPath === undefined || ipSupplies.length === 0
+          ? {
+              error: [
+                kubeconfigPath === undefined &&
+                  `computePeer ${color.yellow(name)} must have a ${color.yellow("kubeconfigPath")} property`,
+                ipSupplies.length === 0 &&
+                  `computePeer ${color.yellow(name)} must have a ${color.yellow("resources.ip.supply")} property, which must be a non-empty array`,
+              ]
+                .filter((err) => {
+                  return typeof err === "string";
+                })
+                .join("\n"),
+            }
+          : { result: { name, ipSupplies, kubeconfigPath, ...restPeer } };
+      },
+    );
+
+    if (invalidPeers.length > 0) {
+      const providerConfig = await ensureReadonlyProviderConfig();
+
+      commandObj.error(
+        `Invalid config at ${providerConfig.$getPath()}:\n${invalidPeers.join("\n")}`,
+      );
+    }
+
+    for (const { kubeconfigPath, name, manifestPath } of peers) {
       await kubectlApply(kubeconfigPath, manifestPath, name);
     }
   }
@@ -54,15 +84,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
  * @return Array of resources created
  */
 export async function kubectlApply(
-  kubeconfigPath: string | undefined,
+  kubeconfigPath: string,
   specPath: string,
   peerName: string,
 ): Promise<k8s.KubernetesObject[]> {
-  assert(
-    typeof kubeconfigPath === "string",
-    `Kubeconfig path is required for  computePeer ${peerName}`,
-  );
-
   const kubeconfigAbsolutePath = isAbsolute(kubeconfigPath)
     ? kubeconfigPath
     : resolve(projectRootDir, kubeconfigPath);

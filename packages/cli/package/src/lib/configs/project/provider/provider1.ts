@@ -653,6 +653,8 @@ type IPSupply =
 
 const supplySchema = {
   type: "object",
+  description:
+    "Either specify only a `start` property (if you want a single IP) or `start` and `end` properties (if you want a range) or `cidr` property (if you want a CIDR notation)",
   oneOf: [
     {
       additionalProperties: false,
@@ -701,6 +703,7 @@ const ipSchema = {
       type: "array",
       items: supplySchema,
       description: "IP supply",
+      minItems: 1,
     },
   },
   required: ["supply"],

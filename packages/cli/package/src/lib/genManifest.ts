@@ -23,7 +23,7 @@ const PRIVATE_KEY_SECRET_REF = "private-key-secret";
 
 type GenManifestsArgs = {
   chainPrivateKey: string;
-  IPSupplies: IPSupplies;
+  ipSupplies: IPSupplies;
   httpEndpoint: string;
   wsEndpoint: string;
   ipfsGatewayEndpoint: string;
@@ -34,7 +34,7 @@ type GenManifestsArgs = {
 
 export function genManifest({
   chainPrivateKey,
-  IPSupplies,
+  ipSupplies,
   httpEndpoint,
   wsEndpoint,
   ipfsGatewayEndpoint,
@@ -81,7 +81,7 @@ ${stringify({
           {
             op: "add",
             path: "/spec/blocks",
-            value: IPSupplies,
+            value: ipSupplies,
           },
         ]),
         target: {
