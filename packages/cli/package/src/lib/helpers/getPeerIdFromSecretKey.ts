@@ -18,7 +18,15 @@
 import { base64ToUint8Array } from "../keyPairs.js";
 
 export async function getPeerIdFromSecretKey(secretKey: string) {
-  const { KeyPair } = await import("@fluencelabs/js-client");
-  const keyPair = await KeyPair.fromEd25519SK(base64ToUint8Array(secretKey));
-  return keyPair.getPeerId();
+  const { generateKeyPairFromSeed } = await import("@libp2p/crypto/keys");
+  const { createFromPrivKey } = await import("@libp2p/peer-id-factory");
+
+  const key = await generateKeyPairFromSeed(
+    "Ed25519",
+    base64ToUint8Array(secretKey),
+    256,
+  );
+
+  // eslint-disable-next-line no-restricted-syntax
+  return (await createFromPrivKey(key)).toString();
 }

@@ -41,10 +41,11 @@ export async function genSecretKeyOrReturnExisting(name: string) {
 }
 
 async function genSecretKeyString(): Promise<string> {
-  const { KeyPair } = await import("@fluencelabs/js-client");
-  const keyPair = await KeyPair.randomEd25519();
-  const privateKey = keyPair.toEd25519PrivateKey();
-  return bufferToBase64(Buffer.from(privateKey));
+  const { generateKeyPair } = await import("@libp2p/crypto/keys");
+
+  return bufferToBase64(
+    Buffer.from((await generateKeyPair("Ed25519")).marshal().subarray(0, 32)),
+  );
 }
 
 export function base64ToUint8Array(base64: string) {
