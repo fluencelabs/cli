@@ -15,4 +15,4 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { run } from "@oclif/core";
+import "@total-typescript/ts-reset";

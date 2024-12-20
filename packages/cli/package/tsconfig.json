@@ -10,6 +10,6 @@
     "verbatimModuleSyntax": true
   },
   "include": ["src/**/*"],
-  "files": ["src/environment.d.ts", "src/types.d.ts"],
+  "files": ["src/environment.d.ts", "src/types.d.ts", "src/reset.d.ts"],
   "types": ["node"]
 }

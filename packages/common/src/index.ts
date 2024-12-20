@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import "@total-typescript/ts-reset";
 import type { TransactionRequest } from "ethers";
 
 export const DEFAULT_PUBLIC_FLUENCE_ENV = "testnet";

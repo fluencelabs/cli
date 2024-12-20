@@ -28,7 +28,6 @@ import ReactDOM from "react-dom/client";
 import { WagmiProvider, deepEqual } from "wagmi";
 
 import { App } from "./App.jsx";
-import "@total-typescript/ts-reset";
 import "./index.css";
 
 globalThis.Buffer = Buffer;
