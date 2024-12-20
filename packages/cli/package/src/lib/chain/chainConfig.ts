@@ -17,6 +17,7 @@
 
 import capitalize from "lodash-es/capitalize.js";
 
+import type { ChainENV } from "../../common.js";
 import { commandObj } from "../commandObj.js";
 import { initEnvConfig } from "../configs/project/env/env.js";
 import { dbg } from "../dbg.js";
@@ -73,6 +74,38 @@ export async function getRpcUrl() {
   }
 
   return rpcUrlPromise;
+}
+
+let ipfsGatewayPromise: Promise<string> | undefined;
+
+const IPFS_GATEWAYS: Record<ChainENV, string> = {
+  local: "https://ipfs-gateway.fluence.dev",
+  testnet: "https://ipfs-gateway.fluence.dev",
+  mainnet: "https://ipfs-gateway.fluence.dev",
+  stage: "https://ipfs-gateway.fluence.dev",
+};
+
+export async function getIpfsGateway() {
+  if (ipfsGatewayPromise === undefined) {
+    ipfsGatewayPromise = (async () => {
+      const chainEnv = await ensureChainEnv();
+      let ipfsGateway = IPFS_GATEWAYS[chainEnv];
+      const envConfig = await initEnvConfig();
+
+      if (envConfig?.ipfsGateway !== undefined) {
+        commandObj.logToStderr(
+          `Using custom IPFS Gateway: ${envConfig.ipfsGateway} from ${envConfig.$getPath()}`,
+        );
+
+        ipfsGateway = envConfig.ipfsGateway;
+      }
+
+      dbg(`ipfsGateway: ${ipfsGateway}`);
+      return ipfsGateway;
+    })();
+  }
+
+  return ipfsGatewayPromise;
 }
 
 let blockScoutUrlPromise:

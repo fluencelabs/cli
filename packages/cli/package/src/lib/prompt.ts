@@ -139,7 +139,7 @@ export function confirm(question: ConfirmArg): Promise<boolean> {
   }) as Promise<boolean>;
 }
 
-export type InputArg = DistinctQuestion & {
+type InputArg = DistinctQuestion & {
   message: string;
   flagName?: string | undefined;
 };
@@ -191,7 +191,7 @@ export const password = (question: PasswordArg): Promise<string> => {
 type Separator = typeof inquirer.Separator;
 type SeparatorObj = InstanceType<Separator>;
 
-export type Choices<T> = [T] extends [string]
+type Choices<T> = [T] extends [string]
   ? Array<T | SeparatorObj>
   : Array<{ value: T; name: string } | SeparatorObj>;
 

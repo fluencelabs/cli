@@ -27,7 +27,7 @@ import {
   DEFAULT_CC_DURATION,
   DEFAULT_CC_STAKER_REWARD,
   DURATION_EXAMPLE,
-  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
   PT_SYMBOL,
 } from "../../../const.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
@@ -394,7 +394,7 @@ const computePeerSchema = {
     computeUnits: {
       type: "integer",
       description: `How many compute units should nox have. Default: ${numToStr(
-        DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+        DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
       )} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
     },
     nox: noxConfigYAMLSchema,

@@ -26,7 +26,6 @@ import { jsonStringify } from "../../common.js";
 import { validationErrorToString, getAjv } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import {
-  FS_OPTIONS,
   YAML_EXT,
   YML_EXT,
   CLI_NAME_FULL,
@@ -36,7 +35,6 @@ import { dbg } from "../dbg.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
 import { removeProperties } from "../helpers/utils.js";
 
-import { formatConfig, type GetPath } from "./initConfig.js";
 import type {
   InitializedConfig,
   InitConfigOptions,
@@ -45,6 +43,7 @@ import type {
   OptionsTuple,
   ConfigOptionsWithoutMigrate,
   ConfigOptions,
+  GetPath,
 } from "./initConfigNewTypes.js";
 
 const initializedConfigs = new Map<
@@ -322,7 +321,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     // if it fails, try replacing .yaml with .yml or vice versa and read again
     // this way we can support both .yaml and .yml extensions interchangeably
     try {
-      configString = await readFile(actualConfigPath, FS_OPTIONS);
+      configString = await readFile(actualConfigPath, "utf8");
     } catch {
       const endsWithYaml = actualConfigPath.endsWith(YAML_EXT);
 
@@ -332,7 +331,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
         -(endsWithYaml ? YAML_EXT : YML_EXT).length,
       )}${endsWithYaml ? YML_EXT : YAML_EXT}`;
 
-      configString = await readFile(newConfigPath, FS_OPTIONS);
+      configString = await readFile(newConfigPath, "utf8");
       actualConfigPath = newConfigPath;
     }
   } catch {
@@ -466,10 +465,10 @@ async function updateSchema(
   const schemaString = `${jsonStringify(configOptions.schema)}\n`;
 
   try {
-    const actualSchemaString = await readFile(schemaPath, FS_OPTIONS);
+    const actualSchemaString = await readFile(schemaPath, "utf8");
     assert(actualSchemaString === schemaString);
   } catch {
-    await writeFile(schemaPath, schemaString, FS_OPTIONS);
+    await writeFile(schemaPath, schemaString, "utf8");
   }
 }
 
@@ -483,10 +482,49 @@ async function saveConfig(
   }
 
   const newConfigString = formatConfig(configString);
-  await writeFile(configPath, newConfigString, FS_OPTIONS);
+  await writeFile(configPath, newConfigString, "utf8");
   return newConfigString;
 }
 
 function getConfigName(configPath: string) {
   return basename(configPath).replace(/\.(yml|yaml)$/, "");
+}
+
+function formatConfig(configString: string) {
+  const formattedConfig = configString
+    .trim()
+    .split("\n")
+    .flatMap((line, i, ar) => {
+      // If it's an empty string - it was a newline before split - remove it
+      if (line.trim() === "") {
+        return [];
+      }
+
+      const maybePreviousLine = ar[i - 1];
+      const isComment = line.startsWith("#");
+      const isPreviousLineComment = maybePreviousLine?.startsWith("#") ?? false;
+
+      const addNewLineBeforeBlockOfComments =
+        isComment && !isPreviousLineComment;
+
+      if (addNewLineBeforeBlockOfComments) {
+        return ["", line];
+      }
+
+      const isFirstLine = maybePreviousLine === undefined;
+      const isIndentedCode = line.startsWith(" ");
+
+      const doNotAddNewLine =
+        isFirstLine || isIndentedCode || isComment || isPreviousLineComment;
+
+      if (doNotAddNewLine) {
+        return [line];
+      }
+
+      // If it's top level property - separate it with a new line ("" -> "\n" when joined)
+      return ["", line];
+    })
+    .join("\n");
+
+  return `${formattedConfig.trim()}\n`;
 }

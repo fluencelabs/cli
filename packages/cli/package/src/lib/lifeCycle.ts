@@ -17,8 +17,6 @@
 
 import { access } from "fs/promises";
 
-import { color } from "@oclif/color";
-
 import { setChainFlags } from "./chainFlags.js";
 import {
   commandObj,
@@ -26,20 +24,17 @@ import {
   type CommandObj,
 } from "./commandObj.js";
 import { initNewEnvConfig } from "./configs/project/env/env.js";
-import { initFluenceConfig } from "./configs/project/fluence.js";
 import { initNewUserConfig } from "./configs/user/config/config.js";
 import {
   NODE_JS_MAJOR_VERSION,
   CLI_NAME_FULL,
   NO_INPUT_FLAG_NAME,
-  CLI_NAME,
   PRIV_KEY_FLAG_NAME,
   ENV_FLAG_NAME,
 } from "./const.js";
 import { haltCountly, initCountly } from "./countly.js";
 import "./setupEnvironment.js";
 import { dbg } from "./dbg.js";
-import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
 import { numToStr } from "./helpers/typesafeStringify.js";
 import {
@@ -104,34 +99,8 @@ export async function initCli<
     [PRIV_KEY_FLAG_NAME]: argsAndFlags.flags[PRIV_KEY_FLAG_NAME],
   });
 
-  const res = requiresFluenceProject
-    ? { fluenceConfig: await ensureFluenceProject() }
-    : { maybeFluenceConfig: await initFluenceConfig() };
-
-  const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
-  await initCountly({ maybeFluenceConfig });
-  ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
+  await initCountly();
   return argsAndFlags;
-}
-
-function ensureCorrectCliVersion(maybeCliVersion: string | undefined): void {
-  const currentVersion = commandObj.config.version;
-
-  if (
-    typeof maybeCliVersion === "string" &&
-    maybeCliVersion !== currentVersion
-  ) {
-    const cliVersion = maybeCliVersion;
-    return commandObj.error(
-      `Current ${CLI_NAME_FULL} versions is ${color.yellow(
-        currentVersion,
-      )}, but this project is compatible only with ${CLI_NAME_FULL} version ${color.yellow(
-        cliVersion,
-      )}\n\nPlease install it with:\n\n${color.yellow(
-        `${CLI_NAME} update --version ${cliVersion}`,
-      )}`,
-    );
-  }
 }
 
 export const exitCli = async (): Promise<never> => {

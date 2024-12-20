@@ -9,13 +9,6 @@
       ],
       "outputs": ["package/node_modules/**"]
     },
-    "install-npm-dependencies": {
-      "inputs": [
-        "package/src/cli-aqua-dependencies/package.json",
-        "package/src/cli-aqua-dependencies/package-lock.json"
-      ],
-      "outputs": ["package/src/cli-aqua-dependencies/node_modules/**"]
-    },
     "gen-gql-schema": {
       "dependsOn": ["install-yarn-dependencies"],
       "inputs": [
@@ -34,23 +27,13 @@
       "outputs": ["package/src/lib/gql/gqlGenerated.ts"]
     },
     "before-build": {
-      "dependsOn": [
-        "install-yarn-dependencies",
-        "install-npm-dependencies",
-        "^build"
-      ],
+      "dependsOn": ["install-yarn-dependencies", "^build"],
       "inputs": [
         "package/src/beforeBuild.ts",
         "package/src/versions.json",
         "package/src/versions.ts"
       ],
-      "outputs": [
-        "package/src/lib/compiled-aqua/**",
-        "package/src/lib/compiled-aqua-with-tracing/**",
-        "package/src/aqua-dependencies/**",
-        "package/src/versions/**",
-        "package/src/common.ts"
-      ]
+      "outputs": ["package/src/versions/**", "package/src/common.ts"]
     },
     "build": {
       "dependsOn": ["^build", "before-build", "gql-codegen"],

@@ -76,10 +76,10 @@ export const validateBatchAsync = async (
   return errors.length === 0 ? true : errors.join("\n");
 };
 
-export const isExactVersion = async (version: string): Promise<boolean> => {
+async function isExactVersion(version: string): Promise<boolean> {
   const semver = await import("semver");
   return semver.clean(version) === version;
-};
+}
 
 export async function validateVersionsIsExact(
   dependency: string,

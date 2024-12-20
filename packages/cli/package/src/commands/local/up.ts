@@ -24,26 +24,23 @@ import { BaseCommand } from "../../baseCommand.js";
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "../../common.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
-import { distributeToNox } from "../../lib/chain/distributeToNox.js";
+import { distributeToPeer } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { setChainFlags } from "../../lib/chainFlags.js";
 import { ensureDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env/env.js";
-import { initFluenceConfig } from "../../lib/configs/project/fluence.js";
-import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   DOCKER_COMPOSE_FLAGS,
   OFFER_FLAG_NAME,
   ALL_FLAG_VALUE,
   DOCKER_COMPOSE_FULL_FILE_NAME,
-  NOXES_FLAG,
+  PEERS_FLAG,
   PRIV_KEY_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
   PRIV_KEY_FLAG_NAME,
 } from "../../lib/const.js";
-import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
@@ -55,7 +52,7 @@ export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using all the offers from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} config using default wallet key ${LOCAL_NET_DEFAULT_WALLET_KEY}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NOXES_FLAG,
+    ...PEERS_FLAG,
     timeout: Flags.integer({
       description:
         "Timeout in seconds for attempting to register local network on local peers",
@@ -125,17 +122,6 @@ export default class Up extends BaseCommand<typeof Up> {
       try {
         await rm(await ensureProviderArtifactsConfigPath());
       } catch {}
-
-      const workersConfig = await initNewWorkersConfig();
-
-      if (workersConfig.deals !== undefined) {
-        delete workersConfig.deals.local;
-        await workersConfig.$commit();
-
-        if ((await initFluenceConfig()) !== null) {
-          await ensureAquaFileWithWorkerInfo();
-        }
-      }
     }
 
     await ensureDockerComposeConfig();
@@ -160,7 +146,7 @@ export default class Up extends BaseCommand<typeof Up> {
     }
 
     const allOffers = { [OFFER_FLAG_NAME]: ALL_FLAG_VALUE };
-    await distributeToNox({ ...flags, ...allOffers, amount: "10" });
+    await distributeToPeer({ ...flags, ...allOffers, amount: "10" });
     await registerProvider();
     await createOffers({ force: true, ...allOffers });
     await createCommitments({ ...flags, ...allOffers });

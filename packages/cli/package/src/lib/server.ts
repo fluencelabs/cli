@@ -243,12 +243,6 @@ export async function getAddressFromConnector(): Promise<string> {
   return addressFromConnector;
 }
 
-export async function returnToCLI() {
-  if (isServerInitialized) {
-    await sendEventAndWaitForResponse({ tag: "returnToCLI" });
-  }
-}
-
 function ping() {
   void sendEvent({
     tag: "ping",

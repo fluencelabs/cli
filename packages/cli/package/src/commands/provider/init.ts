@@ -15,8 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { writeFile } from "node:fs/promises";
+
 import { color } from "@oclif/color";
-import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -26,20 +27,18 @@ import {
 } from "../../lib/configs/project/provider/provider.js";
 import {
   CHAIN_FLAGS,
-  NOXES_FLAG,
+  PEERS_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
+  RECOMMENDED_GITIGNORE_CONTENT,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { getGitignorePath } from "../../lib/paths.js";
 
 export default class Init extends BaseCommand<typeof Init> {
   static override description = `Init provider config. Creates a ${PROVIDER_CONFIG_FULL_FILE_NAME} file`;
   static override flags = {
-    ...NOXES_FLAG,
+    ...PEERS_FLAG,
     ...CHAIN_FLAGS,
-    "no-vm": Flags.boolean({
-      description: `Generate ${PROVIDER_CONFIG_FULL_FILE_NAME} without vm configuration`,
-      default: false,
-    }),
   };
 
   async run(): Promise<void> {
@@ -56,6 +55,8 @@ export default class Init extends BaseCommand<typeof Init> {
     }
 
     providerConfig = await initNewProviderConfig(flags);
+
+    await writeFile(getGitignorePath(), RECOMMENDED_GITIGNORE_CONTENT, "utf8");
 
     commandObj.logToStderr(
       `Provider config is at ${color.yellow(providerConfig.$getPath())}`,

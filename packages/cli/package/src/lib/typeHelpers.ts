@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { jsonStringify } from "../common.js";
-
 /**
  * Makes all properties in the object to be NOT readonly
  * Doesn't work recursively
@@ -55,43 +53,3 @@ export type OptionalFlags<T extends string> = Partial<
 export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
-
-export const isObject = (
-  unknown: unknown,
-): unknown is Record<string, unknown> => {
-  return unknown !== null && typeof unknown === "object";
-};
-
-export const hasKey = <K extends string>(
-  key: K,
-  unknown: unknown,
-): unknown is Record<K, unknown> => {
-  return isObject(unknown) && key in unknown;
-};
-
-/**
- * Asserts unknown value is an object that has the key
- * @example
- * const unknown: unknown = { a: 1 }
- * assertHasKey('a', unknown, 'unknown must have "a" key')
- * unknown // Record<'a', unknown>
- * @example
- * const unknown: unknown = { a: 1 }
- * assertHasKey('b', unknown, 'unknown must have "b" key')
- * // throws Error('unknown must have "b" key')
- * @param key any string key
- * @param unknown any value
- * @param message error message
- * @returns void
- */
-export function assertHasKey<K extends string>(
-  key: K,
-  unknown: unknown,
-  message?: string,
-): asserts unknown is Record<K, unknown> {
-  if (!hasKey(key, unknown)) {
-    throw new Error(
-      message ?? `missing key '${key}' in ${jsonStringify(unknown)}`,
-    );
-  }
-}
