@@ -4,8 +4,6 @@
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "packages": {
-    "cli": {
-      "component": "fluence-cli"
-    }
+    "packages/cli/package": {}
   }
 }
