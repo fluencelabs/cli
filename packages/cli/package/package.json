@@ -145,8 +145,8 @@
       "default": {
         "description": "Manage and display default CLI configurations"
       },
-      "key": {
-        "description": "Manage secret keys, that define peer-ids of both nox and js-client (including the one inside this CLI itself)"
+      "local": {
+        "description": "Manage local fluence environment using docker-compose"
       },
       "provider": {
         "description": "Set of commands to be used by providers or you can use them to manage your local environment"
