@@ -83,7 +83,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
  * @param specPath File system path to a YAML Kubernetes spec.
  * @return Array of resources created
  */
-export async function kubectlApply(
+async function kubectlApply(
   kubeconfigPath: string,
   specPath: string,
   peerName: string,

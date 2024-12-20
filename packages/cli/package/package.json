@@ -57,12 +57,10 @@
   },
   "dependencies": {
     "@fluencelabs/deal-ts-clients": "0.22.1",
-    "@fluencelabs/fluence-network-environment": "1.2.3",
-    "@fluencelabs/js-client": "0.9.0",
-    "@iarna/toml": "2.2.5",
     "@kubernetes/client-node": "github:fluencelabs/kubernetes-client-javascript#e72ee00a52fec4eb4a8327632895d888ee504f4d",
+    "@libp2p/crypto": "4.0.1",
+    "@libp2p/peer-id-factory": "4.0.5",
     "@mswjs/interceptors": "0.29.1",
-    "@multiformats/multiaddr": "12.2.1",
     "@oclif/color": "1.0.13",
     "@oclif/core": "4.0.29",
     "@oclif/plugin-autocomplete": "3.2.6",
@@ -147,8 +145,8 @@
       "default": {
         "description": "Manage and display default CLI configurations"
       },
-      "key": {
-        "description": "Manage secret keys, that define peer-ids of both nox and js-client (including the one inside this CLI itself)"
+      "local": {
+        "description": "Manage local fluence environment using docker-compose"
       },
       "provider": {
         "description": "Set of commands to be used by providers or you can use them to manage your local environment"

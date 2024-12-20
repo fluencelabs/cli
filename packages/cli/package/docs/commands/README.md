@@ -3,7 +3,6 @@
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence chain info`](#fluence-chain-info)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
-* [`fluence default peers [ENV]`](#fluence-default-peers-env)
 * [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence local down`](#fluence-local-down)
 * [`fluence local init`](#fluence-local-init)
@@ -109,29 +108,6 @@ EXAMPLES
 ```
 
 _See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/default/env.ts)_
-
-## `fluence default peers [ENV]`
-
-Print default Fluence network peer addresses
-
-```
-USAGE
-  $ fluence default peers [ENV] [--no-input]
-
-ARGUMENTS
-  ENV  Fluence Environment to use when running the command
-
-FLAGS
-  --no-input  Don't interactively ask for any input from the user
-
-DESCRIPTION
-  Print default Fluence network peer addresses
-
-EXAMPLES
-  $ fluence default peers
-```
-
-_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/default/peers.ts)_
 
 ## `fluence help [COMMAND]`
 
