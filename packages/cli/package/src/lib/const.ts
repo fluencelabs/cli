@@ -27,7 +27,6 @@ import {
 import {
   CHAIN_RPC_CONTAINER_NAME,
   CHAIN_RPC_PORT,
-  IPFS_PORT,
 } from "./configs/project/chainContainers.js";
 
 export const CLI_NAME = "fluence";
@@ -47,13 +46,7 @@ export const defaultNumberProperties: Record<"minPricePerCuPerEpoch", string> =
 
 export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 
-export const DEFAULT_CURL_EFFECTOR_CID =
-  "bafybeicorj3sl6fhqpuubmt5r2n7plkjkmto6jxqckgte2624dj5zvzufm";
-
-export const DEFAULT_VM_EFFECTOR_CID =
-  "bafkreidfw2so3evkkkky7bodnamzg32zweunfkthna362r7e6a63cnqxiy";
-
-export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
+export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER = 32;
 
 export type FluenceEnv = (typeof CHAIN_ENV)[number];
 export const isFluenceEnv = getIsUnion(CHAIN_ENV);
@@ -72,12 +65,11 @@ export function fluenceOldEnvToNewEnv(env: FluenceEnvOld): FluenceEnv {
   )[env];
 }
 
-export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
 export const TCP_PORT_START = 977;
 export const WEB_SOCKET_PORT_START = 999;
 export const HTTP_PORT_START = 918;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
-export const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
+export const DEFAULT_NUMBER_OF_LOCAL_NET_PEERS = 3;
 
 export const WS_CHAIN_URLS: Record<ChainENV, string> = {
   mainnet: "wss://ws.mainnet.fluence.dev",
@@ -89,7 +81,6 @@ export const WS_CHAIN_URLS: Record<ChainENV, string> = {
 export const JSON_EXT = "json";
 export const YAML_EXT = "yaml";
 export const YML_EXT = "yml";
-export const TOML_EXT = "toml";
 
 export const CLI_CONNECTOR_DIR_NAME = "cli-connector";
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
@@ -97,8 +88,6 @@ export const SCHEMAS_DIR_NAME = "schemas";
 export const COUNTLY_DIR_NAME = "countly";
 export const SECRETS_DIR_NAME = "secrets";
 export const BACKUPS_DIR_NAME = "backups";
-export const CONFIGS_DIR_NAME = "configs";
-export const CCP_CONFIGS_DIR_NAME = "ccp-configs";
 
 export const PROVIDER_CONFIG_FILE_NAME = `provider`;
 export const PROVIDER_SECRETS_CONFIG_FILE_NAME = `provider-secrets`;
@@ -144,20 +133,22 @@ export const ENV_ARG = {
 
 export const ALL_FLAG_VALUE = "all";
 
-export const NOX_NAMES_FLAG_NAME = "nox-names";
+export const PEER_NAMES_FLAG_NAME = "peer-names";
 
-const NOX_NAMES_FLAG_CONFIG = {
-  description: `Comma-separated names of noxes from ${PROVIDER_CONFIG_FULL_FILE_NAME}. To use all of your noxes: --${NOX_NAMES_FLAG_NAME} ${ALL_FLAG_VALUE}`,
-  helpValue: "<nox-1,nox-2>",
+const PEER_NAMES_FLAG_CONFIG = {
+  description: `Comma-separated names of peers from ${PROVIDER_CONFIG_FULL_FILE_NAME}. To use all of your peers: --${PEER_NAMES_FLAG_NAME} ${ALL_FLAG_VALUE}`,
+  helpValue: "<peer-1,peer-2>",
 };
 
-export const NOX_NAMES_FLAG = {
-  [NOX_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
+const PEER_NAMES_FLAG = {
+  [PEER_NAMES_FLAG_NAME]: Flags.string(PEER_NAMES_FLAG_CONFIG),
 };
 
-export const NOXES_FLAG = {
-  noxes: Flags.integer({
-    description: `Number of Compute Peers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
+export const PEERS_FLAG_NAME = "peers";
+
+export const PEERS_FLAG = {
+  [PEERS_FLAG_NAME]: Flags.integer({
+    description: `Number of peers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
   }),
 };
 
@@ -183,6 +174,16 @@ export const OFFER_FLAGS = {
     helpValue: "<id-1,id-2>",
     exclusive: [OFFER_FLAG_NAME],
   }),
+};
+
+export const PEER_AND_OFFER_NAMES_FLAGS = {
+  ...PEER_NAMES_FLAG,
+  ...OFFER_FLAG,
+};
+
+export type PeerAndOfferNameFlags = {
+  [PEER_NAMES_FLAG_NAME]?: string | undefined;
+  [OFFER_FLAG_NAME]?: string | undefined;
 };
 
 export const PRIV_KEY_FLAG_NAME = "priv-key";
@@ -227,13 +228,13 @@ export const DOCKER_COMPOSE_FLAGS = {
 export const CC_IDS_FLAG_NAME = "cc-ids";
 
 export const CC_FLAGS = {
-  [NOX_NAMES_FLAG_NAME]: Flags.string({
-    ...NOX_NAMES_FLAG_CONFIG,
+  [PEER_NAMES_FLAG_NAME]: Flags.string({
+    ...PEER_NAMES_FLAG_CONFIG,
     exclusive: [CC_IDS_FLAG_NAME],
   }),
   [CC_IDS_FLAG_NAME]: Flags.string({
     description: "Comma separated capacity commitment IDs",
-    exclusive: [NOX_NAMES_FLAG_NAME],
+    exclusive: [PEER_NAMES_FLAG_NAME],
   }),
   ...OFFER_FLAG,
 };
@@ -251,6 +252,8 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
+.terraform
+.terraform.lock.hcl
 `;
 export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";

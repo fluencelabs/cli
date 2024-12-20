@@ -38,7 +38,7 @@ import {
   type Config as PrevConfig,
 } from "./provider1.js";
 
-export type Offer = {
+type Offer = {
   minPricePerCuPerEpoch: string;
   computePeers: Array<string>;
   effectors?: Array<string>;

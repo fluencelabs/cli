@@ -15,17 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { parse } from "@iarna/toml";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
-import cloneDeep from "lodash-es/cloneDeep.js";
 import isEmpty from "lodash-es/isEmpty.js";
 import mapValues from "lodash-es/mapValues.js";
-import mergeWith from "lodash-es/mergeWith.js";
 
-import { jsonStringify, type ChainENV } from "../../../../common.js";
 import { versions } from "../../../../versions.js";
-import { getChainId } from "../../../chain/chainConfig.js";
 import {
   ccDurationValidator,
   validateAddress,
@@ -33,38 +28,21 @@ import {
 } from "../../../chain/chainValidators.js";
 import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
-  DEFAULT_AQUAVM_POOL_SIZE,
-  HTTP_PORT_START,
-  TCP_PORT_START,
-  WEB_SOCKET_PORT_START,
-  LOCAL_IPFS_ADDRESS,
   DEFAULT_CC_DURATION,
   DEFAULT_CC_STAKER_REWARD,
   DURATION_EXAMPLE,
-  WS_CHAIN_URLS,
-  DEFAULT_VM_EFFECTOR_CID,
 } from "../../../const.js";
-import { resolveDeployment } from "../../../dealClient.js";
-import { ensureChainEnv } from "../../../ensureChainNetwork.js";
 import {
   type ValidationResult,
   validateCIDs,
 } from "../../../helpers/validations.js";
 import { validateBatchAsync } from "../../../helpers/validations.js";
-import { resolveRelaysWithoutLocal } from "../../../multiaddresWithoutLocal.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
-import { CHAIN_RPC_CONTAINER_NAME } from "../chainContainers.js";
-import { IPFS_CONTAINER_NAME } from "../chainContainers.js";
-import { CHAIN_RPC_PORT, IPFS_PORT } from "../chainContainers.js";
-import { initEnvConfig } from "../env/env.js";
 
 import { providerNameSchema } from "./provider0.js";
 import {
   ccpConfigYAMLSchema,
   computePeersSchema,
-  DEFAULT_IPFS_BINARY_PATH,
-  DEFAULT_PROOF_POLL_PERIOD,
-  DEFAULT_TIMER_RESOLUTION,
   noxConfigYAMLSchema,
   type CCPConfigYAML,
   type ComputePeers,
@@ -191,7 +169,6 @@ export default {
           },
         ),
       ),
-      validateEffectors(config),
       validateCC(config),
       validateMissingComputePeers(config),
       validateNoDuplicateNoxNamesInOffers(config),
@@ -255,82 +232,6 @@ async function validateProtocolVersions(providerConfig: Config) {
   return true;
 }
 
-async function validateEffectors(
-  providerConfig: Config,
-): Promise<ValidationResult> {
-  const errors = (
-    await Promise.all(
-      Object.entries(providerConfig.offers).flatMap(
-        ([offerName, { effectors = [], computePeers: computePeerNames }]) => {
-          const offerEffectorsString = jsonStringify([...effectors].sort());
-
-          return computePeerNames.map(async (computePeerName) => {
-            const computePeer = providerConfig.computePeers[computePeerName];
-
-            if (computePeer === undefined) {
-              return true;
-            }
-
-            const noxConfig = await resolveNoxConfigYAML(
-              providerConfig.nox,
-              computePeer.nox,
-            );
-
-            const computePeerEffectors = [
-              ...Object.values(noxConfig.effectors ?? {}).map(({ wasmCID }) => {
-                return wasmCID;
-              }),
-            ].sort();
-
-            const hasDefaultVmEffector = computePeerEffectors.includes(
-              DEFAULT_VM_EFFECTOR_CID,
-            );
-
-            if (
-              noxConfig.vm?.network.publicIp !== undefined &&
-              !hasDefaultVmEffector
-            ) {
-              return `Compute peer ${color.yellow(
-                computePeerName,
-              )} has a defined publicIp property:\n\nvm:\n  network:\n    publicIp: ${noxConfig.vm.network.publicIp}\n\nso it is expected to also have a vm effector:\n\neffectors:\n  vm:\n    wasmCID: ${DEFAULT_VM_EFFECTOR_CID}`;
-            }
-
-            if (
-              noxConfig.vm?.network.publicIp === undefined &&
-              hasDefaultVmEffector
-            ) {
-              return `Compute peer ${color.yellow(
-                computePeerName,
-              )} has a vm effector:\n\neffectors:\n  vm:\n    wasmCID: ${DEFAULT_VM_EFFECTOR_CID}\n\nso it is expected to also have a defined publicIp property:\n\nvm:\n  network:\n    publicIp: <public_ip>`;
-            }
-
-            const computePeerEffectorsString =
-              jsonStringify(computePeerEffectors);
-
-            if (computePeerEffectorsString !== offerEffectorsString) {
-              return `Offer ${color.yellow(
-                offerName,
-              )} contains computePeer ${color.yellow(
-                computePeerName,
-              )}, that has effectors ${color.yellow(
-                computePeerEffectorsString,
-              )} which doesn't match effectors that are specified in the offer ${color.yellow(
-                offerEffectorsString,
-              )}`;
-            }
-
-            return true;
-          });
-        },
-      ),
-    )
-  ).filter((result): result is string => {
-    return typeof result === "string";
-  });
-
-  return errors.length > 0 ? errors.join("\n\n") : true;
-}
-
 function validateNoDuplicateNoxNamesInOffers(config: Config): ValidationResult {
   const noxNamesInOffers: Record<string, string[]> = {};
 
@@ -355,7 +256,7 @@ function validateNoDuplicateNoxNamesInOffers(config: Config): ValidationResult {
   if (duplicateNoxNames.length > 0) {
     return duplicateNoxNames
       .map(([noxName, offerNames]) => {
-        return `Nox ${color.yellow(
+        return `Peer ${color.yellow(
           noxName,
         )} is present in multiple offers: ${color.yellow(
           offerNames.join(", "),
@@ -443,166 +344,4 @@ function validateMissingComputePeers(config: Config): ValidationResult {
   }
 
   return true;
-}
-
-function mergeConfigYAML<T>(a: T, b: Record<string, unknown>) {
-  return mergeWith(cloneDeep(a), b, (objValue, srcValue) => {
-    if (Array.isArray(objValue) && Array.isArray(srcValue)) {
-      return srcValue;
-    }
-
-    return undefined;
-  });
-}
-
-export function mergeConfigYAMLWithRawConfig<
-  T extends { rawConfig?: string | undefined } & Record<string, unknown>,
->(a: T, b: T) {
-  const { rawConfig: rawConfigB, ...configB } = b;
-  let config = mergeConfigYAML(a, configB);
-
-  const parsedRawConfigB =
-    rawConfigB === undefined ? undefined : parse(rawConfigB);
-
-  if (parsedRawConfigB !== undefined) {
-    config = mergeConfigYAML(config, parsedRawConfigB);
-  }
-
-  return config;
-}
-
-export async function resolveNoxConfigYAML(
-  globalNoxConfig: NoxConfigYAML | undefined = {},
-  computePeerNoxConfig: NoxConfigYAML | undefined = {},
-  { i = 0, signingWallet = "" }: { i?: number; signingWallet?: string } = {},
-) {
-  const env = await ensureChainEnv();
-  const isLocal = env === "local";
-
-  let config = mergeConfigYAMLWithRawConfig(
-    await getDefaultNoxConfigYAML(),
-    globalNoxConfig,
-  );
-
-  config = mergeConfigYAMLWithRawConfig(config, computePeerNoxConfig);
-
-  /* eslint-disable @typescript-eslint/consistent-type-assertions */
-
-  const tcpPort =
-    (config["tcp_port"] as number | undefined) ??
-    config.tcpPort ??
-    (isLocal ? TCP_PORT_START - i : TCP_PORT_START);
-
-  const websocketPort =
-    (config["websocket_port"] as number | undefined) ??
-    config.websocketPort ??
-    (isLocal ? WEB_SOCKET_PORT_START - i : WEB_SOCKET_PORT_START);
-
-  const httpPort =
-    (config["http_port"] as number | undefined) ??
-    config.httpPort ??
-    (isLocal ? HTTP_PORT_START - i : HTTP_PORT_START);
-
-  const walletPrivateKey =
-    // @ts-expect-error we allow user to put anything in raw config
-    (config["chain_config"]?.["wallet_key"] as string | undefined) ??
-    config.chain?.walletPrivateKey ??
-    signingWallet;
-
-  /* eslint-enable @typescript-eslint/consistent-type-assertions */
-
-  if (config.chain?.walletPrivateKey === undefined) {
-    config.chain = { ...config.chain, walletPrivateKey };
-  }
-
-  let ipfs: undefined | NoxConfigYAML["ipfs"];
-  // eslint-disable-next-line prefer-const
-  ({ ipfs, ...config } = config);
-
-  config.systemServices = {
-    ...config.systemServices,
-    aquaIpfs: {
-      ...config.systemServices?.aquaIpfs,
-      externalApiMultiaddr:
-        config.systemServices?.aquaIpfs?.externalApiMultiaddr ??
-        ipfs?.externalApiMultiaddr ??
-        EXTERNAL_API_MULTIADDRS[env],
-      localApiMultiaddr:
-        config.systemServices?.aquaIpfs?.localApiMultiaddr ??
-        ipfs?.localApiMultiaddr ??
-        LOCAL_API_MULTIADDRS[env],
-      ipfsBinaryPath:
-        config.systemServices?.aquaIpfs?.ipfsBinaryPath ??
-        ipfs?.ipfsBinaryPath ??
-        DEFAULT_IPFS_BINARY_PATH,
-    },
-  };
-
-  return { ...config, tcpPort, websocketPort, httpPort };
-}
-
-const EXTERNAL_API_MULTIADDRS: Record<ChainENV, string> = {
-  mainnet: "/dns4/ipfs.kras.fluence.dev/tcp/5020",
-  testnet: "/dns4/ipfs.dar.fluence.dev/tcp/5020",
-  stage: "/dns4/ipfs.fluence.dev/tcp/5001",
-  local: LOCAL_IPFS_ADDRESS,
-};
-
-const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
-
-const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
-  ...EXTERNAL_API_MULTIADDRS,
-  local: NOX_IPFS_MULTIADDR,
-};
-
-async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
-  const env = await ensureChainEnv();
-  const networkId = await getChainId();
-  const { RPC_URLS } = await import("@fluencelabs/deal-ts-clients");
-  const envConfig = await initEnvConfig();
-
-  const CHAIN_URLS_FOR_CONTAINERS = {
-    ...RPC_URLS,
-    local: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
-  };
-
-  return {
-    aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
-    ipfs: {
-      externalApiMultiaddr: EXTERNAL_API_MULTIADDRS[env],
-      localApiMultiaddr: LOCAL_API_MULTIADDRS[env],
-      ipfsBinaryPath: DEFAULT_IPFS_BINARY_PATH,
-    },
-    systemServices: {
-      enable: ["aqua-ipfs", "decider"],
-      decider: {
-        deciderPeriodSec: 30,
-        workerIpfsMultiaddr:
-          env === "local"
-            ? NOX_IPFS_MULTIADDR
-            : "/dns4/ipfs.fluence.dev/tcp/5001",
-      },
-    },
-    chain: {
-      httpEndpoint:
-        envConfig?.rpcUrl === undefined
-          ? CHAIN_URLS_FOR_CONTAINERS[env]
-          : envConfig.rpcUrl,
-      wsEndpoint: WS_CHAIN_URLS[env],
-      diamondContract: (await resolveDeployment()).diamond,
-      networkId,
-      defaultPriorityFee: 0,
-    },
-    ccp: {
-      proofPollPeriod: DEFAULT_PROOF_POLL_PERIOD,
-    },
-    ...(env === "local"
-      ? {}
-      : { bootstrapNodes: await resolveRelaysWithoutLocal(env) }),
-    metrics: {
-      enabled: true,
-      timerResolution: DEFAULT_TIMER_RESOLUTION,
-      tokioMetricsEnabled: true,
-    },
-  };
 }

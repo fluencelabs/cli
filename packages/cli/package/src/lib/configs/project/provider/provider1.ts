@@ -26,7 +26,7 @@ import {
   HTTP_PORT_START,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
-  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
 } from "../../../const.js";
 import { boolToStr, numToStr } from "../../../helpers/typesafeStringify.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
@@ -120,9 +120,9 @@ export type NoxConfigYAML = {
   };
 };
 
-export const DEFAULT_TIMER_RESOLUTION = "1 minute";
-export const DEFAULT_PROOF_POLL_PERIOD = "60 seconds";
-export const DEFAULT_IPFS_BINARY_PATH = "/usr/bin/ipfs";
+const DEFAULT_TIMER_RESOLUTION = "1 minute";
+const DEFAULT_PROOF_POLL_PERIOD = "60 seconds";
+const DEFAULT_IPFS_BINARY_PATH = "/usr/bin/ipfs";
 
 export const noxConfigYAMLSchema = {
   type: "object",
@@ -530,12 +530,12 @@ export type CCPConfigYAML = {
   rawConfig?: string;
 };
 
-export const DEFAULT_RPC_ENDPOINT_HOST = "0.0.0.0";
-export const DEFAULT_RPC_ENDPOINT_PORT = 9389;
-export const DEFAULT_PROMETHEUS_ENDPOINT_HOST = "0.0.0.0";
-export const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
-export const DEFAULT_REPORT_HASHRATE = false;
-export const DEFAULT_LOG_LEVEL = "debug";
+const DEFAULT_RPC_ENDPOINT_HOST = "0.0.0.0";
+const DEFAULT_RPC_ENDPOINT_PORT = 9389;
+const DEFAULT_PROMETHEUS_ENDPOINT_HOST = "0.0.0.0";
+const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
+const DEFAULT_REPORT_HASHRATE = false;
+const DEFAULT_LOG_LEVEL = "debug";
 const DEFAULT_STATE_PATH = "./state";
 
 export const ccpConfigYAMLSchema = {
@@ -642,8 +642,92 @@ export const ccpConfigYAMLSchema = {
   additionalProperties: false,
 } as const satisfies JSONSchemaType<CCPConfigYAML>;
 
+type IPSupply =
+  | {
+      start: string;
+      end?: string;
+    }
+  | {
+      cidr: string;
+    };
+
+const supplySchema = {
+  type: "object",
+  description:
+    "Either specify only a `start` property (if you want a single IP) or `start` and `end` properties (if you want a range) or `cidr` property (if you want a CIDR notation)",
+  oneOf: [
+    {
+      additionalProperties: false,
+      properties: {
+        start: {
+          type: "string",
+          format: "ipv4",
+          description: "Start of the IP range or individual IP",
+        },
+        end: {
+          nullable: true,
+          type: "string",
+          format: "ipv4",
+          description: "End of the IP range",
+        },
+      },
+      required: ["start"],
+    },
+    {
+      additionalProperties: false,
+      properties: {
+        cidr: {
+          type: "string",
+          description: "CIDR notation of the IP range",
+        },
+      },
+      required: ["cidr"],
+    },
+  ],
+  required: [],
+  nullable: true,
+} as const satisfies JSONSchemaType<IPSupply>;
+
+export type IPSupplies = Array<IPSupply>;
+
+type IP = {
+  supply: IPSupplies;
+};
+
+const ipSchema = {
+  type: "object",
+  description: "IP configuration",
+  additionalProperties: false,
+  properties: {
+    supply: {
+      type: "array",
+      items: supplySchema,
+      description: "IP supply",
+      minItems: 1,
+    },
+  },
+  required: ["supply"],
+} as const satisfies JSONSchemaType<IP>;
+
+type Resources = {
+  ip: IP;
+};
+
+const resourcesSchema = {
+  type: "object",
+  description: "Resources configuration",
+  additionalProperties: false,
+  properties: {
+    ip: ipSchema,
+  },
+  required: ["ip"],
+  nullable: true,
+} as const satisfies JSONSchemaType<Resources>;
+
 export type ComputePeer = {
   computeUnits: number;
+  resources?: Resources;
+  kubeconfigPath?: string;
   nox?: NoxConfigYAML;
   ccp?: CCPConfigYAML;
 };
@@ -656,8 +740,14 @@ const computePeerSchema = {
     computeUnits: {
       type: "integer",
       description: `How many compute units should nox have. Default: ${numToStr(
-        DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+        DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
       )} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
+    },
+    resources: resourcesSchema,
+    kubeconfigPath: {
+      nullable: true,
+      type: "string",
+      description: `Path to the kubeconfig file`,
     },
     nox: noxConfigYAMLSchema,
     ccp: ccpConfigYAMLSchema,

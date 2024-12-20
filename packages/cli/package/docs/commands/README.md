@@ -3,7 +3,6 @@
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence chain info`](#fluence-chain-info)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
-* [`fluence default peers [ENV]`](#fluence-default-peers-env)
 * [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence local down`](#fluence-local-down)
 * [`fluence local init`](#fluence-local-init)
@@ -20,6 +19,7 @@
 * [`fluence provider deal-list`](#fluence-provider-deal-list)
 * [`fluence provider deal-rewards-info [DEAL-ADDRESS] [ON-CHAIN-WORKER-ID]`](#fluence-provider-deal-rewards-info-deal-address-on-chain-worker-id)
 * [`fluence provider deal-rewards-withdraw`](#fluence-provider-deal-rewards-withdraw)
+* [`fluence provider deploy`](#fluence-provider-deploy)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider info`](#fluence-provider-info)
 * [`fluence provider init`](#fluence-provider-init)
@@ -108,29 +108,6 @@ EXAMPLES
 ```
 
 _See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/default/env.ts)_
-
-## `fluence default peers [ENV]`
-
-Print default Fluence network peer addresses
-
-```
-USAGE
-  $ fluence default peers [ENV] [--no-input]
-
-ARGUMENTS
-  ENV  Fluence Environment to use when running the command
-
-FLAGS
-  --no-input  Don't interactively ask for any input from the user
-
-DESCRIPTION
-  Print default Fluence network peer addresses
-
-EXAMPLES
-  $ fluence default peers
-```
-
-_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/default/peers.ts)_
 
 ## `fluence help [COMMAND]`
 
@@ -248,7 +225,7 @@ Run docker-compose.yaml using docker compose and set up provider using all the o
 
 ```
 USAGE
-  $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <private-key>]
+  $ fluence local up [--no-input] [--peers <value>] [--timeout <value>] [--priv-key <private-key>]
     [--quiet-pull] [-d] [--build] [--flags <--flag arg>] [-r] [--no-wait] [--no-set-up]
 
 FLAGS
@@ -261,7 +238,7 @@ FLAGS
       --no-set-up               Don't set up provider, offer, commitments and deposit collateral, so there will be no
                                 active offer on the network after command is finished
       --no-wait                 Don't wait for services to be running|healthy
-      --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
+      --peers=<value>           Number of peers to generate when a new provider.yaml is created
       --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure. On
                                 local env 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used by
                                 default when CLI is used in non-interactive mode
@@ -286,16 +263,16 @@ Add FLT collateral to capacity commitment to activate it. Alias: fluence provide
 ```
 USAGE
   $ fluence provider cc-activate [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
+    [--peer-names <peer-1,peer-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
 
 FLAGS
   --cc-ids=<value>                           Comma separated capacity commitment IDs
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                  Comma-separated names of noxes from provider.yaml. To use all of your
-                                             noxes: --nox-names all
   --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
                                              all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
@@ -314,15 +291,15 @@ Create Capacity commitment. Alias: fluence provider cc
 ```
 USAGE
   $ fluence provider cc-create [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2>] [--offers <offer-1,offer-2>]
+    [--peer-names <peer-1,peer-2>] [--offers <offer-1,offer-2>]
 
 FLAGS
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                  Comma-separated names of noxes from provider.yaml. To use all of your
-                                             noxes: --nox-names all
   --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
                                              all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
@@ -340,17 +317,17 @@ Move resources from deals, withdraw FLT collateral from capacity commitments, re
 
 ```
 USAGE
-  $ fluence provider cc-finish [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
-    [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
+  $ fluence provider cc-finish [--no-input] [--peer-names <peer-1,peer-2> | --cc-ids <value>] [--offers
+    <offer-1,offer-2>] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
 
 FLAGS
   --cc-ids=<value>                           Comma separated capacity commitment IDs
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                  Comma-separated names of noxes from provider.yaml. To use all of your
-                                             noxes: --nox-names all
   --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
                                              all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
@@ -370,17 +347,17 @@ Get info about capacity commitments. Alias: fluence provider ci
 ```
 USAGE
   $ fluence provider cc-info [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>] [--json]
+    [--peer-names <peer-1,peer-2> | --cc-ids <value>] [--offers <offer-1,offer-2>] [--json]
 
 FLAGS
   --cc-ids=<value>                           Comma separated capacity commitment IDs
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --json                                     Output JSON
   --no-input                                 Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                  Comma-separated names of noxes from provider.yaml. To use all of your
-                                             noxes: --nox-names all
   --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
                                              all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
@@ -399,16 +376,16 @@ Remove Capacity commitment. You can remove it only BEFORE you activated it by de
 ```
 USAGE
   $ fluence provider cc-remove [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
+    [--peer-names <peer-1,peer-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
 
 FLAGS
   --cc-ids=<value>                           Comma separated capacity commitment IDs
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                  Comma-separated names of noxes from provider.yaml. To use all of your
-                                             noxes: --nox-names all
   --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
                                              all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
@@ -427,17 +404,17 @@ Withdraw FLT rewards from capacity commitments. Alias: fluence provider crw
 
 ```
 USAGE
-  $ fluence provider cc-rewards-withdraw [--no-input] [--nox-names <nox-1,nox-2> | --cc-ids <value>] [--offers <offer-1,offer-2>]
-    [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
+  $ fluence provider cc-rewards-withdraw [--no-input] [--peer-names <peer-1,peer-2> | --cc-ids <value>] [--offers
+    <offer-1,offer-2>] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
 
 FLAGS
   --cc-ids=<value>                           Comma separated capacity commitment IDs
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                  Comma-separated names of noxes from provider.yaml. To use all of your
-                                             noxes: --nox-names all
   --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
                                              all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
@@ -546,6 +523,36 @@ DESCRIPTION
 
 _See code: [src/commands/provider/deal-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/deal-rewards-withdraw.ts)_
 
+## `fluence provider deploy`
+
+Deploy manifests
+
+```
+USAGE
+  $ fluence provider deploy [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
+    [--peer-names <peer-1,peer-2>] [--offers <offer-1,offer-2>]
+
+FLAGS
+  --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
+  --no-input                                 Don't interactively ask for any input from the user
+  --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
+                                             all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
+  --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
+                                             unsecure. On local env
+                                             0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
+                                             by default when CLI is used in non-interactive mode
+
+DESCRIPTION
+  Deploy manifests
+
+EXAMPLES
+  $ fluence provider deploy
+```
+
+_See code: [src/commands/provider/deploy.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/deploy.ts)_
+
 ## `fluence provider gen`
 
 Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
@@ -553,18 +560,18 @@ Generate Config.toml files according to provider.yaml and secrets according to p
 ```
 USAGE
   $ fluence provider gen [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--reset-nox-secrets] [--no-withdraw]
+    [--reset-peer-secrets] [--no-withdraw]
 
 FLAGS
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --no-withdraw                              Is used only when --reset-nox-secrets flag is present. Will not withdraw
-                                             tokens from noxes (if you don't need it or it fails for some reason)
+  --no-withdraw                              Is used only when --reset-peer-secrets flag is present. Will not withdraw
+                                             tokens from peers (if you don't need it or it fails for some reason)
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
                                              by default when CLI is used in non-interactive mode
-  --reset-nox-secrets                        Withdraw remaining tokens from your noxes, backup nox secrets from
+  --reset-peer-secrets                       Withdraw remaining tokens from your peers, backup peer secrets from
                                              .fluence/provider-secrets.yaml and .fluence/secrets (if they exist) to
                                              .fluence/backups and generate new ones
 
@@ -579,27 +586,29 @@ _See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blo
 
 ## `fluence provider info`
 
-Print nox signing wallets and peer ids. Alias: fluence provider i
+Print peer signing wallets and peer ids. Alias: fluence provider i
 
 ```
 USAGE
   $ fluence provider info [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2>] [--json] [--address <address>]
+    [--peer-names <peer-1,peer-2>] [--offers <offer-1,offer-2>] [--json] [--address <address>]
 
 FLAGS
   --address=<address>                        Provider address
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --json                                     Output JSON
   --no-input                                 Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                  Comma-separated names of noxes from provider.yaml. To use all of your
-                                             noxes: --nox-names all
+  --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
+                                             all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Print nox signing wallets and peer ids. Alias: fluence provider i
+  Print peer signing wallets and peer ids. Alias: fluence provider i
 ```
 
 _See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/info.ts)_
@@ -610,14 +619,13 @@ Init provider config. Creates a provider.yaml file
 
 ```
 USAGE
-  $ fluence provider init [--no-input] [--noxes <value>] [--env <testnet | mainnet | stage | local>] [--priv-key
-    <private-key>] [--no-vm]
+  $ fluence provider init [--no-input] [--peers <value>] [--env <testnet | mainnet | stage | local>] [--priv-key
+    <private-key>]
 
 FLAGS
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --no-vm                                    Generate provider.yaml without vm configuration
-  --noxes=<value>                            Number of Compute Peers to generate when a new provider.yaml is created
+  --peers=<value>                            Number of peers to generate when a new provider.yaml is created
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
@@ -757,55 +765,57 @@ _See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cl
 
 ## `fluence provider tokens-distribute`
 
-Distribute FLT tokens to noxes. Alias: fluence provider td
+Distribute FLT tokens to peers. Alias: fluence provider td
 
 ```
 USAGE
   $ fluence provider tokens-distribute [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2>] [--offers <offer-1,offer-2>] [--amount <value>]
+    [--peer-names <peer-1,peer-2>] [--offers <offer-1,offer-2>] [--amount <value>]
 
 FLAGS
-  --amount=<value>                           Amount of FLT tokens to distribute to noxes
+  --amount=<value>                           Amount of FLT tokens to distribute to peers
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                  Comma-separated names of noxes from provider.yaml. To use all of your
-                                             noxes: --nox-names all
   --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
                                              all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Distribute FLT tokens to noxes. Alias: fluence provider td
+  Distribute FLT tokens to peers. Alias: fluence provider td
 ```
 
 _See code: [src/commands/provider/tokens-distribute.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/tokens-distribute.ts)_
 
 ## `fluence provider tokens-withdraw`
 
-Withdraw FLT tokens from noxes. Alias: fluence provider tw
+Withdraw FLT tokens from peers. Alias: fluence provider tw
 
 ```
 USAGE
   $ fluence provider tokens-withdraw [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--nox-names <nox-1,nox-2>] [--amount <value>]
+    [--peer-names <peer-1,peer-2>] [--offers <offer-1,offer-2>] [--amount <value>]
 
 FLAGS
-  --amount=<value>                           Amount of FLT tokens to withdraw from noxes. Use --amount max to withdraw
+  --amount=<value>                           Amount of FLT tokens to withdraw from peers. Use --amount max to withdraw
                                              maximum possible amount
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>                  Comma-separated names of noxes from provider.yaml. To use all of your
-                                             noxes: --nox-names all
+  --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
+                                             all
+  --peer-names=<peer-1,peer-2>               Comma-separated names of peers from provider.yaml. To use all of your
+                                             peers: --peer-names all
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
                                              by default when CLI is used in non-interactive mode
 
 DESCRIPTION
-  Withdraw FLT tokens from noxes. Alias: fluence provider tw
+  Withdraw FLT tokens from peers. Alias: fluence provider tw
 ```
 
 _See code: [src/commands/provider/tokens-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.22.0/src/commands/provider/tokens-withdraw.ts)_

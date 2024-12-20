@@ -11,10 +11,6 @@ on:
         description: "Fluence environment to run tests against"
         type: string
         default: "local"
-      nox-image:
-        description: "nox image tag"
-        type: string
-        default: "null"
       chain-rpc-image:
         description: "chain-rpc image tag"
         type: string
@@ -88,23 +84,6 @@ jobs:
             kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD ;
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN;
 
-      - name: Set nox image
-        run: |
-          # set nox image
-          case ${{ inputs.nox-image }} in
-          # if nox image is not passed from e2e read from versions.json
-          'null')
-            nox="$(jq .nox packages/cli/package/src/versions.json -r)"
-          ;;
-          # else set nox image to snapshot passed from e2e
-          *)
-            nox=${{ inputs.nox-image }}
-          ;;
-          esac
-
-          echo "nox image used for tests is $nox"
-          echo "NOX_IMAGE=${nox}" >> $GITHUB_ENV
-
       - name: Set deal images
         run: |
           # set deal images
@@ -173,7 +152,6 @@ jobs:
         with:
           versions: |
             {
-              "nox": "${{ env.NOX_IMAGE }}",
               "chain-rpc": "${{ env.CHAIN_RPC_IMAGE }}",
               "chain-deploy-script": "${{ env.CHAIN_DEPLOY_SCRIPT_IMAGE }}",
               "subgraph-deploy-script": "${{ env.SUBGRAPH_DEPLOY_SCRIPT_IMAGE }}"

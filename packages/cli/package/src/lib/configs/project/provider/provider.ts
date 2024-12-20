@@ -18,42 +18,42 @@
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
-import { type JsonMap } from "@iarna/toml";
-import kebabCase from "lodash-es/kebabCase.js";
-import mapKeys from "lodash-es/mapKeys.js";
-import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
-import { type ChainENV } from "../../../../common.js";
-import { ajv } from "../../../ajvInstance.js";
+import {
+  getChainId,
+  getIpfsGateway,
+  getRpcUrl,
+} from "../../../chain/chainConfig.js";
+import { hexStringToUTF8ToBase64String } from "../../../chain/conversions.js";
+import { peerIdBase58ToHexString } from "../../../chain/conversions.js";
 import { commandObj, isInteractive } from "../../../commandObj.js";
 import {
   DEFAULT_OFFER_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
-  TOML_EXT,
   defaultNumberProperties,
   DEFAULT_CC_DURATION,
   DEFAULT_CC_STAKER_REWARD,
-  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
-  DEFAULT_CURL_EFFECTOR_CID,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
   CLI_NAME,
-  DEFAULT_NUMBER_OF_LOCAL_NET_NOXES,
-  DEFAULT_VM_EFFECTOR_CID,
+  DEFAULT_NUMBER_OF_LOCAL_NET_PEERS,
+  WS_CHAIN_URLS,
 } from "../../../const.js";
+import { resolveDeployment } from "../../../dealClient.js";
 import { ensureChainEnv } from "../../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../../generateUserProviderConfig.js";
+import { genManifest } from "../../../genManifest.js";
 import { getPeerIdFromSecretKey } from "../../../helpers/getPeerIdFromSecretKey.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../../helpers/utils.js";
 import { genSecretKeyOrReturnExisting } from "../../../keyPairs.js";
 import {
-  ensureFluenceConfigsDir,
   getProviderConfigPath,
   getFluenceDir,
   ensureFluenceSecretsFilePath,
-  ensureFluenceCCPConfigsDir,
+  ensureK8sManifestsDir,
 } from "../../../paths.js";
 import { input } from "../../../prompt.js";
 import { getConfigInitFunction } from "../../initConfigNew.js";
@@ -63,23 +63,11 @@ import { initNewProviderSecretsConfig } from "../providerSecrets/providerSecrets
 
 import configOptions0, { type Config as Config0 } from "./provider0.js";
 import configOptions1, {
-  DEFAULT_LOG_LEVEL,
-  DEFAULT_PROMETHEUS_ENDPOINT_HOST,
-  DEFAULT_PROMETHEUS_ENDPOINT_PORT,
-  DEFAULT_REPORT_HASHRATE,
-  DEFAULT_RPC_ENDPOINT_HOST,
-  DEFAULT_RPC_ENDPOINT_PORT,
-  type CCPConfigYAML,
   type ComputePeer,
   type Config as Config1,
-  type NoxConfigYAML,
 } from "./provider1.js";
 import configOptions2, { type Config as Config2 } from "./provider2.js";
-import configOptions3, {
-  mergeConfigYAMLWithRawConfig,
-  resolveNoxConfigYAML,
-  type Config as Config3,
-} from "./provider3.js";
+import configOptions3, { type Config as Config3 } from "./provider3.js";
 
 export const options: InitConfigOptions<Config0, Config1, Config2, Config3> = {
   description: "Defines config used for provider set up",
@@ -90,24 +78,14 @@ export const options: InitConfigOptions<Config0, Config1, Config2, Config3> = {
 
 export type ProviderConfig = Awaited<ReturnType<typeof initNewProviderConfig>>;
 
-const ipValidator = ajv.compile({
-  type: "string",
-  format: "ipv4",
-});
-
-function validateIp(value: string) {
-  return ipValidator(value) ? true : "Must be a valid IPv4 address";
-}
-
 function getDefault(args: ProviderConfigArgs) {
   return async () => {
     const chainEnv = await ensureChainEnv();
     await initNewEnvConfig(chainEnv);
     const isLocal = chainEnv === "local";
-    const hasVM = !isLocal && args["no-vm"] !== true;
 
-    const numberOfNoxes =
-      args.noxes ??
+    const numberOfPeers =
+      args.peers ??
       (isInteractive && !isLocal
         ? Number(
             await input({
@@ -119,33 +97,15 @@ function getDefault(args: ProviderConfigArgs) {
               },
             }),
           )
-        : DEFAULT_NUMBER_OF_LOCAL_NET_NOXES);
+        : DEFAULT_NUMBER_OF_LOCAL_NET_PEERS);
 
     const computePeerEntries: [string, ComputePeer][] = [];
 
-    for (const i of times(numberOfNoxes)) {
-      const peerConfig = hasVM
-        ? {
-            nox: {
-              vm: {
-                network: {
-                  publicIp: isInteractive
-                    ? await input({
-                        message: `Enter public IP address for nox-${numToStr(i)}`,
-                        validate: validateIp,
-                      })
-                    : "",
-                },
-              },
-            },
-          }
-        : {};
-
+    for (const i of times(numberOfPeers)) {
       computePeerEntries.push([
-        `nox-${numToStr(i)}`,
+        `peer-${numToStr(i)}`,
         {
-          computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
-          ...peerConfig,
+          computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
         },
       ] as const);
     }
@@ -154,30 +114,17 @@ function getDefault(args: ProviderConfigArgs) {
 
     return {
       providerName: "defaultProvider",
-      nox: {
-        effectors: {
-          curl: {
-            wasmCID: DEFAULT_CURL_EFFECTOR_CID,
-            allowedBinaries: { curl: "/usr/bin/curl" },
-          },
-          ...(hasVM ? { vm: { wasmCID: DEFAULT_VM_EFFECTOR_CID } } : {}),
-        },
-      },
       computePeers,
       offers: {
         [DEFAULT_OFFER_NAME]: {
           ...defaultNumberProperties,
           computePeers: Object.keys(computePeers),
-          effectors: [
-            DEFAULT_CURL_EFFECTOR_CID,
-            ...(hasVM ? [DEFAULT_VM_EFFECTOR_CID] : []),
-          ],
         },
       },
       capacityCommitments: Object.fromEntries(
-        Object.keys(computePeers).map((noxName) => {
+        Object.keys(computePeers).map((peerName) => {
           return [
-            noxName,
+            peerName,
             {
               duration: DEFAULT_CC_DURATION,
               stakerReward: DEFAULT_CC_STAKER_REWARD,
@@ -205,163 +152,6 @@ export async function ensureReadonlyProviderConfig() {
   }
 
   return providerConfig;
-}
-
-function resolveCCPConfigYAML(
-  globalCCPConfig: CCPConfigYAML | undefined = {},
-  computePeerCCPConfig: CCPConfigYAML | undefined = {},
-) {
-  const config = mergeConfigYAMLWithRawConfig(
-    getDefaultCCPConfigYAML(),
-    globalCCPConfig,
-  );
-
-  return mergeConfigYAMLWithRawConfig(config, computePeerCCPConfig);
-}
-
-function getObjByKey(obj: Record<string, unknown>, key: string): object {
-  if (!(key in obj)) {
-    return {};
-  }
-
-  const value = obj[key];
-  return typeof value === "object" && value !== null ? value : {};
-}
-
-function noxConfigYAMLToConfigToml(
-  {
-    chain: { diamondContract, walletPrivateKey, ...chain } = {},
-    ccp,
-    listenIp,
-    metrics,
-    effectors,
-    ...config
-  }: NoxConfigYAML,
-  ccpConfig: CCPConfigYAML,
-  env: ChainENV,
-) {
-  const chainConfig = {
-    httpEndpoint: chain.httpEndpoint,
-    diamondContractAddress: diamondContract,
-    networkId: chain.networkId,
-    walletKey: walletPrivateKey,
-    defaultBaseFee: chain.defaultBaseFee,
-    defaultPriorityFee: chain.defaultPriorityFee,
-    ...getObjByKey(config, "chain_config"),
-  };
-
-  // Would be too hard to properly type this
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return camelCaseKeysToSnakeCase({
-    ...config,
-    ...(listenIp === undefined
-      ? {}
-      : {
-          listenConfig: {
-            listenIp,
-            ...getObjByKey(config, "listen_config"),
-          },
-        }),
-    chainConfig,
-    ...(env === "local"
-      ? {}
-      : {
-          chainListenerConfig: {
-            wsEndpoint: chain.wsEndpoint,
-            ccpEndpoint:
-              ccp?.ccpEndpoint ??
-              `http://${
-                ccpConfig.rpcEndpoint?.host ?? DEFAULT_RPC_ENDPOINT_HOST
-              }:${numToStr(
-                ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT,
-              )}`,
-            proofPollPeriod: ccp?.proofPollPeriod,
-            ...getObjByKey(config, "chain_listener_config"),
-          },
-        }),
-    tokioMetricsEnabled: metrics?.tokioMetricsEnabled,
-    tokioDetailedMetricsEnabled: metrics?.tokioDetailedMetricsEnabled,
-    metricsEnabled: metrics?.enabled,
-    metricsTimerResolution: metrics?.timerResolution,
-    ...(effectors === undefined
-      ? {}
-      : {
-          effectors: Object.fromEntries(
-            Object.entries(effectors).map(
-              ([name, { wasmCID, allowedBinaries }]) => {
-                return [
-                  name,
-                  { wasmCID, allowedBinaries: allowedBinaries ?? {} },
-                ] as const;
-              },
-            ),
-          ),
-        }),
-  }) as JsonMap;
-}
-
-function ccpConfigYAMLToConfigToml(config: CCPConfigYAML) {
-  // Would be too hard to properly type this
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return camelCaseKeysToKebabCase(config) as JsonMap;
-}
-
-function camelCaseToDifferentCase(caseFn: (str: string) => string) {
-  const camelCaseToDifferentCaseImpl = (val: unknown): unknown => {
-    if (typeof val === "object" && val !== null) {
-      if (Array.isArray(val)) {
-        return val.map(camelCaseToDifferentCaseImpl);
-      }
-
-      const objWithSnakeCaseKeys = mapKeys(val, (_, key) => {
-        return caseFn(key);
-      });
-
-      return Object.fromEntries(
-        Object.entries(objWithSnakeCaseKeys).map(([key, value]) => {
-          return [key, camelCaseToDifferentCaseImpl(value)];
-        }),
-      );
-    }
-
-    return val;
-  };
-
-  return camelCaseToDifferentCaseImpl;
-}
-
-function camelCaseKeysToSnakeCase(val: unknown): unknown {
-  return camelCaseToDifferentCase(snakeCase)(val);
-}
-
-function camelCaseKeysToKebabCase(val: unknown): unknown {
-  return camelCaseToDifferentCase(kebabCase)(val);
-}
-
-function getDefaultCCPConfigYAML(): CCPConfigYAML {
-  return {
-    rpcEndpoint: {
-      host: DEFAULT_RPC_ENDPOINT_HOST,
-      port: DEFAULT_RPC_ENDPOINT_PORT,
-      utilityThreadIds: [1],
-    },
-    prometheusEndpoint: {
-      host: DEFAULT_PROMETHEUS_ENDPOINT_HOST,
-      port: DEFAULT_PROMETHEUS_ENDPOINT_PORT,
-    },
-    logs: {
-      reportHashrate: DEFAULT_REPORT_HASHRATE,
-      logLevel: DEFAULT_LOG_LEVEL,
-    },
-  };
-}
-
-export function getConfigTomlName(noxName: string) {
-  return `${noxName}_Config.${TOML_EXT}`;
-}
-
-function getCCPConfigTomlName(noxName: string) {
-  return `${noxName}_Config.${TOML_EXT}`;
 }
 
 export type EnsureComputerPeerConfig = Awaited<
@@ -465,9 +255,6 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
     );
   }
 
-  const { stringify } = await import("@iarna/toml");
-  const configsDir = await ensureFluenceConfigsDir();
-  const ccpConfigsDir = await ensureFluenceCCPConfigsDir();
   const env = await ensureChainEnv();
 
   if (env === "local") {
@@ -495,59 +282,54 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
     }
   }
 
+  const k8sManifestsDir = await ensureK8sManifestsDir();
+  const { diamond: diamondContract } = await resolveDeployment();
+  const networkId = numToStr(await getChainId());
+  const ipfsGatewayEndpoint = await getIpfsGateway();
+  const wsEndpoint = WS_CHAIN_URLS[env];
+  const httpEndpoint = await getRpcUrl();
+
   return Promise.all(
     computePeersWithCC.map(
-      async (
-        {
-          computePeerName,
-          computePeer,
-          secretKey,
-          signingWallet,
-          capacityCommitment,
-        },
-        i,
-      ) => {
+      async ({
+        computePeerName,
+        computePeer,
+        secretKey,
+        signingWallet,
+        capacityCommitment,
+      }) => {
         await writeFile(
           await ensureFluenceSecretsFilePath(computePeerName),
           secretKey,
           "utf8",
         );
 
-        const overridenCCPConfig = resolveCCPConfigYAML(
-          providerConfig.ccp,
-          computePeer.ccp,
-        );
+        const peerId = await getPeerIdFromSecretKey(secretKey);
 
-        await writeFile(
-          join(ccpConfigsDir, getCCPConfigTomlName(computePeerName)),
-          stringify(ccpConfigYAMLToConfigToml(overridenCCPConfig)),
-          "utf8",
-        );
+        const ipSupplies = computePeer.resources?.ip.supply ?? [];
 
-        const overriddenNoxConfig = await resolveNoxConfigYAML(
-          providerConfig.nox,
-          computePeer.nox,
-          { i, signingWallet },
-        );
+        const manifest = genManifest({
+          chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
+          ipSupplies,
+          httpEndpoint,
+          wsEndpoint,
+          ipfsGatewayEndpoint,
+          peerIdHex: await peerIdBase58ToHexString(peerId),
+          networkId,
+          diamondContract,
+        });
 
-        await writeFile(
-          join(configsDir, getConfigTomlName(computePeerName)),
-          stringify(
-            noxConfigYAMLToConfigToml(
-              overriddenNoxConfig,
-              overridenCCPConfig,
-              env,
-            ),
-          ),
-          "utf8",
-        );
+        const manifestPath = join(k8sManifestsDir, `${computePeerName}.yaml`);
+        await writeFile(manifestPath, manifest, "utf8");
 
         return {
           name: computePeerName,
-          overriddenNoxConfig,
           secretKey,
-          peerId: await getPeerIdFromSecretKey(secretKey),
+          peerId,
           computeUnits: computePeer.computeUnits,
+          kubeconfigPath: computePeer.kubeconfigPath,
+          ipSupplies,
+          manifestPath,
           walletKey: signingWallet,
           walletAddress: await new Wallet(signingWallet).getAddress(),
           capacityCommitment,

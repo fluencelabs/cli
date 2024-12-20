@@ -31,6 +31,7 @@ export type Config = {
   blockScoutUrl?: string;
   chainId?: number;
   deployment?: Partial<Deployment>;
+  ipfsGateway?: string;
 };
 
 export default {
@@ -85,6 +86,12 @@ export default {
           multicall3: { type: "string", nullable: true },
           diamond: { type: "string", nullable: true },
         },
+      },
+      ipfsGateway: {
+        type: "string",
+        description: `IPFS gateway URL to use`,
+        format: "uri",
+        nullable: true,
       },
     },
     additionalProperties: false,
