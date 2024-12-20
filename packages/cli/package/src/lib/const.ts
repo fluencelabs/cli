@@ -27,7 +27,6 @@ import {
 import {
   CHAIN_RPC_CONTAINER_NAME,
   CHAIN_RPC_PORT,
-  IPFS_PORT,
 } from "./configs/project/chainContainers.js";
 
 export const CLI_NAME = "fluence";
@@ -46,12 +45,6 @@ export const defaultNumberProperties: Record<"minPricePerCuPerEpoch", string> =
   };
 
 export const COMPUTE_UNIT_MEMORY_STR = "2GB";
-
-export const DEFAULT_CURL_EFFECTOR_CID =
-  "bafybeicorj3sl6fhqpuubmt5r2n7plkjkmto6jxqckgte2624dj5zvzufm";
-
-export const DEFAULT_VM_EFFECTOR_CID =
-  "bafkreidfw2so3evkkkky7bodnamzg32zweunfkthna362r7e6a63cnqxiy";
 
 export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER = 32;
 
@@ -72,7 +65,6 @@ export function fluenceOldEnvToNewEnv(env: FluenceEnvOld): FluenceEnv {
   )[env];
 }
 
-export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
 export const TCP_PORT_START = 977;
 export const WEB_SOCKET_PORT_START = 999;
 export const HTTP_PORT_START = 918;
@@ -89,7 +81,6 @@ export const WS_CHAIN_URLS: Record<ChainENV, string> = {
 export const JSON_EXT = "json";
 export const YAML_EXT = "yaml";
 export const YML_EXT = "yml";
-export const TOML_EXT = "toml";
 
 export const CLI_CONNECTOR_DIR_NAME = "cli-connector";
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
@@ -97,8 +88,6 @@ export const SCHEMAS_DIR_NAME = "schemas";
 export const COUNTLY_DIR_NAME = "countly";
 export const SECRETS_DIR_NAME = "secrets";
 export const BACKUPS_DIR_NAME = "backups";
-export const CONFIGS_DIR_NAME = "configs";
-export const CCP_CONFIGS_DIR_NAME = "ccp-configs";
 
 export const PROVIDER_CONFIG_FILE_NAME = `provider`;
 export const PROVIDER_SECRETS_CONFIG_FILE_NAME = `provider-secrets`;

@@ -25,7 +25,6 @@ import {
   DOT_FLUENCE_DIR_NAME,
   GITIGNORE_FILE_NAME,
   SECRETS_DIR_NAME,
-  CONFIGS_DIR_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
@@ -109,7 +108,7 @@ export const getGitignorePath = (): string => {
   return join(projectRootDir, GITIGNORE_FILE_NAME);
 };
 
-export function k8sManifestsDir() {
+function k8sManifestsDir() {
   return join(projectRootDir, "k8s-manifests");
 }
 
@@ -163,7 +162,3 @@ export const ensureFluenceSecretsFilePath = async (
 ): Promise<string> => {
   return join(await ensureFluenceSecretsDir(), `${name}.txt`);
 };
-
-export async function ensureFluenceConfigsDir(): Promise<string> {
-  return ensureDir(join(getFluenceDir(), CONFIGS_DIR_NAME));
-}

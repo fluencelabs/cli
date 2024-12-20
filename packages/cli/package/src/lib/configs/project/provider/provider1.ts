@@ -120,9 +120,9 @@ export type NoxConfigYAML = {
   };
 };
 
-export const DEFAULT_TIMER_RESOLUTION = "1 minute";
-export const DEFAULT_PROOF_POLL_PERIOD = "60 seconds";
-export const DEFAULT_IPFS_BINARY_PATH = "/usr/bin/ipfs";
+const DEFAULT_TIMER_RESOLUTION = "1 minute";
+const DEFAULT_PROOF_POLL_PERIOD = "60 seconds";
+const DEFAULT_IPFS_BINARY_PATH = "/usr/bin/ipfs";
 
 export const noxConfigYAMLSchema = {
   type: "object",
@@ -530,12 +530,12 @@ export type CCPConfigYAML = {
   rawConfig?: string;
 };
 
-export const DEFAULT_RPC_ENDPOINT_HOST = "0.0.0.0";
-export const DEFAULT_RPC_ENDPOINT_PORT = 9389;
-export const DEFAULT_PROMETHEUS_ENDPOINT_HOST = "0.0.0.0";
-export const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
-export const DEFAULT_REPORT_HASHRATE = false;
-export const DEFAULT_LOG_LEVEL = "debug";
+const DEFAULT_RPC_ENDPOINT_HOST = "0.0.0.0";
+const DEFAULT_RPC_ENDPOINT_PORT = 9389;
+const DEFAULT_PROMETHEUS_ENDPOINT_HOST = "0.0.0.0";
+const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
+const DEFAULT_REPORT_HASHRATE = false;
+const DEFAULT_LOG_LEVEL = "debug";
 const DEFAULT_STATE_PATH = "./state";
 
 export const ccpConfigYAMLSchema = {

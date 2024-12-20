@@ -56,7 +56,7 @@ export default class Info extends BaseCommand<typeof Info> {
       )),
       computePeers: computePeers.map(({ name, peerId, walletAddress }) => {
         return {
-          nox: name,
+          peer: name,
           peerId,
           wallet: walletAddress,
         };

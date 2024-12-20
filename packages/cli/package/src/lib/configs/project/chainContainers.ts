@@ -17,7 +17,7 @@
 
 import { versions } from "../../../versions.js";
 
-export type Service = {
+type Service = {
   image?: string;
   ports?: string[];
   pull_policy?: string;
@@ -29,24 +29,24 @@ export type Service = {
   healthcheck?: Record<string, string | number>;
 };
 
-export type Config = {
+type Config = {
   services: Record<string, Service>;
   volumes?: Record<string, null>;
   include?: string[];
   secrets?: Record<string, { file?: string }>;
 };
 
-export const CHAIN_DEPLOY_SCRIPT_NAME = "chain-deploy-script";
+const CHAIN_DEPLOY_SCRIPT_NAME = "chain-deploy-script";
 export const CHAIN_RPC_CONTAINER_NAME = "chain-rpc";
 export const CHAIN_RPC_PORT = "8545";
 const GRAPH_NODE_CONTAINER_NAME = "graph-node";
 const GRAPH_NODE_PORT = "8020";
-export const IPFS_CONTAINER_NAME = "ipfs";
-export const IPFS_PORT = "5001";
+const IPFS_CONTAINER_NAME = "ipfs";
+const IPFS_PORT = "5001";
 const POSTGRES_CONTAINER_NAME = "postgres";
 const SUBGRAPH_DEPLOY_SCRIPT_NAME = "subgraph-deploy-script";
 
-export const chainContainers: Config = {
+export const chainContainers = {
   volumes: {
     "chain-rpc": null,
     [IPFS_CONTAINER_NAME]: null,
@@ -150,4 +150,4 @@ export const chainContainers: Config = {
       depends_on: [GRAPH_NODE_CONTAINER_NAME],
     },
   },
-};
+} as const satisfies Config;
