@@ -533,7 +533,7 @@ export function defaultComputePeerConfig({
       bandwidth: { name: BANDWIDTH_RESOURCE_NAME, supply: 1 },
       ip: {
         name: IP_RESOURCE_NAME,
-        ...(resources?.ip ?? { supply: [{ start: "0.0.0.0" }] }),
+        ...(resources?.ip ?? { supply: [{ start: "1.1.1.1" }] }),
       },
     },
   };
