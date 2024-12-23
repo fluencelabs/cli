@@ -186,14 +186,14 @@ Defines a provider offer
 
 #### Properties
 
-| Property             | Type                 | Required | Description                                                                        |
-|----------------------|----------------------|----------|------------------------------------------------------------------------------------|
-| `computePeers`       | string[]             | **Yes**  | Compute peers participating in this offer                                          |
-| `maxProtocolVersion` | integer              | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 1 |
-| `minProtocolVersion` | integer              | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 1 |
-| `resources`          | [object](#resources) | No       | Resource prices for the offer                                                      |
+| Property             | Type                      | Required | Description                                                                        |
+|----------------------|---------------------------|----------|------------------------------------------------------------------------------------|
+| `computePeers`       | string[]                  | **Yes**  | Compute peers participating in this offer                                          |
+| `maxProtocolVersion` | integer                   | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 1 |
+| `minProtocolVersion` | integer                   | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 1 |
+| `resourcePrices`     | [object](#resourceprices) | No       | Resource prices for the offer                                                      |
 
-#### resources
+#### resourcePrices
 
 Resource prices for the offer
 
