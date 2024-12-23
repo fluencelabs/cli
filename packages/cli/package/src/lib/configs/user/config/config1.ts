@@ -23,6 +23,7 @@ import type { Config as PrevConfig } from "./config0.js";
 export type Config = {
   countlyConsent: boolean;
   defaultSecretKeyName?: string;
+  docsInConfigs?: boolean;
 };
 
 export default {
@@ -38,6 +39,11 @@ export default {
         type: "string",
         description:
           "DEPRECATED: Secret key with this name will be used by default by js-client inside CLI to run Aqua code",
+        nullable: true,
+      },
+      docsInConfigs: {
+        type: "boolean",
+        description: "DEPRECATED: Whether to include docs in generated configs",
         nullable: true,
       },
     },
