@@ -157,7 +157,7 @@ Defines a vCPU resource
 | Property  | Type               | Required | Description                                                                          |
 |-----------|--------------------|----------|--------------------------------------------------------------------------------------|
 | `name`    | string             | **Yes**  |                                                                                      |
-| `supply`  | integer            | **Yes**  | Number of vCPUs. Currently it's 2 vCPU per 1 CU                                      |
+| `supply`  | integer            | **Yes**  | Number of physical cores                                                             |
 | `details` | [object](#details) | No       | CPU details not related to matching but visible to the user for information purposes |
 
 ###### details
