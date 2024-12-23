@@ -16,6 +16,7 @@
  */
 
 import { color } from "@oclif/color";
+import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { versions } from "../../../versions.js";
@@ -118,8 +119,6 @@ export async function createOffers(flags: OffersArgs) {
   for (const offer of offers) {
     const {
       computePeersFromProviderConfig: allCPs,
-      effectorPrefixesAndHash,
-      minPricePerCuPerEpochBigInt,
       offerName,
       minProtocolVersion = versions.protocolVersion,
       maxProtocolVersion = versions.protocolVersion,
@@ -143,9 +142,9 @@ export async function createOffers(flags: OffersArgs) {
         sliceIndex: allCUs.length,
         getArgs(computePeersToRegister) {
           return [
-            minPricePerCuPerEpochBigInt,
+            "3300000",
             contracts.deployment.usdc,
-            effectorPrefixesAndHash,
+            [],
             computePeersToRegister,
             minProtocolVersion,
             maxProtocolVersion,
@@ -537,7 +536,6 @@ export async function resolveOffersFromProviderConfig(
       offerInfos.map(async ({ offerId, offerIndexerInfo }) => {
         return {
           offerName: `Offer ${offerId}`,
-          minPricePerCuPerEpochBigInt: offerIndexerInfo.pricePerEpoch,
           effectorPrefixesAndHash: await Promise.all(
             offerIndexerInfo.effectors.map(({ cid }) => {
               return cidStringToCIDV1Struct(cid);
@@ -653,7 +651,7 @@ export type EnsureOfferConfig = Awaited<
 async function ensureOfferConfigs() {
   const providerConfig = await ensureReadonlyProviderConfig();
   const providerArtifactsConfig = await initProviderArtifactsConfig();
-  // const { randomBytes } = await import("ethers");
+  const { randomBytes } = await import("ethers");
   const fluenceEnv = await ensureFluenceEnv();
 
   return Promise.all(
@@ -666,17 +664,20 @@ async function ensureOfferConfigs() {
           await ensureComputerPeerConfigs(computePeers);
 
         const computePeersFromProviderConfig = await Promise.all(
-          computePeerConfigs.map(async ({ name, walletAddress, peerId }) => {
-            return {
-              name,
-              peerIdBase58: peerId,
-              peerId: await peerIdBase58ToUint8Array(peerId),
-              // unitIds: times(computeUnits).map(() => {
-              //   return randomBytes(32);
-              // }),
-              owner: walletAddress,
-            };
-          }),
+          computePeerConfigs.map(
+            async ({ name, walletAddress, peerId, resources }) => {
+              return {
+                name,
+                peerIdBase58: peerId,
+                peerId: await peerIdBase58ToUint8Array(peerId),
+                // TODO: clarify what to do with unitIds
+                unitIds: times(resources.vcpu.supply).map(() => {
+                  return randomBytes(32);
+                }),
+                owner: walletAddress,
+              };
+            },
+          ),
         );
 
         const offerId =

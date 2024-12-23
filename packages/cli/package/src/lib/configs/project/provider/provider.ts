@@ -297,11 +297,9 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
 
         const peerId = await getPeerIdFromSecretKey(secretKey);
 
-        const ipSupplies = computePeer.resources.ip.supply;
-
         const manifest = genManifest({
           chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
-          ipSupplies,
+          ipSupplies: computePeer.resources.ip.supply,
           httpEndpoint,
           wsEndpoint,
           ipfsGatewayEndpoint,
@@ -318,7 +316,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
           secretKey,
           peerId,
           kubeconfigPath: computePeer.kubeconfigPath,
-          ipSupplies,
+          resources: computePeer.resources,
           manifestPath,
           walletKey: signingWallet,
           walletAddress: await new Wallet(signingWallet).getAddress(),

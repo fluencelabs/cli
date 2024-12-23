@@ -37,13 +37,6 @@ export const PT_SYMBOL = "USDC";
 
 export const MAX_TOKEN_AMOUNT_KEYWORD = "max";
 
-const DEFAULT_PRICE_PER_CU_PER_EPOCH_PROVIDER = "0.33";
-
-export const defaultNumberProperties: Record<"minPricePerCuPerEpoch", string> =
-  {
-    minPricePerCuPerEpoch: DEFAULT_PRICE_PER_CU_PER_EPOCH_PROVIDER,
-  };
-
 export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 
 export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER = 1;
