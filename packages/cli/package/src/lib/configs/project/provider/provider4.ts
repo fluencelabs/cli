@@ -324,7 +324,7 @@ const offerResourcesSchema = {
 
 type Offer = {
   computePeers: Array<string>;
-  resources: OfferResources;
+  resourcePrices: OfferResources;
   minProtocolVersion?: number;
   maxProtocolVersion?: number;
 };
@@ -340,7 +340,7 @@ const offerSchema = {
       items: { type: "string" },
       uniqueItems: true,
     },
-    resources: offerResourcesSchema,
+    resourcePrices: offerResourcesSchema,
     minProtocolVersion: {
       type: "integer",
       description: `Min protocol version. Must be less then or equal to maxProtocolVersion. Default: ${numToStr(
@@ -432,7 +432,10 @@ export default {
     const newOffers = Object.fromEntries(
       // TODO: protocol versions
       Object.entries(offers).map(([name, { computePeers }]) => {
-        return [name, { computePeers, resources: getDefaultOfferResources() }];
+        return [
+          name,
+          { computePeers, resourcePrices: getDefaultOfferResources() },
+        ];
       }),
     );
 
@@ -561,7 +564,7 @@ function validateNoDuplicateResourceIds({
       return names.length > 1;
     })
     .map(([id, names]) => {
-      return `Resource ID ${color.yellow(id)} has multiple names in resourceNames property: ${names.join(", ")}`;
+      return `names: ${color.yellow(names.join(", "))} in ${color.yellow("resourceNames")} property refer to the exact same Resource ID ${color.yellow(id)}`;
     });
 
   return errors.length === 0 ? true : errors.join("\n");
@@ -622,7 +625,7 @@ function validateOfferHasComputePeerResources(config: {
   }
 
   const errors = offers.reduce<string[]>(
-    (acc, [offerName, { computePeers, resources: offerResources }]) => {
+    (acc, [offerName, { computePeers, resourcePrices: offerResources }]) => {
       const offerResourcesSets: Record<ResourceType, Set<string>> = {
         vcpu: new Set(Object.keys(offerResources.vcpu)),
         ram: new Set(Object.keys(offerResources.ram)),
@@ -659,47 +662,99 @@ function validateOfferHasComputePeerResources(config: {
         );
       }
 
-      const missingResources = presentComputePeers.reduce<string[]>(
-        (acc, [peerName, peer]) => {
-          const validateResource = getValidateResource(
-            peer.resources,
-            offerResourcesSets,
-            extraOfferResourcesSets,
-          );
+      const missingResources = presentComputePeers.reduce<
+        {
+          peerName: string;
+          resourceType: ResourceType;
+          resourceNames: string[];
+        }[]
+      >((acc, [peerName, peer]) => {
+        const validateResource = getValidateResource(
+          peer.resources,
+          offerResourcesSets,
+          extraOfferResourcesSets,
+        );
 
-          const errors: Record<ResourceType, string[]> = {
-            vcpu: validateResource("vcpu"),
-            ram: validateResource("ram"),
-            storage: validateResource("storage"),
-            bandwidth: validateResource("bandwidth"),
-            ip: validateResource("ip"),
-          };
+        const missingResourceNamesPerType: Record<ResourceType, string[]> = {
+          vcpu: validateResource("vcpu"),
+          ram: validateResource("ram"),
+          storage: validateResource("storage"),
+          bandwidth: validateResource("bandwidth"),
+          ip: validateResource("ip"),
+        };
 
-          const missing = Object.entries(errors).reduce<string[]>(
-            (acc, [type, errors]) => {
-              if (errors.length > 0) {
-                acc.push(`${type}: ${errors.join(", ")}`);
-              }
-
-              return acc;
-            },
-            [],
-          );
-
-          if (missing.length > 0) {
-            acc.push(
-              `compute peer ${color.yellow(peerName)} resources:\n${missing.join("\n")}`,
-            );
+        const missingResourceNames = Object.entries(
+          missingResourceNamesPerType,
+        ).reduce<
+          {
+            peerName: string;
+            resourceType: ResourceType;
+            resourceNames: string[];
+          }[]
+        >((acc, [resourceType, resourceNames]) => {
+          if (resourceNames.length > 0) {
+            acc.push({
+              peerName,
+              // here there is no good way to avoid type assertion
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              resourceType: resourceType as ResourceType,
+              resourceNames,
+            });
           }
 
           return acc;
-        },
-        [],
-      );
+        }, []);
+
+        if (missingResourceNames.length > 0) {
+          acc.push(...missingResourceNames);
+        }
+
+        return acc;
+      }, []);
 
       if (missingResources.length > 0) {
+        const missing = Object.entries(
+          missingResources.reduce<
+            Record<ResourceType, Record<string, string[]>>
+          >(
+            (acc, { peerName, resourceNames, resourceType }) => {
+              const resourceNamesPerType = acc[resourceType];
+
+              resourceNames.forEach((resourceName) => {
+                if (resourceNamesPerType[resourceName] === undefined) {
+                  resourceNamesPerType[resourceName] = [];
+                }
+
+                resourceNamesPerType[resourceName].push(peerName);
+              });
+
+              return acc;
+            },
+            {
+              vcpu: {},
+              ram: {},
+              storage: {},
+              bandwidth: {},
+              ip: {},
+            },
+          ),
+        )
+          .filter(([, resourceNamesPerType]) => {
+            return Object.keys(resourceNamesPerType).length > 0;
+          })
+          .map(([resourceType, resourceNamesPerType]) => {
+            return `${color.yellow(resourceType)}: ${Object.entries(
+              resourceNamesPerType,
+            )
+              .map(([resourceName, peerNames]) => {
+                return `${color.yellow(resourceName)} (present in peers: ${peerNames.join(", ")})`;
+              })
+              .join(", ")}`;
+          })
+          .join("\n");
+
         acc.push(
-          `Offer ${color.yellow(offerName)} is missing resources defined in compute peers:\n${missingResources.join("\n")}`,
+          `Offer ${color.yellow(offerName)} is missing resources:\n${missing}`,
         );
       }
 

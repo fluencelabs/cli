@@ -135,7 +135,7 @@ function getDefault(args: ProviderConfigArgs) {
       offers: {
         [DEFAULT_OFFER_NAME]: {
           computePeers: Object.keys(computePeers),
-          resources: getDefaultOfferResources(),
+          resourcePrices: getDefaultOfferResources(),
         },
       },
       capacityCommitments: Object.fromEntries(
