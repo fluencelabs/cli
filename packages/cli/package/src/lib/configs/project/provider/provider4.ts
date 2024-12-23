@@ -44,7 +44,7 @@ import {
 } from "./provider3.js";
 
 export const OPTIONAL_RESOURCE_DETAILS_STRING = "<optional>";
-export const OPTIONAL_RESOURCE_DETAILS_NUMBER = 2;
+export const OPTIONAL_RESOURCE_DETAILS_NUMBER = 1;
 export const OPTIONAL_RESOURCE_DETAILS_BOOLEAN = false;
 
 const idSchema = {
@@ -95,7 +95,7 @@ const resourceSchema = {
   additionalProperties: false,
   properties: {
     name: { type: "string" },
-    supply: { type: "integer", minimum: 2 },
+    supply: { type: "integer", minimum: 1 },
   },
   required: ["name", "supply"],
 } as const satisfies JSONSchemaType<Resource>;
@@ -128,9 +128,8 @@ const peerVCPUSchema = {
     details: peerVCPUDetailsSchema,
     supply: {
       type: "integer",
-      minimum: 2,
-      multipleOf: 2,
-      description: "Number of vCPUs. Currently it's 2 vCPU per 1 CU",
+      minimum: 1,
+      description: "Number of physical cores",
     },
   },
   required: resourceSchema.required,
@@ -489,11 +488,11 @@ export function getDefaultResourceNames(): ResourceNames {
 
 export function getDefaultOfferResources(): OfferResources {
   return {
-    vcpu: { [VCPU_RESOURCE_NAME]: 2 },
-    ram: { [RAM_RESOURCE_NAME]: 2 },
-    storage: { [STORAGE_RESOURCE_NAME]: 2 },
-    bandwidth: { [BANDWIDTH_RESOURCE_NAME]: 2 },
-    ip: { [IP_RESOURCE_NAME]: 2 },
+    vcpu: { [VCPU_RESOURCE_NAME]: 1 },
+    ram: { [RAM_RESOURCE_NAME]: 1 },
+    storage: { [STORAGE_RESOURCE_NAME]: 1 },
+    bandwidth: { [BANDWIDTH_RESOURCE_NAME]: 1 },
+    ip: { [IP_RESOURCE_NAME]: 1 },
   };
 }
 
@@ -508,14 +507,14 @@ export function defaultComputePeerConfig({
     resources: {
       vcpu: {
         name: VCPU_RESOURCE_NAME,
-        supply: computeUnits < 2 ? 2 : computeUnits,
+        supply: computeUnits < 1 ? 1 : computeUnits,
         details: {
           model: OPTIONAL_RESOURCE_DETAILS_STRING,
         },
       },
       ram: {
         name: RAM_RESOURCE_NAME,
-        supply: 2,
+        supply: 1,
         details: {
           ecc: OPTIONAL_RESOURCE_DETAILS_BOOLEAN,
           manufacturer: OPTIONAL_RESOURCE_DETAILS_STRING,
@@ -526,7 +525,7 @@ export function defaultComputePeerConfig({
       storage: [
         {
           name: STORAGE_RESOURCE_NAME,
-          supply: 2,
+          supply: 1,
           details: {
             manufacturer: OPTIONAL_RESOURCE_DETAILS_STRING,
             model: OPTIONAL_RESOURCE_DETAILS_STRING,
@@ -534,10 +533,10 @@ export function defaultComputePeerConfig({
           },
         },
       ],
-      bandwidth: { name: BANDWIDTH_RESOURCE_NAME, supply: 2 },
+      bandwidth: { name: BANDWIDTH_RESOURCE_NAME, supply: 1 },
       ip: {
         name: IP_RESOURCE_NAME,
-        ...(resources?.ip ?? { supply: [{ start: "2.2.2.2" }] }),
+        ...(resources?.ip ?? { supply: [{ start: "1.1.1.1" }] }),
       },
     },
   };
