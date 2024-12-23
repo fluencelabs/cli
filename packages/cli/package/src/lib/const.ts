@@ -46,7 +46,7 @@ export const defaultNumberProperties: Record<"minPricePerCuPerEpoch", string> =
 
 export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 
-export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER = 32;
+export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER = 1;
 
 export type FluenceEnv = (typeof CHAIN_ENV)[number];
 export const isFluenceEnv = getIsUnion(CHAIN_ENV);

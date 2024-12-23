@@ -86,9 +86,9 @@ const capacityCommitmentSchema = {
   },
 } as const satisfies JSONSchemaType<CapacityCommitment>;
 
-type CapacityCommitments = Record<string, CapacityCommitment>;
+export type CapacityCommitments = Record<string, CapacityCommitment>;
 
-const capacityCommitmentsSchema = {
+export const capacityCommitmentsSchema = {
   type: "object",
   description:
     "A map with nox names as keys and capacity commitments as values",
@@ -171,13 +171,18 @@ export default {
       ),
       validateCC(config),
       validateMissingComputePeers(config),
-      validateNoDuplicateNoxNamesInOffers(config),
+      validateNoDuplicatePeerNamesInOffers(config),
       validateProtocolVersions(config),
     );
   },
 } satisfies ConfigOptions<PrevConfig, Config>;
 
-async function validateProtocolVersions(providerConfig: Config) {
+export async function validateProtocolVersions(providerConfig: {
+  offers: Record<
+    string,
+    { maxProtocolVersion?: number; minProtocolVersion?: number }
+  >;
+}): Promise<ValidationResult> {
   const errors = (
     await Promise.all(
       Object.entries(providerConfig.offers).flatMap(
@@ -232,7 +237,9 @@ async function validateProtocolVersions(providerConfig: Config) {
   return true;
 }
 
-function validateNoDuplicateNoxNamesInOffers(config: Config): ValidationResult {
+export function validateNoDuplicatePeerNamesInOffers(config: {
+  offers: Record<string, { computePeers: Array<string> }>;
+}): ValidationResult {
   const noxNamesInOffers: Record<string, string[]> = {};
 
   Object.entries(config.offers).forEach(([offerName, { computePeers }]) => {
@@ -268,7 +275,9 @@ function validateNoDuplicateNoxNamesInOffers(config: Config): ValidationResult {
   return true;
 }
 
-async function validateCC(config: Config): Promise<ValidationResult> {
+export async function validateCC(config: {
+  capacityCommitments: CapacityCommitments;
+}): Promise<ValidationResult> {
   const validateCCDuration = await ccDurationValidator();
 
   const capacityCommitmentErrors = (
@@ -301,7 +310,10 @@ async function validateCC(config: Config): Promise<ValidationResult> {
   return true;
 }
 
-function validateMissingComputePeers(config: Config): ValidationResult {
+function validateMissingComputePeers(config: {
+  computePeers: Record<string, unknown>;
+  offers: Record<string, { computePeers: Array<string> }>;
+}): ValidationResult {
   const missingComputePeerNamesInOffer: Array<{
     offerName: string;
     missingComputePeerNames: Array<string>;

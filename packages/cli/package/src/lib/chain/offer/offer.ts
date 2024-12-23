@@ -16,7 +16,6 @@
  */
 
 import { color } from "@oclif/color";
-import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { versions } from "../../../versions.js";
@@ -59,7 +58,7 @@ import {
   peerIdBase58ToUint8Array,
   peerIdHexStringToBase58String,
 } from "../conversions.js";
-import { ptFormat, ptParse } from "../currencies.js";
+import { ptFormat } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
@@ -654,47 +653,29 @@ export type EnsureOfferConfig = Awaited<
 async function ensureOfferConfigs() {
   const providerConfig = await ensureReadonlyProviderConfig();
   const providerArtifactsConfig = await initProviderArtifactsConfig();
-  const { randomBytes } = await import("ethers");
+  // const { randomBytes } = await import("ethers");
   const fluenceEnv = await ensureFluenceEnv();
 
   return Promise.all(
     Object.entries(providerConfig.offers).map(
       async ([
         offerName,
-        {
-          minPricePerCuPerEpoch,
-          effectors,
-          computePeers,
-          minProtocolVersion,
-          maxProtocolVersion,
-        },
+        { computePeers, minProtocolVersion, maxProtocolVersion },
       ]) => {
         const computePeerConfigs =
           await ensureComputerPeerConfigs(computePeers);
 
-        const minPricePerCuPerEpochBigInt = await ptParse(
-          minPricePerCuPerEpoch,
-        );
-
         const computePeersFromProviderConfig = await Promise.all(
-          computePeerConfigs.map(
-            async ({ computeUnits, name, walletAddress, peerId }) => {
-              return {
-                name,
-                peerIdBase58: peerId,
-                peerId: await peerIdBase58ToUint8Array(peerId),
-                unitIds: times(computeUnits).map(() => {
-                  return randomBytes(32);
-                }),
-                owner: walletAddress,
-              };
-            },
-          ),
-        );
-
-        const effectorPrefixesAndHash = await Promise.all(
-          (effectors ?? []).map((effector) => {
-            return cidStringToCIDV1Struct(effector);
+          computePeerConfigs.map(async ({ name, walletAddress, peerId }) => {
+            return {
+              name,
+              peerIdBase58: peerId,
+              peerId: await peerIdBase58ToUint8Array(peerId),
+              // unitIds: times(computeUnits).map(() => {
+              //   return randomBytes(32);
+              // }),
+              owner: walletAddress,
+            };
           }),
         );
 
@@ -703,9 +684,6 @@ async function ensureOfferConfigs() {
 
         return {
           offerName,
-          minPricePerCuPerEpochBigInt,
-          effectorPrefixesAndHash,
-          effectors,
           computePeersFromProviderConfig,
           offerId,
           minProtocolVersion,
