@@ -48,7 +48,7 @@ export const offersConfig = {
   type: "object",
   description: "Created offers",
   additionalProperties: offerConfig,
-  properties: { noxName: offerConfig },
+  properties: { offerName: offerConfig },
   required: [],
   nullable: true,
 } as const satisfies JSONSchemaType<OffersConfig>;
