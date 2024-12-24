@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { CIDV1Struct } from "@fluencelabs/deal-ts-clients/dist/typechain-types/Config.js";
-
 import { bufferToBase64 } from "../helpers/typesafeStringify.js";
 
 const PREFIX = new Uint8Array([0, 36, 8, 1, 18, 32]);
@@ -47,6 +45,11 @@ export async function peerIdHexStringToBase58String(peerIdHex: string) {
     .encode(Buffer.concat([PREFIX, Buffer.from(peerIdHex.slice(2), "hex")]))
     .slice(BASE_58_PREFIX.length);
 }
+
+type CIDV1Struct = {
+  prefixes: Uint8Array;
+  hash: Uint8Array;
+};
 
 const CID_PREFIX_LENGTH = 4;
 

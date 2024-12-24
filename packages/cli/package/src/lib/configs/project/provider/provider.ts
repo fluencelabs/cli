@@ -68,7 +68,9 @@ import configOptions4, {
   defaultComputePeerConfig,
   getDefaultResourceNames,
   getDefaultOfferResources,
+  type ResourceType,
 } from "./provider4.js";
+import assert from "assert";
 
 export const options: InitConfigOptions<
   Config0,
@@ -311,12 +313,66 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         const manifestPath = join(k8sManifestsDir, `${computePeerName}.yaml`);
         await writeFile(manifestPath, manifest, "utf8");
 
+        const cpuId =
+          providerConfig.resourceNames.cpu[computePeer.resources.cpu.name];
+
+        assert(
+          cpuId !== undefined,
+          `Unreachable. cpuId must be defined for ${computePeerName} because it is validated in the config`,
+        );
+
+        const ramId =
+          providerConfig.resourceNames.ram[computePeer.resources.ram.name];
+
+        assert(
+          ramId !== undefined,
+          `Unreachable. ramId must be defined for ${computePeerName} because it is validated in the config`,
+        );
+
+        const storage = computePeer.resources.storage.map((s) => {
+          const storageId = providerConfig.resourceNames.storage[s.name];
+          assert(
+            storageId !== undefined,
+            `Unreachable. storageId must be defined for ${computePeerName} because it is validated in the config`,
+          );
+          return { ...s, id: storageId };
+        });
+
+        const ipId =
+          providerConfig.resourceNames.ip[computePeer.resources.ip.name];
+
+        assert(
+          ipId !== undefined,
+          `Unreachable. ipId must be defined for ${computePeerName} because it is validated in the config`,
+        );
+
+        const bandwidthId =
+          providerConfig.resourceNames.bandwidth[
+            computePeer.resources.bandwidth.name
+          ];
+
+        assert(
+          bandwidthId !== undefined,
+          `Unreachable. bandwidthId must be defined for ${computePeerName} because it is validated in the config`,
+        );
+
+        const resourcesWithIds = {
+          cpu: { ...computePeer.resources.cpu, id: cpuId },
+          ram: { ...computePeer.resources.ram, id: ramId },
+          storage,
+          ip: { ...computePeer.resources.ip, id: ipId },
+          bandwidth: { ...computePeer.resources.bandwidth, id: bandwidthId },
+        } as const satisfies Record<
+          ResourceType,
+          { id: string } | Array<{ id: string }>
+        >;
+
         return {
           name: computePeerName,
           secretKey,
           peerId,
           kubeconfigPath: computePeer.kubeconfigPath,
-          resources: computePeer.resources,
+          resourcesWithIds,
           manifestPath,
           walletKey: signingWallet,
           walletAddress: await new Wallet(signingWallet).getAddress(),

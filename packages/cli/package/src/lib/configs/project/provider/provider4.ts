@@ -20,6 +20,7 @@ import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
 
 import { versions } from "../../../../versions.js";
+import { commandObj } from "../../../commandObj.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../../helpers/utils.js";
 import {
@@ -33,6 +34,7 @@ import {
   ipSchema as prevIpSchema,
   kubeconfigPathSchema,
   type IP as PrevIp,
+  type IPSupplies,
 } from "./provider1.js";
 import {
   type Config as PrevConfig,
@@ -85,7 +87,7 @@ const resourceNamesSchema = {
   required: [],
 } as const satisfies JSONSchemaType<ResourceNames>;
 
-type ResourceNamesPerResourceType = Record<ResourceType, ResourceNames>;
+export type ResourceNamesPerResourceType = Record<ResourceType, ResourceNames>;
 
 const resourceNamesPerResourceTypeSchema = {
   type: "object",
@@ -263,7 +265,7 @@ const ipSchema = {
   nullable: false,
 } as const satisfies JSONSchemaType<IP>;
 
-type ComputePeerResources = {
+export type ComputePeerResources = {
   cpu: PeerCPU;
   ram: PeerRAM;
   storage: PeerStorage[];
@@ -271,7 +273,7 @@ type ComputePeerResources = {
   ip: IP;
 };
 
-type ResourceType = keyof ComputePeerResources;
+export type ResourceType = keyof ComputePeerResources;
 
 export type ComputePeer = {
   kubeconfigPath: string;
@@ -322,7 +324,7 @@ const offerResourceSchema = {
   required: [],
 } as const satisfies JSONSchemaType<OfferResource>;
 
-type OfferResources = Record<ResourceType, OfferResource>;
+export type ResourcePrices = Record<ResourceType, OfferResource>;
 
 const offerResourcesSchema = {
   type: "object",
@@ -336,11 +338,11 @@ const offerResourcesSchema = {
     ip: offerResourceSchema,
   },
   required: ["cpu", "ram", "storage", "bandwidth", "ip"],
-} as const satisfies JSONSchemaType<OfferResources>;
+} as const satisfies JSONSchemaType<ResourcePrices>;
 
 type Offer = {
   computePeers: Array<string>;
-  resourcePrices: OfferResources;
+  resourcePrices: ResourcePrices;
   minProtocolVersion?: number;
   maxProtocolVersion?: number;
 };
@@ -513,7 +515,7 @@ export function getDefaultResourceNames(): ResourceNamesPerResourceType {
   };
 }
 
-export function getDefaultOfferResources(): OfferResources {
+export function getDefaultOfferResources(): ResourcePrices {
   return {
     cpu: { [CPU_RESOURCE_NAME]: 1 },
     ram: { [RAM_RESOURCE_NAME]: 1 },
@@ -670,13 +672,13 @@ function validateOfferHasComputePeerResources(config: {
   }
 
   const errors = offers.reduce<string[]>(
-    (acc, [offerName, { computePeers, resourcePrices: offerResources }]) => {
+    (acc, [offerName, { computePeers, resourcePrices }]) => {
       const offerResourcesSets: Record<ResourceType, Set<string>> = {
-        cpu: new Set(Object.keys(offerResources.cpu)),
-        ram: new Set(Object.keys(offerResources.ram)),
-        storage: new Set(Object.keys(offerResources.storage)),
-        bandwidth: new Set(Object.keys(offerResources.bandwidth)),
-        ip: new Set(Object.keys(offerResources.ip)),
+        cpu: new Set(Object.keys(resourcePrices.cpu)),
+        ram: new Set(Object.keys(resourcePrices.ram)),
+        storage: new Set(Object.keys(resourcePrices.storage)),
+        bandwidth: new Set(Object.keys(resourcePrices.bandwidth)),
+        ip: new Set(Object.keys(resourcePrices.ip)),
       };
 
       const extraOfferResourcesSets: Record<ResourceType, Set<string>> = {
@@ -861,4 +863,266 @@ function getValidateResource(
 
     return [];
   };
+}
+
+export function peerCPUDetailsToString({
+  model,
+}: PeerCPUDetails | undefined = {}) {
+  const details: PeerCPUDetails = {};
+
+  if (model !== undefined && model !== OPTIONAL_RESOURCE_DETAILS_STRING) {
+    details["model"] = model;
+  }
+
+  return JSON.stringify(details);
+}
+
+export function peerRAMDetailsToString({
+  manufacturer,
+  model,
+  speed,
+  ecc,
+}: PeerRamDetails | undefined = {}) {
+  const details: PeerRamDetails = {};
+
+  const isManufacturerDefined =
+    manufacturer !== undefined &&
+    manufacturer !== OPTIONAL_RESOURCE_DETAILS_STRING;
+
+  if (isManufacturerDefined) {
+    details["manufacturer"] = manufacturer;
+  }
+
+  const isModelDefined =
+    model !== undefined && model !== OPTIONAL_RESOURCE_DETAILS_STRING;
+
+  if (isModelDefined) {
+    details["model"] = model;
+  }
+
+  const isSpeedDefined =
+    speed !== undefined && speed !== OPTIONAL_RESOURCE_DETAILS_NUMBER;
+
+  if (isSpeedDefined) {
+    details["speed"] = speed;
+  }
+
+  const isEccDefined = ecc !== undefined;
+
+  const isSomethingElseDefined =
+    ecc !== OPTIONAL_RESOURCE_DETAILS_BOOLEAN ||
+    isManufacturerDefined ||
+    isModelDefined ||
+    isSpeedDefined;
+
+  if (isEccDefined && isSomethingElseDefined) {
+    details["ecc"] = ecc;
+  }
+
+  return JSON.stringify(details);
+}
+
+export function peerStorageDetailsToString({
+  manufacturer,
+  model,
+  sequentialWriteSpeed,
+}: PeerStorageDetails | undefined = {}) {
+  const details: PeerStorageDetails = {};
+
+  if (
+    manufacturer !== undefined &&
+    manufacturer !== OPTIONAL_RESOURCE_DETAILS_STRING
+  ) {
+    details["manufacturer"] = manufacturer;
+  }
+
+  if (model !== undefined && model !== OPTIONAL_RESOURCE_DETAILS_STRING) {
+    details["model"] = model;
+  }
+
+  if (
+    sequentialWriteSpeed !== undefined &&
+    sequentialWriteSpeed !== OPTIONAL_RESOURCE_DETAILS_NUMBER
+  ) {
+    details["sequentialWriteSpeed"] = sequentialWriteSpeed;
+  }
+
+  return JSON.stringify(details);
+}
+
+type IpRange =
+  | {
+      ip: IPv4;
+      mask: number;
+    }
+  | {
+      start: IPv4;
+      end?: IPv4;
+    };
+
+// TODO: export this from deal-ts-clients
+export enum OnChainResourceType {
+  VCPU,
+  RAM,
+  STORAGE,
+  PUBLIC_IP,
+  NETWORK_BANDWIDTH,
+  GPU,
+}
+
+export const resourceTypeToOnChainResourceType: Record<
+  ResourceType,
+  OnChainResourceType
+> = {
+  cpu: OnChainResourceType.VCPU,
+  ram: OnChainResourceType.RAM,
+  storage: OnChainResourceType.STORAGE,
+  bandwidth: OnChainResourceType.NETWORK_BANDWIDTH,
+  ip: OnChainResourceType.PUBLIC_IP,
+};
+
+export function ipSupplyToIndividualIPs(supply: IPSupplies) {
+  const ips = new Set<string>();
+
+  const [errors, validRanges] = splitErrorsAndResults(
+    supply,
+    (s): { error: string } | { result: IpRange } => {
+      if ("cidr" in s) {
+        const commonError = `Invalid cidr: ${s.cidr}. `;
+        const [baseIp, bits] = s.cidr.split("/");
+
+        if (baseIp === undefined) {
+          return { error: `${commonError}Expected to have "/" character` };
+        }
+
+        if (bits === undefined) {
+          return {
+            error: `${commonError}Expected to have bits after "/" character`,
+          };
+        }
+
+        const mask = parseInt(bits, 10);
+        const ipRes = stringToIp(baseIp);
+
+        if ("error" in ipRes) {
+          return { error: `${commonError}${ipRes.error}` };
+        }
+
+        if (isNaN(mask) || mask < 0 || mask > 32) {
+          return {
+            error: `${commonError}Expected mask to be an integer between 0 and 32`,
+          };
+        }
+
+        return { result: { ip: ipRes.result, mask } };
+      }
+
+      const startRes = stringToIp(s.start);
+
+      if ("error" in startRes) {
+        return {
+          error: `Invalid IP range start: ${s.start}. ${startRes.error}`,
+        };
+      }
+
+      if (!("end" in s)) {
+        return { result: { start: startRes.result } };
+      }
+
+      const endRes = stringToIp(s.end);
+
+      if ("error" in endRes) {
+        return {
+          error: `Invalid IP range end: ${s.end}. ${endRes.error}`,
+        };
+      }
+
+      return { result: { start: startRes.result, end: endRes.result } };
+    },
+  );
+
+  if (errors.length > 0) {
+    return commandObj.error(`Invalid IP ranges:\n${errors.join("\n")}`);
+  }
+
+  validRanges.forEach((range) => {
+    if ("mask" in range) {
+      const { ip: ipParts, mask } = range;
+      const numAddresses = Math.pow(2, 32 - mask);
+
+      let ipNum =
+        (ipParts[0] << 24) +
+        (ipParts[1] << 16) +
+        (ipParts[2] << 8) +
+        ipParts[3];
+
+      for (let i = 0; i < numAddresses; i++) {
+        const newIp = [
+          (ipNum >> 24) & 255,
+          (ipNum >> 16) & 255,
+          (ipNum >> 8) & 255,
+          ipNum & 255,
+        ].join(".");
+
+        ips.add(newIp);
+        ipNum++;
+      }
+    } else if ("end" in range) {
+      const { start, end } = range;
+
+      let startNum =
+        (start[0] << 24) + (start[1] << 16) + (start[2] << 8) + start[3];
+
+      const endNum = (end[0] << 24) + (end[1] << 16) + (end[2] << 8) + end[3];
+
+      while (startNum <= endNum) {
+        const ip = [
+          (startNum >> 24) & 255,
+          (startNum >> 16) & 255,
+          (startNum >> 8) & 255,
+          startNum & 255,
+        ].join(".");
+
+        ips.add(ip);
+        startNum++;
+      }
+    } else {
+      const { start } = range;
+      const ip = start.join(".");
+      ips.add(ip);
+    }
+  });
+
+  return Array.from(ips);
+}
+
+type IPv4 = [number, number, number, number];
+
+function stringToIp(str: string): { result: IPv4 } | { error: string } {
+  const parts = str.split(".").map(Number);
+  const [first, second, third, fourth, ...rest] = parts;
+
+  if (
+    rest.length > 0 ||
+    first === undefined ||
+    second === undefined ||
+    third === undefined ||
+    fourth === undefined
+  ) {
+    return {
+      error: `Expected to have 4 parts divided by "." character. Got: ${numToStr(parts.length)}`,
+    };
+  }
+
+  if (
+    parts.some((p) => {
+      return isNaN(p) || p < 0 || p > 255;
+    })
+  ) {
+    return {
+      error: `Expected each part divided by "." character to be an integer between 0 and 255`,
+    };
+  }
+
+  return { result: [first, second, third, fourth] };
 }

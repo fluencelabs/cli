@@ -15,16 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import assert from "node:assert";
+
 import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { versions } from "../../../versions.js";
 import { commandObj } from "../../commandObj.js";
 import {
   ensureComputerPeerConfigs,
   ensureReadonlyProviderConfig,
+  type ProviderConfig,
 } from "../../configs/project/provider/provider.js";
+import {
+  peerCPUDetailsToString,
+  peerRAMDetailsToString,
+  peerStorageDetailsToString,
+  ipSupplyToIndividualIPs,
+  type ResourceType,
+  type ResourcePrices,
+} from "../../configs/project/provider/provider4.js";
 import {
   initNewProviderArtifactsConfig,
   initProviderArtifactsConfig,
@@ -55,11 +65,10 @@ import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import { getProtocolVersions } from "../chainValidators.js";
 import {
   cidHexStringToBase32,
-  cidStringToCIDV1Struct,
   peerIdBase58ToUint8Array,
   peerIdHexStringToBase58String,
 } from "../conversions.js";
-import { ptFormat } from "../currencies.js";
+import { ptFormat, ptParse } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
@@ -120,9 +129,10 @@ export async function createOffers(flags: OffersArgs) {
     const {
       computePeersFromProviderConfig: allCPs,
       offerName,
-      minProtocolVersion = versions.protocolVersion,
-      maxProtocolVersion = versions.protocolVersion,
+      resourcePricesWithIds,
     } = offer;
+
+    const resourcePricesArray = Object.values(resourcePricesWithIds).flat();
 
     const allCUs = allCPs.flatMap(({ unitIds }) => {
       return unitIds;
@@ -142,18 +152,15 @@ export async function createOffers(flags: OffersArgs) {
         sliceIndex: allCUs.length,
         getArgs(computePeersToRegister) {
           return [
-            "3300000",
             contracts.deployment.usdc,
-            [],
+            resourcePricesArray,
             computePeersToRegister,
-            minProtocolVersion,
-            maxProtocolVersion,
           ];
         },
         getTitle() {
           return `Register offer: ${offerName}`;
         },
-        method: contracts.diamond.registerMarketOffer,
+        method: contracts.diamond.registerMarketOfferV2,
         validateAddress: assertProviderIsRegistered,
       }));
     } catch (e) {
@@ -326,7 +333,7 @@ export async function addRemainingCPs({
           },
         ).join("\n")}\n\nto offer ${offerName} (${offerId})`;
       },
-      method: contracts.diamond.addComputePeers,
+      method: contracts.diamond.addComputePeersV2,
     });
 
     await addRemainingCUs({
@@ -361,7 +368,13 @@ async function addRemainingCUs({
     lastRegisteredCP.unitIds.length,
   );
 
-  const { peerId, peerIdBase58, name: cpName } = lastRegisteredCPFromAllCPs;
+  const {
+    peerId,
+    peerIdBase58,
+    name: cpName,
+    resourcesByType,
+  } = lastRegisteredCPFromAllCPs;
+
   let totalRegisteredCUsCount = 0;
 
   while (totalRegisteredCUsCount < remainingCUsArr.length) {
@@ -373,12 +386,12 @@ async function addRemainingCUs({
       },
       sliceIndex: CUs.length,
       getArgs(CUsToRegister) {
-        return [peerId, CUsToRegister];
+        return [peerId, CUsToRegister, resourcesByType.cpu];
       },
       getTitle({ sliceCount: numberOfCUsForAddCU }) {
         return `Add ${numToStr(numberOfCUsForAddCU)} compute units\nto compute peer ${cpName} (${peerIdBase58})\nfor offer ${offerName} (${offerId})`;
       },
-      method: contracts.diamond.addComputeUnits,
+      method: contracts.diamond.addComputeUnitsV2,
     });
 
     totalRegisteredCUsCount = totalRegisteredCUsCount + registeredCUsCount;
@@ -536,14 +549,6 @@ export async function resolveOffersFromProviderConfig(
       offerInfos.map(async ({ offerId, offerIndexerInfo }) => {
         return {
           offerName: `Offer ${offerId}`,
-          effectorPrefixesAndHash: await Promise.all(
-            offerIndexerInfo.effectors.map(({ cid }) => {
-              return cidStringToCIDV1Struct(cid);
-            }),
-          ),
-          effectors: offerIndexerInfo.effectors.map(({ cid }) => {
-            return cid;
-          }),
           computePeersFromProviderConfig: await Promise.all(
             offerIndexerInfo.peers.map(async ({ computeUnits, id }, i) => {
               const peerIdBase58 = await peerIdHexStringToBase58String(id);
@@ -555,6 +560,39 @@ export async function resolveOffersFromProviderConfig(
                   return new Uint8Array(Buffer.from(id.slice(2), "hex"));
                 }),
                 owner: offerIndexerInfo.providerId,
+                // TODO: get proper resources from subgraph
+                resources: [],
+                resourcesByType: {
+                  cpu: {
+                    id: "",
+                    resourceId: "",
+                    name: "",
+                    supply: computeUnits.length,
+                    details: "{}",
+                  },
+                  ram: {
+                    id: "",
+                    resourceId: "",
+                    name: "",
+                    supply: 0,
+                    details: "{}",
+                  },
+                  storage: [],
+                  ip: {
+                    id: "",
+                    resourceId: "",
+                    name: "",
+                    supply: 0,
+                    details: "{}",
+                  },
+                  bandwidth: {
+                    id: "",
+                    resourceId: "",
+                    name: "",
+                    supply: 0,
+                    details: "{}",
+                  },
+                },
               };
             }),
           ),
@@ -565,7 +603,15 @@ export async function resolveOffersFromProviderConfig(
           maxProtocolVersion: Number(
             protocolVersionsFromChain.maxProtocolVersion,
           ),
-        };
+          // TODO: get proper resource prices from subgraph
+          resourcePricesWithIds: {
+            cpu: [],
+            ram: [],
+            storage: [],
+            ip: [],
+            bandwidth: [],
+          },
+        } satisfies (typeof offersDefinedLocally)[number];
       }),
     );
 
@@ -648,6 +694,12 @@ export type EnsureOfferConfig = Awaited<
   ReturnType<typeof ensureOfferConfigs>
 >[number];
 
+type OnChainResource = {
+  resourceId: string;
+  supply: number;
+  details: string;
+};
+
 async function ensureOfferConfigs() {
   const providerConfig = await ensureReadonlyProviderConfig();
   const providerArtifactsConfig = await initProviderArtifactsConfig();
@@ -658,22 +710,65 @@ async function ensureOfferConfigs() {
     Object.entries(providerConfig.offers).map(
       async ([
         offerName,
-        { computePeers, minProtocolVersion, maxProtocolVersion },
+        {
+          computePeers,
+          minProtocolVersion,
+          maxProtocolVersion,
+          resourcePrices,
+        },
       ]) => {
         const computePeerConfigs =
           await ensureComputerPeerConfigs(computePeers);
 
         const computePeersFromProviderConfig = await Promise.all(
           computePeerConfigs.map(
-            async ({ name, walletAddress, peerId, resources }) => {
+            async ({ name, walletAddress, peerId, resourcesWithIds }) => {
+              const resources = {
+                cpu: {
+                  ...resourcesWithIds.cpu,
+                  resourceId: resourcesWithIds.cpu.id,
+                  details: peerCPUDetailsToString(resourcesWithIds.cpu.details),
+                },
+                ram: {
+                  ...resourcesWithIds.ram,
+                  resourceId: resourcesWithIds.ram.id,
+                  details: peerRAMDetailsToString(resourcesWithIds.ram.details),
+                },
+                storage: resourcesWithIds.storage.map((res) => {
+                  return {
+                    ...res,
+                    resourceId: res.id,
+                    details: peerStorageDetailsToString(res.details),
+                  };
+                }),
+                ip: {
+                  ...resourcesWithIds.ip,
+                  supply: ipSupplyToIndividualIPs(resourcesWithIds.ip.supply)
+                    .length,
+                  resourceId: resourcesWithIds.ip.id,
+                  details: "{}",
+                },
+                bandwidth: {
+                  ...resourcesWithIds.bandwidth,
+                  resourceId: resourcesWithIds.bandwidth.id,
+                  details: "{}",
+                },
+              } as const satisfies Record<
+                ResourceType,
+                OnChainResource[] | OnChainResource
+              >;
+
               return {
                 name,
                 peerIdBase58: peerId,
                 peerId: await peerIdBase58ToUint8Array(peerId),
-                // TODO: clarify what to do with unitIds
-                unitIds: times(resources.cpu.supply).map(() => {
+                unitIds: times(resourcesWithIds.cpu.supply).map(() => {
                   return randomBytes(32);
                 }),
+                resources: Object.values(resources).flatMap((resource) => {
+                  return Array.isArray(resource) ? resource : [resource];
+                }),
+                resourcesByType: resources,
                 owner: walletAddress,
               };
             },
@@ -683,12 +778,34 @@ async function ensureOfferConfigs() {
         const offerId =
           providerArtifactsConfig?.offers[fluenceEnv]?.[offerName]?.id;
 
+        const getResourcePricesWithIds = createGetResourcePricesWithIds(
+          providerConfig,
+          resourcePrices,
+        );
+
+        const resourcePricesWithIds: Record<
+          ResourceType,
+          {
+            ty: ResourceType;
+            resourceId: string;
+            resourceName: string;
+            price: bigint;
+          }[]
+        > = {
+          cpu: await getResourcePricesWithIds("cpu"),
+          ram: await getResourcePricesWithIds("ram"),
+          storage: await getResourcePricesWithIds("storage"),
+          ip: await getResourcePricesWithIds("ip"),
+          bandwidth: await getResourcePricesWithIds("bandwidth"),
+        };
+
         return {
           offerName,
           computePeersFromProviderConfig,
           offerId,
           minProtocolVersion,
           maxProtocolVersion,
+          resourcePricesWithIds,
         };
       },
     ),
@@ -707,6 +824,34 @@ type OfferNameAndId = {
 type OfferArtifactsArgs = OffersArgs & {
   [OFFER_IDS_FLAG_NAME]: string | undefined;
 };
+
+function createGetResourcePricesWithIds(
+  providerConfig: ProviderConfig,
+  resourcePrices: ResourcePrices,
+) {
+  return async function getResourcePricesWithIds(resourceType: ResourceType) {
+    return Promise.all(
+      Object.entries(resourcePrices[resourceType]).map(
+        async ([resourceName, price]) => {
+          const resourceId =
+            providerConfig.resourceNames[resourceType][resourceName];
+
+          assert(
+            resourceId !== undefined,
+            `Unreachable. Resource ID for ${resourceName} is not found in provider config. This must happen during validation`,
+          );
+
+          return {
+            ty: resourceType,
+            resourceName,
+            resourceId,
+            price: await ptParse(numToStr(price)),
+          };
+        },
+      ),
+    );
+  };
+}
 
 export async function resolveCreatedOffers(flags: OfferArtifactsArgs) {
   if (
