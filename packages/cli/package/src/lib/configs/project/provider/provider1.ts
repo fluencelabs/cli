@@ -690,11 +690,11 @@ const supplySchema = {
 
 export type IPSupplies = Array<IPSupply>;
 
-type IP = {
+export type IP = {
   supply: IPSupplies;
 };
 
-const ipSchema = {
+export const ipSchema = {
   type: "object",
   description: "IP configuration",
   additionalProperties: false,
@@ -732,6 +732,12 @@ export type ComputePeer = {
   ccp?: CCPConfigYAML;
 };
 
+export const kubeconfigPathSchema = {
+  nullable: true,
+  type: "string",
+  description: `Path to the kubeconfig file`,
+} as const satisfies JSONSchemaType<string>;
+
 const computePeerSchema = {
   type: "object",
   description: "Defines a compute peer",
@@ -744,11 +750,7 @@ const computePeerSchema = {
       )} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
     },
     resources: resourcesSchema,
-    kubeconfigPath: {
-      nullable: true,
-      type: "string",
-      description: `Path to the kubeconfig file`,
-    },
+    kubeconfigPath: kubeconfigPathSchema,
     nox: noxConfigYAMLSchema,
     ccp: ccpConfigYAMLSchema,
   },

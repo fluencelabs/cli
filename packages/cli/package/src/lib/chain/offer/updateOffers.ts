@@ -29,11 +29,7 @@ import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
-import {
-  cidStringToCIDV1Struct,
-  peerIdHexStringToBase58String,
-} from "../conversions.js";
-import { ptFormatWithSymbol } from "../currencies.js";
+import { peerIdHexStringToBase58String } from "../conversions.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 import {
@@ -219,12 +215,6 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         }),
       )) satisfies PeersOnChain;
 
-      const effectorsOnChain = await Promise.all(
-        offerIndexerInfo.effectors.map(({ cid }) => {
-          return cid;
-        }),
-      );
-
       const removePeersFromOffersTxs = (await populatePeersToRemoveTxs(
         offer,
         peersOnChain,
@@ -234,14 +224,10 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
 
       const txs = (
         await Promise.all([
-          populateEffectorsRemoveTx(offer, effectorsOnChain),
-          populateEffectorsAddTx(offer, effectorsOnChain),
-
           populateCUToRemoveTxs(offer, peersOnChain),
           populateCUToAddTxs(offer, peersOnChain),
 
           populatePaymentTokenTx(offer),
-          populateMinPricePerCuPerEpochTx(offer),
         ])
       ).flat() satisfies Txs;
 
@@ -336,88 +322,6 @@ async function populatePaymentTokenTx({
             contracts.diamond.changePaymentToken,
             offerId,
             usdcAddress,
-          ),
-        },
-      ];
-}
-
-async function populateMinPricePerCuPerEpochTx({
-  offerIndexerInfo,
-  minPricePerCuPerEpochBigInt,
-  offerId,
-}: OnChainOffer) {
-  const { contracts } = await getContracts();
-  return offerIndexerInfo.pricePerEpoch === minPricePerCuPerEpochBigInt
-    ? []
-    : [
-        {
-          description: `\nchanging minPricePerCuPerEpoch from ${color.yellow(
-            await ptFormatWithSymbol(offerIndexerInfo.pricePerEpoch),
-          )} to ${color.yellow(
-            await ptFormatWithSymbol(minPricePerCuPerEpochBigInt),
-          )}`,
-          tx: populateTx(
-            contracts.diamond.changeMinPricePerCuPerEpoch,
-            offerId,
-            minPricePerCuPerEpochBigInt,
-          ),
-        },
-      ];
-}
-
-async function populateEffectorsRemoveTx(
-  { effectors, offerId }: OnChainOffer,
-  effectorsOnChain: string[],
-) {
-  const { contracts } = await getContracts();
-
-  const removedEffectors = effectorsOnChain.filter((cid) => {
-    return effectors === undefined ? true : !effectors.includes(cid);
-  });
-
-  return removedEffectors.length === 0
-    ? []
-    : [
-        {
-          description: `\nRemoving effectors:\n${removedEffectors.join("\n")}`,
-          tx: populateTx(
-            contracts.diamond.removeEffector,
-            offerId,
-            await Promise.all(
-              removedEffectors.map((cid) => {
-                return cidStringToCIDV1Struct(cid);
-              }),
-            ),
-          ),
-        },
-      ];
-}
-
-async function populateEffectorsAddTx(
-  { effectors, offerId }: OnChainOffer,
-  effectorsOnChain: string[],
-) {
-  const { contracts } = await getContracts();
-
-  const addedEffectors = (effectors ?? []).filter((effector) => {
-    return !effectorsOnChain.some((cid) => {
-      return cid === effector;
-    });
-  });
-
-  return addedEffectors.length === 0
-    ? []
-    : [
-        {
-          description: `\nAdding effectors:\n${addedEffectors.join("\n")}`,
-          tx: populateTx(
-            contracts.diamond.addEffector,
-            offerId,
-            await Promise.all(
-              addedEffectors.map((effector) => {
-                return cidStringToCIDV1Struct(effector);
-              }),
-            ),
           ),
         },
       ];

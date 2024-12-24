@@ -2,7 +2,7 @@
 
 ## [provider.yaml](./provider.md)
 
-Defines config used for provider set up
+Defines provider configuration
 
 ## [provider-secrets.yaml](./provider-secrets.md)
 

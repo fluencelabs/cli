@@ -59,7 +59,7 @@ import {
   peerIdBase58ToUint8Array,
   peerIdHexStringToBase58String,
 } from "../conversions.js";
-import { ptFormat, ptParse } from "../currencies.js";
+import { ptFormat } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
@@ -119,8 +119,6 @@ export async function createOffers(flags: OffersArgs) {
   for (const offer of offers) {
     const {
       computePeersFromProviderConfig: allCPs,
-      effectorPrefixesAndHash,
-      minPricePerCuPerEpochBigInt,
       offerName,
       minProtocolVersion = versions.protocolVersion,
       maxProtocolVersion = versions.protocolVersion,
@@ -144,9 +142,9 @@ export async function createOffers(flags: OffersArgs) {
         sliceIndex: allCUs.length,
         getArgs(computePeersToRegister) {
           return [
-            minPricePerCuPerEpochBigInt,
+            "3300000",
             contracts.deployment.usdc,
-            effectorPrefixesAndHash,
+            [],
             computePeersToRegister,
             minProtocolVersion,
             maxProtocolVersion,
@@ -538,7 +536,6 @@ export async function resolveOffersFromProviderConfig(
       offerInfos.map(async ({ offerId, offerIndexerInfo }) => {
         return {
           offerName: `Offer ${offerId}`,
-          minPricePerCuPerEpochBigInt: offerIndexerInfo.pricePerEpoch,
           effectorPrefixesAndHash: await Promise.all(
             offerIndexerInfo.effectors.map(({ cid }) => {
               return cidStringToCIDV1Struct(cid);
@@ -661,29 +658,20 @@ async function ensureOfferConfigs() {
     Object.entries(providerConfig.offers).map(
       async ([
         offerName,
-        {
-          minPricePerCuPerEpoch,
-          effectors,
-          computePeers,
-          minProtocolVersion,
-          maxProtocolVersion,
-        },
+        { computePeers, minProtocolVersion, maxProtocolVersion },
       ]) => {
         const computePeerConfigs =
           await ensureComputerPeerConfigs(computePeers);
 
-        const minPricePerCuPerEpochBigInt = await ptParse(
-          minPricePerCuPerEpoch,
-        );
-
         const computePeersFromProviderConfig = await Promise.all(
           computePeerConfigs.map(
-            async ({ computeUnits, name, walletAddress, peerId }) => {
+            async ({ name, walletAddress, peerId, resources }) => {
               return {
                 name,
                 peerIdBase58: peerId,
                 peerId: await peerIdBase58ToUint8Array(peerId),
-                unitIds: times(computeUnits).map(() => {
+                // TODO: clarify what to do with unitIds
+                unitIds: times(resources.cpu.supply).map(() => {
                   return randomBytes(32);
                 }),
                 owner: walletAddress,
@@ -692,20 +680,11 @@ async function ensureOfferConfigs() {
           ),
         );
 
-        const effectorPrefixesAndHash = await Promise.all(
-          (effectors ?? []).map((effector) => {
-            return cidStringToCIDV1Struct(effector);
-          }),
-        );
-
         const offerId =
           providerArtifactsConfig?.offers[fluenceEnv]?.[offerName]?.id;
 
         return {
           offerName,
-          minPricePerCuPerEpochBigInt,
-          effectorPrefixesAndHash,
-          effectors,
           computePeersFromProviderConfig,
           offerId,
           minProtocolVersion,
