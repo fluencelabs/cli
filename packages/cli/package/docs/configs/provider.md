@@ -4,14 +4,14 @@ Defines provider configuration
 
 ## Properties
 
-| Property              | Type                           | Required | Description                                                              |
-|-----------------------|--------------------------------|----------|--------------------------------------------------------------------------|
-| `capacityCommitments` | [object](#capacitycommitments) | **Yes**  | A map with nox names as keys and capacity commitments as values          |
-| `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peer configs as values |
-| `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offer configs as values               |
-| `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                         |
-| `version`             | integer                        | **Yes**  | Config version                                                           |
-| `resourceNames`       | [object](#resourcenames)       | No       | A map with resource names as keys and on-chain resource IDs as values    |
+| Property              | Type                           | Required | Description                                                                |
+|-----------------------|--------------------------------|----------|----------------------------------------------------------------------------|
+| `capacityCommitments` | [object](#capacitycommitments) | **Yes**  | A map with nox names as keys and capacity commitments as values            |
+| `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peer configs as values   |
+| `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offer configs as values                 |
+| `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                           |
+| `version`             | integer                        | **Yes**  | Config version                                                             |
+| `resourceNames`       | [object](#resourcenames)       | No       | A map with resource type names as keys and resource names object as values |
 
 ## capacityCommitments
 
@@ -65,10 +65,10 @@ Resources available on this compute peer
 | Property    | Type                 | Required | Description                  |
 |-------------|----------------------|----------|------------------------------|
 | `bandwidth` | [object](#bandwidth) | **Yes**  | Defines a bandwidth resource |
+| `cpu`       | [object](#cpu)       | **Yes**  | Defines a CPU resource       |
 | `ip`        | [object](#ip)        | **Yes**  | Defines an IP resource       |
 | `ram`       | [object](#ram)       | **Yes**  | Defines a RAM resource       |
 | `storage`   | [object](#storage)[] | **Yes**  |                              |
-| `vcpu`      | [object](#vcpu)      | **Yes**  | Defines a vCPU resource      |
 
 ##### bandwidth
 
@@ -80,6 +80,28 @@ Defines a bandwidth resource
 |----------|---------|----------|-------------------|
 | `name`   | string  | **Yes**  |                   |
 | `supply` | integer | **Yes**  | Bandwidth in Mbps |
+
+##### cpu
+
+Defines a CPU resource
+
+###### Properties
+
+| Property  | Type               | Required | Description                                                                          |
+|-----------|--------------------|----------|--------------------------------------------------------------------------------------|
+| `name`    | string             | **Yes**  |                                                                                      |
+| `supply`  | integer            | **Yes**  | Number of physical cores                                                             |
+| `details` | [object](#details) | No       | CPU details not related to matching but visible to the user for information purposes |
+
+###### details
+
+CPU details not related to matching but visible to the user for information purposes
+
+**Properties**
+
+| Property | Type   | Required | Description |
+|----------|--------|----------|-------------|
+| `model`  | string | No       |             |
 
 ##### ip
 
@@ -148,28 +170,6 @@ Storage details not related to matching but visible to the user for information 
 | `model`                | string | No       |             |
 | `sequentialWriteSpeed` | number | No       |             |
 
-##### vcpu
-
-Defines a vCPU resource
-
-###### Properties
-
-| Property  | Type               | Required | Description                                                                          |
-|-----------|--------------------|----------|--------------------------------------------------------------------------------------|
-| `name`    | string             | **Yes**  |                                                                                      |
-| `supply`  | integer            | **Yes**  | Number of physical cores                                                             |
-| `details` | [object](#details) | No       | CPU details not related to matching but visible to the user for information purposes |
-
-###### details
-
-CPU details not related to matching but visible to the user for information purposes
-
-**Properties**
-
-| Property | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| `model`  | string | No       |             |
-
 ## offers
 
 A map with offer names as keys and offer configs as values
@@ -202,12 +202,17 @@ Resource prices for the offer
 | Property    | Type                 | Required | Description |
 |-------------|----------------------|----------|-------------|
 | `bandwidth` | [object](#bandwidth) | **Yes**  |             |
+| `cpu`       | [object](#cpu)       | **Yes**  |             |
 | `ip`        | [object](#ip)        | **Yes**  |             |
 | `ram`       | [object](#ram)       | **Yes**  |             |
 | `storage`   | [object](#storage)   | **Yes**  |             |
-| `vcpu`      | [object](#vcpu)      | **Yes**  |             |
 
 ##### bandwidth
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+##### cpu
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -227,16 +232,65 @@ Resource prices for the offer
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 
-##### vcpu
-
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-
 ## resourceNames
+
+A map with resource type names as keys and resource names object as values
+
+### Properties
+
+| Property    | Type                 | Required | Description                                                           |
+|-------------|----------------------|----------|-----------------------------------------------------------------------|
+| `bandwidth` | [object](#bandwidth) | No       | A map with resource names as keys and on-chain resource IDs as values |
+| `cpu`       | [object](#cpu)       | No       | A map with resource names as keys and on-chain resource IDs as values |
+| `ip`        | [object](#ip)        | No       | A map with resource names as keys and on-chain resource IDs as values |
+| `ram`       | [object](#ram)       | No       | A map with resource names as keys and on-chain resource IDs as values |
+| `storage`   | [object](#storage)   | No       | A map with resource names as keys and on-chain resource IDs as values |
+
+### bandwidth
 
 A map with resource names as keys and on-chain resource IDs as values
 
-### Properties
+#### Properties
+
+| Property       | Type   | Required | Description                 |
+|----------------|--------|----------|-----------------------------|
+| `resourceName` | string | No       | On-chain ID of the resource |
+
+### cpu
+
+A map with resource names as keys and on-chain resource IDs as values
+
+#### Properties
+
+| Property       | Type   | Required | Description                 |
+|----------------|--------|----------|-----------------------------|
+| `resourceName` | string | No       | On-chain ID of the resource |
+
+### ip
+
+A map with resource names as keys and on-chain resource IDs as values
+
+#### Properties
+
+| Property       | Type   | Required | Description                 |
+|----------------|--------|----------|-----------------------------|
+| `resourceName` | string | No       | On-chain ID of the resource |
+
+### ram
+
+A map with resource names as keys and on-chain resource IDs as values
+
+#### Properties
+
+| Property       | Type   | Required | Description                 |
+|----------------|--------|----------|-----------------------------|
+| `resourceName` | string | No       | On-chain ID of the resource |
+
+### storage
+
+A map with resource names as keys and on-chain resource IDs as values
+
+#### Properties
 
 | Property       | Type   | Required | Description                 |
 |----------------|--------|----------|-----------------------------|
