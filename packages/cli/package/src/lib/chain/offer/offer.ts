@@ -671,7 +671,7 @@ async function ensureOfferConfigs() {
                 peerIdBase58: peerId,
                 peerId: await peerIdBase58ToUint8Array(peerId),
                 // TODO: clarify what to do with unitIds
-                unitIds: times(resources.vcpu.supply).map(() => {
+                unitIds: times(resources.cpu.supply).map(() => {
                   return randomBytes(32);
                 }),
                 owner: walletAddress,

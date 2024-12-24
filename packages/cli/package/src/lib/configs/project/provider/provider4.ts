@@ -85,6 +85,23 @@ const resourceNamesSchema = {
   required: [],
 } as const satisfies JSONSchemaType<ResourceNames>;
 
+type ResourceNamesPerResourceType = Record<ResourceType, ResourceNames>;
+
+const resourceNamesPerResourceTypeSchema = {
+  type: "object",
+  description:
+    "A map with resource type names as keys and resource names object as values",
+  additionalProperties: false,
+  properties: {
+    cpu: resourceNamesSchema,
+    ram: resourceNamesSchema,
+    storage: resourceNamesSchema,
+    bandwidth: resourceNamesSchema,
+    ip: resourceNamesSchema,
+  },
+  required: [],
+} as const satisfies JSONSchemaType<ResourceNamesPerResourceType>;
+
 type Resource = {
   name: string;
   supply: number;
@@ -100,11 +117,11 @@ const resourceSchema = {
   required: ["name", "supply"],
 } as const satisfies JSONSchemaType<Resource>;
 
-type PeerVCPUDetails = {
+type PeerCPUDetails = {
   model?: string;
 };
 
-const peerVCPUDetailsSchema = {
+const peerCPUDetailsSchema = {
   type: "object",
   description:
     "CPU details not related to matching but visible to the user for information purposes",
@@ -114,18 +131,18 @@ const peerVCPUDetailsSchema = {
   },
   required: [],
   nullable: true,
-} as const satisfies JSONSchemaType<PeerVCPUDetails>;
+} as const satisfies JSONSchemaType<PeerCPUDetails>;
 
-type PeerVCPU = Resource & {
-  details?: PeerVCPUDetails;
+type PeerCPU = Resource & {
+  details?: PeerCPUDetails;
 };
 
-const peerVCPUSchema = {
+const peerCPUSchema = {
   ...resourceSchema,
-  description: "Defines a vCPU resource",
+  description: "Defines a CPU resource",
   properties: {
     ...resourceSchema.properties,
-    details: peerVCPUDetailsSchema,
+    details: peerCPUDetailsSchema,
     supply: {
       type: "integer",
       minimum: 1,
@@ -133,7 +150,7 @@ const peerVCPUSchema = {
     },
   },
   required: resourceSchema.required,
-} as const satisfies JSONSchemaType<PeerVCPU>;
+} as const satisfies JSONSchemaType<PeerCPU>;
 
 type PeerRamDetails = {
   manufacturer?: string;
@@ -247,7 +264,7 @@ const ipSchema = {
 } as const satisfies JSONSchemaType<IP>;
 
 type ComputePeerResources = {
-  vcpu: PeerVCPU;
+  cpu: PeerCPU;
   ram: PeerRAM;
   storage: PeerStorage[];
   bandwidth: Bandwidth;
@@ -274,13 +291,13 @@ const computePeerSchema = {
       additionalProperties: false,
       description: "Resources available on this compute peer",
       properties: {
-        vcpu: peerVCPUSchema,
+        cpu: peerCPUSchema,
         ram: peerRAMSchema,
         storage: { type: "array", items: peerStorageSchema },
         bandwidth: bandwidthSchema,
         ip: ipSchema,
       },
-      required: ["vcpu", "ram", "storage", "bandwidth", "ip"],
+      required: ["cpu", "ram", "storage", "bandwidth", "ip"],
     },
   },
   required: ["kubeconfigPath", "resources"],
@@ -312,13 +329,13 @@ const offerResourcesSchema = {
   description: "Resource prices for the offer",
   additionalProperties: false,
   properties: {
-    vcpu: offerResourceSchema,
+    cpu: offerResourceSchema,
     ram: offerResourceSchema,
     storage: offerResourceSchema,
     bandwidth: offerResourceSchema,
     ip: offerResourceSchema,
   },
-  required: ["vcpu", "ram", "storage", "bandwidth", "ip"],
+  required: ["cpu", "ram", "storage", "bandwidth", "ip"],
 } as const satisfies JSONSchemaType<OfferResources>;
 
 type Offer = {
@@ -373,14 +390,14 @@ const offersSchema = {
 } as const satisfies JSONSchemaType<Offers>;
 
 export type Config = {
-  resourceNames: ResourceNames;
+  resourceNames: ResourceNamesPerResourceType;
   providerName: string;
   capacityCommitments: CapacityCommitments;
   computePeers: ComputePeers;
   offers: Offers;
 };
 
-const VCPU_RESOURCE_NAME = "<vcpuResourceName>";
+const CPU_RESOURCE_NAME = "<cpuResourceName>";
 const RAM_RESOURCE_NAME = "<ramResourceName>";
 const STORAGE_RESOURCE_NAME = "<storageResourceName>";
 const BANDWIDTH_RESOURCE_NAME = "shared";
@@ -391,7 +408,7 @@ export default {
     type: "object",
     additionalProperties: false,
     properties: {
-      resourceNames: resourceNamesSchema,
+      resourceNames: resourceNamesPerResourceTypeSchema,
       providerName: providerNameSchema,
       computePeers: computePeersSchema,
       capacityCommitments: capacityCommitmentsSchema,
@@ -448,7 +465,7 @@ export default {
   },
   validate(config) {
     return validateBatchAsync(
-      // TODO: validate 4 GB RAM per 1 vCPU
+      // TODO: validate 4 GB RAM per 1 CPU core
       validateCC(config),
       validateNoDuplicatePeerNamesInOffers(config),
       validateProtocolVersions(config),
@@ -470,25 +487,35 @@ type DefaultComputePeerConfigArgs = {
     | undefined;
 };
 
-export function getDefaultResourceNames(): ResourceNames {
+export function getDefaultResourceNames(): ResourceNamesPerResourceType {
   // TODO: use real on-chain IDs here?
   return {
-    [VCPU_RESOURCE_NAME]:
-      "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
-    [RAM_RESOURCE_NAME]:
-      "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
-    [STORAGE_RESOURCE_NAME]:
-      "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
-    [BANDWIDTH_RESOURCE_NAME]:
-      "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
-    [IP_RESOURCE_NAME]:
-      "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
+    cpu: {
+      [CPU_RESOURCE_NAME]:
+        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+    },
+    ram: {
+      [RAM_RESOURCE_NAME]:
+        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+    },
+    storage: {
+      [STORAGE_RESOURCE_NAME]:
+        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+    },
+    bandwidth: {
+      [BANDWIDTH_RESOURCE_NAME]:
+        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
+    },
+    ip: {
+      [IP_RESOURCE_NAME]:
+        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
+    },
   };
 }
 
 export function getDefaultOfferResources(): OfferResources {
   return {
-    vcpu: { [VCPU_RESOURCE_NAME]: 1 },
+    cpu: { [CPU_RESOURCE_NAME]: 1 },
     ram: { [RAM_RESOURCE_NAME]: 1 },
     storage: { [STORAGE_RESOURCE_NAME]: 1 },
     bandwidth: { [BANDWIDTH_RESOURCE_NAME]: 1 },
@@ -505,8 +532,8 @@ export function defaultComputePeerConfig({
   return {
     kubeconfigPath: kubeconfigPath ?? `./path-to-${name}-kubeconfig`,
     resources: {
-      vcpu: {
-        name: VCPU_RESOURCE_NAME,
+      cpu: {
+        name: CPU_RESOURCE_NAME,
         supply: computeUnits < 1 ? 1 : computeUnits,
         details: {
           model: OPTIONAL_RESOURCE_DETAILS_STRING,
@@ -543,50 +570,69 @@ export function defaultComputePeerConfig({
 }
 
 function validateNoDuplicateResourceIds({
-  resourceNames,
+  resourceNames: resourceNamesPerResourceType,
 }: {
-  resourceNames: ResourceNames;
+  resourceNames: ResourceNamesPerResourceType;
 }): ValidationResult {
-  const resourceNamesById = Object.entries(resourceNames).reduce<
-    Record<string, string[]>
-  >((acc, [name, id]) => {
-    if (acc[id] === undefined) {
-      acc[id] = [];
-    }
+  const errorsPerResourceType = Object.entries(resourceNamesPerResourceType)
+    .map(([resourceType, resourceNames]) => {
+      const resourceNamesById = Object.entries(resourceNames).reduce<
+        Record<string, string[]>
+      >((acc, [name, id]) => {
+        if (acc[id] === undefined) {
+          acc[id] = [];
+        }
 
-    acc[id].push(name);
-    return acc;
-  }, {});
+        acc[id].push(name);
+        return acc;
+      }, {});
 
-  const errors = Object.entries(resourceNamesById)
-    .filter(([, names]) => {
-      return names.length > 1;
+      const errors = Object.entries(resourceNamesById)
+        .filter(([, names]) => {
+          return names.length > 1;
+        })
+        .map(([id, names]) => {
+          return `names: ${color.yellow(names.join(", "))} in ${color.yellow(`resourceNames.${resourceType}`)} property refer to the exact same Resource ID ${color.yellow(id)}`;
+        });
+
+      return errors.length === 0 ? true : errors.join("\n");
     })
-    .map(([id, names]) => {
-      return `names: ${color.yellow(names.join(", "))} in ${color.yellow("resourceNames")} property refer to the exact same Resource ID ${color.yellow(id)}`;
+    .filter((result) => {
+      return typeof result === "string";
     });
 
-  return errors.length === 0 ? true : errors.join("\n");
+  return errorsPerResourceType.length === 0
+    ? true
+    : errorsPerResourceType.join("\n");
 }
 
 function validateNoUnknownResourceNamesInComputePeers({
-  resourceNames,
+  resourceNames: resourceNamesPerResourceType,
   computePeers,
 }: {
-  resourceNames: ResourceNames;
+  resourceNames: ResourceNamesPerResourceType;
   computePeers: ComputePeers;
 }): ValidationResult {
   const errors = Object.entries(computePeers).reduce<string[]>(
     (acc, [peerName, { resources }]) => {
       const unknownResourceNames = Object.entries(resources).reduce<string[]>(
-        (acc, [resourceType, resource]) => {
+        (acc, [resourceTypeString, resource]) => {
+          // here there is no good way to avoid type assertion
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          const resourceType = resourceTypeString as ResourceType;
+
           if (Array.isArray(resource)) {
             resource.forEach(({ name }) => {
-              if (resourceNames[name] === undefined) {
+              if (
+                resourceNamesPerResourceType[resourceType][name] === undefined
+              ) {
                 acc.push(`${resourceType}: ${name}`);
               }
             });
-          } else if (resourceNames[resource.name] === undefined) {
+          } else if (
+            resourceNamesPerResourceType[resourceType][resource.name] ===
+            undefined
+          ) {
             acc.push(`${resourceType}: ${resource.name}`);
           }
 
@@ -597,7 +643,7 @@ function validateNoUnknownResourceNamesInComputePeers({
 
       if (unknownResourceNames.length > 0) {
         acc.push(
-          `Compute peer ${color.yellow(peerName)} has resource names, not found in resourceNames property:\n${unknownResourceNames.join("\n")}`,
+          `Compute peer ${color.yellow(peerName)} has resource names that are not found in resourceNames property:\n${unknownResourceNames.join("\n")}`,
         );
       }
 
@@ -626,7 +672,7 @@ function validateOfferHasComputePeerResources(config: {
   const errors = offers.reduce<string[]>(
     (acc, [offerName, { computePeers, resourcePrices: offerResources }]) => {
       const offerResourcesSets: Record<ResourceType, Set<string>> = {
-        vcpu: new Set(Object.keys(offerResources.vcpu)),
+        cpu: new Set(Object.keys(offerResources.cpu)),
         ram: new Set(Object.keys(offerResources.ram)),
         storage: new Set(Object.keys(offerResources.storage)),
         bandwidth: new Set(Object.keys(offerResources.bandwidth)),
@@ -634,7 +680,7 @@ function validateOfferHasComputePeerResources(config: {
       };
 
       const extraOfferResourcesSets: Record<ResourceType, Set<string>> = {
-        vcpu: new Set(offerResourcesSets.vcpu),
+        cpu: new Set(offerResourcesSets.cpu),
         ram: new Set(offerResourcesSets.ram),
         storage: new Set(offerResourcesSets.storage),
         bandwidth: new Set(offerResourcesSets.bandwidth),
@@ -675,7 +721,7 @@ function validateOfferHasComputePeerResources(config: {
         );
 
         const missingResourceNamesPerType: Record<ResourceType, string[]> = {
-          vcpu: validateResource("vcpu"),
+          cpu: validateResource("cpu"),
           ram: validateResource("ram"),
           storage: validateResource("storage"),
           bandwidth: validateResource("bandwidth"),
@@ -730,7 +776,7 @@ function validateOfferHasComputePeerResources(config: {
               return acc;
             },
             {
-              vcpu: {},
+              cpu: {},
               ram: {},
               storage: {},
               bandwidth: {},
