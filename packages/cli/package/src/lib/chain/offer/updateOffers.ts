@@ -30,6 +30,7 @@ import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import { peerIdHexStringToBase58String } from "../conversions.js";
+import { ptFormat, ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 import {
@@ -37,6 +38,7 @@ import {
   resolveOffersFromProviderConfig,
   type EnsureOfferConfig,
   getOffersInfo,
+  type OnChainResource,
   addRemainingCPs,
 } from "./offer.js";
 
@@ -45,6 +47,7 @@ type PeersOnChain = {
     id: string;
     workerId: string | undefined;
   }[];
+  resources: { cpu: OnChainResource };
   peerIdBase58: string;
   hexPeerId: string;
 }[];
@@ -228,6 +231,8 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
           populateCUToAddTxs(offer, peersOnChain),
 
           populatePaymentTokenTx(offer),
+
+          populateChangeResourcePriceTx(offer),
         ])
       ).flat() satisfies Txs;
 
@@ -287,7 +292,7 @@ async function populatePeersToRemoveTxs(
   });
 
   return computePeersToRemove.flatMap(
-    ({ peerIdBase58, hexPeerId, computeUnits }) => {
+    ({ peerIdBase58, hexPeerId, computeUnits, resources: { cpu } }) => {
       return [
         ...computeUnits.map((computeUnit, index) => {
           return {
@@ -296,10 +301,14 @@ async function populatePeersToRemoveTxs(
                   description: `\nRemoving peer ${peerIdBase58} with ${numToStr(computeUnits.length)} compute units`,
                 }
               : {}),
-            tx: populateTx(contracts.diamond.removeComputeUnit, computeUnit.id),
+            tx: populateTx(
+              contracts.diamond.removeComputeUnitV2,
+              computeUnit.id,
+              cpu.resourceId,
+            ),
           };
         }),
-        { tx: populateTx(contracts.diamond.removeComputePeer, hexPeerId) },
+        { tx: populateTx(contracts.diamond.removeComputePeerV2, hexPeerId) },
       ];
     },
   );
@@ -334,7 +343,7 @@ async function populateCUToRemoveTxs(
   const { contracts } = await getContracts();
 
   const computeUnitsToRemove = peersOnChain.flatMap(
-    ({ peerIdBase58, computeUnits }) => {
+    ({ peerIdBase58, computeUnits, resources }) => {
       const alreadyRegisteredPeer = computePeersFromProviderConfig.find((p) => {
         return p.peerIdBase58 === peerIdBase58;
       });
@@ -352,6 +361,7 @@ async function populateCUToRemoveTxs(
               .map(({ id }) => {
                 return id;
               }),
+            resources,
           },
         ];
       }
@@ -360,25 +370,79 @@ async function populateCUToRemoveTxs(
     },
   );
 
-  return computeUnitsToRemove.flatMap(({ peerIdBase58, computeUnits }) => {
-    return computeUnits.map((computeUnit, index) => {
-      return {
-        ...(index === 0
-          ? {
-              description: `\nRemoving ${numToStr(computeUnits.length)} compute units from peer ${peerIdBase58}`,
-            }
-          : {}),
-        tx: populateTx(contracts.diamond.removeComputeUnit, computeUnit),
-      };
-    });
-  });
+  return computeUnitsToRemove.flatMap(
+    ({ peerIdBase58, computeUnits, resources }) => {
+      return computeUnits.map((computeUnit, index) => {
+        return {
+          ...(index === 0
+            ? {
+                description: `\nRemoving ${numToStr(computeUnits.length)} compute units from peer ${peerIdBase58}`,
+              }
+            : {}),
+          tx: populateTx(
+            contracts.diamond.removeComputeUnitV2,
+            computeUnit,
+            resources.cpu.resourceId,
+          ),
+        };
+      });
+    },
+  );
+}
+
+async function populateChangeResourcePriceTx({
+  offerId,
+  offerIndexerInfo,
+  resourcePricesWithIds,
+}: OnChainOffer) {
+  const { contracts } = await getContracts();
+
+  const allResourcePrices = Object.fromEntries(
+    Object.values(resourcePricesWithIds)
+      .flat()
+      .map(({ price, resourceId, resourceName, ty }) => {
+        return [resourceId, { price, resourceName, ty }];
+      }),
+  );
+
+  return (
+    await Promise.all(
+      offerIndexerInfo.resources.map(async ({ resourceId, resourcePrice }) => {
+        const newResource = allResourcePrices[resourceId];
+
+        if (newResource === undefined) {
+          commandObj.warn(
+            `Price for resource with id ${resourceId} is not found in the provider config for offer with id: ${offerId}. Expected: ${await ptFormat(resourcePrice)}`,
+          );
+
+          return null;
+        }
+
+        const { price: newPrice, resourceName, ty } = newResource;
+
+        if (newPrice === resourcePrice) {
+          return null;
+        }
+
+        return {
+          description: `\nChanging ${ty}: ${resourceName} price to ${await ptFormatWithSymbol(newPrice)}`,
+          tx: populateTx(
+            contracts.diamond.changeResourcePriceV2,
+            offerId,
+            resourceId,
+            newPrice,
+          ),
+        };
+      }),
+    )
+  ).filter(Boolean);
 }
 
 async function populateOfferRemoveTx({ offerId }: OnChainOffer) {
   const { contracts } = await getContracts();
   return {
     description: `\nRemoving offer: ${offerId}`,
-    tx: populateTx(contracts.diamond.removeOffer, offerId),
+    tx: populateTx(contracts.diamond.removeOfferV2, offerId),
   };
 }
 
@@ -389,7 +453,7 @@ async function populateCUToAddTxs(
   const { contracts } = await getContracts();
 
   const computeUnitsToAdd = peersOnChain.flatMap(
-    ({ peerIdBase58, hexPeerId, computeUnits }) => {
+    ({ peerIdBase58, hexPeerId, computeUnits, resources }) => {
       const alreadyRegisteredPeer = computePeersFromProviderConfig.find((p) => {
         return p.peerIdBase58 === peerIdBase58;
       });
@@ -408,23 +472,31 @@ async function populateCUToAddTxs(
           unitIds: alreadyRegisteredPeer.unitIds.slice(
             computeUnits.length - alreadyRegisteredPeer.unitIds.length,
           ),
+          resources,
         },
       ];
     },
   );
 
-  return computeUnitsToAdd.flatMap(({ hexPeerId, unitIds, peerIdBase58 }) => {
-    return unitIds.map((CUId, i) => {
-      return {
-        ...(i === 0
-          ? {
-              description: `\nAdding ${numToStr(unitIds.length)} compute units to peer ${peerIdBase58}`,
-            }
-          : {}),
-        tx: populateTx(contracts.diamond.addComputeUnits, hexPeerId, [CUId]),
-      };
-    });
-  });
+  return computeUnitsToAdd.flatMap(
+    ({ hexPeerId, unitIds, peerIdBase58, resources }) => {
+      return unitIds.map((CUId, i) => {
+        return {
+          ...(i === 0
+            ? {
+                description: `\nAdding ${numToStr(unitIds.length)} compute units to peer ${peerIdBase58}`,
+              }
+            : {}),
+          tx: populateTx(
+            contracts.diamond.addComputeUnitsV2,
+            hexPeerId,
+            [CUId],
+            resources.cpu,
+          ),
+        };
+      });
+    },
+  );
 }
 
 async function addMissingComputePeers(

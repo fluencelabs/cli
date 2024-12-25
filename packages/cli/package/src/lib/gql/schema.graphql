@@ -9,11 +9,6 @@ query OfferDetails($where: Offer_filter) {
     }
     computeUnitsTotal
     computeUnitsAvailable
-    effectors {
-      effector {
-        id
-      }
-    }
     provider {
       id
     }

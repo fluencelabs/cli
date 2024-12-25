@@ -64,11 +64,10 @@ import { checkboxes } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import { getProtocolVersions } from "../chainValidators.js";
 import {
-  cidHexStringToBase32,
   peerIdBase58ToUint8Array,
   peerIdHexStringToBase58String,
 } from "../conversions.js";
-import { ptFormat, ptParse } from "../currencies.js";
+import { ptParse } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
@@ -471,19 +470,50 @@ async function formatOfferInfo(
       "Offer ID": offerIndexerInfo.id,
       "Created At": offerIndexerInfo.createdAt,
       "Last Updated At": offerIndexerInfo.updatedAt,
-      "Price Per Epoch": await ptFormat(offerIndexerInfo.pricePerEpoch),
-      Effectors: await Promise.all(
-        offerIndexerInfo.effectors.map(({ cid }) => {
-          return cid;
-        }),
+      "Resource Prices": offerIndexerInfo.resources.map(
+        ({ resourceId, resourcePrice }) => {
+          return {
+            "Resource ID": resourceId,
+            Price: resourcePrice,
+          };
+        },
       ),
       "Total compute units": offerIndexerInfo.totalComputeUnits,
       "Free compute units": offerIndexerInfo.freeComputeUnits,
       Peers: await Promise.all(
-        offerIndexerInfo.peers.map(async ({ id, computeUnits }) => {
+        offerIndexerInfo.peers.map(async ({ id, computeUnits, resources }) => {
           return {
             "Peer ID": await peerIdHexStringToBase58String(id),
             "CU Count": computeUnits.length,
+            Resources: {
+              CPU: {
+                "Resource ID": resources.cpu.resourceId,
+                Supply: resources.cpu.supply,
+                Details: resources.cpu.details,
+              },
+              RAM: {
+                "Resource ID": resources.ram.resourceId,
+                Supply: resources.ram.supply,
+                Details: resources.ram.details,
+              },
+              Storage: resources.storage.map((storage) => {
+                return {
+                  "Resource ID": storage.resourceId,
+                  Supply: storage.supply,
+                  Details: storage.details,
+                };
+              }),
+              IP: {
+                "Resource ID": resources.ip.resourceId,
+                Supply: resources.ip.supply,
+                Details: resources.ip.details,
+              },
+              Bandwidth: {
+                "Resource ID": resources.bandwidth.resourceId,
+                Supply: resources.bandwidth.supply,
+                Details: resources.bandwidth.details,
+              },
+            },
           };
         }),
       ),
@@ -565,14 +595,14 @@ export async function resolveOffersFromProviderConfig(
                 resourcesByType: {
                   cpu: {
                     id: "",
-                    resourceId: "",
+                    resourceId: "0x",
                     name: "",
                     supply: computeUnits.length,
                     details: "{}",
                   },
                   ram: {
                     id: "",
-                    resourceId: "",
+                    resourceId: "0x",
                     name: "",
                     supply: 0,
                     details: "{}",
@@ -580,14 +610,14 @@ export async function resolveOffersFromProviderConfig(
                   storage: [],
                   ip: {
                     id: "",
-                    resourceId: "",
+                    resourceId: "0x",
                     name: "",
                     supply: 0,
                     details: "{}",
                   },
                   bandwidth: {
                     id: "",
-                    resourceId: "",
+                    resourceId: "0x",
                     name: "",
                     supply: 0,
                     details: "{}",
@@ -694,8 +724,8 @@ export type EnsureOfferConfig = Awaited<
   ReturnType<typeof ensureOfferConfigs>
 >[number];
 
-type OnChainResource = {
-  resourceId: string;
+export type OnChainResource = {
+  resourceId: `0x${string}`;
   supply: number;
   details: string;
 };
@@ -726,18 +756,18 @@ async function ensureOfferConfigs() {
               const resources = {
                 cpu: {
                   ...resourcesWithIds.cpu,
-                  resourceId: resourcesWithIds.cpu.id,
+                  resourceId: `0x${resourcesWithIds.cpu.id}`,
                   details: peerCPUDetailsToString(resourcesWithIds.cpu.details),
                 },
                 ram: {
                   ...resourcesWithIds.ram,
-                  resourceId: resourcesWithIds.ram.id,
+                  resourceId: `0x${resourcesWithIds.ram.id}`,
                   details: peerRAMDetailsToString(resourcesWithIds.ram.details),
                 },
                 storage: resourcesWithIds.storage.map((res) => {
                   return {
                     ...res,
-                    resourceId: res.id,
+                    resourceId: `0x${res.id}`,
                     details: peerStorageDetailsToString(res.details),
                   };
                 }),
@@ -745,12 +775,12 @@ async function ensureOfferConfigs() {
                   ...resourcesWithIds.ip,
                   supply: ipSupplyToIndividualIPs(resourcesWithIds.ip.supply)
                     .length,
-                  resourceId: resourcesWithIds.ip.id,
+                  resourceId: `0x${resourcesWithIds.ip.id}`,
                   details: "{}",
                 },
                 bandwidth: {
                   ...resourcesWithIds.bandwidth,
-                  resourceId: resourcesWithIds.bandwidth.id,
+                  resourceId: `0x${resourcesWithIds.bandwidth.id}`,
                   details: "{}",
                 },
               } as const satisfies Record<
@@ -985,24 +1015,55 @@ export async function getOffersInfo<T extends OfferNameAndId>(
 
   return [
     errors,
-    await Promise.all(
-      results.map(async ({ offerIndexerInfo, offer }) => {
-        return {
-          ...offer,
-          offerIndexerInfo: await serializeOfferInfo(offerIndexerInfo),
-        };
-      }),
-    ),
+    results.map(({ offerIndexerInfo, offer }) => {
+      return {
+        ...offer,
+        offerIndexerInfo: serializeOfferInfo(offerIndexerInfo),
+      };
+    }),
   ] as const;
 }
 
 type OfferIndexerInfo = Awaited<ReturnType<typeof getOffers>>["offers"][number];
 
-async function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
+function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
   const serializedPeers =
     offerIndexerInfo.peers?.map((peer) => {
       return {
         id: peer.id,
+        // TODO: get proper resources from subgraph
+        resources: {
+          cpu: {
+            resourceId: "0x",
+            supply: 0,
+            details: "{}",
+          },
+          ram: {
+            resourceId: "0x",
+            supply: 0,
+            details: "{}",
+          },
+          storage: [
+            {
+              resourceId: "0x",
+              supply: 0,
+              details: "{}",
+            },
+          ],
+          ip: {
+            resourceId: "0x",
+            supply: 0,
+            details: "{}",
+          },
+          bandwidth: {
+            resourceId: "0x",
+            supply: 0,
+            details: "{}",
+          },
+        } as const satisfies Record<
+          ResourceType,
+          OnChainResource | OnChainResource[]
+        >,
         computeUnits:
           peer.computeUnits?.map((computeUnit) => {
             return {
@@ -1021,22 +1082,19 @@ async function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
     updatedAt: new Date(
       Number(offerIndexerInfo.updatedAt) * 1000,
     ).toISOString(),
-    pricePerEpoch: BigInt(offerIndexerInfo.pricePerEpoch),
     paymentToken: {
       address: offerIndexerInfo.paymentToken.id,
     },
     totalComputeUnits: offerIndexerInfo.computeUnitsTotal,
     freeComputeUnits: offerIndexerInfo.computeUnitsAvailable,
-    effectors: await serializeEffectors(offerIndexerInfo.effectors),
     providerId: offerIndexerInfo.provider.id,
     peers: serializedPeers,
+    // TODO: get proper resources from subgraph
+    resources: [
+      {
+        resourceId: "0x",
+        resourcePrice: BigInt(1),
+      },
+    ] as const,
   };
-}
-
-async function serializeEffectors(effectors: OfferIndexerInfo["effectors"]) {
-  return Promise.all(
-    effectors?.map(async ({ effector: { id } }) => {
-      return { cid: await cidHexStringToBase32(id) };
-    }) ?? [],
-  );
 }

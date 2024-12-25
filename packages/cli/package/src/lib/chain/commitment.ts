@@ -495,6 +495,7 @@ export async function collateralWithdraw(
   })) {
     const { ccId, name: peerName } = commitment;
 
+    // TODO: improve how we get this info
     const [unitIds, isExitedStatuses] =
       await contracts.diamond.getUnitExitStatuses(ccId);
 
@@ -544,30 +545,20 @@ export async function collateralWithdraw(
       return unit.unitInfo.deal !== ZeroAddress;
     });
 
-    const unitIdsByOnChainWorkerId: Record<string, string[]> = {};
+    const onChainWorkerIds = new Set<string>();
 
-    for (const { unitId, unitInfo } of unitsWithDeals) {
-      let unitIds = unitIdsByOnChainWorkerId[unitInfo.onchainWorkerId];
-
-      if (unitIds === undefined) {
-        unitIds = [];
-        unitIdsByOnChainWorkerId[unitInfo.onchainWorkerId] = unitIds;
-      }
-
-      unitIds.push(unitId);
+    for (const { unitInfo } of unitsWithDeals) {
+      onChainWorkerIds.add(unitInfo.onchainWorkerId);
     }
 
-    const moveResourcesFromDealTxs = Object.entries(
-      unitIdsByOnChainWorkerId,
-    ).flatMap(([onchainWorkerId, unitIds]) => {
-      return unitIds.map((unit) => {
+    const moveResourcesFromDealTxs = Array.from(onChainWorkerIds).map(
+      (onchainWorkerId) => {
         return populateTx(
-          contracts.diamond.moveResourcesFromDeal,
-          [unit],
+          contracts.diamond.moveResourcesFromDealV2,
           onchainWorkerId,
         );
-      });
-    });
+      },
+    );
 
     const [firstMoveResourcesFromDealTx, ...restMoveResourcesFromDealTxs] =
       moveResourcesFromDealTxs;
