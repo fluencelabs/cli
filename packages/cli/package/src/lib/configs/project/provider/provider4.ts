@@ -179,7 +179,7 @@ const peerStorageDetailsSchema = {
   properties: {
     manufacturer: { type: "string", nullable: true },
     model: { type: "string", nullable: true },
-    sequentialWriteSpeed: { type: "number", nullable: true },
+    sequentialWriteSpeed: { type: "integer", nullable: true, minimum: 1 },
   },
   required: [],
   nullable: true,
