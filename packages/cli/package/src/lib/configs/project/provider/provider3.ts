@@ -91,10 +91,10 @@ export type CapacityCommitments = Record<string, CapacityCommitment>;
 export const capacityCommitmentsSchema = {
   type: "object",
   description:
-    "A map with nox names as keys and capacity commitments as values",
+    "A map with computePeer names as keys and capacity commitments as values",
   additionalProperties: capacityCommitmentSchema,
   properties: {
-    noxName: capacityCommitmentSchema,
+    computePeerName: capacityCommitmentSchema,
   },
   required: [],
 } as const satisfies JSONSchemaType<CapacityCommitments>;
