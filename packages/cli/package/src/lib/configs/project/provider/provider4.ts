@@ -26,6 +26,8 @@ import { stringify } from "yaml";
 import { versions } from "../../../../versions.js";
 import { ajv, validationErrorToString } from "../../../ajvInstance.js";
 import { commandObj } from "../../../commandObj.js";
+import { CLI_NAME_FULL } from "../../../const.js";
+// import { getReadonlyContracts } from "../../../dealClient.js";
 import { stringifyUnknown } from "../../../helpers/stringifyUnknown.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../../helpers/utils.js";
@@ -1039,6 +1041,10 @@ export enum OnChainResourceType {
   GPU,
 }
 
+function isOnChainResourceType(value: unknown): value is OnChainResourceType {
+  return typeof value === "number" && value in OnChainResourceType;
+}
+
 export const resourceTypeToOnChainResourceType: Record<
   ResourceType,
   OnChainResourceType
@@ -1488,62 +1494,53 @@ const resourcesMock = [
     ty: OnChainResourceType.VCPU,
     metadata:
       '{"manufacturer":"Intel","brand":"Xeon","architecture":"x86_64","generation":"Skylake"}',
-    resourceId:
-      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
   },
   {
     ty: OnChainResourceType.VCPU,
     metadata:
       '{"manufacturer":"AMD","brand":"EPYC","architecture":"x86_64","generation":"Rome"}',
-    resourceId:
-      "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+    id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
   },
   {
     ty: OnChainResourceType.RAM,
     metadata: '{"type":"DDR4","generation":"4"}',
-    resourceId:
-      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
   },
   {
     ty: OnChainResourceType.RAM,
     metadata: '{"type":"DDR4","generation":"5"}',
-    resourceId:
-      "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+    id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
   },
   {
     ty: OnChainResourceType.STORAGE,
     metadata: '{"type":"SSD"}',
-    resourceId:
-      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
   },
   {
     ty: OnChainResourceType.STORAGE,
     metadata: '{"type":"HDD"}',
-    resourceId:
-      "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+    id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
   },
   {
     ty: OnChainResourceType.NETWORK_BANDWIDTH,
     metadata: '{"type":"shared"}',
-    resourceId:
-      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
+    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
   },
   {
     ty: OnChainResourceType.PUBLIC_IP,
     metadata: '{"version":"IPv4"}',
-    resourceId:
-      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
+    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
   },
   {
     ty: OnChainResourceType.GPU,
     metadata: '{"manufacturer":"Nvidia","model":"RTX 3090"}',
-    resourceId:
-      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC6",
+    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC6",
   },
 ] as const satisfies {
   ty: OnChainResourceType;
   metadata: string;
-  resourceId: string;
+  id: string;
 }[];
 
 async function getResources() {
@@ -1565,6 +1562,7 @@ async function getResourcesFromChain(): Promise<ChainResources> {
 }
 
 async function getResourcesFromChainImpl(): Promise<ChainResources> {
+  // TODO: get resources from chain
   // const { readonlyContracts } = await getReadonlyContracts();
   // const resources = await readonlyContracts.diamond.getResources();
   const resources = await getResources();
@@ -1577,13 +1575,21 @@ async function getResourcesFromChainImpl(): Promise<ChainResources> {
     ip: {},
   };
 
-  for (const { metadata, resourceId, ty } of resources) {
-    if (ty === OnChainResourceType.GPU) {
+  for (const { metadata, id, ty } of resources) {
+    const onChainResourceType = Number(ty);
+
+    if (!isOnChainResourceType(onChainResourceType)) {
+      commandObj.error(
+        `Unknown resource type: ${color.yellow(onChainResourceType)}. You may need to update ${CLI_NAME_FULL}`,
+      );
+    }
+
+    if (onChainResourceType === OnChainResourceType.GPU) {
       continue;
     }
 
-    const resourceType = onChainResourceTypeToResourceType[ty];
-    const resourceIdWithoutPrefix = resourceId.slice(2);
+    const resourceType = onChainResourceTypeToResourceType[onChainResourceType];
+    const resourceIdWithoutPrefix = id.slice(2);
 
     try {
       const parsedMetadata = JSON.parse(metadata);
