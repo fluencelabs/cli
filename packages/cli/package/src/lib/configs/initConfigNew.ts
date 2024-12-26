@@ -428,6 +428,13 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
       currentConfig = { version: initialVersion + index, ...migrated };
     }
 
+    if (configOptions.refineSchema !== undefined) {
+      configOptions.schema = await configOptions.refineSchema(
+        // @ts-expect-error - we have to do this to be able to modify pieces of the schema independently
+        JSON.parse(JSON.stringify(configOptions.schema)),
+      );
+    }
+
     await updateSchema(configOptions, schemaPath);
 
     currentConfigString = await saveConfig(

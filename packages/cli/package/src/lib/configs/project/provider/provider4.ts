@@ -15,11 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import assert from "node:assert";
+
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
+import merge from "lodash-es/merge.js";
+import { stringify } from "yaml";
 
 import { versions } from "../../../../versions.js";
+import { ajv, validationErrorToString } from "../../../ajvInstance.js";
+import { commandObj } from "../../../commandObj.js";
+import { stringifyUnknown } from "../../../helpers/stringifyUnknown.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../../helpers/utils.js";
 import {
@@ -54,23 +61,6 @@ const idSchema = {
   minLength: 64,
   maxLength: 64,
   pattern: "^[0-9a-fA-F]+$",
-  // TODO: get this from chain and add dynamically add it to schema
-  //   oneOf: [
-  //     {
-  //       const: "5465737456616c75654f6642797465733332",
-  //       description: `manufacturer: AMD
-  // brand: EPYC
-  // architecture: Zen
-  // generation: 3`,
-  //     },
-  //     {
-  //       const: "5465737456616c75654f6642797465733333",
-  //       description: `manufacturer: Intel
-  // brand: Xeon
-  // architecture: Ice Lake
-  // generation: 3`,
-  //     },
-  //   ],
 } as const satisfies JSONSchemaType<string>;
 
 type Resource = {
@@ -109,12 +99,15 @@ const cpuResourceSchema = {
 
 type CPUResources = Record<string, CPUResource>;
 
+const RESOURCE_NAME_EXAMPLE = "ResourceName";
+const CPU_RESOURCE_NAME_EXAMPLE = `cpu${RESOURCE_NAME_EXAMPLE}`;
+
 const cpuResourcesSchema = {
   type: "object",
   description:
     "A map with CPU resource names as keys and CPU resource objects as values",
   additionalProperties: cpuResourceSchema,
-  properties: { cpuResourceName: cpuResourceSchema },
+  properties: { [CPU_RESOURCE_NAME_EXAMPLE]: cpuResourceSchema },
   required: [],
 } as const satisfies JSONSchemaType<CPUResources>;
 
@@ -156,12 +149,14 @@ const ramResourceSchema = {
 
 type RamResources = Record<string, RamResource>;
 
+const RAM_RESOURCE_NAME_EXAMPLE = `ram${RESOURCE_NAME_EXAMPLE}`;
+
 const ramResourcesSchema = {
   type: "object",
   description:
     "A map with RAM resource names as keys and RAM resource objects as values",
   additionalProperties: ramResourceSchema,
-  properties: { ramResourceName: ramResourceSchema },
+  properties: { [RAM_RESOURCE_NAME_EXAMPLE]: ramResourceSchema },
   required: [],
 } as const satisfies JSONSchemaType<RamResources>;
 
@@ -201,12 +196,14 @@ const storageResourceSchema = {
 
 type StorageResources = Record<string, StorageResource>;
 
+const STORAGE_RESOURCE_NAME_EXAMPLE = `storage${RESOURCE_NAME_EXAMPLE}`;
+
 const storageResourcesSchema = {
   type: "object",
   description:
     "A map with storage resource names as keys and storage resource objects as values",
   additionalProperties: storageResourceSchema,
-  properties: { storageResourceName: storageResourceSchema },
+  properties: { [STORAGE_RESOURCE_NAME_EXAMPLE]: storageResourceSchema },
   required: [],
 } as const satisfies JSONSchemaType<StorageResources>;
 
@@ -223,12 +220,14 @@ const bandwidthResourceSchema = {
 
 type BandwidthResources = Record<string, BandwidthResource>;
 
+const BANDWIDTH_RESOURCE_NAME_EXAMPLE = `bandwidth${RESOURCE_NAME_EXAMPLE}`;
+
 const bandwidthResourcesSchema = {
   type: "object",
   description:
     "A map with bandwidth resource names as keys and bandwidth resource objects as values",
   additionalProperties: bandwidthResourceSchema,
-  properties: { bandwidthResourceName: bandwidthResourceSchema },
+  properties: { [BANDWIDTH_RESOURCE_NAME_EXAMPLE]: bandwidthResourceSchema },
   required: [],
 } as const satisfies JSONSchemaType<BandwidthResources>;
 
@@ -245,12 +244,14 @@ const ipResourceSchema = {
 
 type IPResources = Record<string, IPResource>;
 
+const IP_RESOURCE_NAME_EXAMPLE = `ip${RESOURCE_NAME_EXAMPLE}`;
+
 const ipResourcesSchema = {
   type: "object",
   description:
     "A map with IP resource names as keys and IP resource objects as values",
   additionalProperties: ipResourceSchema,
-  properties: { ipResourceName: ipResourceSchema },
+  properties: { [IP_RESOURCE_NAME_EXAMPLE]: ipResourceSchema },
   required: [],
 } as const satisfies JSONSchemaType<IPResources>;
 
@@ -544,7 +545,7 @@ export default {
     },
     required: ["computePeers", "offers", "providerName", "capacityCommitments"],
   },
-  migrate({ computePeers, capacityCommitments, offers, providerName }) {
+  async migrate({ computePeers, capacityCommitments, offers, providerName }) {
     const newComputePeers = Object.fromEntries(
       Object.entries(computePeers).map(
         ([
@@ -568,7 +569,7 @@ export default {
                   ? undefined
                   : { ip: { supply: [{ start: vmIp }] } }),
             }),
-          ];
+          ] as const;
         },
       ),
     );
@@ -585,7 +586,7 @@ export default {
 
     return {
       providerName,
-      resources: getDefaultResources(),
+      resources: await getDefaultResources(),
       computePeers: newComputePeers,
       offers: newOffers,
       capacityCommitments,
@@ -602,7 +603,59 @@ export default {
       validateComputePeerIPs(config),
     );
   },
+  async refineSchema(schema) {
+    const resourcesFromChain = await getResourcesFromChain();
+
+    const cpuOneOf = getOneOfForSchema(resourcesFromChain.cpu);
+    const ramOneOf = getOneOfForSchema(resourcesFromChain.ram);
+    const storageOneOf = getOneOfForSchema(resourcesFromChain.storage);
+    const bandwidthOneOf = getOneOfForSchema(resourcesFromChain.bandwidth);
+    const ipOneOf = getOneOfForSchema(resourcesFromChain.ip);
+
+    const properties = {
+      cpu: {
+        additionalProperties: cpuOneOf,
+        properties: { [CPU_RESOURCE_NAME_EXAMPLE]: cpuOneOf },
+      },
+      ram: {
+        additionalProperties: ramOneOf,
+        properties: { [RAM_RESOURCE_NAME_EXAMPLE]: ramOneOf },
+      },
+      storage: {
+        additionalProperties: storageOneOf,
+        properties: { [STORAGE_RESOURCE_NAME_EXAMPLE]: storageOneOf },
+      },
+      bandwidth: {
+        additionalProperties: bandwidthOneOf,
+        properties: { [BANDWIDTH_RESOURCE_NAME_EXAMPLE]: bandwidthOneOf },
+      },
+      ip: {
+        additionalProperties: ipOneOf,
+        properties: { [IP_RESOURCE_NAME_EXAMPLE]: ipOneOf },
+      },
+    } satisfies Record<
+      ResourceType,
+      {
+        additionalProperties: ReturnType<typeof getOneOfForSchema>;
+        properties: Record<string, ReturnType<typeof getOneOfForSchema>>;
+      }
+    >;
+
+    return merge(schema, { properties: { resources: { properties } } });
+  },
 } satisfies ConfigOptions<PrevConfig, Config>;
+
+function getOneOfForSchema<T>(resourcesFromChain: Record<string, T>) {
+  return {
+    properties: {
+      id: {
+        oneOf: Object.entries(resourcesFromChain).map(([id, metadata]) => {
+          return { const: id, description: stringify(metadata) };
+        }),
+      },
+    },
+  };
+}
 
 type DefaultComputePeerConfigArgs = {
   name: string;
@@ -632,35 +685,36 @@ const DEFAULT_STORAGE_DETAILS: PeerStorageDetails = {
   sequentialWriteSpeed: OPTIONAL_RESOURCE_DETAILS_NUMBER,
 };
 
-export function getDefaultResources(): ResourcePerResourceType {
-  // TODO: use real on-chain IDs here?
+export async function getDefaultResources(): Promise<ResourcePerResourceType> {
+  const resources = await getDefaultChainResources();
+
   return {
     cpu: {
       [CPU_RESOURCE_NAME]: {
-        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+        id: resources.cpu,
         details: DEFAULT_CPU_DETAILS,
       },
     },
     ram: {
       [RAM_RESOURCE_NAME]: {
-        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+        id: resources.ram,
         details: DEFAULT_RAM_DETAILS,
       },
     },
     storage: {
       [STORAGE_RESOURCE_NAME]: {
-        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+        id: resources.storage,
         details: DEFAULT_STORAGE_DETAILS,
       },
     },
     bandwidth: {
       [BANDWIDTH_RESOURCE_NAME]: {
-        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
+        id: resources.bandwidth,
       },
     },
     ip: {
       [IP_RESOURCE_NAME]: {
-        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
+        id: resources.ip,
       },
     },
   };
@@ -996,6 +1050,17 @@ export const resourceTypeToOnChainResourceType: Record<
   ip: OnChainResourceType.PUBLIC_IP,
 };
 
+const onChainResourceTypeToResourceType: Record<
+  Exclude<OnChainResourceType, OnChainResourceType.GPU>,
+  ResourceType
+> = {
+  [OnChainResourceType.VCPU]: "cpu",
+  [OnChainResourceType.RAM]: "ram",
+  [OnChainResourceType.STORAGE]: "storage",
+  [OnChainResourceType.NETWORK_BANDWIDTH]: "bandwidth",
+  [OnChainResourceType.PUBLIC_IP]: "ip",
+};
+
 function validateComputePeerIPs({
   computePeers,
 }: {
@@ -1327,4 +1392,268 @@ export function mergeBandwidthResources(
 
 export function mergeIPResources(ipResource: IPResource, peerIP: PeerIP) {
   return { ...ipResource, ...peerIP, details: {} };
+}
+
+type CPUMetadata = {
+  manufacturer: string;
+  brand: string;
+  architecture: string;
+  generation: string;
+};
+
+const cpuMetadataSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    manufacturer: { type: "string" },
+    brand: { type: "string" },
+    architecture: { type: "string" },
+    generation: { type: "string" },
+  },
+  required: ["manufacturer", "brand", "architecture", "generation"],
+} as const satisfies JSONSchemaType<CPUMetadata>;
+
+type RAMMetadata = {
+  type: string;
+  generation: string;
+};
+
+const ramMetadataSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    type: { type: "string" },
+    generation: { type: "string" },
+  },
+  required: ["type", "generation"],
+} as const satisfies JSONSchemaType<RAMMetadata>;
+
+type StorageMetadata = {
+  type: string;
+};
+
+const storageMetadataSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    type: { type: "string" },
+  },
+  required: ["type"],
+} as const satisfies JSONSchemaType<StorageMetadata>;
+
+type BandwidthMetadata = {
+  type: string;
+};
+
+const bandwidthMetadataSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    type: { type: "string" },
+  },
+  required: ["type"],
+} as const satisfies JSONSchemaType<BandwidthMetadata>;
+
+type IPMetadata = {
+  version: string;
+};
+
+const ipMetadataSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    version: { type: "string" },
+  },
+  required: ["version"],
+} as const satisfies JSONSchemaType<IPMetadata>;
+
+const resourcesMetadataPerResourceTypeSchema = {
+  cpu: ajv.compile(cpuMetadataSchema),
+  ram: ajv.compile(ramMetadataSchema),
+  storage: ajv.compile(storageMetadataSchema),
+  bandwidth: ajv.compile(bandwidthMetadataSchema),
+  ip: ajv.compile(ipMetadataSchema),
+};
+
+type ChainResources = {
+  cpu: Record<string, CPUMetadata>;
+  ram: Record<string, RAMMetadata>;
+  storage: Record<string, StorageMetadata>;
+  bandwidth: Record<string, BandwidthMetadata>;
+  ip: Record<string, IPMetadata>;
+};
+
+const resourcesMock = [
+  {
+    ty: OnChainResourceType.VCPU,
+    metadata:
+      '{"manufacturer":"Intel","brand":"Xeon","architecture":"x86_64","generation":"Skylake"}',
+    resourceId:
+      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+  },
+  {
+    ty: OnChainResourceType.VCPU,
+    metadata:
+      '{"manufacturer":"AMD","brand":"EPYC","architecture":"x86_64","generation":"Rome"}',
+    resourceId:
+      "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+  },
+  {
+    ty: OnChainResourceType.RAM,
+    metadata: '{"type":"DDR4","generation":"4"}',
+    resourceId:
+      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+  },
+  {
+    ty: OnChainResourceType.RAM,
+    metadata: '{"type":"DDR4","generation":"5"}',
+    resourceId:
+      "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+  },
+  {
+    ty: OnChainResourceType.STORAGE,
+    metadata: '{"type":"SSD"}',
+    resourceId:
+      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+  },
+  {
+    ty: OnChainResourceType.STORAGE,
+    metadata: '{"type":"HDD"}',
+    resourceId:
+      "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+  },
+  {
+    ty: OnChainResourceType.NETWORK_BANDWIDTH,
+    metadata: '{"type":"shared"}',
+    resourceId:
+      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
+  },
+  {
+    ty: OnChainResourceType.PUBLIC_IP,
+    metadata: '{"version":"IPv4"}',
+    resourceId:
+      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
+  },
+  {
+    ty: OnChainResourceType.GPU,
+    metadata: '{"manufacturer":"Nvidia","model":"RTX 3090"}',
+    resourceId:
+      "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC6",
+  },
+] as const satisfies {
+  ty: OnChainResourceType;
+  metadata: string;
+  resourceId: string;
+}[];
+
+async function getResources() {
+  return new Promise<typeof resourcesMock>((res) => {
+    setTimeout(() => {
+      res(resourcesMock);
+    }, 1000);
+  });
+}
+
+let resourcesPromise: undefined | Promise<ChainResources> = undefined;
+
+async function getResourcesFromChain(): Promise<ChainResources> {
+  if (resourcesPromise === undefined) {
+    resourcesPromise = getResourcesFromChainImpl();
+  }
+
+  return resourcesPromise;
+}
+
+async function getResourcesFromChainImpl(): Promise<ChainResources> {
+  // const { readonlyContracts } = await getReadonlyContracts();
+  // const resources = await readonlyContracts.diamond.getResources();
+  const resources = await getResources();
+
+  const chainResources: ChainResources = {
+    cpu: {},
+    ram: {},
+    storage: {},
+    bandwidth: {},
+    ip: {},
+  };
+
+  for (const { metadata, resourceId, ty } of resources) {
+    if (ty === OnChainResourceType.GPU) {
+      continue;
+    }
+
+    const resourceType = onChainResourceTypeToResourceType[ty];
+    const resourceIdWithoutPrefix = resourceId.slice(2);
+
+    try {
+      const parsedMetadata = JSON.parse(metadata);
+
+      if (
+        !resourcesMetadataPerResourceTypeSchema[resourceType](parsedMetadata)
+      ) {
+        throw new Error(
+          await validationErrorToString(
+            resourcesMetadataPerResourceTypeSchema[resourceType].errors,
+          ),
+        );
+      }
+
+      chainResources[resourceType][resourceIdWithoutPrefix] = parsedMetadata;
+    } catch (err) {
+      commandObj.warn(
+        `Failed to parse metadata for ${resourceIdWithoutPrefix}. Error: ${stringifyUnknown(err)} Please report this issue.`,
+      );
+
+      continue;
+    }
+  }
+
+  return chainResources;
+}
+
+type ChainResourcesDefault = {
+  cpu: string;
+  ram: string;
+  storage: string;
+  bandwidth: string;
+  ip: string;
+};
+
+async function getDefaultChainResources(): Promise<ChainResourcesDefault> {
+  const resources = await getResourcesFromChain();
+
+  const [[cpu], [ram], [storage], [bandwidth], [ip]] = [
+    Object.keys(resources.cpu),
+    Object.keys(resources.ram),
+    Object.keys(resources.storage),
+    Object.keys(resources.bandwidth),
+    Object.keys(resources.ip),
+  ];
+
+  assert(
+    cpu !== undefined,
+    "There must be at least one CPU resource specified on chain",
+  );
+
+  assert(
+    ram !== undefined,
+    "There must be at least one RAM resource specified on chain",
+  );
+
+  assert(
+    storage !== undefined,
+    "There must be at least one storage resource specified on chain",
+  );
+
+  assert(
+    bandwidth !== undefined,
+    "There must be at least one bandwidth resource specified on chain",
+  );
+
+  assert(
+    ip !== undefined,
+    "There must be at least one IP resource specified on chain",
+  );
+
+  return { cpu, ram, storage, bandwidth, ip };
 }

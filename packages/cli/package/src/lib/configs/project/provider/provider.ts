@@ -137,7 +137,7 @@ function getDefault(args: ProviderConfigArgs) {
 
     return {
       providerName: "defaultProvider",
-      resources: getDefaultResources(),
+      resources: await getDefaultResources(),
       computePeers,
       offers: {
         [DEFAULT_OFFER_NAME]: {
