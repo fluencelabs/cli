@@ -164,11 +164,11 @@ Override or extend Storage details not related to matching but visible to the us
 
 **Properties**
 
-| Property               | Type   | Required | Description |
-|------------------------|--------|----------|-------------|
-| `manufacturer`         | string | No       |             |
-| `model`                | string | No       |             |
-| `sequentialWriteSpeed` | number | No       |             |
+| Property               | Type    | Required | Description |
+|------------------------|---------|----------|-------------|
+| `manufacturer`         | string  | No       |             |
+| `model`                | string  | No       |             |
+| `sequentialWriteSpeed` | integer | No       |             |
 
 ## offers
 
@@ -378,9 +378,9 @@ Storage details not related to matching but visible to the user for information 
 
 ###### Properties
 
-| Property               | Type   | Required | Description |
-|------------------------|--------|----------|-------------|
-| `manufacturer`         | string | No       |             |
-| `model`                | string | No       |             |
-| `sequentialWriteSpeed` | number | No       |             |
+| Property               | Type    | Required | Description |
+|------------------------|---------|----------|-------------|
+| `manufacturer`         | string  | No       |             |
+| `model`                | string  | No       |             |
+| `sequentialWriteSpeed` | integer | No       |             |
 
