@@ -20,7 +20,6 @@ import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
 
 import { versions } from "../../../../versions.js";
-import { commandObj } from "../../../commandObj.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../../helpers/utils.js";
 import {
@@ -600,6 +599,7 @@ export default {
       validateProtocolVersions(config),
       validateNoUnknownResourceNamesInComputePeers(config),
       validateOfferHasComputePeerResources(config),
+      validateComputePeerIPs(config),
     );
   },
 } satisfies ConfigOptions<PrevConfig, Config>;
@@ -996,9 +996,32 @@ export const resourceTypeToOnChainResourceType: Record<
   ip: OnChainResourceType.PUBLIC_IP,
 };
 
-export function ipSupplyToIndividualIPs(supply: IPSupplies) {
-  const ips = new Set<string>();
+function validateComputePeerIPs({
+  computePeers,
+}: {
+  computePeers: ComputePeers;
+}) {
+  const errors = Object.entries(computePeers).reduce<string[]>(
+    (acc, [peerName, { resources }]) => {
+      const res = ipSupplyToIndividualIPs(resources.ip.supply);
 
+      if ("error" in res) {
+        acc.push(
+          `Compute peer ${color.yellow(peerName)} has invalid IPs in the supply:\n${res.error}`,
+        );
+      }
+
+      return acc;
+    },
+    [],
+  );
+
+  return errors.length === 0 ? true : errors.join("\n");
+}
+
+export function ipSupplyToIndividualIPs(
+  supply: IPSupplies,
+): { error: string } | { result: string[] } {
   const [errors, validRanges] = splitErrorsAndResults(
     supply,
     (s): { error: string } | { result: IpRange } => {
@@ -1057,58 +1080,65 @@ export function ipSupplyToIndividualIPs(supply: IPSupplies) {
   );
 
   if (errors.length > 0) {
-    return commandObj.error(`Invalid IP ranges:\n${errors.join("\n")}`);
+    return { error: `Invalid IP ranges:\n${errors.join("\n")}` };
+  }
+
+  const ips = new Set<string>();
+  const duplicatedIps = new Set<string>();
+
+  function addIp(ip: string) {
+    if (ips.has(ip)) {
+      duplicatedIps.add(ip);
+    } else {
+      ips.add(ip);
+    }
   }
 
   validRanges.forEach((range) => {
     if ("mask" in range) {
       const { ip: ipParts, mask } = range;
       const numAddresses = Math.pow(2, 32 - mask);
-
-      let ipNum =
-        (ipParts[0] << 24) +
-        (ipParts[1] << 16) +
-        (ipParts[2] << 8) +
-        ipParts[3];
+      let ipNum = ipToIpNum(ipParts);
 
       for (let i = 0; i < numAddresses; i++) {
-        const newIp = [
-          (ipNum >> 24) & 255,
-          (ipNum >> 16) & 255,
-          (ipNum >> 8) & 255,
-          ipNum & 255,
-        ].join(".");
-
-        ips.add(newIp);
+        addIp(ipNumToIpStr(ipNum));
         ipNum++;
       }
     } else if ("end" in range) {
-      const { start, end } = range;
-
-      let startNum =
-        (start[0] << 24) + (start[1] << 16) + (start[2] << 8) + start[3];
-
-      const endNum = (end[0] << 24) + (end[1] << 16) + (end[2] << 8) + end[3];
+      const { end, start } = range;
+      const endNum = ipToIpNum(end);
+      let startNum = ipToIpNum(start);
 
       while (startNum <= endNum) {
-        const ip = [
-          (startNum >> 24) & 255,
-          (startNum >> 16) & 255,
-          (startNum >> 8) & 255,
-          startNum & 255,
-        ].join(".");
-
-        ips.add(ip);
+        addIp(ipNumToIpStr(startNum));
         startNum++;
       }
     } else {
       const { start } = range;
-      const ip = start.join(".");
-      ips.add(ip);
+      addIp(start.join("."));
     }
   });
 
-  return Array.from(ips);
+  if (duplicatedIps.size > 0) {
+    return {
+      error: `IPs are duplicated:\n${Array.from(duplicatedIps).join("\n")}`,
+    };
+  }
+
+  return { result: Array.from(ips) };
+}
+
+function ipNumToIpStr(ipNum: number) {
+  return [
+    (ipNum >> 24) & 255,
+    (ipNum >> 16) & 255,
+    (ipNum >> 8) & 255,
+    ipNum & 255,
+  ].join(".");
+}
+
+function ipToIpNum(ip: IPv4) {
+  return (ip[0] << 24) + (ip[1] << 16) + (ip[2] << 8) + ip[3];
 }
 
 type IPv4 = [number, number, number, number];

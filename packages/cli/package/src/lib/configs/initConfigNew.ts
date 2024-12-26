@@ -30,10 +30,12 @@ import {
   YML_EXT,
   CLI_NAME_FULL,
   SCHEMAS_DIR_NAME,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
 import { removeProperties } from "../helpers/utils.js";
+import { confirm } from "../prompt.js";
 
 import type {
   InitializedConfig,
@@ -416,8 +418,14 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     // No need to migrate for the current config version
     if (index !== 0) {
       prevConfig = currentConfig;
+      await confirmProviderConfigMigration(actualConfigPath, prevConfig);
       const migrated = await configOptions.migrate(prevConfig);
-      currentConfig = { ...migrated, version: initialVersion + index };
+
+      if ("version" in migrated) {
+        delete migrated.version;
+      }
+
+      currentConfig = { version: initialVersion + index, ...migrated };
     }
 
     await updateSchema(configOptions, schemaPath);
@@ -447,6 +455,27 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
       typeof getConfigValidator<LatestConfig>
     >,
   };
+}
+
+async function confirmProviderConfigMigration(
+  actualConfigPath: string,
+  prevConfig: object,
+) {
+  if (
+    actualConfigPath.endsWith(PROVIDER_CONFIG_FULL_FILE_NAME) &&
+    "version" in prevConfig &&
+    Number(prevConfig.version) === 3 &&
+    !(await confirm({
+      message: `Config at ${color.yellow(
+        actualConfigPath,
+      )} will be automatically migrated to version 4. Continue?`,
+      default: true,
+    }))
+  ) {
+    commandObj.error(
+      `Aborting. Reason: ${actualConfigPath} migration cancelled. Please use older ${CLI_NAME_FULL} version if you don't want to migrate`,
+    );
+  }
 }
 
 const objWithVersionSchema: JSONSchemaType<{ version: number }> = {

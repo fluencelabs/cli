@@ -57,14 +57,14 @@ import {
   commaSepStrToArr,
   splitErrorsAndResults,
 } from "../../helpers/utils.js";
-import { checkboxes } from "../../prompt.js";
+import { checkboxes, confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import { getProtocolVersions } from "../chainValidators.js";
 import {
   peerIdBase58ToUint8Array,
   peerIdHexStringToBase58String,
 } from "../conversions.js";
-import { ptParse } from "../currencies.js";
+import { ptFormatWithSymbol, ptParse } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
@@ -122,6 +122,10 @@ export async function createOffers(flags: OffersArgs) {
   }
 
   for (const offer of offers) {
+    if (!(await confirmOffer(offer))) {
+      continue;
+    }
+
     const {
       computePeersFromProviderConfig: allCPs,
       offerName,
@@ -289,6 +293,78 @@ Offers ${color.yellow(offersStr)} successfully created!
 
 ${await offersInfoToString([offerInfoErrors, offersInfo])}
 `);
+}
+
+async function confirmOffer(offer: EnsureOfferConfig) {
+  return confirm({
+    message: `The following offer will be created: ${color.yellow(offer.offerName)}\n${yamlDiffPatch(
+      "",
+      {},
+      {
+        "Resource Prices": {
+          CPU: await formatOfferResourcePrice("cpu", offer),
+          RAM: await formatOfferResourcePrice("ram", offer),
+          Storage: await formatOfferResourcePrice("storage", offer),
+          IP: await formatOfferResourcePrice("ip", offer),
+          Bandwidth: await formatOfferResourcePrice("bandwidth", offer),
+        },
+        "Compute Peers": offer.computePeersFromProviderConfig.map(
+          ({ name, peerIdBase58, resourcesByType }) => {
+            return {
+              Name: name,
+              "Peer ID": peerIdBase58,
+              Resources: {
+                CPU: formatOfferResource(resourcesByType.cpu),
+                RAM: formatOfferResource(resourcesByType.ram),
+                Storage: resourcesByType.storage.map((storage) => {
+                  return formatOfferResource(storage);
+                }),
+                IP: formatOfferResource(resourcesByType.ip),
+                Bandwidth: formatOfferResource(resourcesByType.bandwidth),
+              },
+            };
+          },
+        ),
+      },
+    )}\nDo you want to proceed?`,
+  });
+}
+
+function formatOfferResourcePrice(
+  resourceType: ResourceType,
+  offer: {
+    resourcePricesWithIds: Record<
+      ResourceType,
+      Array<{ resourceId: string; price: bigint }>
+    >;
+  },
+) {
+  return Promise.all(
+    offer.resourcePricesWithIds[resourceType].map(
+      async ({ resourceId, price }) => {
+        return {
+          "Resource ID": resourceId,
+          Price: await ptFormatWithSymbol(price),
+        };
+      },
+    ),
+  );
+}
+
+function formatOfferResource({
+  resourceId,
+  supply,
+  details,
+}: {
+  resourceId: string;
+  supply: number;
+  details: string;
+}) {
+  return {
+    "Resource ID": resourceId,
+    Supply: supply,
+    ...(details === "{}" ? {} : { Details: details }),
+  };
 }
 
 type AddRemainingCPsOrCUsArgs = {
@@ -757,6 +833,13 @@ async function ensureOfferConfigs() {
               const { id: bandwidthId, ...bandwidth } =
                 resourcesWithIds.bandwidth;
 
+              const ipSupplyRes = ipSupplyToIndividualIPs(ip.supply);
+
+              assert(
+                "result" in ipSupplyRes,
+                "Unreachable. Config is validated so it must return result",
+              );
+
               const resources = {
                 cpu: {
                   ...cpu,
@@ -779,7 +862,7 @@ async function ensureOfferConfigs() {
                 ),
                 ip: {
                   ...ip,
-                  supply: ipSupplyToIndividualIPs(ip.supply).length,
+                  supply: ipSupplyRes.result.length,
                   resourceId: `0x${ipId}`,
                   details: JSON.stringify(ip.details),
                 },
