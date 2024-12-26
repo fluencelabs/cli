@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import assert from "assert";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
@@ -66,11 +67,15 @@ import configOptions4, {
   type Config as Config4,
   type ComputePeer,
   defaultComputePeerConfig,
-  getDefaultResourceNames,
+  getDefaultResources,
   getDefaultOfferResources,
   type ResourceType,
+  mergeCPUResources,
+  mergeRAMResources,
+  mergeStorageResources,
+  mergeIPResources,
+  mergeBandwidthResources,
 } from "./provider4.js";
-import assert from "assert";
 
 export const options: InitConfigOptions<
   Config0,
@@ -132,7 +137,7 @@ function getDefault(args: ProviderConfigArgs) {
 
     return {
       providerName: "defaultProvider",
-      resourceNames: getDefaultResourceNames(),
+      resources: getDefaultResources(),
       computePeers,
       offers: {
         [DEFAULT_OFFER_NAME]: {
@@ -313,55 +318,59 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         const manifestPath = join(k8sManifestsDir, `${computePeerName}.yaml`);
         await writeFile(manifestPath, manifest, "utf8");
 
-        const cpuId =
-          providerConfig.resourceNames.cpu[computePeer.resources.cpu.name];
+        const cpu =
+          providerConfig.resources.cpu[computePeer.resources.cpu.name];
 
         assert(
-          cpuId !== undefined,
-          `Unreachable. cpuId must be defined for ${computePeerName} because it is validated in the config`,
+          cpu !== undefined,
+          `Unreachable. cpu must be defined for ${computePeerName} because it is validated in the config`,
         );
 
-        const ramId =
-          providerConfig.resourceNames.ram[computePeer.resources.ram.name];
+        const ram =
+          providerConfig.resources.ram[computePeer.resources.ram.name];
 
         assert(
-          ramId !== undefined,
-          `Unreachable. ramId must be defined for ${computePeerName} because it is validated in the config`,
+          ram !== undefined,
+          `Unreachable. ram must be defined for ${computePeerName} because it is validated in the config`,
         );
 
-        const storage = computePeer.resources.storage.map((s) => {
-          const storageId = providerConfig.resourceNames.storage[s.name];
+        const storages = computePeer.resources.storage.map((s) => {
+          const storage = providerConfig.resources.storage[s.name];
+
           assert(
-            storageId !== undefined,
-            `Unreachable. storageId must be defined for ${computePeerName} because it is validated in the config`,
+            storage !== undefined,
+            `Unreachable. storage must be defined for ${computePeerName} because it is validated in the config`,
           );
-          return { ...s, id: storageId };
+
+          return mergeStorageResources(storage, s);
         });
 
-        const ipId =
-          providerConfig.resourceNames.ip[computePeer.resources.ip.name];
+        const ip = providerConfig.resources.ip[computePeer.resources.ip.name];
 
         assert(
-          ipId !== undefined,
-          `Unreachable. ipId must be defined for ${computePeerName} because it is validated in the config`,
+          ip !== undefined,
+          `Unreachable. ip must be defined for ${computePeerName} because it is validated in the config`,
         );
 
-        const bandwidthId =
-          providerConfig.resourceNames.bandwidth[
+        const bandwidth =
+          providerConfig.resources.bandwidth[
             computePeer.resources.bandwidth.name
           ];
 
         assert(
-          bandwidthId !== undefined,
-          `Unreachable. bandwidthId must be defined for ${computePeerName} because it is validated in the config`,
+          bandwidth !== undefined,
+          `Unreachable. bandwidth must be defined for ${computePeerName} because it is validated in the config`,
         );
 
         const resourcesWithIds = {
-          cpu: { ...computePeer.resources.cpu, id: cpuId },
-          ram: { ...computePeer.resources.ram, id: ramId },
-          storage,
-          ip: { ...computePeer.resources.ip, id: ipId },
-          bandwidth: { ...computePeer.resources.bandwidth, id: bandwidthId },
+          cpu: mergeCPUResources(cpu, computePeer.resources.cpu),
+          ram: mergeRAMResources(ram, computePeer.resources.ram),
+          storage: storages,
+          ip: mergeIPResources(ip, computePeer.resources.ip),
+          bandwidth: mergeBandwidthResources(
+            bandwidth,
+            computePeer.resources.bandwidth,
+          ),
         } as const satisfies Record<
           ResourceType,
           { id: string } | Array<{ id: string }>

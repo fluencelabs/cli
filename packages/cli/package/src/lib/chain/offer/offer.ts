@@ -28,9 +28,6 @@ import {
   type ProviderConfig,
 } from "../../configs/project/provider/provider.js";
 import {
-  peerCPUDetailsToString,
-  peerRAMDetailsToString,
-  peerStorageDetailsToString,
   ipSupplyToIndividualIPs,
   type ResourceType,
   type ResourcePrices,
@@ -753,35 +750,43 @@ async function ensureOfferConfigs() {
         const computePeersFromProviderConfig = await Promise.all(
           computePeerConfigs.map(
             async ({ name, walletAddress, peerId, resourcesWithIds }) => {
+              const { id: cpuId, ...cpu } = resourcesWithIds.cpu;
+              const { id: ramId, ...ram } = resourcesWithIds.ram;
+              const { id: ipId, ...ip } = resourcesWithIds.ip;
+
+              const { id: bandwidthId, ...bandwidth } =
+                resourcesWithIds.bandwidth;
+
               const resources = {
                 cpu: {
-                  ...resourcesWithIds.cpu,
-                  resourceId: `0x${resourcesWithIds.cpu.id}`,
-                  details: peerCPUDetailsToString(resourcesWithIds.cpu.details),
+                  ...cpu,
+                  resourceId: `0x${cpuId}`,
+                  details: JSON.stringify(cpu.details),
                 },
                 ram: {
-                  ...resourcesWithIds.ram,
-                  resourceId: `0x${resourcesWithIds.ram.id}`,
-                  details: peerRAMDetailsToString(resourcesWithIds.ram.details),
+                  ...ram,
+                  resourceId: `0x${ramId}`,
+                  details: JSON.stringify(ram.details),
                 },
-                storage: resourcesWithIds.storage.map((res) => {
-                  return {
-                    ...res,
-                    resourceId: `0x${res.id}`,
-                    details: peerStorageDetailsToString(res.details),
-                  };
-                }),
+                storage: resourcesWithIds.storage.map(
+                  ({ id: storageId, ...storage }) => {
+                    return {
+                      ...storage,
+                      resourceId: `0x${storageId}`,
+                      details: JSON.stringify(storage.details),
+                    };
+                  },
+                ),
                 ip: {
-                  ...resourcesWithIds.ip,
-                  supply: ipSupplyToIndividualIPs(resourcesWithIds.ip.supply)
-                    .length,
-                  resourceId: `0x${resourcesWithIds.ip.id}`,
-                  details: "{}",
+                  ...ip,
+                  supply: ipSupplyToIndividualIPs(ip.supply).length,
+                  resourceId: `0x${ipId}`,
+                  details: JSON.stringify(ip.details),
                 },
                 bandwidth: {
-                  ...resourcesWithIds.bandwidth,
-                  resourceId: `0x${resourcesWithIds.bandwidth.id}`,
-                  details: "{}",
+                  ...bandwidth,
+                  resourceId: `0x${bandwidthId}`,
+                  details: JSON.stringify(bandwidth.details),
                 },
               } as const satisfies Record<
                 ResourceType,
@@ -863,18 +868,17 @@ function createGetResourcePricesWithIds(
     return Promise.all(
       Object.entries(resourcePrices[resourceType]).map(
         async ([resourceName, price]) => {
-          const resourceId =
-            providerConfig.resourceNames[resourceType][resourceName];
+          const resource = providerConfig.resources[resourceType][resourceName];
 
           assert(
-            resourceId !== undefined,
-            `Unreachable. Resource ID for ${resourceName} is not found in provider config. This must happen during validation`,
+            resource !== undefined,
+            `Unreachable. Resource for ${resourceName} is not found in provider config`,
           );
 
           return {
             ty: resourceType,
             resourceName,
-            resourceId,
+            resourceId: resource.id,
             price: await ptParse(numToStr(price)),
           };
         },

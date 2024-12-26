@@ -45,9 +45,9 @@ import {
   validateProtocolVersions,
 } from "./provider3.js";
 
-export const OPTIONAL_RESOURCE_DETAILS_STRING = "<optional>";
-export const OPTIONAL_RESOURCE_DETAILS_NUMBER = 1;
-export const OPTIONAL_RESOURCE_DETAILS_BOOLEAN = false;
+const OPTIONAL_RESOURCE_DETAILS_STRING = "<optional>";
+const OPTIONAL_RESOURCE_DETAILS_NUMBER = 1;
+const OPTIONAL_RESOURCE_DETAILS_BOOLEAN = false;
 
 const idSchema = {
   description: "On-chain ID of the resource",
@@ -74,50 +74,9 @@ const idSchema = {
   //   ],
 } as const satisfies JSONSchemaType<string>;
 
-type ResourceNames = Record<string, string>;
-
-const resourceNamesSchema = {
-  type: "object",
-  description:
-    "A map with resource names as keys and on-chain resource IDs as values",
-  additionalProperties: idSchema,
-  properties: {
-    resourceName: idSchema,
-  },
-  required: [],
-} as const satisfies JSONSchemaType<ResourceNames>;
-
-export type ResourceNamesPerResourceType = Record<ResourceType, ResourceNames>;
-
-const resourceNamesPerResourceTypeSchema = {
-  type: "object",
-  description:
-    "A map with resource type names as keys and resource names object as values",
-  additionalProperties: false,
-  properties: {
-    cpu: resourceNamesSchema,
-    ram: resourceNamesSchema,
-    storage: resourceNamesSchema,
-    bandwidth: resourceNamesSchema,
-    ip: resourceNamesSchema,
-  },
-  required: [],
-} as const satisfies JSONSchemaType<ResourceNamesPerResourceType>;
-
 type Resource = {
-  name: string;
-  supply: number;
+  id: string;
 };
-
-const resourceSchema = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    name: { type: "string" },
-    supply: { type: "integer", minimum: 1 },
-  },
-  required: ["name", "supply"],
-} as const satisfies JSONSchemaType<Resource>;
 
 type PeerCPUDetails = {
   model?: string;
@@ -135,24 +94,30 @@ const peerCPUDetailsSchema = {
   nullable: true,
 } as const satisfies JSONSchemaType<PeerCPUDetails>;
 
-type PeerCPU = Resource & {
+type CPUResource = Resource & {
   details?: PeerCPUDetails;
 };
 
-const peerCPUSchema = {
-  ...resourceSchema,
+const cpuResourceSchema = {
+  type: "object",
   description: "Defines a CPU resource",
   properties: {
-    ...resourceSchema.properties,
+    id: idSchema,
     details: peerCPUDetailsSchema,
-    supply: {
-      type: "integer",
-      minimum: 1,
-      description: "Number of physical cores",
-    },
   },
-  required: resourceSchema.required,
-} as const satisfies JSONSchemaType<PeerCPU>;
+  required: ["id"],
+} as const satisfies JSONSchemaType<CPUResource>;
+
+type CPUResources = Record<string, CPUResource>;
+
+const cpuResourcesSchema = {
+  type: "object",
+  description:
+    "A map with CPU resource names as keys and CPU resource objects as values",
+  additionalProperties: cpuResourceSchema,
+  properties: { cpuResourceName: cpuResourceSchema },
+  required: [],
+} as const satisfies JSONSchemaType<CPUResources>;
 
 type PeerRamDetails = {
   manufacturer?: string;
@@ -176,24 +141,30 @@ const peerRamDetailsSchema = {
   nullable: true,
 } as const satisfies JSONSchemaType<PeerRamDetails>;
 
-type PeerRAM = Resource & {
+type RamResource = Resource & {
   details?: PeerRamDetails;
 };
 
-const peerRAMSchema = {
-  ...resourceSchema,
+const ramResourceSchema = {
+  type: "object",
   description: "Defines a RAM resource",
   properties: {
-    ...resourceSchema.properties,
+    id: idSchema,
     details: peerRamDetailsSchema,
-    supply: {
-      type: "integer",
-      minimum: 1,
-      description: "Amount of RAM in GB",
-    },
   },
-  required: resourceSchema.required,
-} as const satisfies JSONSchemaType<PeerRAM>;
+  required: ["id"],
+} as const satisfies JSONSchemaType<RamResource>;
+
+type RamResources = Record<string, RamResource>;
+
+const ramResourcesSchema = {
+  type: "object",
+  description:
+    "A map with RAM resource names as keys and RAM resource objects as values",
+  additionalProperties: ramResourceSchema,
+  properties: { ramResourceName: ramResourceSchema },
+  required: [],
+} as const satisfies JSONSchemaType<RamResources>;
 
 type PeerStorageDetails = {
   manufacturer?: string;
@@ -215,46 +186,202 @@ const peerStorageDetailsSchema = {
   nullable: true,
 } as const satisfies JSONSchemaType<PeerStorageDetails>;
 
-type PeerStorage = Resource & {
+type StorageResource = Resource & {
+  details?: PeerStorageDetails;
+};
+
+const storageResourceSchema = {
+  type: "object",
+  description: "Defines a storage resource",
+  properties: {
+    id: idSchema,
+    details: peerStorageDetailsSchema,
+  },
+  required: ["id"],
+} as const satisfies JSONSchemaType<StorageResource>;
+
+type StorageResources = Record<string, StorageResource>;
+
+const storageResourcesSchema = {
+  type: "object",
+  description:
+    "A map with storage resource names as keys and storage resource objects as values",
+  additionalProperties: storageResourceSchema,
+  properties: { storageResourceName: storageResourceSchema },
+  required: [],
+} as const satisfies JSONSchemaType<StorageResources>;
+
+type BandwidthResource = Resource;
+
+const bandwidthResourceSchema = {
+  type: "object",
+  description: "Defines a bandwidth resource",
+  properties: {
+    id: idSchema,
+  },
+  required: ["id"],
+} as const satisfies JSONSchemaType<BandwidthResource>;
+
+type BandwidthResources = Record<string, BandwidthResource>;
+
+const bandwidthResourcesSchema = {
+  type: "object",
+  description:
+    "A map with bandwidth resource names as keys and bandwidth resource objects as values",
+  additionalProperties: bandwidthResourceSchema,
+  properties: { bandwidthResourceName: bandwidthResourceSchema },
+  required: [],
+} as const satisfies JSONSchemaType<BandwidthResources>;
+
+type IPResource = Resource;
+
+const ipResourceSchema = {
+  type: "object",
+  description: "Defines an IP resource",
+  properties: {
+    id: idSchema,
+  },
+  required: ["id"],
+} as const satisfies JSONSchemaType<IPResource>;
+
+type IPResources = Record<string, IPResource>;
+
+const ipResourcesSchema = {
+  type: "object",
+  description:
+    "A map with IP resource names as keys and IP resource objects as values",
+  additionalProperties: ipResourceSchema,
+  properties: { ipResourceName: ipResourceSchema },
+  required: [],
+} as const satisfies JSONSchemaType<IPResources>;
+
+export type ResourcePerResourceType = {
+  cpu: CPUResources;
+  ram: RamResources;
+  storage: StorageResources;
+  bandwidth: BandwidthResources;
+  ip: IPResources;
+};
+
+const resourcesPerResourceTypeSchema = {
+  type: "object",
+  description:
+    "A map with resource type names as keys and resource names object as values",
+  additionalProperties: false,
+  properties: {
+    cpu: cpuResourcesSchema,
+    ram: ramResourcesSchema,
+    storage: storageResourcesSchema,
+    bandwidth: bandwidthResourcesSchema,
+    ip: ipResourcesSchema,
+  },
+  required: [],
+} as const satisfies JSONSchemaType<ResourcePerResourceType>;
+
+type PeerResource = {
+  name: string;
+  supply: number;
+};
+
+const peerResourceSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    name: { type: "string" },
+    supply: { type: "integer", minimum: 1 },
+  },
+  required: ["name", "supply"],
+} as const satisfies JSONSchemaType<PeerResource>;
+
+const OVERRIDE_OR_EXTEND_DEDSCRIPTION = `Override or extend `;
+
+type PeerCPU = PeerResource & {
+  details?: PeerCPUDetails;
+};
+
+const peerCPUSchema = {
+  ...peerResourceSchema,
+  description: "Defines a CPU resource",
+  properties: {
+    ...peerResourceSchema.properties,
+    details: {
+      ...peerCPUDetailsSchema,
+      description: `${OVERRIDE_OR_EXTEND_DEDSCRIPTION}${peerCPUDetailsSchema.description}`,
+    },
+    supply: {
+      type: "integer",
+      minimum: 1,
+      description: "Number of physical cores",
+    },
+  },
+  required: peerResourceSchema.required,
+} as const satisfies JSONSchemaType<PeerCPU>;
+
+type PeerRAM = PeerResource & {
+  details?: PeerRamDetails;
+};
+
+const peerRAMSchema = {
+  ...peerResourceSchema,
+  description: "Defines a RAM resource",
+  properties: {
+    ...peerResourceSchema.properties,
+    details: {
+      ...peerRamDetailsSchema,
+      description: `${OVERRIDE_OR_EXTEND_DEDSCRIPTION}${peerRamDetailsSchema.description}`,
+    },
+    supply: {
+      type: "integer",
+      minimum: 1,
+      description: "Amount of RAM in GB",
+    },
+  },
+  required: peerResourceSchema.required,
+} as const satisfies JSONSchemaType<PeerRAM>;
+
+type PeerStorage = PeerResource & {
   details?: PeerStorageDetails;
 };
 
 const peerStorageSchema = {
-  ...resourceSchema,
+  ...peerResourceSchema,
   description: "Defines a storage resource",
   properties: {
-    ...resourceSchema.properties,
-    details: peerStorageDetailsSchema,
+    ...peerResourceSchema.properties,
+    details: {
+      ...peerStorageDetailsSchema,
+      description: `${OVERRIDE_OR_EXTEND_DEDSCRIPTION}${peerStorageDetailsSchema.description}`,
+    },
     supply: {
       type: "integer",
       minimum: 1,
       description: "Amount of storage in GB",
     },
   },
-  required: resourceSchema.required,
+  required: peerResourceSchema.required,
 } as const satisfies JSONSchemaType<PeerStorage>;
 
-type Bandwidth = Resource;
+type PeerBandwidth = PeerResource;
 
-const bandwidthSchema = {
-  ...resourceSchema,
+const peerBandwidthSchema = {
+  ...peerResourceSchema,
   description: "Defines a bandwidth resource",
   properties: {
-    ...resourceSchema.properties,
+    ...peerResourceSchema.properties,
     supply: {
       type: "integer",
       minimum: 1,
       description: "Bandwidth in Mbps",
     },
   },
-  required: resourceSchema.required,
-} as const satisfies JSONSchemaType<Bandwidth>;
+  required: peerResourceSchema.required,
+} as const satisfies JSONSchemaType<PeerBandwidth>;
 
-type IP = PrevIp & {
+type PeerIP = PrevIp & {
   name: string;
 };
 
-const ipSchema = {
+const peerIpSchema = {
   ...prevIpSchema,
   description: "Defines an IP resource",
   properties: {
@@ -263,14 +390,14 @@ const ipSchema = {
   },
   required: [...prevIpSchema.required, "name"],
   nullable: false,
-} as const satisfies JSONSchemaType<IP>;
+} as const satisfies JSONSchemaType<PeerIP>;
 
 export type ComputePeerResources = {
   cpu: PeerCPU;
   ram: PeerRAM;
   storage: PeerStorage[];
-  bandwidth: Bandwidth;
-  ip: IP;
+  bandwidth: PeerBandwidth;
+  ip: PeerIP;
 };
 
 export type ResourceType = keyof ComputePeerResources;
@@ -296,8 +423,8 @@ const computePeerSchema = {
         cpu: peerCPUSchema,
         ram: peerRAMSchema,
         storage: { type: "array", items: peerStorageSchema },
-        bandwidth: bandwidthSchema,
-        ip: ipSchema,
+        bandwidth: peerBandwidthSchema,
+        ip: peerIpSchema,
       },
       required: ["cpu", "ram", "storage", "bandwidth", "ip"],
     },
@@ -392,7 +519,7 @@ const offersSchema = {
 } as const satisfies JSONSchemaType<Offers>;
 
 export type Config = {
-  resourceNames: ResourceNamesPerResourceType;
+  resources: ResourcePerResourceType;
   providerName: string;
   capacityCommitments: CapacityCommitments;
   computePeers: ComputePeers;
@@ -410,7 +537,7 @@ export default {
     type: "object",
     additionalProperties: false,
     properties: {
-      resourceNames: resourceNamesPerResourceTypeSchema,
+      resources: resourcesPerResourceTypeSchema,
       providerName: providerNameSchema,
       computePeers: computePeersSchema,
       capacityCommitments: capacityCommitmentsSchema,
@@ -459,7 +586,7 @@ export default {
 
     return {
       providerName,
-      resourceNames: getDefaultResourceNames(),
+      resources: getDefaultResources(),
       computePeers: newComputePeers,
       offers: newOffers,
       capacityCommitments,
@@ -471,7 +598,6 @@ export default {
       validateCC(config),
       validateNoDuplicatePeerNamesInOffers(config),
       validateProtocolVersions(config),
-      validateNoDuplicateResourceIds(config),
       validateNoUnknownResourceNamesInComputePeers(config),
       validateOfferHasComputePeerResources(config),
     );
@@ -489,28 +615,53 @@ type DefaultComputePeerConfigArgs = {
     | undefined;
 };
 
-export function getDefaultResourceNames(): ResourceNamesPerResourceType {
+const DEFAULT_CPU_DETAILS: PeerCPUDetails = {
+  model: OPTIONAL_RESOURCE_DETAILS_STRING,
+};
+
+const DEFAULT_RAM_DETAILS: PeerRamDetails = {
+  manufacturer: OPTIONAL_RESOURCE_DETAILS_STRING,
+  model: OPTIONAL_RESOURCE_DETAILS_STRING,
+  speed: OPTIONAL_RESOURCE_DETAILS_NUMBER,
+  ecc: OPTIONAL_RESOURCE_DETAILS_BOOLEAN,
+};
+
+const DEFAULT_STORAGE_DETAILS: PeerStorageDetails = {
+  manufacturer: OPTIONAL_RESOURCE_DETAILS_STRING,
+  model: OPTIONAL_RESOURCE_DETAILS_STRING,
+  sequentialWriteSpeed: OPTIONAL_RESOURCE_DETAILS_NUMBER,
+};
+
+export function getDefaultResources(): ResourcePerResourceType {
   // TODO: use real on-chain IDs here?
   return {
     cpu: {
-      [CPU_RESOURCE_NAME]:
-        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+      [CPU_RESOURCE_NAME]: {
+        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+        details: DEFAULT_CPU_DETAILS,
+      },
     },
     ram: {
-      [RAM_RESOURCE_NAME]:
-        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+      [RAM_RESOURCE_NAME]: {
+        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+        details: DEFAULT_RAM_DETAILS,
+      },
     },
     storage: {
-      [STORAGE_RESOURCE_NAME]:
-        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+      [STORAGE_RESOURCE_NAME]: {
+        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+        details: DEFAULT_STORAGE_DETAILS,
+      },
     },
     bandwidth: {
-      [BANDWIDTH_RESOURCE_NAME]:
-        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
+      [BANDWIDTH_RESOURCE_NAME]: {
+        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
+      },
     },
     ip: {
-      [IP_RESOURCE_NAME]:
-        "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
+      [IP_RESOURCE_NAME]: {
+        id: "111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
+      },
     },
   };
 }
@@ -537,29 +688,18 @@ export function defaultComputePeerConfig({
       cpu: {
         name: CPU_RESOURCE_NAME,
         supply: computeUnits < 1 ? 1 : computeUnits,
-        details: {
-          model: OPTIONAL_RESOURCE_DETAILS_STRING,
-        },
+        details: DEFAULT_CPU_DETAILS,
       },
       ram: {
         name: RAM_RESOURCE_NAME,
         supply: 1,
-        details: {
-          ecc: OPTIONAL_RESOURCE_DETAILS_BOOLEAN,
-          manufacturer: OPTIONAL_RESOURCE_DETAILS_STRING,
-          model: OPTIONAL_RESOURCE_DETAILS_STRING,
-          speed: OPTIONAL_RESOURCE_DETAILS_NUMBER,
-        },
+        details: DEFAULT_RAM_DETAILS,
       },
       storage: [
         {
           name: STORAGE_RESOURCE_NAME,
           supply: 1,
-          details: {
-            manufacturer: OPTIONAL_RESOURCE_DETAILS_STRING,
-            model: OPTIONAL_RESOURCE_DETAILS_STRING,
-            sequentialWriteSpeed: OPTIONAL_RESOURCE_DETAILS_NUMBER,
-          },
+          details: DEFAULT_STORAGE_DETAILS,
         },
       ],
       bandwidth: { name: BANDWIDTH_RESOURCE_NAME, supply: 1 },
@@ -571,48 +711,11 @@ export function defaultComputePeerConfig({
   };
 }
 
-function validateNoDuplicateResourceIds({
-  resourceNames: resourceNamesPerResourceType,
-}: {
-  resourceNames: ResourceNamesPerResourceType;
-}): ValidationResult {
-  const errorsPerResourceType = Object.entries(resourceNamesPerResourceType)
-    .map(([resourceType, resourceNames]) => {
-      const resourceNamesById = Object.entries(resourceNames).reduce<
-        Record<string, string[]>
-      >((acc, [name, id]) => {
-        if (acc[id] === undefined) {
-          acc[id] = [];
-        }
-
-        acc[id].push(name);
-        return acc;
-      }, {});
-
-      const errors = Object.entries(resourceNamesById)
-        .filter(([, names]) => {
-          return names.length > 1;
-        })
-        .map(([id, names]) => {
-          return `names: ${color.yellow(names.join(", "))} in ${color.yellow(`resourceNames.${resourceType}`)} property refer to the exact same Resource ID ${color.yellow(id)}`;
-        });
-
-      return errors.length === 0 ? true : errors.join("\n");
-    })
-    .filter((result) => {
-      return typeof result === "string";
-    });
-
-  return errorsPerResourceType.length === 0
-    ? true
-    : errorsPerResourceType.join("\n");
-}
-
 function validateNoUnknownResourceNamesInComputePeers({
-  resourceNames: resourceNamesPerResourceType,
+  resources: resourcesPerResourceType,
   computePeers,
 }: {
-  resourceNames: ResourceNamesPerResourceType;
+  resources: ResourcePerResourceType;
   computePeers: ComputePeers;
 }): ValidationResult {
   const errors = Object.entries(computePeers).reduce<string[]>(
@@ -625,15 +728,12 @@ function validateNoUnknownResourceNamesInComputePeers({
 
           if (Array.isArray(resource)) {
             resource.forEach(({ name }) => {
-              if (
-                resourceNamesPerResourceType[resourceType][name] === undefined
-              ) {
+              if (resourcesPerResourceType[resourceType][name] === undefined) {
                 acc.push(`${resourceType}: ${name}`);
               }
             });
           } else if (
-            resourceNamesPerResourceType[resourceType][resource.name] ===
-            undefined
+            resourcesPerResourceType[resourceType][resource.name] === undefined
           ) {
             acc.push(`${resourceType}: ${resource.name}`);
           }
@@ -865,91 +965,6 @@ function getValidateResource(
   };
 }
 
-export function peerCPUDetailsToString({
-  model,
-}: PeerCPUDetails | undefined = {}) {
-  const details: PeerCPUDetails = {};
-
-  if (model !== undefined && model !== OPTIONAL_RESOURCE_DETAILS_STRING) {
-    details["model"] = model;
-  }
-
-  return JSON.stringify(details);
-}
-
-export function peerRAMDetailsToString({
-  manufacturer,
-  model,
-  speed,
-  ecc,
-}: PeerRamDetails | undefined = {}) {
-  const details: PeerRamDetails = {};
-
-  const isManufacturerDefined =
-    manufacturer !== undefined &&
-    manufacturer !== OPTIONAL_RESOURCE_DETAILS_STRING;
-
-  if (isManufacturerDefined) {
-    details["manufacturer"] = manufacturer;
-  }
-
-  const isModelDefined =
-    model !== undefined && model !== OPTIONAL_RESOURCE_DETAILS_STRING;
-
-  if (isModelDefined) {
-    details["model"] = model;
-  }
-
-  const isSpeedDefined =
-    speed !== undefined && speed !== OPTIONAL_RESOURCE_DETAILS_NUMBER;
-
-  if (isSpeedDefined) {
-    details["speed"] = speed;
-  }
-
-  const isEccDefined = ecc !== undefined;
-
-  const isSomethingElseDefined =
-    ecc !== OPTIONAL_RESOURCE_DETAILS_BOOLEAN ||
-    isManufacturerDefined ||
-    isModelDefined ||
-    isSpeedDefined;
-
-  if (isEccDefined && isSomethingElseDefined) {
-    details["ecc"] = ecc;
-  }
-
-  return JSON.stringify(details);
-}
-
-export function peerStorageDetailsToString({
-  manufacturer,
-  model,
-  sequentialWriteSpeed,
-}: PeerStorageDetails | undefined = {}) {
-  const details: PeerStorageDetails = {};
-
-  if (
-    manufacturer !== undefined &&
-    manufacturer !== OPTIONAL_RESOURCE_DETAILS_STRING
-  ) {
-    details["manufacturer"] = manufacturer;
-  }
-
-  if (model !== undefined && model !== OPTIONAL_RESOURCE_DETAILS_STRING) {
-    details["model"] = model;
-  }
-
-  if (
-    sequentialWriteSpeed !== undefined &&
-    sequentialWriteSpeed !== OPTIONAL_RESOURCE_DETAILS_NUMBER
-  ) {
-    details["sequentialWriteSpeed"] = sequentialWriteSpeed;
-  }
-
-  return JSON.stringify(details);
-}
-
 type IpRange =
   | {
       ip: IPv4;
@@ -1125,4 +1140,161 @@ function stringToIp(str: string): { result: IPv4 } | { error: string } {
   }
 
   return { result: [first, second, third, fourth] };
+}
+
+export function mergeCPUResources(
+  { details: cpuResourceDetails, ...restCPURescource }: CPUResource,
+  { details: peerCPUDetails, ...restPeerCPU }: PeerCPU,
+) {
+  return {
+    ...restCPURescource,
+    ...restPeerCPU,
+    details: mergeCPUDetails(cpuResourceDetails, peerCPUDetails),
+  };
+}
+
+function mergeCPUDetails(
+  details: PeerCPUDetails | undefined,
+  peerDetails: PeerCPUDetails | undefined,
+): PeerCPUDetails {
+  const cleanedDetails = removeOptionalCPUDetails(details);
+  const cleanedPeerDetails = removeOptionalCPUDetails(peerDetails);
+  return { ...cleanedDetails, ...cleanedPeerDetails };
+}
+
+function removeOptionalCPUDetails(
+  details: PeerCPUDetails | undefined,
+): PeerCPUDetails {
+  if (details === undefined) {
+    return {};
+  }
+
+  const { model } = details;
+  const res: PeerCPUDetails = {};
+
+  if (model !== undefined && model !== OPTIONAL_RESOURCE_DETAILS_STRING) {
+    res.model = model;
+  }
+
+  return res;
+}
+
+export function mergeRAMResources(
+  { details: ramResourceDetails, ...restRAMRescource }: RamResource,
+  { details: peerRAMDetails, ...restPeerRAM }: PeerRAM,
+) {
+  return {
+    ...restRAMRescource,
+    ...restPeerRAM,
+    details: mergeRAMDetails(ramResourceDetails, peerRAMDetails),
+  };
+}
+
+function mergeRAMDetails(
+  details: PeerRamDetails | undefined,
+  peerDetails: PeerRamDetails | undefined,
+): PeerRamDetails {
+  const cleanedDetails = removeOptionalRAMDetails(details);
+  const cleanedPeerDetails = removeOptionalRAMDetails(peerDetails);
+  return { ...cleanedDetails, ...cleanedPeerDetails };
+}
+
+function removeOptionalRAMDetails(
+  details: PeerRamDetails | undefined,
+): PeerRamDetails {
+  if (details === undefined) {
+    return {};
+  }
+
+  const { manufacturer, model, speed, ecc } = details;
+  const res: PeerRamDetails = {};
+
+  if (
+    manufacturer !== undefined &&
+    manufacturer !== OPTIONAL_RESOURCE_DETAILS_STRING
+  ) {
+    res.manufacturer = manufacturer;
+  }
+
+  if (model !== undefined && model !== OPTIONAL_RESOURCE_DETAILS_STRING) {
+    res.model = model;
+  }
+
+  if (speed !== undefined && speed !== OPTIONAL_RESOURCE_DETAILS_NUMBER) {
+    res.speed = speed;
+  }
+
+  const allDetailsAreOptional =
+    manufacturer === OPTIONAL_RESOURCE_DETAILS_STRING &&
+    model === OPTIONAL_RESOURCE_DETAILS_STRING &&
+    speed === OPTIONAL_RESOURCE_DETAILS_NUMBER &&
+    ecc === OPTIONAL_RESOURCE_DETAILS_BOOLEAN;
+
+  if (ecc !== undefined && !allDetailsAreOptional) {
+    res.ecc = ecc;
+  }
+
+  return res;
+}
+
+export function mergeStorageResources(
+  { details: storageResourceDetails, ...restStorageRescource }: StorageResource,
+  { details: peerStorageDetails, ...restPeerStorage }: PeerStorage,
+) {
+  return {
+    ...restStorageRescource,
+    ...restPeerStorage,
+    details: mergeStorageDetails(storageResourceDetails, peerStorageDetails),
+  };
+}
+
+function mergeStorageDetails(
+  details: PeerStorageDetails | undefined,
+  peerDetails: PeerStorageDetails | undefined,
+): PeerStorageDetails {
+  const cleanedDetails = removeOptionalStorageDetails(details);
+  const cleanedPeerDetails = removeOptionalStorageDetails(peerDetails);
+  return { ...cleanedDetails, ...cleanedPeerDetails };
+}
+
+function removeOptionalStorageDetails(
+  details: PeerStorageDetails | undefined,
+): PeerStorageDetails {
+  if (details === undefined) {
+    return {};
+  }
+
+  const { manufacturer, model, sequentialWriteSpeed } = details;
+  const res: PeerStorageDetails = {};
+
+  if (
+    manufacturer !== undefined &&
+    manufacturer !== OPTIONAL_RESOURCE_DETAILS_STRING
+  ) {
+    res.manufacturer = manufacturer;
+  }
+
+  if (model !== undefined && model !== OPTIONAL_RESOURCE_DETAILS_STRING) {
+    res.model = model;
+  }
+
+  if (
+    sequentialWriteSpeed !== undefined &&
+    sequentialWriteSpeed !== OPTIONAL_RESOURCE_DETAILS_NUMBER
+  ) {
+    res.sequentialWriteSpeed = sequentialWriteSpeed;
+  }
+
+  return res;
+}
+
+export function mergeBandwidthResources(
+  bandwidthResource: BandwidthResource,
+  peerBandwidth: PeerBandwidth,
+) {
+  return { ...bandwidthResource, ...peerBandwidth, details: {} };
+}
+
+export function mergeIPResources(ipResource: IPResource, peerIP: PeerIP) {
+  return { ...ipResource, ...peerIP, details: {} };
 }
