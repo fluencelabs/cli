@@ -6,7 +6,7 @@ Defines provider configuration
 
 | Property              | Type                           | Required | Description                                                                |
 |-----------------------|--------------------------------|----------|----------------------------------------------------------------------------|
-| `capacityCommitments` | [object](#capacitycommitments) | **Yes**  | A map with nox names as keys and capacity commitments as values            |
+| `capacityCommitments` | [object](#capacitycommitments) | **Yes**  | A map with computePeer names as keys and capacity commitments as values    |
 | `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peer configs as values   |
 | `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offer configs as values                 |
 | `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                           |
@@ -15,15 +15,15 @@ Defines provider configuration
 
 ## capacityCommitments
 
-A map with nox names as keys and capacity commitments as values
+A map with computePeer names as keys and capacity commitments as values
 
 ### Properties
 
-| Property  | Type               | Required | Description                   |
-|-----------|--------------------|----------|-------------------------------|
-| `noxName` | [object](#noxname) | No       | Defines a capacity commitment |
+| Property          | Type                       | Required | Description                   |
+|-------------------|----------------------------|----------|-------------------------------|
+| `computePeerName` | [object](#computepeername) | No       | Defines a capacity commitment |
 
-### noxName
+### computePeerName
 
 Defines a capacity commitment
 
