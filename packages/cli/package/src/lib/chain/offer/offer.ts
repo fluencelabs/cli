@@ -33,6 +33,8 @@ import {
   type ResourcePrices,
   resourceTypeToOnChainResourceType,
   OnChainResourceType,
+  isOnChainResourceType,
+  onChainResourceTypeToResourceType,
 } from "../../configs/project/provider/provider4.js";
 import {
   initNewProviderArtifactsConfig,
@@ -545,7 +547,7 @@ async function formatOfferInfo(
       "Offer ID": offerIndexerInfo.id,
       "Created At": offerIndexerInfo.createdAt,
       "Last Updated At": offerIndexerInfo.updatedAt,
-      "Resource Prices": offerIndexerInfo.resources.map(
+      "Resource Prices": offerIndexerInfo.resources?.map(
         ({ resourceId, resourcePrice }) => {
           return {
             "Resource ID": resourceId,
@@ -556,41 +558,43 @@ async function formatOfferInfo(
       "Total compute units": offerIndexerInfo.totalComputeUnits,
       "Free compute units": offerIndexerInfo.freeComputeUnits,
       Peers: await Promise.all(
-        offerIndexerInfo.peers.map(async ({ id, computeUnits, resources }) => {
-          return {
-            "Peer ID": await peerIdHexStringToBase58String(id),
-            "CU Count": computeUnits.length,
-            Resources: {
-              CPU: {
-                "Resource ID": resources.cpu.resourceId,
-                Supply: resources.cpu.supply,
-                Details: resources.cpu.details,
+        offerIndexerInfo.peers.map(
+          async ({ id, computeUnits, resourcesByType }) => {
+            return {
+              "Peer ID": await peerIdHexStringToBase58String(id),
+              "CU Count": computeUnits.length,
+              Resources: {
+                CPU: {
+                  "Resource ID": resourcesByType.cpu.resourceId,
+                  Supply: resourcesByType.cpu.supply,
+                  Details: resourcesByType.cpu.details,
+                },
+                RAM: {
+                  "Resource ID": resourcesByType.ram.resourceId,
+                  Supply: resourcesByType.ram.supply,
+                  Details: resourcesByType.ram.details,
+                },
+                Storage: resourcesByType.storage.map((storage) => {
+                  return {
+                    "Resource ID": storage.resourceId,
+                    Supply: storage.supply,
+                    Details: storage.details,
+                  };
+                }),
+                IP: {
+                  "Resource ID": resourcesByType.ip.resourceId,
+                  Supply: resourcesByType.ip.supply,
+                  Details: resourcesByType.ip.details,
+                },
+                Bandwidth: {
+                  "Resource ID": resourcesByType.bandwidth.resourceId,
+                  Supply: resourcesByType.bandwidth.supply,
+                  Details: resourcesByType.bandwidth.details,
+                },
               },
-              RAM: {
-                "Resource ID": resources.ram.resourceId,
-                Supply: resources.ram.supply,
-                Details: resources.ram.details,
-              },
-              Storage: resources.storage.map((storage) => {
-                return {
-                  "Resource ID": storage.resourceId,
-                  Supply: storage.supply,
-                  Details: storage.details,
-                };
-              }),
-              IP: {
-                "Resource ID": resources.ip.resourceId,
-                Supply: resources.ip.supply,
-                Details: resources.ip.details,
-              },
-              Bandwidth: {
-                "Resource ID": resources.bandwidth.resourceId,
-                Supply: resources.bandwidth.supply,
-                Details: resources.bandwidth.details,
-              },
-            },
-          };
-        }),
+            };
+          },
+        ),
       ),
     },
   );
@@ -652,11 +656,65 @@ export async function resolveOffersFromProviderConfig(
 
     const offersNotDefinedLocally = await Promise.all(
       offerInfos.map(async ({ offerId, offerIndexerInfo }) => {
-        return {
-          offerName: `Offer ${offerId}`,
-          computePeersFromProviderConfig: await Promise.all(
-            offerIndexerInfo.peers.map(async ({ computeUnits, id }, i) => {
+        const resourcePricesWithIds = (
+          offerIndexerInfo.resources ?? []
+        ).reduce<ResourcePricesWithIds>(
+          (acc, { resourceId, resourcePrice, resource: { type } }) => {
+            if (
+              !isOnChainResourceType(type) ||
+              type === OnChainResourceType.GPU
+            ) {
+              return acc;
+            }
+
+            const resourceType = onChainResourceTypeToResourceType[type];
+
+            acc[resourceType].push({
+              ty: type,
+              resourceType,
+              resourceId,
+              resourceName: resourceId,
+              price: resourcePrice,
+            });
+
+            return acc;
+          },
+          {
+            cpu: [],
+            ram: [],
+            storage: [],
+            ip: [],
+            bandwidth: [],
+          },
+        );
+
+        const computePeersFromProviderConfig = await Promise.all(
+          offerIndexerInfo.peers.map(
+            async ({ computeUnits, resourcesByType, id }, i) => {
               const peerIdBase58 = await peerIdHexStringToBase58String(id);
+
+              const resourcesByTypeWithName = {
+                cpu: {
+                  ...resourcesByType.cpu,
+                  name: resourcesByType.cpu.resourceId,
+                },
+                ram: {
+                  ...resourcesByType.ram,
+                  name: resourcesByType.ram.resourceId,
+                },
+                storage: resourcesByType.storage.map((res) => {
+                  return { ...res, name: res.resourceId };
+                }),
+                ip: {
+                  ...resourcesByType.ip,
+                  name: resourcesByType.ip.resourceId,
+                },
+                bandwidth: {
+                  ...resourcesByType.bandwidth,
+                  name: resourcesByType.bandwidth.resourceId,
+                },
+              };
+
               return {
                 name: `Peer #${numToStr(i)}`,
                 peerIdBase58,
@@ -665,42 +723,20 @@ export async function resolveOffersFromProviderConfig(
                   return new Uint8Array(Buffer.from(id.slice(2), "hex"));
                 }),
                 owner: offerIndexerInfo.providerId,
-                // TODO: get proper resources from subgraph
-                resources: [],
-                resourcesByType: {
-                  cpu: {
-                    id: "",
-                    resourceId: "0x",
-                    name: "",
-                    supply: computeUnits.length,
-                    details: "{}",
+                resources: Object.values(resourcesByTypeWithName).flatMap(
+                  (resource) => {
+                    return Array.isArray(resource) ? resource : [resource];
                   },
-                  ram: {
-                    id: "",
-                    resourceId: "0x",
-                    name: "",
-                    supply: 0,
-                    details: "{}",
-                  },
-                  storage: [],
-                  ip: {
-                    id: "",
-                    resourceId: "0x",
-                    name: "",
-                    supply: 0,
-                    details: "{}",
-                  },
-                  bandwidth: {
-                    id: "",
-                    resourceId: "0x",
-                    name: "",
-                    supply: 0,
-                    details: "{}",
-                  },
-                },
+                ),
+                resourcesByType: resourcesByTypeWithName,
               };
-            }),
+            },
           ),
+        );
+
+        return {
+          offerName: `Offer ${offerId}`,
+          computePeersFromProviderConfig,
           offerId,
           minProtocolVersion: Number(
             protocolVersionsFromChain.minProtocolVersion,
@@ -708,14 +744,7 @@ export async function resolveOffersFromProviderConfig(
           maxProtocolVersion: Number(
             protocolVersionsFromChain.maxProtocolVersion,
           ),
-          // TODO: get proper resource prices from subgraph
-          resourcePricesWithIds: {
-            cpu: [],
-            ram: [],
-            storage: [],
-            ip: [],
-            bandwidth: [],
-          },
+          resourcePricesWithIds,
         } satisfies (typeof offersDefinedLocally)[number];
       }),
     );
@@ -804,6 +833,17 @@ export type OnChainResource = {
   supply: number;
   details: string;
 };
+
+type ResourcePricesWithIds = Record<
+  ResourceType,
+  {
+    ty: OnChainResourceType;
+    resourceType: ResourceType;
+    resourceId: `0x${string}`;
+    resourceName: string;
+    price: bigint;
+  }[]
+>;
 
 async function ensureOfferConfigs() {
   const providerConfig = await ensureReadonlyProviderConfig();
@@ -903,16 +943,7 @@ async function ensureOfferConfigs() {
           resourcePrices,
         );
 
-        const resourcePricesWithIds: Record<
-          ResourceType,
-          {
-            ty: OnChainResourceType;
-            resourceType: ResourceType;
-            resourceId: `0x${string}`;
-            resourceName: string;
-            price: bigint;
-          }[]
-        > = {
+        const resourcePricesWithIds: ResourcePricesWithIds = {
           cpu: await getResourcePricesWithIds("cpu"),
           ram: await getResourcePricesWithIds("ram"),
           storage: await getResourcePricesWithIds("storage"),
@@ -1117,46 +1148,82 @@ export async function getOffersInfo<T extends OfferNameAndId>(
 
 type OfferIndexerInfo = Awaited<ReturnType<typeof getOffers>>["offers"][number];
 
+function indexerResourcesToOnchainResources(
+  resourceType: ResourceType,
+  resources: NonNullable<
+    NonNullable<OfferIndexerInfo["peers"]>[number]["resources"]
+  >,
+  offerId: string,
+): [OnChainResource, ...OnChainResource[]] {
+  const onChainResourceType = resourceTypeToOnChainResourceType[resourceType];
+
+  const [firstResource, ...restResources] = resources
+    .filter(({ resource: { type } }) => {
+      return isOnChainResourceType(type) && type === onChainResourceType;
+    })
+    .map(({ details, id, maxSupply }) => {
+      return {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        resourceId: id as `0x${string}`,
+        supply: Number(maxSupply),
+        details,
+      };
+    });
+
+  if (firstResource === undefined) {
+    throw new Error(
+      `Resource of type ${resourceType} not found in indexer for offer ${offerId}`,
+    );
+  }
+
+  return [firstResource, ...restResources];
+}
+
 function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
   const serializedPeers =
-    offerIndexerInfo.peers?.map((peer) => {
+    offerIndexerInfo.peers?.map(({ id, computeUnits, resources }) => {
+      if (resources === null || resources === undefined) {
+        throw new Error(
+          `Resources for peer ${id} are not found in indexer for offer ${offerIndexerInfo.id}`,
+        );
+      }
+
+      const resourcesByType = {
+        cpu: indexerResourcesToOnchainResources(
+          "cpu",
+          resources,
+          offerIndexerInfo.id,
+        )[0],
+        ram: indexerResourcesToOnchainResources(
+          "ram",
+          resources,
+          offerIndexerInfo.id,
+        )[0],
+        storage: indexerResourcesToOnchainResources(
+          "storage",
+          resources,
+          offerIndexerInfo.id,
+        ),
+        ip: indexerResourcesToOnchainResources(
+          "ip",
+          resources,
+          offerIndexerInfo.id,
+        )[0],
+        bandwidth: indexerResourcesToOnchainResources(
+          "bandwidth",
+          resources,
+          offerIndexerInfo.id,
+        )[0],
+      } as const satisfies Record<
+        ResourceType,
+        OnChainResource | OnChainResource[]
+      >;
+
       return {
-        id: peer.id,
-        // TODO: get proper resources from subgraph
-        resources: {
-          cpu: {
-            resourceId: "0x",
-            supply: 0,
-            details: "{}",
-          },
-          ram: {
-            resourceId: "0x",
-            supply: 0,
-            details: "{}",
-          },
-          storage: [
-            {
-              resourceId: "0x",
-              supply: 0,
-              details: "{}",
-            },
-          ],
-          ip: {
-            resourceId: "0x",
-            supply: 0,
-            details: "{}",
-          },
-          bandwidth: {
-            resourceId: "0x",
-            supply: 0,
-            details: "{}",
-          },
-        } as const satisfies Record<
-          ResourceType,
-          OnChainResource | OnChainResource[]
-        >,
+        id,
+        resourcesByType,
         computeUnits:
-          peer.computeUnits?.map((computeUnit) => {
+          computeUnits?.map((computeUnit) => {
             return {
               id: computeUnit.id,
               workerId: computeUnit.worker?.id,
@@ -1180,12 +1247,13 @@ function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
     freeComputeUnits: offerIndexerInfo.computeUnitsAvailable,
     providerId: offerIndexerInfo.provider.id,
     peers: serializedPeers,
-    // TODO: get proper resources from subgraph
-    resources: [
-      {
-        resourceId: "0x",
-        resourcePrice: BigInt(1),
-      },
-    ] as const,
+    resources: offerIndexerInfo.resources?.map(({ id, price, resource }) => {
+      return {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        resourceId: id as `0x${string}`,
+        resourcePrice: BigInt(price),
+        resource,
+      };
+    }),
   };
 }

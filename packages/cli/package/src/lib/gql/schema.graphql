@@ -12,12 +12,27 @@ query OfferDetails($where: Offer_filter) {
     provider {
       id
     }
+    resources {
+      id
+      price
+      resource {
+        type
+      }
+    }
     peers(where: { deleted: false }) {
       id
       computeUnits(first: 1000, where: { deleted: false }) {
         id
         worker {
           id
+        }
+      }
+      resources {
+        id
+        maxSupply
+        details
+        resource {
+          type
         }
       }
     }

@@ -1051,7 +1051,9 @@ export enum OnChainResourceType {
   GPU,
 }
 
-function isOnChainResourceType(value: unknown): value is OnChainResourceType {
+export function isOnChainResourceType(
+  value: unknown,
+): value is OnChainResourceType {
   return typeof value === "number" && value in OnChainResourceType;
 }
 
@@ -1066,7 +1068,7 @@ export const resourceTypeToOnChainResourceType: Record<
   ip: OnChainResourceType.PUBLIC_IP,
 };
 
-const onChainResourceTypeToResourceType: Record<
+export const onChainResourceTypeToResourceType: Record<
   Exclude<OnChainResourceType, OnChainResourceType.GPU>,
   ResourceType
 > = {
