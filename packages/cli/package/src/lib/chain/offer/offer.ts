@@ -31,6 +31,8 @@ import {
   ipSupplyToIndividualIPs,
   type ResourceType,
   type ResourcePrices,
+  resourceTypeToOnChainResourceType,
+  OnChainResourceType,
 } from "../../configs/project/provider/provider4.js";
 import {
   initNewProviderArtifactsConfig,
@@ -335,7 +337,7 @@ function formatOfferResourcePrice(
   offer: {
     resourcePricesWithIds: Record<
       ResourceType,
-      Array<{ resourceId: string; price: bigint }>
+      Array<{ resourceId: `0x${string}`; price: bigint }>
     >;
   },
 ) {
@@ -356,7 +358,7 @@ function formatOfferResource({
   supply,
   details,
 }: {
-  resourceId: string;
+  resourceId: `0x${string}`;
   supply: number;
   details: string;
 }) {
@@ -904,8 +906,9 @@ async function ensureOfferConfigs() {
         const resourcePricesWithIds: Record<
           ResourceType,
           {
-            ty: ResourceType;
-            resourceId: string;
+            ty: OnChainResourceType;
+            resourceType: ResourceType;
+            resourceId: `0x${string}`;
             resourceName: string;
             price: bigint;
           }[]
@@ -959,11 +962,12 @@ function createGetResourcePricesWithIds(
           );
 
           return {
-            ty: resourceType,
+            ty: resourceTypeToOnChainResourceType[resourceType],
+            resourceType,
             resourceName,
-            resourceId: resource.id,
+            resourceId: `0x${resource.id}`,
             price: await ptParse(numToStr(price)),
-          };
+          } as const;
         },
       ),
     );

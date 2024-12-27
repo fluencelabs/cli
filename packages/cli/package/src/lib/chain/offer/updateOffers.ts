@@ -400,8 +400,8 @@ async function populateChangeResourcePriceTx({
   const allResourcePrices = Object.fromEntries(
     Object.values(resourcePricesWithIds)
       .flat()
-      .map(({ price, resourceId, resourceName, ty }) => {
-        return [resourceId, { price, resourceName, ty }];
+      .map(({ price, resourceId, resourceName, resourceType }) => {
+        return [resourceId, { price, resourceName, resourceType }];
       }),
   );
 
@@ -418,14 +418,14 @@ async function populateChangeResourcePriceTx({
           return null;
         }
 
-        const { price: newPrice, resourceName, ty } = newResource;
+        const { price: newPrice, resourceName, resourceType } = newResource;
 
         if (newPrice === resourcePrice) {
           return null;
         }
 
         return {
-          description: `\nChanging ${ty}: ${resourceName} price to ${await ptFormatWithSymbol(newPrice)}`,
+          description: `\nChanging ${resourceType}: ${resourceName} price to ${await ptFormatWithSymbol(newPrice)}`,
           tx: populateTx(
             contracts.diamond.changeResourcePriceV2,
             offerId,

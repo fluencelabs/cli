@@ -26,7 +26,10 @@ import { stringify } from "yaml";
 import { versions } from "../../../../versions.js";
 import { ajv, validationErrorToString } from "../../../ajvInstance.js";
 import { commandObj } from "../../../commandObj.js";
-import { CLI_NAME_FULL } from "../../../const.js";
+import {
+  CLI_NAME_FULL,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+} from "../../../const.js";
 // import { getReadonlyContracts } from "../../../dealClient.js";
 import { stringifyUnknown } from "../../../helpers/stringifyUnknown.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
@@ -608,11 +611,11 @@ export default {
   async refineSchema(schema) {
     const resourcesFromChain = await getResourcesFromChain();
 
-    const cpuOneOf = getOneOfForSchema(resourcesFromChain.cpu);
-    const ramOneOf = getOneOfForSchema(resourcesFromChain.ram);
-    const storageOneOf = getOneOfForSchema(resourcesFromChain.storage);
-    const bandwidthOneOf = getOneOfForSchema(resourcesFromChain.bandwidth);
-    const ipOneOf = getOneOfForSchema(resourcesFromChain.ip);
+    const cpuOneOf = getOneOfForSchema("cpu", resourcesFromChain);
+    const ramOneOf = getOneOfForSchema("ram", resourcesFromChain);
+    const storageOneOf = getOneOfForSchema("storage", resourcesFromChain);
+    const bandwidthOneOf = getOneOfForSchema("bandwidth", resourcesFromChain);
+    const ipOneOf = getOneOfForSchema("ip", resourcesFromChain);
 
     const properties = {
       cpu: {
@@ -647,16 +650,23 @@ export default {
   },
 } satisfies ConfigOptions<PrevConfig, Config>;
 
-function getOneOfForSchema<T>(resourcesFromChain: Record<string, T>) {
-  return {
-    properties: {
-      id: {
-        oneOf: Object.entries(resourcesFromChain).map(([id, metadata]) => {
-          return { const: id, description: stringify(metadata) };
-        }),
-      },
+function getOneOfForSchema(
+  resourceType: ResourceType,
+  resourcesFromChain: ChainResources,
+) {
+  const oneOf = Object.entries(resourcesFromChain[resourceType]).map(
+    ([id, metadata]) => {
+      return { const: id, description: stringify(metadata) };
     },
-  };
+  );
+
+  if (oneOf.length === 0) {
+    return commandObj.error(
+      `No ${resourceType} resources found on chain. At least on is required to define a valid offer in ${PROVIDER_CONFIG_FULL_FILE_NAME}`,
+    );
+  }
+
+  return { properties: { id: { oneOf } } };
 }
 
 type DefaultComputePeerConfigArgs = {
