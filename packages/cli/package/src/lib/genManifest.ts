@@ -120,10 +120,6 @@ ${stringify({
             privateKeySecretRef: PRIVATE_KEY_SECRET_REF,
           },
         },
-        image: {
-          repository: "fluencelabs/lightmare", // optional
-          tag: "main", // optional
-        },
       },
     }),
   },
