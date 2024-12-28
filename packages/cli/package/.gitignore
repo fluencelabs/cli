@@ -26,7 +26,8 @@ docker-compose.yaml
 
 # ignore compiled files
 src/lib/gql/gqlGenerated.ts
-src/lib/gql/gqlSchema.json
+# TODO: temporary hardcode for gqlSchema.json. Don't forget to fix package.json
+# src/lib/gql/gqlSchema.json
 src/versions
 src/common.ts
 

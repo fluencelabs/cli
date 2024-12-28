@@ -29,7 +29,7 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "find-dead-code": "ts-prune",
-    "gen-gql-schema": "tsx ./src/genGqlSchema.ts",
+    "gen-gql-schema": "",
     "gql-codegen": "graphql-codegen --config ./src/lib/gql/gqlCodegen.ts",
     "postpack": "shx rm -f oclif.manifest.json",
     "vitest-provider": "vitest run provider.test.ts",

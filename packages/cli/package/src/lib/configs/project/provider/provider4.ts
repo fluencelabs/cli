@@ -30,8 +30,7 @@ import {
   CLI_NAME_FULL,
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../../const.js";
-// import { getReadonlyContracts } from "../../../dealClient.js";
-import { stringifyUnknown } from "../../../helpers/stringifyUnknown.js";
+import { getReadonlyContracts } from "../../../dealClient.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../../helpers/utils.js";
 import {
@@ -1501,67 +1500,67 @@ type ChainResources = {
   ip: Record<string, IPMetadata>;
 };
 
-const resourcesMock = [
-  {
-    ty: OnChainResourceType.VCPU,
-    metadata:
-      '{"manufacturer":"Intel","brand":"Xeon","architecture":"x86_64","generation":"Skylake"}',
-    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
-  },
-  {
-    ty: OnChainResourceType.VCPU,
-    metadata:
-      '{"manufacturer":"AMD","brand":"EPYC","architecture":"x86_64","generation":"Rome"}',
-    id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
-  },
-  {
-    ty: OnChainResourceType.RAM,
-    metadata: '{"type":"DDR4","generation":"4"}',
-    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
-  },
-  {
-    ty: OnChainResourceType.RAM,
-    metadata: '{"type":"DDR4","generation":"5"}',
-    id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
-  },
-  {
-    ty: OnChainResourceType.STORAGE,
-    metadata: '{"type":"SSD"}',
-    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
-  },
-  {
-    ty: OnChainResourceType.STORAGE,
-    metadata: '{"type":"HDD"}',
-    id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
-  },
-  {
-    ty: OnChainResourceType.NETWORK_BANDWIDTH,
-    metadata: '{"type":"shared"}',
-    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
-  },
-  {
-    ty: OnChainResourceType.PUBLIC_IP,
-    metadata: '{"version":"IPv4"}',
-    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
-  },
-  {
-    ty: OnChainResourceType.GPU,
-    metadata: '{"manufacturer":"Nvidia","model":"RTX 3090"}',
-    id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC6",
-  },
-] as const satisfies {
-  ty: OnChainResourceType;
-  metadata: string;
-  id: string;
-}[];
+// const resourcesMock = [
+//   {
+//     ty: OnChainResourceType.VCPU,
+//     metadata:
+//       '{"manufacturer":"Intel","brand":"Xeon","architecture":"x86_64","generation":"Skylake"}',
+//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+//   },
+//   {
+//     ty: OnChainResourceType.VCPU,
+//     metadata:
+//       '{"manufacturer":"AMD","brand":"EPYC","architecture":"x86_64","generation":"Rome"}',
+//     id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
+//   },
+//   {
+//     ty: OnChainResourceType.RAM,
+//     metadata: '{"type":"DDR4","generation":"4"}',
+//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+//   },
+//   {
+//     ty: OnChainResourceType.RAM,
+//     metadata: '{"type":"DDR4","generation":"5"}',
+//     id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
+//   },
+//   {
+//     ty: OnChainResourceType.STORAGE,
+//     metadata: '{"type":"SSD"}',
+//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+//   },
+//   {
+//     ty: OnChainResourceType.STORAGE,
+//     metadata: '{"type":"HDD"}',
+//     id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
+//   },
+//   {
+//     ty: OnChainResourceType.NETWORK_BANDWIDTH,
+//     metadata: '{"type":"shared"}',
+//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
+//   },
+//   {
+//     ty: OnChainResourceType.PUBLIC_IP,
+//     metadata: '{"version":"IPv4"}',
+//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
+//   },
+//   {
+//     ty: OnChainResourceType.GPU,
+//     metadata: '{"manufacturer":"Nvidia","model":"RTX 3090"}',
+//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC6",
+//   },
+// ] as const satisfies {
+//   ty: OnChainResourceType;
+//   metadata: string;
+//   id: string;
+// }[];
 
-async function getResources() {
-  return new Promise<typeof resourcesMock>((res) => {
-    setTimeout(() => {
-      res(resourcesMock);
-    }, 1000);
-  });
-}
+// async function getResources() {
+//   return new Promise<typeof resourcesMock>((res) => {
+//     setTimeout(() => {
+//       res(resourcesMock);
+//     }, 1000);
+//   });
+// }
 
 let resourcesPromise: undefined | Promise<ChainResources> = undefined;
 
@@ -1575,9 +1574,9 @@ async function getResourcesFromChain(): Promise<ChainResources> {
 
 async function getResourcesFromChainImpl(): Promise<ChainResources> {
   // TODO: get resources from chain
-  // const { readonlyContracts } = await getReadonlyContracts();
-  // const resources = await readonlyContracts.diamond.getResources();
-  const resources = await getResources();
+  const { readonlyContracts } = await getReadonlyContracts();
+  const resources = await readonlyContracts.diamond.getResources();
+  // const resources = await getResources();
 
   const chainResources: ChainResources = {
     cpu: {},
@@ -1617,10 +1616,13 @@ async function getResourcesFromChainImpl(): Promise<ChainResources> {
       }
 
       chainResources[resourceType][resourceIdWithoutPrefix] = parsedMetadata;
-    } catch (err) {
-      commandObj.warn(
-        `Failed to parse metadata for ${resourceIdWithoutPrefix}. Error: ${stringifyUnknown(err)} Please report this issue.`,
-      );
+    } catch {
+      // commandObj.warn(
+      //   `Failed to parse metadata for ${resourceIdWithoutPrefix}. Error: ${stringifyUnknown(err)} Please report this issue.`,
+      // );
+
+      // @ts-expect-error TODO: temporary don't care about metadata
+      chainResources[resourceType][resourceIdWithoutPrefix] = {};
 
       continue;
     }
