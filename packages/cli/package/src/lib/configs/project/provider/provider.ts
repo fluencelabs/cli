@@ -121,14 +121,15 @@ function getDefault(args: ProviderConfigArgs) {
 
     const computePeerEntries: [string, ComputePeer][] = [];
 
-    for (const i of times(numberOfPeers)) {
-      const name = `peer-${numToStr(i)}`;
+    for (const index of times(numberOfPeers)) {
+      const name = `peer-${numToStr(index)}`;
 
       computePeerEntries.push([
         name,
         defaultComputePeerConfig({
           computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
           name,
+          index,
         }),
       ] as const);
     }

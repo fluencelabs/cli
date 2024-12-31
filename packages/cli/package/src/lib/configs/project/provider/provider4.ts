@@ -552,15 +552,18 @@ export default {
   async migrate({ computePeers, capacityCommitments, offers, providerName }) {
     const newComputePeers = Object.fromEntries(
       Object.entries(computePeers).map(
-        ([
-          name,
-          {
-            computeUnits,
-            kubeconfigPath,
-            resources,
-            nox: { vm: { network: { vmIp } = {} } = {} } = {},
-          },
-        ]) => {
+        (
+          [
+            name,
+            {
+              computeUnits,
+              kubeconfigPath,
+              resources,
+              nox: { vm: { network: { vmIp } = {} } = {} } = {},
+            },
+          ],
+          index,
+        ) => {
           return [
             name,
             defaultComputePeerConfig({
@@ -572,6 +575,7 @@ export default {
                 (vmIp === undefined
                   ? undefined
                   : { ip: { supply: [{ start: vmIp }] } }),
+              index,
             }),
           ] as const;
         },
@@ -677,6 +681,7 @@ type DefaultComputePeerConfigArgs = {
         ip: PrevIp;
       }
     | undefined;
+  index: number;
 };
 
 const DEFAULT_CPU_DETAILS: PeerCPUDetails = {
@@ -741,11 +746,14 @@ export function getDefaultOfferResources(): ResourcePrices {
   };
 }
 
+const START_IP = 16843009; // 1.1.1.1
+
 export function defaultComputePeerConfig({
   kubeconfigPath,
   name,
   computeUnits,
   resources,
+  index,
 }: DefaultComputePeerConfigArgs): ComputePeer {
   return {
     kubeconfigPath: kubeconfigPath ?? `./path-to-${name}-kubeconfig`,
@@ -770,7 +778,9 @@ export function defaultComputePeerConfig({
       bandwidth: { name: BANDWIDTH_RESOURCE_NAME, supply: 1 },
       ip: {
         name: IP_RESOURCE_NAME,
-        ...(resources?.ip ?? { supply: [{ start: "1.1.1.1" }] }),
+        ...(resources?.ip ?? {
+          supply: [{ start: ipNumToIpStr(START_IP + index) }],
+        }),
       },
     },
   };
@@ -1083,6 +1093,9 @@ function validateComputePeerIPs({
 }: {
   computePeers: ComputePeers;
 }) {
+  const allIPs = new Set<string>();
+  const duplicateIPs = new Set<string>();
+
   const errors = Object.entries(computePeers).reduce<string[]>(
     (acc, [peerName, { resources }]) => {
       const res = ipSupplyToIndividualIPs(resources.ip.supply);
@@ -1091,12 +1104,28 @@ function validateComputePeerIPs({
         acc.push(
           `Compute peer ${color.yellow(peerName)} has invalid IPs in the supply:\n${res.error}`,
         );
+
+        return acc;
       }
+
+      res.result.forEach((ip) => {
+        if (allIPs.has(ip)) {
+          duplicateIPs.add(ip);
+        } else {
+          allIPs.add(ip);
+        }
+      });
 
       return acc;
     },
     [],
   );
+
+  if (duplicateIPs.size > 0) {
+    errors.push(
+      `The following IPs are not unique across compute peers:\n${Array.from(duplicateIPs).join("\n")}`,
+    );
+  }
 
   return errors.length === 0 ? true : errors.join("\n");
 }
