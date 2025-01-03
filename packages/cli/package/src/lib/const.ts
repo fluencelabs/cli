@@ -37,8 +37,7 @@ export const PT_SYMBOL = "USDC";
 
 export const MAX_TOKEN_AMOUNT_KEYWORD = "max";
 
-export const COMPUTE_UNIT_MEMORY_STR = "2GB";
-
+export const VCPU_PER_CU = 2;
 export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER = 1;
 
 export type FluenceEnv = (typeof CHAIN_ENV)[number];

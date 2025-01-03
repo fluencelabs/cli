@@ -19,7 +19,6 @@ import type { JSONSchemaType } from "ajv";
 
 import { versions } from "../../../../versions.js";
 import {
-  COMPUTE_UNIT_MEMORY_STR,
   DEFAULT_AQUAVM_POOL_SIZE,
   HTTP_PORT_START,
   TCP_PORT_START,
@@ -32,6 +31,8 @@ import {
 } from "../../../const.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
+
+export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 
 type CapacityCommitment = {
   duration: string;

@@ -24,6 +24,7 @@ import { initNewProviderArtifactsConfig } from "../../configs/project/providerAr
 import {
   CLI_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  VCPU_PER_CU,
 } from "../../const.js";
 import { getContracts, signBatch, populateTx } from "../../dealClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
@@ -462,7 +463,12 @@ async function createResourceSupplyUpdateTx(
   peerId: string,
   { resourceType, onChainResource, configuredResource }: ResourceSupplyUpdate,
 ) {
-  if (onChainResource.supply === configuredResource.supply * 2) {
+  const resourceMultiplier = resourceType === "cpu" ? VCPU_PER_CU : 1;
+
+  if (
+    onChainResource.supply ===
+    configuredResource.supply * resourceMultiplier
+  ) {
     return null;
   }
 
@@ -486,7 +492,7 @@ async function createResourceSupplyUpdateTx(
       contracts.diamond.changeResourceMaxSupplyV2,
       peerId,
       onChainResource.resourceId,
-      supply * 2,
+      supply * resourceMultiplier,
     ),
   };
 }
@@ -744,6 +750,8 @@ async function populateCUToAddTxs(
   return computeUnitsToAdd.flatMap(
     ({ hexPeerId, unitIds, peerIdBase58, resources }) => {
       return unitIds.map((CUId, i) => {
+        const CUIds = [CUId];
+
         return {
           ...(i === 0
             ? {
@@ -753,8 +761,8 @@ async function populateCUToAddTxs(
           tx: populateTx(
             contracts.diamond.addComputeUnitsV2,
             hexPeerId,
-            [CUId],
-            resources.cpu,
+            CUIds,
+            { ...resources.cpu, supply: CUIds.length },
           ),
         };
       });

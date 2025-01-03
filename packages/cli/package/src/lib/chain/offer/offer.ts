@@ -46,6 +46,7 @@ import {
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  VCPU_PER_CU,
 } from "../../const.js";
 import {
   getContracts,
@@ -343,7 +344,7 @@ function setCPUSupply(
   },
   unitIds: Uint8Array[],
 ): OnChainResource {
-  return { ...cpu, supply: unitIds.length * 2 };
+  return { ...cpu, supply: unitIds.length * VCPU_PER_CU };
 }
 
 async function confirmOffer(offer: EnsureOfferConfig) {
@@ -617,7 +618,7 @@ async function formatOfferInfo(
               Resources: {
                 CPU: {
                   "Resource ID": resourcesByType.cpu.resourceId,
-                  Supply: resourcesByType.cpu.supply,
+                  Supply: resourcesByType.cpu.supply / VCPU_PER_CU,
                   Details: resourcesByType.cpu.details,
                 },
                 RAM: {

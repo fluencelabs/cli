@@ -21,7 +21,6 @@ import mapValues from "lodash-es/mapValues.js";
 import omitBy from "lodash-es/omitBy.js";
 
 import {
-  COMPUTE_UNIT_MEMORY_STR,
   DEFAULT_AQUAVM_POOL_SIZE,
   HTTP_PORT_START,
   TCP_PORT_START,
@@ -43,6 +42,7 @@ import {
   type NoxConfigYAML as PrevNoxConfigYAML,
   type ChainConfig as PrevChainConfig,
   type ComputePeers as PrevComputePeers,
+  COMPUTE_UNIT_MEMORY_STR,
 } from "./provider0.js";
 
 export type NoxConfigYAML = {
