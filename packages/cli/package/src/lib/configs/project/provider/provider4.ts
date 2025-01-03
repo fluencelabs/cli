@@ -359,7 +359,7 @@ const peerStorageSchema = {
     },
     supply: {
       type: "string",
-      description: "Amount of storage in GB",
+      description: "Amount of storage",
     },
   },
   required: peerResourceSchema.required,
