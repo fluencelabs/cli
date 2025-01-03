@@ -158,7 +158,7 @@ export async function createOffers(flags: OffersArgs) {
           return [
             contracts.deployment.usdc,
             resourcePricesArray,
-            computePeersToRegister,
+            setCPUSupplyForCP(computePeersToRegister),
           ];
         },
         getTitle() {
@@ -265,7 +265,7 @@ export async function createOffers(flags: OffersArgs) {
   let offersInfo: GetOffersInfoReturnType[1] = [];
 
   const getOffersInfoRes = await setTryTimeout(
-    "Getting offers info from indexer",
+    "get offers info from indexer",
     async () => {
       [offerInfoErrors, offersInfo] = await getOffersInfo(createdOffers);
 
@@ -297,6 +297,53 @@ Offers ${color.yellow(offersStr)} successfully created!
 
 ${await offersInfoToString([offerInfoErrors, offersInfo])}
 `);
+}
+
+function setCPUSupplyForCP(
+  computePeersToRegister: {
+    peerId: Uint8Array;
+    unitIds: Uint8Array[];
+    resourcesByType: {
+      readonly cpu: {
+        readonly resourceId: `0x${string}`;
+        readonly details: string;
+        readonly name: string;
+        readonly supply: number;
+      };
+    };
+    owner: string;
+  }[],
+) {
+  return computePeersToRegister.map(
+    ({
+      peerId,
+      unitIds,
+      resourcesByType: { cpu, ...restResources },
+      owner,
+    }) => {
+      return {
+        peerId,
+        unitIds,
+        resources: [
+          setCPUSupply(cpu, unitIds),
+          ...resourcesByTypeToArr(restResources),
+        ],
+        owner,
+      };
+    },
+  );
+}
+
+function setCPUSupply(
+  cpu: {
+    readonly resourceId: `0x${string}`;
+    readonly details: string;
+    readonly name: string;
+    readonly supply: number;
+  },
+  unitIds: Uint8Array[],
+): OnChainResource {
+  return { ...cpu, supply: unitIds.length * 2 };
 }
 
 async function confirmOffer(offer: EnsureOfferConfig) {
@@ -361,7 +408,7 @@ function formatOfferResource({
   details,
 }: {
   resourceId: `0x${string}`;
-  supply: number;
+  supply: number | string;
   details: string;
 }) {
   return {
@@ -400,7 +447,7 @@ export async function addRemainingCPs({
       sliceValuesToRegister: sliceCPsByNumberOfCUs(remainingCPs),
       sliceIndex: CUsToRegisterCount,
       getArgs(CPsToRegister) {
-        return [offerId, CPsToRegister];
+        return [offerId, setCPUSupplyForCP(CPsToRegister)];
       },
       getTitle({ valuesToRegister: CPsToRegister }) {
         return `Add compute peers:\n${CPsToRegister.map(
@@ -462,7 +509,11 @@ async function addRemainingCUs({
       },
       sliceIndex: CUs.length,
       getArgs(CUsToRegister) {
-        return [peerId, CUsToRegister, resourcesByType.cpu];
+        return [
+          peerId,
+          CUsToRegister,
+          setCPUSupply(resourcesByType.cpu, CUsToRegister),
+        ];
       },
       getTitle({ sliceCount: numberOfCUsForAddCU }) {
         return `Add ${numToStr(numberOfCUsForAddCU)} compute units\nto compute peer ${cpName} (${peerIdBase58})\nfor offer ${offerName} (${offerId})`;
@@ -723,11 +774,6 @@ export async function resolveOffersFromProviderConfig(
                   return new Uint8Array(Buffer.from(id.slice(2), "hex"));
                 }),
                 owner: offerIndexerInfo.providerId,
-                resources: Object.values(resourcesByTypeWithName).flatMap(
-                  (resource) => {
-                    return Array.isArray(resource) ? resource : [resource];
-                  },
-                ),
                 resourcesByType: resourcesByTypeWithName,
               };
             },
@@ -882,6 +928,8 @@ async function ensureOfferConfigs() {
                 "Unreachable. Config is validated so it must return result",
               );
 
+              const xbytes = (await import("xbytes")).default;
+
               const resources = {
                 cpu: {
                   ...cpu,
@@ -890,6 +938,7 @@ async function ensureOfferConfigs() {
                 },
                 ram: {
                   ...ram,
+                  supply: xbytes.parseSize(ram.supply),
                   resourceId: `0x${ramId}`,
                   details: JSON.stringify(ram.details),
                 },
@@ -897,6 +946,7 @@ async function ensureOfferConfigs() {
                   ({ id: storageId, ...storage }) => {
                     return {
                       ...storage,
+                      supply: xbytes.parseSize(storage.supply),
                       resourceId: `0x${storageId}`,
                       details: JSON.stringify(storage.details),
                     };
@@ -924,9 +974,6 @@ async function ensureOfferConfigs() {
                 peerId: await peerIdBase58ToUint8Array(peerId),
                 unitIds: times(resourcesWithIds.cpu.supply).map(() => {
                   return randomBytes(32);
-                }),
-                resources: Object.values(resources).flatMap((resource) => {
-                  return Array.isArray(resource) ? resource : [resource];
                 }),
                 resourcesByType: resources,
                 owner: walletAddress,
@@ -962,6 +1009,16 @@ async function ensureOfferConfigs() {
       },
     ),
   );
+}
+
+function resourcesByTypeToArr(
+  resourcesByType: Partial<
+    Record<ResourceType, OnChainResource | OnChainResource[]>
+  >,
+) {
+  return Object.values(resourcesByType).flatMap((resource) => {
+    return Array.isArray(resource) ? resource : [resource];
+  });
 }
 
 type CPFromProviderConfig = Awaited<

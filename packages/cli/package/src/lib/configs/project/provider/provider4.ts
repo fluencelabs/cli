@@ -321,7 +321,8 @@ const peerCPUSchema = {
   required: peerResourceSchema.required,
 } as const satisfies JSONSchemaType<PeerCPU>;
 
-type PeerRAM = PeerResource & {
+type PeerRAM = Omit<PeerResource, "supply"> & {
+  supply: string;
   details?: PeerRamDetails;
 };
 
@@ -335,15 +336,15 @@ const peerRAMSchema = {
       description: `${OVERRIDE_OR_EXTEND_DEDSCRIPTION}${peerRamDetailsSchema.description}`,
     },
     supply: {
-      type: "integer",
-      minimum: 1,
-      description: "Amount of RAM in GB",
+      type: "string",
+      description: "Amount of RAM",
     },
   },
   required: peerResourceSchema.required,
 } as const satisfies JSONSchemaType<PeerRAM>;
 
-type PeerStorage = PeerResource & {
+type PeerStorage = Omit<PeerResource, "supply"> & {
+  supply: string;
   details?: PeerStorageDetails;
 };
 
@@ -357,8 +358,7 @@ const peerStorageSchema = {
       description: `${OVERRIDE_OR_EXTEND_DEDSCRIPTION}${peerStorageDetailsSchema.description}`,
     },
     supply: {
-      type: "integer",
-      minimum: 1,
+      type: "string",
       description: "Amount of storage in GB",
     },
   },
@@ -602,7 +602,7 @@ export default {
   },
   validate(config) {
     return validateBatchAsync(
-      // TODO: validate 4 GB RAM per 1 CPU core
+      validateEnoughRAMPerCPUCore(config),
       validateCC(config),
       validateNoDuplicatePeerNamesInOffers(config),
       validateProtocolVersions(config),
@@ -765,13 +765,13 @@ export function defaultComputePeerConfig({
       },
       ram: {
         name: RAM_RESOURCE_NAME,
-        supply: 1,
+        supply: "11 GB",
         details: DEFAULT_RAM_DETAILS,
       },
       storage: [
         {
           name: STORAGE_RESOURCE_NAME,
-          supply: 1,
+          supply: "11 GB",
           details: DEFAULT_STORAGE_DETAILS,
         },
       ],
@@ -1087,6 +1087,35 @@ export const onChainResourceTypeToResourceType: Record<
   [OnChainResourceType.NETWORK_BANDWIDTH]: "bandwidth",
   [OnChainResourceType.PUBLIC_IP]: "ip",
 };
+
+const BYTES_PER_CORE = 4_000_000_000;
+
+async function validateEnoughRAMPerCPUCore({
+  computePeers,
+}: {
+  computePeers: ComputePeers;
+}) {
+  const xbytes = (await import("xbytes")).default;
+
+  const errors = Object.entries(computePeers).reduce<string[]>(
+    (acc, [peerName, { resources }]) => {
+      const cpu = resources.cpu.supply;
+      const ram = xbytes.parseSize(resources.ram.supply);
+      const expectedRam = cpu * BYTES_PER_CORE;
+
+      if (expectedRam > ram) {
+        acc.push(
+          `Compute peer ${color.yellow(peerName)} has not enough RAM per CPU core. Expected: ${xbytes(expectedRam)}. Got: ${xbytes(ram)}`,
+        );
+      }
+
+      return acc;
+    },
+    [],
+  );
+
+  return errors.length === 0 ? true : errors.join("\n");
+}
 
 function validateComputePeerIPs({
   computePeers,
@@ -1529,68 +1558,6 @@ type ChainResources = {
   ip: Record<string, IPMetadata>;
 };
 
-// const resourcesMock = [
-//   {
-//     ty: OnChainResourceType.VCPU,
-//     metadata:
-//       '{"manufacturer":"Intel","brand":"Xeon","architecture":"x86_64","generation":"Skylake"}',
-//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
-//   },
-//   {
-//     ty: OnChainResourceType.VCPU,
-//     metadata:
-//       '{"manufacturer":"AMD","brand":"EPYC","architecture":"x86_64","generation":"Rome"}',
-//     id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC1",
-//   },
-//   {
-//     ty: OnChainResourceType.RAM,
-//     metadata: '{"type":"DDR4","generation":"4"}',
-//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
-//   },
-//   {
-//     ty: OnChainResourceType.RAM,
-//     metadata: '{"type":"DDR4","generation":"5"}',
-//     id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC2",
-//   },
-//   {
-//     ty: OnChainResourceType.STORAGE,
-//     metadata: '{"type":"SSD"}',
-//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
-//   },
-//   {
-//     ty: OnChainResourceType.STORAGE,
-//     metadata: '{"type":"HDD"}',
-//     id: "0x211122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC3",
-//   },
-//   {
-//     ty: OnChainResourceType.NETWORK_BANDWIDTH,
-//     metadata: '{"type":"shared"}',
-//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC4",
-//   },
-//   {
-//     ty: OnChainResourceType.PUBLIC_IP,
-//     metadata: '{"version":"IPv4"}',
-//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC5",
-//   },
-//   {
-//     ty: OnChainResourceType.GPU,
-//     metadata: '{"manufacturer":"Nvidia","model":"RTX 3090"}',
-//     id: "0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCC6",
-//   },
-// ] as const satisfies {
-//   ty: OnChainResourceType;
-//   metadata: string;
-//   id: string;
-// }[];
-
-// async function getResources() {
-//   return new Promise<typeof resourcesMock>((res) => {
-//     setTimeout(() => {
-//       res(resourcesMock);
-//     }, 1000);
-//   });
-// }
-
 let resourcesPromise: undefined | Promise<ChainResources> = undefined;
 
 async function getResourcesFromChain(): Promise<ChainResources> {
@@ -1602,10 +1569,8 @@ async function getResourcesFromChain(): Promise<ChainResources> {
 }
 
 async function getResourcesFromChainImpl(): Promise<ChainResources> {
-  // TODO: get resources from chain
   const { readonlyContracts } = await getReadonlyContracts();
   const resources = await readonlyContracts.diamond.getResources();
-  // const resources = await getResources();
 
   const chainResources: ChainResources = {
     cpu: {},

@@ -15,7 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bufferToBase64 } from "../helpers/typesafeStringify.js";
+import type { ResourceType } from "../configs/project/provider/provider4.js";
+import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
+import { bufferToBase64, numToStr } from "../helpers/typesafeStringify.js";
 
 const PREFIX = new Uint8Array([0, 36, 8, 1, 18, 32]);
 const BASE_58_PREFIX = "z";
@@ -76,4 +78,41 @@ export function hexStringToUTF8ToBase64String(hexString: string): string {
     : hexString;
 
   return bufferToBase64(Buffer.from(cleanHexString, "utf-8"));
+}
+
+export async function resourceSupply(
+  resourceType: ResourceType,
+  supply: number,
+) {
+  const xbytes = (await import("xbytes")).default;
+
+  switch (resourceType) {
+    case "cpu":
+      return { supply, supplyString: numToStr(supply) };
+    case "ram":
+      return {
+        supply: Math.round(supply / (await getRamToBytesFromChain())),
+        supplyString: xbytes(supply),
+      };
+    case "storage":
+      return {
+        supply: Math.round(supply / STORAGE_TO_BYTES),
+        supplyString: xbytes(supply),
+      };
+    case "bandwidth":
+      return { supply, supplyString: numToStr(supply) };
+    case "ip":
+      return { supply, supplyString: numToStr(supply) };
+    default:
+      const unknownResourceType: never = resourceType;
+      throw new Error(
+        `Unknown resource type ${stringifyUnknown(unknownResourceType)}`,
+      );
+  }
+}
+
+const STORAGE_TO_BYTES = 1_000_000_000;
+
+async function getRamToBytesFromChain() {
+  return Promise.resolve(1_000_000_000);
 }

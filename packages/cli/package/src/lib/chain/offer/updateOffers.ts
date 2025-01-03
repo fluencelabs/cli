@@ -19,6 +19,7 @@ import { color } from "@oclif/color";
 import omit from "lodash-es/omit.js";
 
 import { commandObj } from "../../commandObj.js";
+import type { ResourceType } from "../../configs/project/provider/provider4.js";
 import { initNewProviderArtifactsConfig } from "../../configs/project/providerArtifacts/providerArtifacts.js";
 import {
   CLI_NAME,
@@ -29,7 +30,10 @@ import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
-import { peerIdHexStringToBase58String } from "../conversions.js";
+import {
+  peerIdHexStringToBase58String,
+  resourceSupply,
+} from "../conversions.js";
 import { ptFormat, ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
@@ -449,30 +453,40 @@ type ResourceInfo = {
 };
 
 type ResourceSupplyUpdate = {
-  name: string;
+  resourceType: ResourceType;
   onChainResource: ResourceInfo;
   configuredResource: ResourceInfo;
 };
 
 async function createResourceSupplyUpdateTx(
   peerId: string,
-  { name, onChainResource, configuredResource }: ResourceSupplyUpdate,
+  { resourceType, onChainResource, configuredResource }: ResourceSupplyUpdate,
 ) {
-  if (onChainResource.supply === configuredResource.supply) {
+  if (onChainResource.supply === configuredResource.supply * 2) {
     return null;
   }
 
   const { contracts } = await getContracts();
 
+  const { supplyString: onChainSupplyString } = await resourceSupply(
+    resourceType,
+    configuredResource.supply,
+  );
+
+  const { supply, supplyString } = await resourceSupply(
+    resourceType,
+    configuredResource.supply,
+  );
+
   return {
-    description: `\nChanging ${name} supply from ${numToStr(
-      onChainResource.supply,
-    )} to ${numToStr(configuredResource.supply)}`,
+    description: `\nChanging ${resourceType} supply from ${
+      onChainSupplyString
+    } to ${supplyString}`,
     tx: populateTx(
       contracts.diamond.changeResourceMaxSupplyV2,
       peerId,
       onChainResource.resourceId,
-      configuredResource.supply,
+      supply * 2,
     ),
   };
 }
@@ -496,12 +510,12 @@ async function populateChangeResourceSupplyTx({
 
     const resourcePriceUpdates: ResourceSupplyUpdate[] = [
       {
-        name: "CPU",
+        resourceType: "cpu",
         onChainResource: peer.resourcesByType.cpu,
         configuredResource: configuredPeer.resourcesByType.cpu,
       },
       {
-        name: "RAM",
+        resourceType: "ram",
         onChainResource: peer.resourcesByType.ram,
         configuredResource: configuredPeer.resourcesByType.ram,
       },
@@ -516,19 +530,19 @@ async function populateChangeResourceSupplyTx({
           }
 
           return {
-            name: "storage",
+            resourceType: "storage",
             onChainResource: onChainStorage,
             configuredResource: configuredStorage,
-          };
+          } as const;
         })
         .filter(Boolean),
       {
-        name: "IP",
+        resourceType: "ip",
         onChainResource: peer.resourcesByType.ip,
         configuredResource: configuredPeer.resourcesByType.ip,
       },
       {
-        name: "bandwidth",
+        resourceType: "bandwidth",
         onChainResource: peer.resourcesByType.bandwidth,
         configuredResource: configuredPeer.resourcesByType.bandwidth,
       },
