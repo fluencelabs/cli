@@ -155,7 +155,7 @@ Defines a storage resource
 | Property  | Type               | Required | Description                                                                                                 |
 |-----------|--------------------|----------|-------------------------------------------------------------------------------------------------------------|
 | `name`    | string             | **Yes**  |                                                                                                             |
-| `supply`  | string             | **Yes**  | Amount of storage in GB                                                                                     |
+| `supply`  | string             | **Yes**  | Amount of storage                                                                                           |
 | `details` | [object](#details) | No       | Override or extend Storage details not related to matching but visible to the user for information purposes |
 
 ###### details
