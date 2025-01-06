@@ -17,15 +17,7 @@
 
 import { rm, mkdir } from "fs/promises";
 
-import { fluence } from "../helpers/commonWithSetupTests.js";
-import { fluenceEnv } from "../helpers/constants.js";
 import { initializedTemplatePath } from "../helpers/paths.js";
 
 await rm(initializedTemplatePath, { force: true, recursive: true });
 await mkdir(initializedTemplatePath, { recursive: true });
-
-await fluence({
-  args: ["provider", "init"],
-  flags: { env: fluenceEnv, "no-input": true },
-  cwd: initializedTemplatePath,
-});

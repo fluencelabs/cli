@@ -389,6 +389,7 @@ async function confirmOffer(offer: EnsureOfferConfig) {
         ),
       },
     )}\nDo you want to proceed?`,
+    default: true,
   });
 }
 
