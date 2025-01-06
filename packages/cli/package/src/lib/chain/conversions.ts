@@ -49,6 +49,11 @@ export async function peerIdHexStringToBase58String(peerIdHex: string) {
     .slice(BASE_58_PREFIX.length);
 }
 
+export async function uint8ArrayToPeerIdHexString(peerId: Uint8Array) {
+  const { hexlify } = await import("ethers");
+  return hexlify(peerId);
+}
+
 type CIDV1Struct = {
   prefixes: Uint8Array;
   hash: Uint8Array;

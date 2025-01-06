@@ -30,11 +30,12 @@ import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
+import { uint8ArrayToPeerIdHexString } from "../conversions.js";
 import {
   peerIdHexStringToBase58String,
   resourceSupplyFromChainToConfig,
 } from "../conversions.js";
-import { ptFormat, ptFormatWithSymbol } from "../currencies.js";
+import { ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
 
 import {
@@ -418,10 +419,6 @@ async function populateChangeResourcePriceTx({
           const newResource = allResourcePrices[resourceId];
 
           if (newResource === undefined) {
-            commandObj.warn(
-              `Price for resource with id ${resourceId} is not found in the provider config for offer with id: ${offerId}. Expected: ${await ptFormat(resourcePrice)}`,
-            );
-
             return null;
           }
 
@@ -432,7 +429,7 @@ async function populateChangeResourcePriceTx({
           }
 
           return {
-            description: `\nChanging ${resourceType}: ${resourceName} price to ${await ptFormatWithSymbol(newPrice)}`,
+            description: `Changing ${resourceType}: ${resourceName} price to ${await ptFormatWithSymbol(newPrice)}`,
             tx: populateTx(
               contracts.diamond.changeResourcePriceV2,
               offerId,
@@ -477,7 +474,7 @@ async function createResourceSupplyUpdateTx(
     await resourceSupplyFromChainToConfig(resourceType, onChainResource.supply);
 
   return {
-    description: `\nChanging ${resourceType} supply from ${
+    description: `Changing ${resourceType} supply from ${
       onChainSupplyString
     } to ${supplyString}`,
     tx: populateTx(
@@ -558,7 +555,7 @@ async function populateChangeResourceSupplyTx({
       continue;
     }
 
-    firstTx.description = `For peer ${configuredPeer.name}:\n${firstTx.description}`;
+    firstTx.description = `\nFor ${configuredPeer.name}:\n${firstTx.description}`;
     txs.push(firstTx, ...restTxs);
   }
 
@@ -590,7 +587,7 @@ async function createResourceUpdateTx(
       onChainResource.resourceId !== configuredResource.resourceId)
   ) {
     txs.push({
-      description: `\nAdding ${name} with id ${configuredResource.resourceId}`,
+      description: `Adding ${name} resource with id ${configuredResource.resourceId}`,
       tx: populateTx(
         contracts.diamond.registerPeerResource,
         peerId,
@@ -605,7 +602,7 @@ async function createResourceUpdateTx(
       onChainResource.resourceId !== configuredResource.resourceId)
   ) {
     txs.push({
-      description: `\nRemoving ${name} with id ${onChainResource.resourceId}`,
+      description: `Removing ${name} resource with id ${onChainResource.resourceId}`,
       tx: populateTx(
         contracts.diamond.removePeerResource,
         peerId,
@@ -626,9 +623,12 @@ async function populatePeerResourcesTxs({
   for (const {
     resourcesByType,
     name: peerName,
+    peerId,
   } of computePeersFromProviderConfig) {
+    const peerIdHex = await uint8ArrayToPeerIdHexString(peerId);
+
     const onChainPeer = offerIndexerInfo.peers.find((peer) => {
-      return peer.id === resourcesByType.cpu.resourceId;
+      return peer.id === peerIdHex;
     });
 
     if (onChainPeer === undefined) {
@@ -692,7 +692,7 @@ async function populatePeerResourcesTxs({
       continue;
     }
 
-    firstTx.description = `For peer ${peerName}:\n${firstTx.description}`;
+    firstTx.description = `\nFor ${peerName}:\n${firstTx.description}`;
     txs.push(firstTx, ...restTxs);
   }
 
