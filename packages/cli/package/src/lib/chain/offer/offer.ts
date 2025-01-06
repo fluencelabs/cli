@@ -57,7 +57,7 @@ import {
 import { getOffers } from "../../gql/gql.js";
 import { setTryTimeout } from "../../helpers/setTryTimeout.js";
 import { stringifyUnknown } from "../../helpers/stringifyUnknown.js";
-import { numToStr } from "../../helpers/typesafeStringify.js";
+import { bigintToStr, numToStr } from "../../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
@@ -604,7 +604,7 @@ async function formatOfferInfo(
         ({ resourceId, resourcePrice }) => {
           return {
             "Resource ID": resourceId,
-            Price: resourcePrice,
+            Price: bigintToStr(resourcePrice),
           };
         },
       ),

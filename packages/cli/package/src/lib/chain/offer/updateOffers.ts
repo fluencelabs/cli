@@ -476,7 +476,7 @@ async function createResourceSupplyUpdateTx(
 
   const { supplyString: onChainSupplyString } = await resourceSupply(
     resourceType,
-    configuredResource.supply,
+    configuredResource.supply / resourceMultiplier,
   );
 
   const { supply, supplyString } = await resourceSupply(
