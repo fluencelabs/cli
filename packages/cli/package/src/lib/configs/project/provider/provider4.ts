@@ -365,7 +365,9 @@ const peerStorageSchema = {
   required: peerResourceSchema.required,
 } as const satisfies JSONSchemaType<PeerStorage>;
 
-type PeerBandwidth = PeerResource;
+type PeerBandwidth = Omit<PeerResource, "supply"> & {
+  supply: string;
+};
 
 const peerBandwidthSchema = {
   ...peerResourceSchema,
@@ -373,9 +375,8 @@ const peerBandwidthSchema = {
   properties: {
     ...peerResourceSchema.properties,
     supply: {
-      type: "integer",
-      minimum: 1,
-      description: "Bandwidth in Mbps",
+      type: "string",
+      description: "Bandwidth per second",
     },
   },
   required: peerResourceSchema.required,
@@ -775,7 +776,7 @@ export function defaultComputePeerConfig({
           details: DEFAULT_STORAGE_DETAILS,
         },
       ],
-      bandwidth: { name: BANDWIDTH_RESOURCE_NAME, supply: 1 },
+      bandwidth: { name: BANDWIDTH_RESOURCE_NAME, supply: "1 Gb" },
       ip: {
         name: IP_RESOURCE_NAME,
         ...(resources?.ip ?? {

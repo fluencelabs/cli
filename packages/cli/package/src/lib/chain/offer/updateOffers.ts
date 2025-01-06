@@ -24,7 +24,6 @@ import { initNewProviderArtifactsConfig } from "../../configs/project/providerAr
 import {
   CLI_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
-  VCPU_PER_CU,
 } from "../../const.js";
 import { getContracts, signBatch, populateTx } from "../../dealClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
@@ -33,7 +32,7 @@ import { confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import {
   peerIdHexStringToBase58String,
-  resourceSupply,
+  resourceSupplyFromChainToConfig,
 } from "../conversions.js";
 import { ptFormat, ptFormatWithSymbol } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
@@ -463,26 +462,19 @@ async function createResourceSupplyUpdateTx(
   peerId: string,
   { resourceType, onChainResource, configuredResource }: ResourceSupplyUpdate,
 ) {
-  const resourceMultiplier = resourceType === "cpu" ? VCPU_PER_CU : 1;
-
-  if (
-    onChainResource.supply ===
-    configuredResource.supply * resourceMultiplier
-  ) {
+  if (onChainResource.supply === configuredResource.supply) {
     return null;
   }
 
   const { contracts } = await getContracts();
 
-  const { supplyString: onChainSupplyString } = await resourceSupply(
-    resourceType,
-    configuredResource.supply / resourceMultiplier,
-  );
-
-  const { supply, supplyString } = await resourceSupply(
+  const { supplyString } = await resourceSupplyFromChainToConfig(
     resourceType,
     configuredResource.supply,
   );
+
+  const { supplyString: onChainSupplyString } =
+    await resourceSupplyFromChainToConfig(resourceType, onChainResource.supply);
 
   return {
     description: `\nChanging ${resourceType} supply from ${
@@ -492,7 +484,7 @@ async function createResourceSupplyUpdateTx(
       contracts.diamond.changeResourceMaxSupplyV2,
       peerId,
       onChainResource.resourceId,
-      supply * resourceMultiplier,
+      configuredResource.supply,
     ),
   };
 }

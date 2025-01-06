@@ -69,6 +69,8 @@ import { getProtocolVersions } from "../chainValidators.js";
 import {
   peerIdBase58ToUint8Array,
   peerIdHexStringToBase58String,
+  resourceSupplyFromChainToConfig,
+  resourceSupplyFromConfigToChain,
 } from "../conversions.js";
 import { ptFormatWithSymbol, ptParse } from "../currencies.js";
 import { assertProviderIsRegistered } from "../providerInfo.js";
@@ -361,22 +363,29 @@ async function confirmOffer(offer: EnsureOfferConfig) {
           IP: await formatOfferResourcePrice("ip", offer),
           Bandwidth: await formatOfferResourcePrice("bandwidth", offer),
         },
-        "Compute Peers": offer.computePeersFromProviderConfig.map(
-          ({ name, peerIdBase58, resourcesByType }) => {
-            return {
-              Name: name,
-              "Peer ID": peerIdBase58,
-              Resources: {
-                CPU: formatOfferResource(resourcesByType.cpu),
-                RAM: formatOfferResource(resourcesByType.ram),
-                Storage: resourcesByType.storage.map((storage) => {
-                  return formatOfferResource(storage);
-                }),
-                IP: formatOfferResource(resourcesByType.ip),
-                Bandwidth: formatOfferResource(resourcesByType.bandwidth),
-              },
-            };
-          },
+        "Compute Peers": await Promise.all(
+          offer.computePeersFromProviderConfig.map(
+            async ({ name, peerIdBase58, resourcesByType }) => {
+              return {
+                Name: name,
+                "Peer ID": peerIdBase58,
+                Resources: {
+                  CPU: await formatOfferResource("cpu", resourcesByType.cpu),
+                  RAM: await formatOfferResource("ram", resourcesByType.ram),
+                  Storage: await Promise.all(
+                    resourcesByType.storage.map(async (storage) => {
+                      return await formatOfferResource("storage", storage);
+                    }),
+                  ),
+                  IP: await formatOfferResource("ip", resourcesByType.ip),
+                  Bandwidth: await formatOfferResource(
+                    "bandwidth",
+                    resourcesByType.bandwidth,
+                  ),
+                },
+              };
+            },
+          ),
         ),
       },
     )}\nDo you want to proceed?`,
@@ -404,18 +413,22 @@ function formatOfferResourcePrice(
   );
 }
 
-function formatOfferResource({
-  resourceId,
-  supply,
-  details,
-}: {
-  resourceId: `0x${string}`;
-  supply: number | string;
-  details: string;
-}) {
+async function formatOfferResource(
+  resourceType: ResourceType,
+  {
+    resourceId,
+    supply,
+    details,
+  }: {
+    resourceId: `0x${string}`;
+    supply: number;
+    details: string;
+  },
+) {
   return {
     "Resource ID": resourceId,
-    Supply: supply,
+    Supply: (await resourceSupplyFromChainToConfig(resourceType, supply))
+      .supplyString,
     ...(details === "{}" ? {} : { Details: details }),
   };
 }
@@ -619,29 +632,56 @@ async function formatOfferInfo(
               Resources: {
                 CPU: {
                   "Resource ID": resourcesByType.cpu.resourceId,
-                  Supply: resourcesByType.cpu.supply / VCPU_PER_CU,
+                  Supply: (
+                    await resourceSupplyFromChainToConfig(
+                      "cpu",
+                      resourcesByType.cpu.supply,
+                    )
+                  ).supplyString,
                   Details: resourcesByType.cpu.details,
                 },
                 RAM: {
                   "Resource ID": resourcesByType.ram.resourceId,
-                  Supply: resourcesByType.ram.supply,
+                  Supply: (
+                    await resourceSupplyFromChainToConfig(
+                      "ram",
+                      resourcesByType.ram.supply,
+                    )
+                  ).supplyString,
                   Details: resourcesByType.ram.details,
                 },
-                Storage: resourcesByType.storage.map((storage) => {
-                  return {
-                    "Resource ID": storage.resourceId,
-                    Supply: storage.supply,
-                    Details: storage.details,
-                  };
-                }),
+                Storage: await Promise.all(
+                  resourcesByType.storage.map(async (storage) => {
+                    return {
+                      "Resource ID": storage.resourceId,
+                      Supply: (
+                        await resourceSupplyFromChainToConfig(
+                          "storage",
+                          storage.supply,
+                        )
+                      ).supplyString,
+                      Details: storage.details,
+                    };
+                  }),
+                ),
                 IP: {
                   "Resource ID": resourcesByType.ip.resourceId,
-                  Supply: resourcesByType.ip.supply,
+                  Supply: (
+                    await resourceSupplyFromChainToConfig(
+                      "ip",
+                      resourcesByType.ip.supply,
+                    )
+                  ).supplyString,
                   Details: resourcesByType.ip.details,
                 },
                 Bandwidth: {
                   "Resource ID": resourcesByType.bandwidth.resourceId,
-                  Supply: resourcesByType.bandwidth.supply,
+                  Supply: (
+                    await resourceSupplyFromChainToConfig(
+                      "bandwidth",
+                      resourcesByType.bandwidth.supply,
+                    )
+                  ).supplyString,
                   Details: resourcesByType.bandwidth.details,
                 },
               },
@@ -935,33 +975,59 @@ async function ensureOfferConfigs() {
               const resources = {
                 cpu: {
                   ...cpu,
+                  supply: (
+                    await resourceSupplyFromConfigToChain("cpu", cpu.supply)
+                  ).supply,
                   resourceId: `0x${cpuId}`,
                   details: JSON.stringify(cpu.details),
                 },
                 ram: {
                   ...ram,
-                  supply: xbytes.parseSize(ram.supply),
+                  supply: (
+                    await resourceSupplyFromConfigToChain(
+                      "ram",
+                      xbytes.parseSize(ram.supply),
+                    )
+                  ).supply,
                   resourceId: `0x${ramId}`,
                   details: JSON.stringify(ram.details),
                 },
-                storage: resourcesWithIds.storage.map(
-                  ({ id: storageId, ...storage }) => {
-                    return {
-                      ...storage,
-                      supply: xbytes.parseSize(storage.supply),
-                      resourceId: `0x${storageId}`,
-                      details: JSON.stringify(storage.details),
-                    };
-                  },
+                storage: await Promise.all(
+                  resourcesWithIds.storage.map(
+                    async ({ id: storageId, ...storage }) => {
+                      return {
+                        ...storage,
+                        supply: (
+                          await resourceSupplyFromConfigToChain(
+                            "storage",
+                            xbytes.parseSize(storage.supply),
+                          )
+                        ).supply,
+                        resourceId: `0x${storageId}`,
+                        details: JSON.stringify(storage.details),
+                      } as const;
+                    },
+                  ),
                 ),
                 ip: {
                   ...ip,
-                  supply: ipSupplyRes.result.length,
+                  supply: (
+                    await resourceSupplyFromConfigToChain(
+                      "ip",
+                      ip.supply.length,
+                    )
+                  ).supply,
                   resourceId: `0x${ipId}`,
                   details: JSON.stringify(ip.details),
                 },
                 bandwidth: {
                   ...bandwidth,
+                  supply: (
+                    await resourceSupplyFromConfigToChain(
+                      "bandwidth",
+                      xbytes.parseSize(bandwidth.supply),
+                    )
+                  ).supply,
                   resourceId: `0x${bandwidthId}`,
                   details: JSON.stringify(bandwidth.details),
                 },

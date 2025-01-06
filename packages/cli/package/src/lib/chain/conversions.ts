@@ -16,6 +16,7 @@
  */
 
 import type { ResourceType } from "../configs/project/provider/provider4.js";
+import { VCPU_PER_CU } from "../const.js";
 import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
 import { bufferToBase64, numToStr } from "../helpers/typesafeStringify.js";
 
@@ -80,7 +81,7 @@ export function hexStringToUTF8ToBase64String(hexString: string): string {
   return bufferToBase64(Buffer.from(cleanHexString, "utf-8"));
 }
 
-export async function resourceSupply(
+export async function resourceSupplyFromConfigToChain(
   resourceType: ResourceType,
   supply: number,
 ) {
@@ -88,7 +89,7 @@ export async function resourceSupply(
 
   switch (resourceType) {
     case "cpu":
-      return { supply, supplyString: numToStr(supply) };
+      return { supply: supply * VCPU_PER_CU, supplyString: numToStr(supply) };
     case "ram":
       return {
         supply: Math.round(supply / (await getRamToBytesFromChain())),
@@ -100,7 +101,42 @@ export async function resourceSupply(
         supplyString: xbytes(supply),
       };
     case "bandwidth":
+      return {
+        supply: Math.round(supply / STORAGE_TO_BYTES),
+        supplyString: xbytes(supply),
+      };
+    case "ip":
       return { supply, supplyString: numToStr(supply) };
+    default:
+      const unknownResourceType: never = resourceType;
+      throw new Error(
+        `Unknown resource type ${stringifyUnknown(unknownResourceType)}`,
+      );
+  }
+}
+
+export async function resourceSupplyFromChainToConfig(
+  resourceType: ResourceType,
+  supply: number,
+) {
+  const xbytes = (await import("xbytes")).default;
+
+  switch (resourceType) {
+    case "cpu":
+      const cpuSupply = supply / VCPU_PER_CU;
+      return { supply: cpuSupply, supplyString: numToStr(cpuSupply) };
+    case "ram":
+      const ramSupply = supply * (await getRamToBytesFromChain());
+      return { supply: ramSupply, supplyString: xbytes(ramSupply) };
+    case "storage":
+      const storageSupply = supply * STORAGE_TO_BYTES;
+      return { supply: storageSupply, supplyString: xbytes(storageSupply) };
+    case "bandwidth":
+      const bandwidthSupply = supply * STORAGE_TO_BYTES;
+      return {
+        supply: bandwidthSupply,
+        supplyString: xbytes(bandwidthSupply),
+      };
     case "ip":
       return { supply, supplyString: numToStr(supply) };
     default:
