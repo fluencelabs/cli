@@ -1220,7 +1220,7 @@ function indexerResourcesToOnchainResources(
     .filter(({ resource: { type } }) => {
       return isOnChainResourceType(type) && type === onChainResourceType;
     })
-    .map(({ details, id: resourceId, maxSupply }) => {
+    .map(({ details, resource: { id: resourceId }, maxSupply }) => {
       assertIsHex(resourceId, `Invalid Resource ID for offer ${offerId}`);
       return { resourceId, supply: Number(maxSupply), details };
     });
@@ -1302,15 +1302,15 @@ function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
     freeComputeUnits: offerIndexerInfo.computeUnitsAvailable,
     providerId: offerIndexerInfo.provider.id,
     peers: serializedPeers,
-    resources: offerIndexerInfo.resources?.map(
-      ({ id: resourceId, price, resource }) => {
-        assertIsHex(
-          resourceId,
-          `Invalid Resource ID for offer ${offerIndexerInfo.id}`,
-        );
+    resources: offerIndexerInfo.resources?.map(({ price, resource }) => {
+      const resourceId = resource.id;
 
-        return { resourceId, resourcePrice: BigInt(price), resource };
-      },
-    ),
+      assertIsHex(
+        resourceId,
+        `Invalid Resource ID for offer ${offerIndexerInfo.id}`,
+      );
+
+      return { resourceId, resourcePrice: BigInt(price), resource };
+    }),
   };
 }

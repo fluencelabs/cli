@@ -13,9 +13,9 @@ query OfferDetails($where: Offer_filter) {
       id
     }
     resources {
-      id
       price
       resource {
+        id
         type
       }
     }
@@ -28,10 +28,10 @@ query OfferDetails($where: Offer_filter) {
         }
       }
       resources {
-        id
         maxSupply
         details
         resource {
+          id
           type
         }
       }
