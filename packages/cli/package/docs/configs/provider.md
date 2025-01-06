@@ -76,10 +76,10 @@ Defines a bandwidth resource
 
 ###### Properties
 
-| Property | Type    | Required | Description       |
-|----------|---------|----------|-------------------|
-| `name`   | string  | **Yes**  |                   |
-| `supply` | integer | **Yes**  | Bandwidth in Mbps |
+| Property | Type   | Required | Description          |
+|----------|--------|----------|----------------------|
+| `name`   | string | **Yes**  |                      |
+| `supply` | string | **Yes**  | Bandwidth per second |
 
 ##### cpu
 
