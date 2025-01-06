@@ -776,7 +776,7 @@ export function defaultComputePeerConfig({
           details: DEFAULT_STORAGE_DETAILS,
         },
       ],
-      bandwidth: { name: BANDWIDTH_RESOURCE_NAME, supply: "1 Gb" },
+      bandwidth: { name: BANDWIDTH_RESOURCE_NAME, supply: "1 Mb" },
       ip: {
         name: IP_RESOURCE_NAME,
         ...(resources?.ip ?? {

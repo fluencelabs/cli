@@ -102,8 +102,8 @@ export async function resourceSupplyFromConfigToChain(
       };
     case "bandwidth":
       return {
-        supply: Math.round(supply / STORAGE_TO_BYTES),
-        supplyString: xbytes(supply),
+        supply: Math.round(supply / BANDWIDTH_TO_BYTES),
+        supplyString: `${xbytes(supply, { bits: true })}ps`,
       };
     case "ip":
       return { supply, supplyString: numToStr(supply) };
@@ -132,10 +132,10 @@ export async function resourceSupplyFromChainToConfig(
       const storageSupply = supply * STORAGE_TO_BYTES;
       return { supply: storageSupply, supplyString: xbytes(storageSupply) };
     case "bandwidth":
-      const bandwidthSupply = supply * STORAGE_TO_BYTES;
+      const bandwidthSupply = supply * BANDWIDTH_TO_BYTES;
       return {
         supply: bandwidthSupply,
-        supplyString: xbytes(bandwidthSupply),
+        supplyString: `${xbytes(bandwidthSupply, { bits: true })}ps`,
       };
     case "ip":
       return { supply, supplyString: numToStr(supply) };
@@ -147,8 +147,9 @@ export async function resourceSupplyFromChainToConfig(
   }
 }
 
-const STORAGE_TO_BYTES = 1_000_000_000;
+const STORAGE_TO_BYTES = 1_000_000; // to megabytes
+const BANDWIDTH_TO_BYTES = 125_000; // to megabits
 
 async function getRamToBytesFromChain() {
-  return Promise.resolve(1_000_000_000);
+  return Promise.resolve(1_000_000);
 }
