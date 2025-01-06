@@ -21,6 +21,8 @@ import addFormats from "ajv-formats";
 
 import { jsonStringify } from "../common.js";
 
+import { HEX_REGEX } from "./helpers/validations.js";
+
 export function getAjv() {
   const ajv = new Ajv.default({
     allowUnionTypes: true,
@@ -28,7 +30,7 @@ export function getAjv() {
   });
 
   addFormats.default(ajv);
-  ajv.addFormat("hex", /^0x[0-9a-fA-F]*$/);
+  ajv.addFormat("hex", HEX_REGEX);
   return ajv;
 }
 

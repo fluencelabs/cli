@@ -62,6 +62,7 @@ import {
   commaSepStrToArr,
   splitErrorsAndResults,
 } from "../../helpers/utils.js";
+import { assertIsHex } from "../../helpers/validations.js";
 import { checkboxes, confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import { getProtocolVersions } from "../chainValidators.js";
@@ -1219,13 +1220,9 @@ function indexerResourcesToOnchainResources(
     .filter(({ resource: { type } }) => {
       return isOnChainResourceType(type) && type === onChainResourceType;
     })
-    .map(({ details, id, maxSupply }) => {
-      return {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        resourceId: id as `0x${string}`,
-        supply: Number(maxSupply),
-        details,
-      };
+    .map(({ details, id: resourceId, maxSupply }) => {
+      assertIsHex(resourceId, `Invalid Resource ID for offer ${offerId}`);
+      return { resourceId, supply: Number(maxSupply), details };
     });
 
   if (firstResource === undefined) {
@@ -1305,13 +1302,15 @@ function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
     freeComputeUnits: offerIndexerInfo.computeUnitsAvailable,
     providerId: offerIndexerInfo.provider.id,
     peers: serializedPeers,
-    resources: offerIndexerInfo.resources?.map(({ id, price, resource }) => {
-      return {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        resourceId: id as `0x${string}`,
-        resourcePrice: BigInt(price),
-        resource,
-      };
-    }),
+    resources: offerIndexerInfo.resources?.map(
+      ({ id: resourceId, price, resource }) => {
+        assertIsHex(
+          resourceId,
+          `Invalid Resource ID for offer ${offerIndexerInfo.id}`,
+        );
+
+        return { resourceId, resourcePrice: BigInt(price), resource };
+      },
+    ),
   };
 }
