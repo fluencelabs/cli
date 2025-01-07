@@ -405,43 +405,69 @@ async function populateChangeResourcePriceTx({
 }: OnChainOffer) {
   const { contracts } = await getContracts();
 
+  const resourcePricesWithIdsArr = Object.values(resourcePricesWithIds).flat();
+
   const allResourcePrices = Object.fromEntries(
-    Object.values(resourcePricesWithIds)
-      .flat()
-      .map(({ price, resourceId, resourceName, resourceType }) => {
+    resourcePricesWithIdsArr.map(
+      ({ price, resourceId, resourceName, resourceType }) => {
         return [resourceId, { price, resourceName, resourceType }];
-      }),
+      },
+    ),
   );
 
-  return (
-    await Promise.all(
-      (offerIndexerInfo.resources ?? []).map(
-        async ({ resourceId, resourcePrice }) => {
-          const newResource = allResourcePrices[resourceId];
+  const prevResourcePriceChanges = await Promise.all(
+    (offerIndexerInfo.resources ?? []).map(
+      async ({ resourceId, resourcePrice }) => {
+        const newResource = allResourcePrices[resourceId];
 
-          if (newResource === undefined) {
-            return null;
-          }
+        if (newResource === undefined) {
+          return null;
+        }
 
-          const { price: newPrice, resourceName, resourceType } = newResource;
+        const { price: newPrice, resourceName, resourceType } = newResource;
 
-          if (newPrice === resourcePrice) {
-            return null;
-          }
+        if (newPrice === resourcePrice) {
+          return null;
+        }
 
-          return {
-            description: `Changing ${resourceType}: ${resourceName} price to ${await ptFormatWithSymbol(newPrice)}`,
-            tx: populateTx(
-              contracts.diamond.changeResourcePriceV2,
-              offerId,
-              resourceId,
-              newPrice,
-            ),
-          };
-        },
-      ),
-    )
-  ).filter(Boolean);
+        return {
+          description: `Set ${resourceType} resource price for ${resourceName} to ${await ptFormatWithSymbol(newPrice)}`,
+          tx: populateTx(
+            contracts.diamond.changeResourcePriceV2,
+            offerId,
+            resourceId,
+            newPrice,
+          ),
+        };
+      },
+    ),
+  );
+
+  const newResources = await Promise.all(
+    resourcePricesWithIdsArr.map(
+      async ({ price, resourceId, resourceName, resourceType }) => {
+        const onChainResource = offerIndexerInfo.resources?.find((r) => {
+          return r.resourceId === resourceId;
+        });
+
+        if (onChainResource !== undefined) {
+          return null;
+        }
+
+        return {
+          description: `Adding ${resourceType} resource ${resourceName} to offer with price ${await ptFormatWithSymbol(price)}`,
+          tx: populateTx(
+            contracts.diamond.changeResourcePriceV2,
+            offerId,
+            resourceId,
+            price,
+          ),
+        };
+      },
+    ),
+  );
+
+  return prevResourcePriceChanges.concat(newResources).filter(Boolean);
 }
 
 type ResourceInfo = {
