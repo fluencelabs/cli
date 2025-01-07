@@ -233,13 +233,13 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
 
       const txs = (
         await Promise.all([
+          populateChangeResourceSupplyTx(offer),
           populateCUToRemoveTxs(offer, peersOnChain),
           populateCUToAddTxs(offer, peersOnChain),
 
           populatePaymentTokenTx(offer),
 
           populateChangeResourcePriceTx(offer),
-          populateChangeResourceSupplyTx(offer),
           populatePeerResourcesTxs(offer),
         ])
       ).flat() satisfies Txs;
@@ -460,7 +460,10 @@ async function createResourceSupplyUpdateTx(
   peerId: string,
   { resourceType, onChainResource, configuredResource }: ResourceSupplyUpdate,
 ) {
-  if (onChainResource.supply === configuredResource.supply) {
+  if (
+    resourceType === "cpu" || // no need for changeResourceMaxSupplyV2. addComputeUnitsV2 is enough
+    onChainResource.supply === configuredResource.supply
+  ) {
     return null;
   }
 
