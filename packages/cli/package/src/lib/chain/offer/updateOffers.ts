@@ -631,12 +631,22 @@ async function createResourceUpdateTx(
     (configuredResource === undefined ||
       onChainResource.resourceId !== configuredResource.resourceId)
   ) {
+    // TODO: currently not working
+    // txs.push({
+    //   description: `Removing ${name} resource with id ${onChainResource.resourceId}`,
+    //   tx: populateTx(
+    //     contracts.diamond.removePeerResource,
+    //     peerId,
+    //     onChainResource.resourceId,
+    //   ),
+    // });
     txs.push({
-      description: `Removing ${name} resource with id ${onChainResource.resourceId}`,
+      description: `Setting resource ${name} with id ${onChainResource.resourceId} supply to 0`,
       tx: populateTx(
-        contracts.diamond.removePeerResource,
+        contracts.diamond.changeResourceMaxSupplyV2,
         peerId,
         onChainResource.resourceId,
+        0,
       ),
     });
   }
