@@ -535,14 +535,14 @@ async function populateChangeResourceSupplyTx({
 
     const resourcePriceUpdates: ResourceSupplyUpdate[] = [
       {
-        resourceType: "cpu",
-        onChainResource: peer.resourcesByType.cpu,
-        configuredResource: configuredPeer.resourcesByType.cpu,
-      },
-      {
         resourceType: "ram",
         onChainResource: peer.resourcesByType.ram,
         configuredResource: configuredPeer.resourcesByType.ram,
+      },
+      {
+        resourceType: "cpu",
+        onChainResource: peer.resourcesByType.cpu,
+        configuredResource: configuredPeer.resourcesByType.cpu,
       },
       ...configuredPeer.resourcesByType.storage
         .map((configuredStorage) => {
