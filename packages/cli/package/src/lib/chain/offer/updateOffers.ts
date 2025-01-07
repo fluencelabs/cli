@@ -24,6 +24,7 @@ import { initNewProviderArtifactsConfig } from "../../configs/project/providerAr
 import {
   CLI_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  VCPU_PER_CU,
 } from "../../const.js";
 import { getContracts, signBatch, populateTx } from "../../dealClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
@@ -754,7 +755,7 @@ async function populateCUToAddTxs(
             contracts.diamond.addComputeUnitsV2,
             hexPeerId,
             CUIds,
-            { ...resources.cpu, supply: CUIds.length },
+            { ...resources.cpu, supply: CUIds.length * VCPU_PER_CU },
           ),
         };
       });
