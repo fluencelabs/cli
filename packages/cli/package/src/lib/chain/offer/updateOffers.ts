@@ -612,24 +612,10 @@ async function createResourceUpdateTx(
   const { contracts } = await getContracts();
 
   if (
-    configuredResource !== undefined &&
-    (onChainResource === undefined ||
-      onChainResource.resourceId !== configuredResource.resourceId)
-  ) {
-    txs.push({
-      description: `Adding ${name} resource with id ${configuredResource.resourceId}`,
-      tx: populateTx(
-        contracts.diamond.registerPeerResource,
-        peerId,
-        configuredResource,
-      ),
-    });
-  }
-
-  if (
     onChainResource !== undefined &&
     (configuredResource === undefined ||
-      onChainResource.resourceId !== configuredResource.resourceId)
+      onChainResource.resourceId !== configuredResource.resourceId ||
+      onChainResource.details !== configuredResource.details)
   ) {
     // TODO: currently not working
     // txs.push({
@@ -647,6 +633,22 @@ async function createResourceUpdateTx(
         peerId,
         onChainResource.resourceId,
         0,
+      ),
+    });
+  }
+
+  if (
+    configuredResource !== undefined &&
+    (onChainResource === undefined ||
+      onChainResource.resourceId !== configuredResource.resourceId ||
+      onChainResource.details !== configuredResource.details)
+  ) {
+    txs.push({
+      description: `Adding ${name} resource with id ${configuredResource.resourceId}`,
+      tx: populateTx(
+        contracts.diamond.registerPeerResource,
+        peerId,
+        configuredResource,
       ),
     });
   }
