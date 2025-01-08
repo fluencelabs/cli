@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.24.0](https://github.com/fluencelabs/cli/compare/cli-v0.23.0...cli-v0.24.0) (2025-01-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* new provider.yaml and new contracts v2 [JS-850, JS-851] ([#1082](https://github.com/fluencelabs/cli/issues/1082))
+
+### Features
+
+* new provider.yaml and new contracts v2 [JS-850, JS-851] ([#1082](https://github.com/fluencelabs/cli/issues/1082)) ([3894079](https://github.com/fluencelabs/cli/commit/389407999ada5d002c7eaf026c118535666db863))
+
 ## [0.23.0](https://github.com/fluencelabs/cli/compare/cli-v0.22.0...cli-v0.23.0) (2024-12-27)
 
 
