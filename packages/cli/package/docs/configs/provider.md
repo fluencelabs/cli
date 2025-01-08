@@ -199,35 +199,45 @@ Resource prices for the offer
 
 ##### Properties
 
-| Property    | Type                 | Required | Description |
-|-------------|----------------------|----------|-------------|
-| `bandwidth` | [object](#bandwidth) | **Yes**  |             |
-| `cpu`       | [object](#cpu)       | **Yes**  |             |
-| `ip`        | [object](#ip)        | **Yes**  |             |
-| `ram`       | [object](#ram)       | **Yes**  |             |
-| `storage`   | [object](#storage)   | **Yes**  |             |
+| Property    | Type                 | Required | Description                                                                                            |
+|-------------|----------------------|----------|--------------------------------------------------------------------------------------------------------|
+| `bandwidth` | [object](#bandwidth) | **Yes**  | A map with bandwidth resource names as keys and prices in USDC per Megabit (Mb) of bandwidth as values |
+| `cpu`       | [object](#cpu)       | **Yes**  | A map with CPU resource names as keys and prices in USDC per physical core as values                   |
+| `ip`        | [object](#ip)        | **Yes**  | A map with IP resource names as keys and prices in USDC per 1 IPv4 address as values                   |
+| `ram`       | [object](#ram)       | **Yes**  | A map with RAM resource names as keys and prices in USDC per Mebibyte (MiB) of RAM as values           |
+| `storage`   | [object](#storage)   | **Yes**  | A map with storage resource names as keys and prices in USDC per Mebibyte (MiB) of storage as values   |
 
 ##### bandwidth
+
+A map with bandwidth resource names as keys and prices in USDC per Megabit (Mb) of bandwidth as values
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 
 ##### cpu
 
+A map with CPU resource names as keys and prices in USDC per physical core as values
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 
 ##### ip
+
+A map with IP resource names as keys and prices in USDC per 1 IPv4 address as values
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 
 ##### ram
 
+A map with RAM resource names as keys and prices in USDC per Mebibyte (MiB) of RAM as values
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 
 ##### storage
+
+A map with storage resource names as keys and prices in USDC per Mebibyte (MiB) of storage as values
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
