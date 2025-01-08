@@ -28,17 +28,22 @@ export type GetDefaultConfig<LatestConfig> = () =>
   | LatestConfig
   | Promise<LatestConfig>;
 
+type Schema<Config> = JSONSchemaType<Config> & {
+  title?: string;
+  description?: string;
+  properties: { version?: unknown };
+  required?: string[];
+};
+
 export type ConfigOptionsWithoutMigrate<Config> = {
-  schema: JSONSchemaType<Config> & {
-    title?: string;
-    description?: string;
-    properties: { version?: unknown };
-    required?: string[];
-  };
+  schema: Schema<Config>;
   validate?: (
     config: Config,
     configPath: string,
   ) => ValidationResult | Promise<ValidationResult>;
+  refineSchema?: (
+    schema: Schema<Config>,
+  ) => Promise<Schema<Config>> | Schema<Config>;
 };
 
 export type ConfigOptions<PrevConfig, Config> = PrevConfig extends undefined

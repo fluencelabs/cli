@@ -9,13 +9,15 @@ query OfferDetails($where: Offer_filter) {
     }
     computeUnitsTotal
     computeUnitsAvailable
-    effectors {
-      effector {
-        id
-      }
-    }
     provider {
       id
+    }
+    resources {
+      price
+      resource {
+        id
+        type
+      }
     }
     peers(where: { deleted: false }) {
       id
@@ -23,6 +25,14 @@ query OfferDetails($where: Offer_filter) {
         id
         worker {
           id
+        }
+      }
+      resources {
+        maxSupply
+        details
+        resource {
+          id
+          type
         }
       }
     }

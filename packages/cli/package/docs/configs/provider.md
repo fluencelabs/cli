@@ -1,30 +1,29 @@
 # provider.yaml
 
-Defines config used for provider set up
+Defines provider configuration
 
 ## Properties
 
-| Property              | Type                           | Required | Description                                                                                     |
-|-----------------------|--------------------------------|----------|-------------------------------------------------------------------------------------------------|
-| `capacityCommitments` | [object](#capacitycommitments) | **Yes**  | A map with nox names as keys and capacity commitments as values                                 |
-| `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peers as values                               |
-| `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offers as values                                             |
-| `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                                                |
-| `version`             | integer                        | **Yes**  | Config version                                                                                  |
-| `ccp`                 | [object](#ccp)                 | No       | Configuration to pass to the Capacity Commitment Prover                                         |
-| `nox`                 | [object](#nox)                 | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
+| Property              | Type                           | Required | Description                                                                |
+|-----------------------|--------------------------------|----------|----------------------------------------------------------------------------|
+| `capacityCommitments` | [object](#capacitycommitments) | **Yes**  | A map with computePeer names as keys and capacity commitments as values    |
+| `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peer configs as values   |
+| `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offer configs as values                 |
+| `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                           |
+| `version`             | integer                        | **Yes**  | Config version                                                             |
+| `resources`           | [object](#resources)           | No       | A map with resource type names as keys and resource names object as values |
 
 ## capacityCommitments
 
-A map with nox names as keys and capacity commitments as values
+A map with computePeer names as keys and capacity commitments as values
 
 ### Properties
 
-| Property  | Type               | Required | Description                   |
-|-----------|--------------------|----------|-------------------------------|
-| `noxName` | [object](#noxname) | No       | Defines a capacity commitment |
+| Property          | Type                       | Required | Description                   |
+|-------------------|----------------------------|----------|-------------------------------|
+| `computePeerName` | [object](#computepeername) | No       | Defines a capacity commitment |
 
-### noxName
+### computePeerName
 
 Defines a capacity commitment
 
@@ -36,356 +35,83 @@ Defines a capacity commitment
 | `stakerReward` | number | **Yes**  | Staker reward in percent                                                      |
 | `delegator`    | string | No       | Delegator address                                                             |
 
-## ccp
-
-Configuration to pass to the Capacity Commitment Prover
-
-### Properties
-
-| Property             | Type                          | Required | Description                                                                                     |
-|----------------------|-------------------------------|----------|-------------------------------------------------------------------------------------------------|
-| `logs`               | [object](#logs)               | No       | Logs configuration                                                                              |
-| `prometheusEndpoint` | [object](#prometheusendpoint) | No       | Prometheus endpoint configuration                                                               |
-| `rawConfig`          | string                        | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority |
-| `rpcEndpoint`        | [object](#rpcendpoint)        | No       | RPC endpoint configuration                                                                      |
-| `state`              | [object](#state)              | No       | State configuration                                                                             |
-
-### logs
-
-Logs configuration
-
-#### Properties
-
-| Property         | Type    | Required | Description                     |
-|------------------|---------|----------|---------------------------------|
-| `logLevel`       | string  | No       | Log level. Default: debug       |
-| `reportHashrate` | boolean | No       | Report hashrate. Default: false |
-
-### prometheusEndpoint
-
-Prometheus endpoint configuration
-
-#### Properties
-
-| Property | Type    | Required | Description                       |
-|----------|---------|----------|-----------------------------------|
-| `host`   | string  | No       | Prometheus host. Default: 0.0.0.0 |
-| `port`   | integer | No       | Prometheus port. Default: 9384    |
-
-### rpcEndpoint
-
-RPC endpoint configuration
-
-#### Properties
-
-| Property           | Type      | Required | Description                |
-|--------------------|-----------|----------|----------------------------|
-| `host`             | string    | No       | RPC host. Default: 0.0.0.0 |
-| `port`             | integer   | No       | RPC port. Default: 9389    |
-| `utilityThreadIds` | integer[] | No       | Utility thread IDs         |
-
-### state
-
-State configuration
-
-#### Properties
-
-| Property | Type   | Required | Description                              |
-|----------|--------|----------|------------------------------------------|
-| `path`   | string | No       | Path to the state file. Default: ./state |
-
 ## computePeers
 
-A map with compute peer names as keys and compute peers as values
+A map with compute peer names as keys and compute peer configs as values
 
 ### Properties
 
-| Property      | Type                   | Required | Description            |
-|---------------|------------------------|----------|------------------------|
-| `ComputePeer` | [object](#computepeer) | No       | Defines a compute peer |
+| Property          | Type                       | Required | Description            |
+|-------------------|----------------------------|----------|------------------------|
+| `computePeerName` | [object](#computepeername) | No       | Defines a compute peer |
 
-### ComputePeer
+### computePeerName
 
 Defines a compute peer
 
 #### Properties
 
-| Property         | Type                 | Required | Description                                                                                     |
-|------------------|----------------------|----------|-------------------------------------------------------------------------------------------------|
-| `computeUnits`   | integer              | **Yes**  | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
-| `ccp`            | [object](#ccp)       | No       | Configuration to pass to the Capacity Commitment Prover                                         |
-| `kubeconfigPath` | string               | No       | Path to the kubeconfig file                                                                     |
-| `nox`            | [object](#nox)       | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
-| `resources`      | [object](#resources) | No       | Resources configuration                                                                         |
+| Property         | Type                 | Required | Description                              |
+|------------------|----------------------|----------|------------------------------------------|
+| `kubeconfigPath` | string               | **Yes**  | Path to the kubeconfig file              |
+| `resources`      | [object](#resources) | **Yes**  | Resources available on this compute peer |
 
-#### ccp
+#### resources
 
-Configuration to pass to the Capacity Commitment Prover
+Resources available on this compute peer
 
 ##### Properties
 
-| Property             | Type                          | Required | Description                                                                                     |
-|----------------------|-------------------------------|----------|-------------------------------------------------------------------------------------------------|
-| `logs`               | [object](#logs)               | No       | Logs configuration                                                                              |
-| `prometheusEndpoint` | [object](#prometheusendpoint) | No       | Prometheus endpoint configuration                                                               |
-| `rawConfig`          | string                        | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority |
-| `rpcEndpoint`        | [object](#rpcendpoint)        | No       | RPC endpoint configuration                                                                      |
-| `state`              | [object](#state)              | No       | State configuration                                                                             |
+| Property    | Type                 | Required | Description                  |
+|-------------|----------------------|----------|------------------------------|
+| `bandwidth` | [object](#bandwidth) | **Yes**  | Defines a bandwidth resource |
+| `cpu`       | [object](#cpu)       | **Yes**  | Defines a CPU resource       |
+| `ip`        | [object](#ip)        | **Yes**  | Defines an IP resource       |
+| `ram`       | [object](#ram)       | **Yes**  | Defines a RAM resource       |
+| `storage`   | [object](#storage)[] | **Yes**  |                              |
 
-##### logs
+##### bandwidth
 
-Logs configuration
-
-###### Properties
-
-| Property         | Type    | Required | Description                     |
-|------------------|---------|----------|---------------------------------|
-| `logLevel`       | string  | No       | Log level. Default: debug       |
-| `reportHashrate` | boolean | No       | Report hashrate. Default: false |
-
-##### prometheusEndpoint
-
-Prometheus endpoint configuration
+Defines a bandwidth resource
 
 ###### Properties
 
-| Property | Type    | Required | Description                       |
-|----------|---------|----------|-----------------------------------|
-| `host`   | string  | No       | Prometheus host. Default: 0.0.0.0 |
-| `port`   | integer | No       | Prometheus port. Default: 9384    |
+| Property | Type   | Required | Description          |
+|----------|--------|----------|----------------------|
+| `name`   | string | **Yes**  |                      |
+| `supply` | string | **Yes**  | Bandwidth per second |
 
-##### rpcEndpoint
+##### cpu
 
-RPC endpoint configuration
-
-###### Properties
-
-| Property           | Type      | Required | Description                |
-|--------------------|-----------|----------|----------------------------|
-| `host`             | string    | No       | RPC host. Default: 0.0.0.0 |
-| `port`             | integer   | No       | RPC port. Default: 9389    |
-| `utilityThreadIds` | integer[] | No       | Utility thread IDs         |
-
-##### state
-
-State configuration
+Defines a CPU resource
 
 ###### Properties
 
-| Property | Type   | Required | Description                              |
-|----------|--------|----------|------------------------------------------|
-| `path`   | string | No       | Path to the state file. Default: ./state |
+| Property  | Type               | Required | Description                                                                                             |
+|-----------|--------------------|----------|---------------------------------------------------------------------------------------------------------|
+| `name`    | string             | **Yes**  |                                                                                                         |
+| `supply`  | integer            | **Yes**  | Number of physical cores                                                                                |
+| `details` | [object](#details) | No       | Override or extend CPU details not related to matching but visible to the user for information purposes |
 
-#### nox
+###### details
 
-Configuration to pass to the nox compute peer. Config.toml files are generated from this config
-
-##### Properties
-
-| Property                 | Type                      | Required | Description                                                                                                       |
-|--------------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
-| `bootstrapNodes`         | string[]                  | No       | List of bootstrap nodes. Default: all addresses for the selected env                                              |
-| `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                    |
-| `chain`                  | [object](#chain)          | No       | Chain config                                                                                                      |
-| `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                          |
-| `effectors`              | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
-| `externalMultiaddresses` | string[]                  | No       | List of external multiaddresses                                                                                   |
-| `httpPort`               | integer                   | No       | Both host and container HTTP port to use. Default: 918 (on local network ports will be generated by default)      |
-| `ipfs`                   | [object](#ipfs)           | No       | IPFS config                                                                                                       |
-| `listenIp`               | string                    | No       | IP to listen on                                                                                                   |
-| `metrics`                | [object](#metrics)        | No       | Metrics configuration                                                                                             |
-| `rawConfig`              | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
-| `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
-| `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
-| `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: 977 (on local network ports will be generated by default)       |
-| `vm`                     | [object](#vm)             | No       | VM Configuration                                                                                                  |
-| `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: 999 (on local network ports will be generated by default) |
-
-##### ccp
-
-For advanced users. CCP config
-
-###### Properties
-
-| Property          | Type   | Required | Description                                                                                                 |
-|-------------------|--------|----------|-------------------------------------------------------------------------------------------------------------|
-| `ccpEndpoint`     | string | No       | CCP endpoint. Default comes from top-level ccp config: http://{ccp.rpcEndpoint.host}:{ccp.rpcEndpoint.port} |
-| `proofPollPeriod` | string | No       | Proof poll period. Default: 60 seconds                                                                      |
-
-##### chain
-
-Chain config
-
-###### Properties
-
-| Property             | Type    | Required | Description                                       |
-|----------------------|---------|----------|---------------------------------------------------|
-| `ccContract`         | string  | No       | Capacity commitment contract address (deprecated) |
-| `coreContract`       | string  | No       | Core contract address (deprecated)                |
-| `dealSyncStartBlock` | string  | No       | Start block (deprecated)                          |
-| `defaultBaseFee`     | number  | No       | Default base fee                                  |
-| `defaultPriorityFee` | number  | No       | Default priority fee                              |
-| `diamondContract`    | string  | No       | Diamond contract address                          |
-| `httpEndpoint`       | string  | No       | HTTP endpoint of the chain                        |
-| `marketContract`     | string  | No       | Market contract address (deprecated)              |
-| `networkId`          | integer | No       | Network ID                                        |
-| `walletPrivateKey`   | string  | No       | Nox wallet private key. Is generated by default   |
-| `wsEndpoint`         | string  | No       | WebSocket endpoint of the chain                   |
-
-##### effectors
-
-Effectors to allow on the nox
-
-###### Properties
-
-| Property       | Type                    | Required | Description            |
-|----------------|-------------------------|----------|------------------------|
-| `effectorName` | [object](#effectorname) | No       | Effector configuration |
-
-###### effectorName
-
-Effector configuration
-
-**Properties**
-
-| Property          | Type                       | Required | Description              |
-|-------------------|----------------------------|----------|--------------------------|
-| `wasmCID`         | string                     | **Yes**  | Wasm CID of the effector |
-| `allowedBinaries` | [object](#allowedbinaries) | No       | Allowed binaries         |
-
-**allowedBinaries**
-
-Allowed binaries
+Override or extend CPU details not related to matching but visible to the user for information purposes
 
 **Properties**
 
 | Property | Type   | Required | Description |
 |----------|--------|----------|-------------|
-| `curl`   | string | No       |             |
-
-##### ipfs
-
-IPFS config
-
-###### Properties
-
-| Property               | Type   | Required | Description                                     |
-|------------------------|--------|----------|-------------------------------------------------|
-| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API               |
-| `ipfsBinaryPath`       | string | No       | Path to the IPFS binary. Default: /usr/bin/ipfs |
-| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API                  |
-
-##### metrics
-
-Metrics configuration
-
-###### Properties
-
-| Property                      | Type    | Required | Description                          |
-|-------------------------------|---------|----------|--------------------------------------|
-| `enabled`                     | boolean | No       | Metrics enabled. Default: true       |
-| `timerResolution`             | string  | No       | Timer resolution. Default: 1 minute  |
-| `tokioDetailedMetricsEnabled` | boolean | No       | Tokio detailed metrics enabled       |
-| `tokioMetricsEnabled`         | boolean | No       | Tokio metrics enabled. Default: true |
-
-##### systemServices
-
-System services to run by default. aquaIpfs and decider are enabled by default
-
-###### Properties
-
-| Property   | Type                | Required | Description                       |
-|------------|---------------------|----------|-----------------------------------|
-| `aquaIpfs` | [object](#aquaipfs) | No       | Aqua IPFS service configuration   |
-| `decider`  | [object](#decider)  | No       | Decider service configuration     |
-| `enable`   | string[]            | No       | List of system services to enable |
-
-###### aquaIpfs
-
-Aqua IPFS service configuration
-
-**Properties**
-
-| Property               | Type   | Required | Description                                     |
-|------------------------|--------|----------|-------------------------------------------------|
-| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API               |
-| `ipfsBinaryPath`       | string | No       | Path to the IPFS binary. Default: /usr/bin/ipfs |
-| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API                  |
-
-###### decider
-
-Decider service configuration
-
-**Properties**
-
-| Property              | Type    | Required | Description                       |
-|-----------------------|---------|----------|-----------------------------------|
-| `deciderPeriodSec`    | integer | No       | Decider period in seconds         |
-| `matcherAddress`      | string  | No       | Matcher address (deprecated)      |
-| `networkApiEndpoint`  | string  | No       | Network API endpoint (deprecated) |
-| `networkId`           | integer | No       | Network ID (deprecated)           |
-| `startBlock`          | string  | No       | Start block (deprecated)          |
-| `walletKey`           | string  | No       | Wallet key (deprecated)           |
-| `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
-| `workerPeriodSec`     | integer | No       | Worker period in seconds          |
-
-##### vm
-
-VM Configuration
-
-###### Properties
-
-| Property     | Type               | Required | Description                                |
-|--------------|--------------------|----------|--------------------------------------------|
-| `network`    | [object](#network) | **Yes**  | VM Network Configuration                   |
-| `allowGpu`   | boolean            | No       | Whether to add info about GPUs to VM's XML |
-| `libvirtUri` | string             | No       | QEMU Socket                                |
-
-###### network
-
-VM Network Configuration
-
-**Properties**
-
-| Property      | Type                 | Required | Description                                                      |
-|---------------|----------------------|----------|------------------------------------------------------------------|
-| `publicIp`    | string               | **Yes**  | Public IP address to assign the VM. Must be publicly accessible. |
-| `bridgeName`  | string               | No       | Name of the network bridge device                                |
-| `hostSshPort` | integer              | No       | Host SSH port, default is 922                                    |
-| `portRange`   | [object](#portrange) | No       | iptables-mapped port range from Host to VM                       |
-| `vmIp`        | string               | No       | Internal IP address to assign the VM                             |
-| `vmSshPort`   | integer              | No       | VM SSH port, default is 22                                       |
-
-**portRange**
-
-iptables-mapped port range from Host to VM
-
-**Properties**
-
-| Property | Type    | Required | Description                                             |
-|----------|---------|----------|---------------------------------------------------------|
-| `end`    | integer | No       | End of the iptables-mapped port range from Host to VM   |
-| `start`  | integer | No       | Start of the iptables-mapped port range from Host to VM |
-
-#### resources
-
-Resources configuration
-
-##### Properties
-
-| Property | Type          | Required | Description      |
-|----------|---------------|----------|------------------|
-| `ip`     | [object](#ip) | **Yes**  | IP configuration |
+| `model`  | string | No       |             |
 
 ##### ip
 
-IP configuration
+Defines an IP resource
 
 ###### Properties
 
 | Property | Type                | Required | Description |
 |----------|---------------------|----------|-------------|
+| `name`   | string              | **Yes**  |             |
 | `supply` | [object](#supply)[] | **Yes**  | IP supply   |
 
 ###### supply
@@ -395,201 +121,58 @@ Either specify only a `start` property (if you want a single IP) or `start` and 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 
-## nox
+##### ram
 
-Configuration to pass to the nox compute peer. Config.toml files are generated from this config
-
-### Properties
-
-| Property                 | Type                      | Required | Description                                                                                                       |
-|--------------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
-| `bootstrapNodes`         | string[]                  | No       | List of bootstrap nodes. Default: all addresses for the selected env                                              |
-| `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                    |
-| `chain`                  | [object](#chain)          | No       | Chain config                                                                                                      |
-| `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                          |
-| `effectors`              | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
-| `externalMultiaddresses` | string[]                  | No       | List of external multiaddresses                                                                                   |
-| `httpPort`               | integer                   | No       | Both host and container HTTP port to use. Default: 918 (on local network ports will be generated by default)      |
-| `ipfs`                   | [object](#ipfs)           | No       | IPFS config                                                                                                       |
-| `listenIp`               | string                    | No       | IP to listen on                                                                                                   |
-| `metrics`                | [object](#metrics)        | No       | Metrics configuration                                                                                             |
-| `rawConfig`              | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
-| `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
-| `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
-| `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: 977 (on local network ports will be generated by default)       |
-| `vm`                     | [object](#vm)             | No       | VM Configuration                                                                                                  |
-| `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: 999 (on local network ports will be generated by default) |
-
-### ccp
-
-For advanced users. CCP config
-
-#### Properties
-
-| Property          | Type   | Required | Description                                                                                                 |
-|-------------------|--------|----------|-------------------------------------------------------------------------------------------------------------|
-| `ccpEndpoint`     | string | No       | CCP endpoint. Default comes from top-level ccp config: http://{ccp.rpcEndpoint.host}:{ccp.rpcEndpoint.port} |
-| `proofPollPeriod` | string | No       | Proof poll period. Default: 60 seconds                                                                      |
-
-### chain
-
-Chain config
-
-#### Properties
-
-| Property             | Type    | Required | Description                                       |
-|----------------------|---------|----------|---------------------------------------------------|
-| `ccContract`         | string  | No       | Capacity commitment contract address (deprecated) |
-| `coreContract`       | string  | No       | Core contract address (deprecated)                |
-| `dealSyncStartBlock` | string  | No       | Start block (deprecated)                          |
-| `defaultBaseFee`     | number  | No       | Default base fee                                  |
-| `defaultPriorityFee` | number  | No       | Default priority fee                              |
-| `diamondContract`    | string  | No       | Diamond contract address                          |
-| `httpEndpoint`       | string  | No       | HTTP endpoint of the chain                        |
-| `marketContract`     | string  | No       | Market contract address (deprecated)              |
-| `networkId`          | integer | No       | Network ID                                        |
-| `walletPrivateKey`   | string  | No       | Nox wallet private key. Is generated by default   |
-| `wsEndpoint`         | string  | No       | WebSocket endpoint of the chain                   |
-
-### effectors
-
-Effectors to allow on the nox
-
-#### Properties
-
-| Property       | Type                    | Required | Description            |
-|----------------|-------------------------|----------|------------------------|
-| `effectorName` | [object](#effectorname) | No       | Effector configuration |
-
-#### effectorName
-
-Effector configuration
-
-##### Properties
-
-| Property          | Type                       | Required | Description              |
-|-------------------|----------------------------|----------|--------------------------|
-| `wasmCID`         | string                     | **Yes**  | Wasm CID of the effector |
-| `allowedBinaries` | [object](#allowedbinaries) | No       | Allowed binaries         |
-
-##### allowedBinaries
-
-Allowed binaries
+Defines a RAM resource
 
 ###### Properties
 
-| Property | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| `curl`   | string | No       |             |
+| Property  | Type               | Required | Description                                                                                             |
+|-----------|--------------------|----------|---------------------------------------------------------------------------------------------------------|
+| `name`    | string             | **Yes**  |                                                                                                         |
+| `supply`  | string             | **Yes**  | Amount of RAM                                                                                           |
+| `details` | [object](#details) | No       | Override or extend RAM details not related to matching but visible to the user for information purposes |
 
-### ipfs
+###### details
 
-IPFS config
+Override or extend RAM details not related to matching but visible to the user for information purposes
 
-#### Properties
+**Properties**
 
-| Property               | Type   | Required | Description                                     |
-|------------------------|--------|----------|-------------------------------------------------|
-| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API               |
-| `ipfsBinaryPath`       | string | No       | Path to the IPFS binary. Default: /usr/bin/ipfs |
-| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API                  |
+| Property       | Type    | Required | Description |
+|----------------|---------|----------|-------------|
+| `ecc`          | boolean | No       |             |
+| `manufacturer` | string  | No       |             |
+| `model`        | string  | No       |             |
+| `speed`        | integer | No       |             |
 
-### metrics
+##### storage
 
-Metrics configuration
-
-#### Properties
-
-| Property                      | Type    | Required | Description                          |
-|-------------------------------|---------|----------|--------------------------------------|
-| `enabled`                     | boolean | No       | Metrics enabled. Default: true       |
-| `timerResolution`             | string  | No       | Timer resolution. Default: 1 minute  |
-| `tokioDetailedMetricsEnabled` | boolean | No       | Tokio detailed metrics enabled       |
-| `tokioMetricsEnabled`         | boolean | No       | Tokio metrics enabled. Default: true |
-
-### systemServices
-
-System services to run by default. aquaIpfs and decider are enabled by default
-
-#### Properties
-
-| Property   | Type                | Required | Description                       |
-|------------|---------------------|----------|-----------------------------------|
-| `aquaIpfs` | [object](#aquaipfs) | No       | Aqua IPFS service configuration   |
-| `decider`  | [object](#decider)  | No       | Decider service configuration     |
-| `enable`   | string[]            | No       | List of system services to enable |
-
-#### aquaIpfs
-
-Aqua IPFS service configuration
-
-##### Properties
-
-| Property               | Type   | Required | Description                                     |
-|------------------------|--------|----------|-------------------------------------------------|
-| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API               |
-| `ipfsBinaryPath`       | string | No       | Path to the IPFS binary. Default: /usr/bin/ipfs |
-| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API                  |
-
-#### decider
-
-Decider service configuration
-
-##### Properties
-
-| Property              | Type    | Required | Description                       |
-|-----------------------|---------|----------|-----------------------------------|
-| `deciderPeriodSec`    | integer | No       | Decider period in seconds         |
-| `matcherAddress`      | string  | No       | Matcher address (deprecated)      |
-| `networkApiEndpoint`  | string  | No       | Network API endpoint (deprecated) |
-| `networkId`           | integer | No       | Network ID (deprecated)           |
-| `startBlock`          | string  | No       | Start block (deprecated)          |
-| `walletKey`           | string  | No       | Wallet key (deprecated)           |
-| `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node  |
-| `workerPeriodSec`     | integer | No       | Worker period in seconds          |
-
-### vm
-
-VM Configuration
-
-#### Properties
-
-| Property     | Type               | Required | Description                                |
-|--------------|--------------------|----------|--------------------------------------------|
-| `network`    | [object](#network) | **Yes**  | VM Network Configuration                   |
-| `allowGpu`   | boolean            | No       | Whether to add info about GPUs to VM's XML |
-| `libvirtUri` | string             | No       | QEMU Socket                                |
-
-#### network
-
-VM Network Configuration
-
-##### Properties
-
-| Property      | Type                 | Required | Description                                                      |
-|---------------|----------------------|----------|------------------------------------------------------------------|
-| `publicIp`    | string               | **Yes**  | Public IP address to assign the VM. Must be publicly accessible. |
-| `bridgeName`  | string               | No       | Name of the network bridge device                                |
-| `hostSshPort` | integer              | No       | Host SSH port, default is 922                                    |
-| `portRange`   | [object](#portrange) | No       | iptables-mapped port range from Host to VM                       |
-| `vmIp`        | string               | No       | Internal IP address to assign the VM                             |
-| `vmSshPort`   | integer              | No       | VM SSH port, default is 22                                       |
-
-##### portRange
-
-iptables-mapped port range from Host to VM
+Defines a storage resource
 
 ###### Properties
 
-| Property | Type    | Required | Description                                             |
-|----------|---------|----------|---------------------------------------------------------|
-| `end`    | integer | No       | End of the iptables-mapped port range from Host to VM   |
-| `start`  | integer | No       | Start of the iptables-mapped port range from Host to VM |
+| Property  | Type               | Required | Description                                                                                                 |
+|-----------|--------------------|----------|-------------------------------------------------------------------------------------------------------------|
+| `name`    | string             | **Yes**  |                                                                                                             |
+| `supply`  | string             | **Yes**  | Amount of storage                                                                                           |
+| `details` | [object](#details) | No       | Override or extend Storage details not related to matching but visible to the user for information purposes |
+
+###### details
+
+Override or extend Storage details not related to matching but visible to the user for information purposes
+
+**Properties**
+
+| Property               | Type    | Required | Description |
+|------------------------|---------|----------|-------------|
+| `manufacturer`         | string  | No       |             |
+| `model`                | string  | No       |             |
+| `sequentialWriteSpeed` | integer | No       |             |
 
 ## offers
 
-A map with offer names as keys and offers as values
+A map with offer names as keys and offer configs as values
 
 ### Properties
 
@@ -603,11 +186,211 @@ Defines a provider offer
 
 #### Properties
 
-| Property                | Type     | Required | Description                                                                        |
-|-------------------------|----------|----------|------------------------------------------------------------------------------------|
-| `computePeers`          | string[] | **Yes**  | Number of Compute Units for this Compute Peer                                      |
-| `minPricePerCuPerEpoch` | string   | **Yes**  | Minimum price per compute unit per epoch in USDC                                   |
-| `effectors`             | string[] | No       |                                                                                    |
-| `maxProtocolVersion`    | integer  | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 1 |
-| `minProtocolVersion`    | integer  | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 1 |
+| Property             | Type                      | Required | Description                                                                        |
+|----------------------|---------------------------|----------|------------------------------------------------------------------------------------|
+| `computePeers`       | string[]                  | **Yes**  | Compute peers participating in this offer                                          |
+| `maxProtocolVersion` | integer                   | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 1 |
+| `minProtocolVersion` | integer                   | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 1 |
+| `resourcePrices`     | [object](#resourceprices) | No       | Resource prices for the offer                                                      |
+
+#### resourcePrices
+
+Resource prices for the offer
+
+##### Properties
+
+| Property    | Type                 | Required | Description                                                                                            |
+|-------------|----------------------|----------|--------------------------------------------------------------------------------------------------------|
+| `bandwidth` | [object](#bandwidth) | **Yes**  | A map with bandwidth resource names as keys and prices in USDC per Megabit (Mb) of bandwidth as values |
+| `cpu`       | [object](#cpu)       | **Yes**  | A map with CPU resource names as keys and prices in USDC per physical core as values                   |
+| `ip`        | [object](#ip)        | **Yes**  | A map with IP resource names as keys and prices in USDC per 1 IPv4 address as values                   |
+| `ram`       | [object](#ram)       | **Yes**  | A map with RAM resource names as keys and prices in USDC per Mebibyte (MiB) of RAM as values           |
+| `storage`   | [object](#storage)   | **Yes**  | A map with storage resource names as keys and prices in USDC per Mebibyte (MiB) of storage as values   |
+
+##### bandwidth
+
+A map with bandwidth resource names as keys and prices in USDC per Megabit (Mb) of bandwidth as values
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+##### cpu
+
+A map with CPU resource names as keys and prices in USDC per physical core as values
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+##### ip
+
+A map with IP resource names as keys and prices in USDC per 1 IPv4 address as values
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+##### ram
+
+A map with RAM resource names as keys and prices in USDC per Mebibyte (MiB) of RAM as values
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+##### storage
+
+A map with storage resource names as keys and prices in USDC per Mebibyte (MiB) of storage as values
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+## resources
+
+A map with resource type names as keys and resource names object as values
+
+### Properties
+
+| Property    | Type                 | Required | Description                                                                          |
+|-------------|----------------------|----------|--------------------------------------------------------------------------------------|
+| `bandwidth` | [object](#bandwidth) | No       | A map with bandwidth resource names as keys and bandwidth resource objects as values |
+| `cpu`       | [object](#cpu)       | No       | A map with CPU resource names as keys and CPU resource objects as values             |
+| `ip`        | [object](#ip)        | No       | A map with IP resource names as keys and IP resource objects as values               |
+| `ram`       | [object](#ram)       | No       | A map with RAM resource names as keys and RAM resource objects as values             |
+| `storage`   | [object](#storage)   | No       | A map with storage resource names as keys and storage resource objects as values     |
+
+### bandwidth
+
+A map with bandwidth resource names as keys and bandwidth resource objects as values
+
+#### Properties
+
+| Property                | Type                             | Required | Description                  |
+|-------------------------|----------------------------------|----------|------------------------------|
+| `bandwidthResourceName` | [object](#bandwidthresourcename) | No       | Defines a bandwidth resource |
+
+#### bandwidthResourceName
+
+Defines a bandwidth resource
+
+##### Properties
+
+| Property | Type   | Required | Description                 |
+|----------|--------|----------|-----------------------------|
+| `id`     | string | **Yes**  | On-chain ID of the resource |
+
+### cpu
+
+A map with CPU resource names as keys and CPU resource objects as values
+
+#### Properties
+
+| Property          | Type                       | Required | Description            |
+|-------------------|----------------------------|----------|------------------------|
+| `cpuResourceName` | [object](#cpuresourcename) | No       | Defines a CPU resource |
+
+#### cpuResourceName
+
+Defines a CPU resource
+
+##### Properties
+
+| Property  | Type               | Required | Description                                                                          |
+|-----------|--------------------|----------|--------------------------------------------------------------------------------------|
+| `id`      | string             | **Yes**  | On-chain ID of the resource                                                          |
+| `details` | [object](#details) | No       | CPU details not related to matching but visible to the user for information purposes |
+
+##### details
+
+CPU details not related to matching but visible to the user for information purposes
+
+###### Properties
+
+| Property | Type   | Required | Description |
+|----------|--------|----------|-------------|
+| `model`  | string | No       |             |
+
+### ip
+
+A map with IP resource names as keys and IP resource objects as values
+
+#### Properties
+
+| Property         | Type                      | Required | Description            |
+|------------------|---------------------------|----------|------------------------|
+| `ipResourceName` | [object](#ipresourcename) | No       | Defines an IP resource |
+
+#### ipResourceName
+
+Defines an IP resource
+
+##### Properties
+
+| Property | Type   | Required | Description                 |
+|----------|--------|----------|-----------------------------|
+| `id`     | string | **Yes**  | On-chain ID of the resource |
+
+### ram
+
+A map with RAM resource names as keys and RAM resource objects as values
+
+#### Properties
+
+| Property          | Type                       | Required | Description            |
+|-------------------|----------------------------|----------|------------------------|
+| `ramResourceName` | [object](#ramresourcename) | No       | Defines a RAM resource |
+
+#### ramResourceName
+
+Defines a RAM resource
+
+##### Properties
+
+| Property  | Type               | Required | Description                                                                          |
+|-----------|--------------------|----------|--------------------------------------------------------------------------------------|
+| `id`      | string             | **Yes**  | On-chain ID of the resource                                                          |
+| `details` | [object](#details) | No       | RAM details not related to matching but visible to the user for information purposes |
+
+##### details
+
+RAM details not related to matching but visible to the user for information purposes
+
+###### Properties
+
+| Property       | Type    | Required | Description |
+|----------------|---------|----------|-------------|
+| `ecc`          | boolean | No       |             |
+| `manufacturer` | string  | No       |             |
+| `model`        | string  | No       |             |
+| `speed`        | integer | No       |             |
+
+### storage
+
+A map with storage resource names as keys and storage resource objects as values
+
+#### Properties
+
+| Property              | Type                           | Required | Description                |
+|-----------------------|--------------------------------|----------|----------------------------|
+| `storageResourceName` | [object](#storageresourcename) | No       | Defines a storage resource |
+
+#### storageResourceName
+
+Defines a storage resource
+
+##### Properties
+
+| Property  | Type               | Required | Description                                                                              |
+|-----------|--------------------|----------|------------------------------------------------------------------------------------------|
+| `id`      | string             | **Yes**  | On-chain ID of the resource                                                              |
+| `details` | [object](#details) | No       | Storage details not related to matching but visible to the user for information purposes |
+
+##### details
+
+Storage details not related to matching but visible to the user for information purposes
+
+###### Properties
+
+| Property               | Type    | Required | Description |
+|------------------------|---------|----------|-------------|
+| `manufacturer`         | string  | No       |             |
+| `model`                | string  | No       |             |
+| `sequentialWriteSpeed` | integer | No       |             |
 

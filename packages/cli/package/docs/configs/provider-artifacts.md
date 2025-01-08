@@ -29,11 +29,11 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description |
-|-----------|--------------------|----------|-------------|
-| `noxName` | [object](#noxname) | No       |             |
+| Property    | Type                 | Required | Description |
+|-------------|----------------------|----------|-------------|
+| `offerName` | [object](#offername) | No       |             |
 
-#### noxName
+#### offerName
 
 ##### Properties
 
@@ -48,11 +48,11 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description |
-|-----------|--------------------|----------|-------------|
-| `noxName` | [object](#noxname) | No       |             |
+| Property    | Type                 | Required | Description |
+|-------------|----------------------|----------|-------------|
+| `offerName` | [object](#offername) | No       |             |
 
-#### noxName
+#### offerName
 
 ##### Properties
 
@@ -67,11 +67,11 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description |
-|-----------|--------------------|----------|-------------|
-| `noxName` | [object](#noxname) | No       |             |
+| Property    | Type                 | Required | Description |
+|-------------|----------------------|----------|-------------|
+| `offerName` | [object](#offername) | No       |             |
 
-#### noxName
+#### offerName
 
 ##### Properties
 
@@ -86,11 +86,11 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description |
-|-----------|--------------------|----------|-------------|
-| `noxName` | [object](#noxname) | No       |             |
+| Property    | Type                 | Required | Description |
+|-------------|----------------------|----------|-------------|
+| `offerName` | [object](#offername) | No       |             |
 
-#### noxName
+#### offerName
 
 ##### Properties
 
@@ -105,11 +105,11 @@ Created offers
 
 #### Properties
 
-| Property  | Type               | Required | Description |
-|-----------|--------------------|----------|-------------|
-| `noxName` | [object](#noxname) | No       |             |
+| Property    | Type                 | Required | Description |
+|-------------|----------------------|----------|-------------|
+| `offerName` | [object](#offername) | No       |             |
 
-#### noxName
+#### offerName
 
 ##### Properties
 

@@ -27,3 +27,9 @@ if (fluenceEnv === "local") {
     timeout: 1000 * 60 * 5, // 5 minutes
   });
 }
+
+await fluence({
+  args: ["provider", "init"],
+  flags: { env: fluenceEnv, "no-input": true },
+  cwd: initializedTemplatePath,
+});

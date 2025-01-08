@@ -155,3 +155,16 @@ export async function validateCIDs(
 
   return true;
 }
+
+export const HEX_REGEX = /^0x[0-9a-fA-F]*$/;
+
+export function assertIsHex(
+  input: string,
+  msg: string,
+): asserts input is `0x${string}` {
+  if (!HEX_REGEX.test(input)) {
+    throw new Error(
+      `${msg}. Expected hex string that starts with 0x. Got: ${input}`,
+    );
+  }
+}

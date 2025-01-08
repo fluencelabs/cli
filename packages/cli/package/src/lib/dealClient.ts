@@ -706,6 +706,13 @@ export async function guessTxSizeAndSign<
     valuesToRegister = sliceValuesToRegister(sliceIndex);
 
     try {
+      dbg(
+        `\nESTIMATING GAS:\n\n${methodCallToString([
+          signArgs.method,
+          ...(await getArgs(valuesToRegister)),
+        ])}\n\nESTIMATING GAS END\n`,
+      );
+
       const populatedTx = await populateTx(
         signArgs.method,
         ...(await getArgs(valuesToRegister)),

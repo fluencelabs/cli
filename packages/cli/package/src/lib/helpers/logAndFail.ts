@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const logAndFail = (unknown: unknown): never => {
+export function logAndFail(unknown: unknown): never {
   // eslint-disable-next-line no-console
-  console.log(unknown);
-  throw new Error("Failed after console.log");
-};
+  console.dir(unknown, { colors: true, depth: null });
+  throw new Error("Stopped command execution after logging");
+}

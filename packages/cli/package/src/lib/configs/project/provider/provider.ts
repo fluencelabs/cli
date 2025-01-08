@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import assert from "assert";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
@@ -31,9 +32,6 @@ import { commandObj, isInteractive } from "../../../commandObj.js";
 import {
   DEFAULT_OFFER_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
-  TCP_PORT_START,
-  WEB_SOCKET_PORT_START,
-  defaultNumberProperties,
   DEFAULT_CC_DURATION,
   DEFAULT_CC_STAKER_REWARD,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
@@ -62,16 +60,38 @@ import { initNewEnvConfig } from "../env/env.js";
 import { initNewProviderSecretsConfig } from "../providerSecrets/providerSecrets.js";
 
 import configOptions0, { type Config as Config0 } from "./provider0.js";
-import configOptions1, {
-  type ComputePeer,
-  type Config as Config1,
-} from "./provider1.js";
+import configOptions1, { type Config as Config1 } from "./provider1.js";
 import configOptions2, { type Config as Config2 } from "./provider2.js";
 import configOptions3, { type Config as Config3 } from "./provider3.js";
+import configOptions4, {
+  type Config as Config4,
+  type ComputePeer,
+  defaultComputePeerConfig,
+  getDefaultResources,
+  getDefaultOfferResources,
+  type ResourceType,
+  mergeCPUResources,
+  mergeRAMResources,
+  mergeStorageResources,
+  mergeIPResources,
+  mergeBandwidthResources,
+} from "./provider4.js";
 
-export const options: InitConfigOptions<Config0, Config1, Config2, Config3> = {
-  description: "Defines config used for provider set up",
-  options: [configOptions0, configOptions1, configOptions2, configOptions3],
+export const options: InitConfigOptions<
+  Config0,
+  Config1,
+  Config2,
+  Config3,
+  Config4
+> = {
+  description: "Defines provider configuration",
+  options: [
+    configOptions0,
+    configOptions1,
+    configOptions2,
+    configOptions3,
+    configOptions4,
+  ],
   getConfigPath: getProviderConfigPath,
   getSchemaDirPath: getFluenceDir,
 };
@@ -101,12 +121,16 @@ function getDefault(args: ProviderConfigArgs) {
 
     const computePeerEntries: [string, ComputePeer][] = [];
 
-    for (const i of times(numberOfPeers)) {
+    for (const index of times(numberOfPeers)) {
+      const name = `peer-${numToStr(index)}`;
+
       computePeerEntries.push([
-        `peer-${numToStr(i)}`,
-        {
+        name,
+        defaultComputePeerConfig({
           computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
-        },
+          name,
+          index,
+        }),
       ] as const);
     }
 
@@ -114,11 +138,12 @@ function getDefault(args: ProviderConfigArgs) {
 
     return {
       providerName: "defaultProvider",
+      resources: await getDefaultResources(),
       computePeers,
       offers: {
         [DEFAULT_OFFER_NAME]: {
-          ...defaultNumberProperties,
           computePeers: Object.keys(computePeers),
+          resourcePrices: getDefaultOfferResources(),
         },
       },
       capacityCommitments: Object.fromEntries(
@@ -256,32 +281,6 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
   }
 
   const env = await ensureChainEnv();
-
-  if (env === "local") {
-    const cpWithoutGeneratedPorts = computePeersWithCC.slice(
-      WEB_SOCKET_PORT_START - TCP_PORT_START,
-    );
-
-    if (
-      cpWithoutGeneratedPorts.length > 0 &&
-      !cpWithoutGeneratedPorts.every(({ computePeer: { nox } }) => {
-        return (
-          nox?.httpPort !== undefined &&
-          nox.tcpPort !== undefined &&
-          nox.websocketPort !== undefined
-        );
-      })
-    ) {
-      commandObj.error(
-        `Please define httpPort, tcpPort and websocketPort for compute peers ${cpWithoutGeneratedPorts
-          .map(({ computePeerName }) => {
-            return computePeerName;
-          })
-          .join(", ")} in ${providerConfig.$getPath()}`,
-      );
-    }
-  }
-
   const k8sManifestsDir = await ensureK8sManifestsDir();
   const { diamond: diamondContract } = await resolveDeployment();
   const networkId = numToStr(await getChainId());
@@ -306,11 +305,9 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
 
         const peerId = await getPeerIdFromSecretKey(secretKey);
 
-        const ipSupplies = computePeer.resources?.ip.supply ?? [];
-
         const manifest = genManifest({
           chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
-          ipSupplies,
+          ipSupplies: computePeer.resources.ip.supply,
           httpEndpoint,
           wsEndpoint,
           ipfsGatewayEndpoint,
@@ -322,13 +319,70 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         const manifestPath = join(k8sManifestsDir, `${computePeerName}.yaml`);
         await writeFile(manifestPath, manifest, "utf8");
 
+        const cpu =
+          providerConfig.resources.cpu[computePeer.resources.cpu.name];
+
+        assert(
+          cpu !== undefined,
+          `Unreachable. cpu must be defined for ${computePeerName} because it is validated in the config`,
+        );
+
+        const ram =
+          providerConfig.resources.ram[computePeer.resources.ram.name];
+
+        assert(
+          ram !== undefined,
+          `Unreachable. ram must be defined for ${computePeerName} because it is validated in the config`,
+        );
+
+        const storages = computePeer.resources.storage.map((s) => {
+          const storage = providerConfig.resources.storage[s.name];
+
+          assert(
+            storage !== undefined,
+            `Unreachable. storage must be defined for ${computePeerName} because it is validated in the config`,
+          );
+
+          return mergeStorageResources(storage, s);
+        });
+
+        const ip = providerConfig.resources.ip[computePeer.resources.ip.name];
+
+        assert(
+          ip !== undefined,
+          `Unreachable. ip must be defined for ${computePeerName} because it is validated in the config`,
+        );
+
+        const bandwidth =
+          providerConfig.resources.bandwidth[
+            computePeer.resources.bandwidth.name
+          ];
+
+        assert(
+          bandwidth !== undefined,
+          `Unreachable. bandwidth must be defined for ${computePeerName} because it is validated in the config`,
+        );
+
+        const resourcesWithIds = {
+          cpu: mergeCPUResources(cpu, computePeer.resources.cpu),
+          ram: mergeRAMResources(ram, computePeer.resources.ram),
+          storage: storages,
+          ip: mergeIPResources(ip, computePeer.resources.ip),
+          bandwidth: mergeBandwidthResources(
+            bandwidth,
+            computePeer.resources.bandwidth,
+          ),
+        } as const satisfies Record<
+          ResourceType,
+          { id: string } | Array<{ id: string }>
+        >;
+
         return {
           name: computePeerName,
           secretKey,
           peerId,
-          computeUnits: computePeer.computeUnits,
           kubeconfigPath: computePeer.kubeconfigPath,
-          ipSupplies,
+          resourcesWithIds,
           manifestPath,
           walletKey: signingWallet,
           walletAddress: await new Wallet(signingWallet).getAddress(),
