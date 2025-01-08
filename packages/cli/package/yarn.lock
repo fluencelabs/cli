@@ -1964,7 +1964,7 @@ __metadata:
   dependencies:
     "@actions/core": "npm:1.11.1"
     "@aws-sdk/lib-storage": "npm:^3.501.0"
-    "@fluencelabs/deal-ts-clients": "npm:0.23.2-feat-marketplace-v2-resources-d506041-7421-1.0"
+    "@fluencelabs/deal-ts-clients": "npm:0.23.2-feat-marketplace-v2-resources-03f7996-7429-1.0"
     "@graphql-codegen/cli": "npm:^5.0.3"
     "@graphql-codegen/typescript": "npm:^4.1.1"
     "@graphql-codegen/typescript-graphql-request": "npm:^6.2.0"
@@ -2038,9 +2038,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-ts-clients@npm:0.23.2-feat-marketplace-v2-resources-d506041-7421-1.0":
-  version: 0.23.2-feat-marketplace-v2-resources-d506041-7421-1.0
-  resolution: "@fluencelabs/deal-ts-clients@npm:0.23.2-feat-marketplace-v2-resources-d506041-7421-1.0"
+"@fluencelabs/deal-ts-clients@npm:0.23.2-feat-marketplace-v2-resources-03f7996-7429-1.0":
+  version: 0.23.2-feat-marketplace-v2-resources-03f7996-7429-1.0
+  resolution: "@fluencelabs/deal-ts-clients@npm:0.23.2-feat-marketplace-v2-resources-03f7996-7429-1.0"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.2.0"
     debug: "npm:^4.3.4"
@@ -2052,7 +2052,7 @@ __metadata:
     graphql-tag: "npm:^2.12.6"
     ipfs-http-client: "npm:^60.0.1"
     multiformats: "npm:^13.0.1"
-  checksum: 10c0/a3a1987b2a2c9f6b27d941565fbfb7e25f8c5262ddf1981c0a9806428607eb8eeda4ce3c73589fa24bec93fc83b589ad01306e46ca5acac89127214630d5a0ef
+  checksum: 10c0/0eb2c8c03c4302ac2ed89a11f252690dd3e8ec9ac2d61528d03a9e7ef647f91c0075aa98e99403f0d566ba6cf25b676ca1cedf26fe1b4893c3d03fea2f235171
   languageName: node
   linkType: hard
 

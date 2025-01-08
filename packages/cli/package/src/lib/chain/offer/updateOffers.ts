@@ -708,17 +708,23 @@ async function populatePeerResourcesTxs({
       continue;
     }
 
+    const ram = {
+      resourceType: "ram",
+      onChainResource: onChainPeer.resourcesByType.ram,
+      configuredResource: resourcesByType.ram,
+    } as const;
+
+    const cpu = {
+      resourceType: "cpu",
+      onChainResource: onChainPeer.resourcesByType.cpu,
+      configuredResource: resourcesByType.cpu,
+    } as const;
+
     const resourceUpdates = [
-      {
-        resourceType: "ram",
-        onChainResource: onChainPeer.resourcesByType.ram,
-        configuredResource: resourcesByType.ram,
-      },
-      {
-        resourceType: "cpu",
-        onChainResource: onChainPeer.resourcesByType.cpu,
-        configuredResource: resourcesByType.cpu,
-      },
+      // If CPU supply becomes smaller, we need to update CPU first, because if we possibly decrease RAM first, we might not have enough RAM for CPU
+      ...(cpu.onChainResource.supply > cpu.configuredResource.supply
+        ? [cpu, ram]
+        : [ram, cpu]),
       ...resourcesByType.storage.map((configuredStorage) => {
         const onChainStorage = onChainPeer.resourcesByType.storage.find((s) => {
           return s.resourceId === configuredStorage.resourceId;
