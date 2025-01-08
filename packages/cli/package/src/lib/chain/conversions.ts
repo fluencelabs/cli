@@ -99,12 +99,12 @@ export async function resourceSupplyFromConfigToChain(
     case "ram":
       return {
         supply: Math.round(supply / (await getBytesPerRam())),
-        supplyString: xbytes(supply),
+        supplyString: xbytes(supply, { iec: true }),
       };
     case "storage":
       return {
         supply: Math.round(supply / (await getBytesPerStorage())),
-        supplyString: xbytes(supply),
+        supplyString: xbytes(supply, { iec: true }),
       };
     case "bandwidth":
       return {
@@ -133,10 +133,16 @@ export async function resourceSupplyFromChainToConfig(
       return { supply: cpuSupply, supplyString: numToStr(cpuSupply) };
     case "ram":
       const ramSupply = supply * (await getBytesPerRam());
-      return { supply: ramSupply, supplyString: xbytes(ramSupply) };
+      return {
+        supply: ramSupply,
+        supplyString: xbytes(ramSupply, { iec: true }),
+      };
     case "storage":
       const storageSupply = supply * (await getBytesPerStorage());
-      return { supply: storageSupply, supplyString: xbytes(storageSupply) };
+      return {
+        supply: storageSupply,
+        supplyString: xbytes(storageSupply, { iec: true }),
+      };
     case "bandwidth":
       const bandwidthSupply = supply * BYTES_PER_BANDWIDTH;
       return {

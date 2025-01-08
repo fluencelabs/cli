@@ -450,12 +450,6 @@ const computePeersSchema = {
 
 type OfferResource = Record<string, number>;
 
-const offerResourceSchema = {
-  type: "object",
-  additionalProperties: { type: "number", minimum: 0 },
-  required: [],
-} as const satisfies JSONSchemaType<OfferResource>;
-
 export type ResourcePrices = Record<ResourceType, OfferResource>;
 
 const offerResourcesSchema = {
@@ -463,11 +457,61 @@ const offerResourcesSchema = {
   description: "Resource prices for the offer",
   additionalProperties: false,
   properties: {
-    cpu: offerResourceSchema,
-    ram: offerResourceSchema,
-    storage: offerResourceSchema,
-    bandwidth: offerResourceSchema,
-    ip: offerResourceSchema,
+    cpu: {
+      description:
+        "A map with CPU resource names as keys and prices in USDC per physical core as values",
+      type: "object",
+      additionalProperties: {
+        description: "USDC per physical core",
+        type: "number",
+        minimum: 0,
+      },
+      required: [],
+    },
+    ram: {
+      description:
+        "A map with RAM resource names as keys and prices in USDC per Mebibyte (MiB) of RAM as values",
+      type: "object",
+      additionalProperties: {
+        description: "USDC per Mebibyte (MiB) of RAM",
+        type: "number",
+        minimum: 0,
+      },
+      required: [],
+    },
+    storage: {
+      description:
+        "A map with storage resource names as keys and prices in USDC per Mebibyte (MiB) of storage as values",
+      type: "object",
+      additionalProperties: {
+        description: "USDC per Mebibyte (MiB) of storage",
+        type: "number",
+        minimum: 0,
+      },
+      required: [],
+    },
+    bandwidth: {
+      description:
+        "A map with bandwidth resource names as keys and prices in USDC per Megabit (Mb) of bandwidth as values",
+      type: "object",
+      additionalProperties: {
+        description: "USDC per Megabit (Mb) of bandwidth",
+        type: "number",
+        minimum: 0,
+      },
+      required: [],
+    },
+    ip: {
+      description:
+        "A map with IP resource names as keys and prices in USDC per 1 IPv4 address as values",
+      type: "object",
+      additionalProperties: {
+        description: "USDC per 1 IPv4 address",
+        type: "number",
+        minimum: 0,
+      },
+      required: [],
+    },
   },
   required: ["cpu", "ram", "storage", "bandwidth", "ip"],
 } as const satisfies JSONSchemaType<ResourcePrices>;
@@ -766,13 +810,13 @@ export function defaultComputePeerConfig({
       },
       ram: {
         name: RAM_RESOURCE_NAME,
-        supply: "11 GB",
+        supply: "11 GiB",
         details: DEFAULT_RAM_DETAILS,
       },
       storage: [
         {
           name: STORAGE_RESOURCE_NAME,
-          supply: "11 GB",
+          supply: "11 GiB",
           details: DEFAULT_STORAGE_DETAILS,
         },
       ],

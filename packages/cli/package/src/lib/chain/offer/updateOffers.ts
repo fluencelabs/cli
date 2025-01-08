@@ -424,14 +424,17 @@ async function populateChangeResourcePriceTx({
           return null;
         }
 
-        const { price: newPrice, resourceName, resourceType } = newResource;
+        const { price, resourceName, resourceType } = newResource;
+
+        const newPrice =
+          resourceType === "cpu" ? price / BigInt(VCPU_PER_CU) : price;
 
         if (newPrice === resourcePrice) {
           return null;
         }
 
         return {
-          description: `Set ${resourceType} resource price for ${resourceName} to ${await ptFormatWithSymbol(newPrice)}`,
+          description: `Change ${resourceType} resource price for ${resourceName} from ${await ptFormatWithSymbol(resourcePrice * BigInt(VCPU_PER_CU))} to ${await ptFormatWithSymbol(price)}`,
           tx: populateTx(
             contracts.diamond.changeResourcePriceV2,
             offerId,
@@ -454,13 +457,16 @@ async function populateChangeResourcePriceTx({
           return null;
         }
 
+        const newPrice =
+          resourceType === "cpu" ? price / BigInt(VCPU_PER_CU) : price;
+
         return {
           description: `Adding ${resourceType} resource ${resourceName} to offer with price ${await ptFormatWithSymbol(price)}`,
           tx: populateTx(
             contracts.diamond.changeResourcePriceV2,
             offerId,
             resourceId,
-            price,
+            newPrice,
           ),
         };
       },
@@ -555,7 +561,7 @@ async function populateChangeResourceSupplyAndDetailsTx({
       continue;
     }
 
-    const resourcePriceUpdates: ResourceSupplyUpdate[] = [
+    const resourceSupplyAndDetailsUpdates: ResourceSupplyUpdate[] = [
       {
         resourceType: "ram",
         onChainResource: peer.resourcesByType.ram,
@@ -597,7 +603,7 @@ async function populateChangeResourceSupplyAndDetailsTx({
 
     const [firstTx, ...restTxs] = (
       await Promise.all(
-        resourcePriceUpdates.map(async (update) => {
+        resourceSupplyAndDetailsUpdates.map(async (update) => {
           return createResourceSupplyAndDetailsUpdateTx(peer.id, update);
         }),
       )

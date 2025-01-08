@@ -140,7 +140,12 @@ export async function createOffers(flags: OffersArgs) {
       resourcePricesWithIds,
     } = offer;
 
-    const resourcePricesArray = Object.values(resourcePricesWithIds).flat();
+    const resourcePricesArray = Object.values({
+      ...resourcePricesWithIds,
+      cpu: resourcePricesWithIds.cpu.map((cpu) => {
+        return { ...cpu, price: cpu.price / BigInt(VCPU_PER_CU) };
+      }),
+    }).flat();
 
     const allCUs = allCPs.flatMap(({ unitIds }) => {
       return unitIds;
