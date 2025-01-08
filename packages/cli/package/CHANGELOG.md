@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.23.0](https://github.com/fluencelabs/cli/compare/cli-v0.22.0...cli-v0.23.0) (2024-12-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove all developer functionality, add kubernetes manifest generation and deployment ([#1076](https://github.com/fluencelabs/cli/issues/1076))
+
+### Features
+
+* add additional caching ([#1062](https://github.com/fluencelabs/cli/issues/1062)) ([59416e4](https://github.com/fluencelabs/cli/commit/59416e4c3ddb891053c5cd989dcdf7f6dd2ab0f3))
+* fix deal-exit batching ([#1075](https://github.com/fluencelabs/cli/issues/1075)) ([99a4caf](https://github.com/fluencelabs/cli/commit/99a4cafcfc83f924ecad87df6b40643e4c6dafc4))
+* refactor configs [JS-831] ([#1064](https://github.com/fluencelabs/cli/issues/1064)) ([89cbed0](https://github.com/fluencelabs/cli/commit/89cbed0a3e2e6180eb9c835afbbfab79f887bf48))
+* remove all developer functionality, add kubernetes manifest generation and deployment ([#1076](https://github.com/fluencelabs/cli/issues/1076)) ([d12ed09](https://github.com/fluencelabs/cli/commit/d12ed090f03d26190ccac4404e3cc5284bcc0963))
+* remove main tag ([#1084](https://github.com/fluencelabs/cli/issues/1084)) ([cfb8090](https://github.com/fluencelabs/cli/commit/cfb809057f6620cf32f393686473f476cc0859e3))
+* update node.js, oclif, other dependencies and refactor ([#1063](https://github.com/fluencelabs/cli/issues/1063)) ([49dec6d](https://github.com/fluencelabs/cli/commit/49dec6df7e3831035b59707151214ce7b18e8862))
+* use default config when config is empty ([#1070](https://github.com/fluencelabs/cli/issues/1070)) ([f8e2e29](https://github.com/fluencelabs/cli/commit/f8e2e2950c2e9946f89ab4c1a8437cfbdd0c89a9))
+* use indexer directly [JS-842] ([#1069](https://github.com/fluencelabs/cli/issues/1069)) ([05ab854](https://github.com/fluencelabs/cli/commit/05ab85481d6d6d676213d0847d1602226dabbfd2))
+
+
+### Bug Fixes
+
+* default number of compute units to fetch from indexer ([#1072](https://github.com/fluencelabs/cli/issues/1072)) ([75da0a2](https://github.com/fluencelabs/cli/commit/75da0a2a1631dd0f43b39507a5e2bfebb7c20120))
+* remove ts-reset out of runtime files ([5c619bb](https://github.com/fluencelabs/cli/commit/5c619bb2eb87bcfbe4f1711032d35ea1d829c73d))
+* restore docs in configs to avoid possible errors ([#1081](https://github.com/fluencelabs/cli/issues/1081)) ([8cdd6c2](https://github.com/fluencelabs/cli/commit/8cdd6c246c084ec882e0f3023e1315a4770fdbde))
+* try uploading not in parallel ([#1066](https://github.com/fluencelabs/cli/issues/1066)) ([d0a6dd6](https://github.com/fluencelabs/cli/commit/d0a6dd69e54b5cfdbde926e6e3aaefadba14bdc6))
+
 ## [0.22.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.21.0...fluence-cli-v0.22.0) (2024-10-16)
 
 
