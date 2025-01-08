@@ -233,7 +233,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
 
       const txs = (
         await Promise.all([
-          populateChangeResourceSupplyTx(offer),
+          populateChangeResourceSupplyAndDetailsTx(offer),
           populateCUToRemoveTxs(offer, peersOnChain),
           populateCUToAddTxs(offer, peersOnChain),
 
@@ -482,15 +482,35 @@ type ResourceSupplyUpdate = {
   configuredResource: ResourceInfo;
 };
 
-async function createResourceSupplyUpdateTx(
+async function createResourceSupplyAndDetailsUpdateTx(
   peerId: string,
   { resourceType, onChainResource, configuredResource }: ResourceSupplyUpdate,
 ) {
+  const txs: { description: string; tx: ReturnType<typeof populateTx> }[] = [];
+
+  if (onChainResource.resourceId !== configuredResource.resourceId) {
+    return txs;
+  }
+
+  if (onChainResource.details !== configuredResource.details) {
+    const { contracts } = await getContracts();
+
+    txs.push({
+      description: `Changing ${resourceType} details from ${onChainResource.details} to ${configuredResource.details}`,
+      tx: populateTx(
+        contracts.diamond.changeResourceDetails,
+        peerId,
+        onChainResource.resourceId,
+        configuredResource.details,
+      ),
+    });
+  }
+
   if (
     resourceType === "cpu" || // no need for changeResourceMaxSupplyV2. addComputeUnitsV2 is enough
     onChainResource.supply === configuredResource.supply
   ) {
-    return null;
+    return txs;
   }
 
   const { contracts } = await getContracts();
@@ -503,7 +523,7 @@ async function createResourceSupplyUpdateTx(
   const { supplyString: onChainSupplyString } =
     await resourceSupplyFromChainToConfig(resourceType, onChainResource.supply);
 
-  return {
+  txs.push({
     description: `Changing ${resourceType} supply from ${
       onChainSupplyString
     } to ${supplyString}`,
@@ -513,10 +533,12 @@ async function createResourceSupplyUpdateTx(
       onChainResource.resourceId,
       configuredResource.supply,
     ),
-  };
+  });
+
+  return txs;
 }
 
-async function populateChangeResourceSupplyTx({
+async function populateChangeResourceSupplyAndDetailsTx({
   computePeersFromProviderConfig,
   offerIndexerInfo,
 }: OnChainOffer) {
@@ -576,10 +598,12 @@ async function populateChangeResourceSupplyTx({
     const [firstTx, ...restTxs] = (
       await Promise.all(
         resourcePriceUpdates.map(async (update) => {
-          return createResourceSupplyUpdateTx(peer.id, update);
+          return createResourceSupplyAndDetailsUpdateTx(peer.id, update);
         }),
       )
-    ).filter(Boolean);
+    )
+      .flat()
+      .filter(Boolean);
 
     if (firstTx === undefined) {
       continue;
@@ -594,63 +618,64 @@ async function populateChangeResourceSupplyTx({
 
 type ResourceUpdate =
   | {
-      name: string;
+      resourceType: ResourceType;
       onChainResource: ResourceInfo | undefined;
       configuredResource: ResourceInfo;
     }
   | {
-      name: string;
+      resourceType: ResourceType;
       onChainResource: ResourceInfo;
       configuredResource: ResourceInfo | undefined;
     };
 
 async function createResourceUpdateTx(
   peerId: string,
-  { name, onChainResource, configuredResource }: ResourceUpdate,
+  { resourceType, onChainResource, configuredResource }: ResourceUpdate,
 ) {
   const txs: { description: string; tx: ReturnType<typeof populateTx> }[] = [];
   const { contracts } = await getContracts();
 
-  if (
-    onChainResource !== undefined &&
-    (configuredResource === undefined ||
-      onChainResource.resourceId !== configuredResource.resourceId ||
-      onChainResource.details !== configuredResource.details)
-  ) {
-    // TODO: currently not working
-    // txs.push({
-    //   description: `Removing ${name} resource with id ${onChainResource.resourceId}`,
-    //   tx: populateTx(
-    //     contracts.diamond.removePeerResource,
-    //     peerId,
-    //     onChainResource.resourceId,
-    //   ),
-    // });
-    txs.push({
-      description: `Setting resource ${name} with id ${onChainResource.resourceId} supply to 0`,
-      tx: populateTx(
-        contracts.diamond.changeResourceMaxSupplyV2,
-        peerId,
-        onChainResource.resourceId,
-        0,
-      ),
-    });
+  function removeResource() {
+    if (
+      onChainResource !== undefined &&
+      (configuredResource === undefined ||
+        onChainResource.resourceId !== configuredResource.resourceId)
+    ) {
+      txs.push({
+        description: `Removing ${resourceType} resource with id ${onChainResource.resourceId}`,
+        tx: populateTx(
+          contracts.diamond.removePeerResource,
+          peerId,
+          onChainResource.resourceId,
+        ),
+      });
+    }
   }
 
-  if (
-    configuredResource !== undefined &&
-    (onChainResource === undefined ||
-      onChainResource.resourceId !== configuredResource.resourceId ||
-      onChainResource.details !== configuredResource.details)
-  ) {
-    txs.push({
-      description: `Adding ${name} resource with id ${configuredResource.resourceId}`,
-      tx: populateTx(
-        contracts.diamond.registerPeerResource,
-        peerId,
-        configuredResource,
-      ),
-    });
+  function addResource() {
+    if (
+      configuredResource !== undefined &&
+      (onChainResource === undefined ||
+        onChainResource.resourceId !== configuredResource.resourceId)
+    ) {
+      txs.push({
+        description: `Adding ${resourceType} resource with id ${configuredResource.resourceId}`,
+        tx: populateTx(
+          contracts.diamond.registerPeerResource,
+          peerId,
+          configuredResource,
+        ),
+      });
+    }
+  }
+
+  // We do this so that there is always enough ram
+  if (resourceType === "ram") {
+    addResource();
+    removeResource();
+  } else {
+    removeResource();
+    addResource();
   }
 
   return txs;
@@ -679,14 +704,14 @@ async function populatePeerResourcesTxs({
 
     const resourceUpdates = [
       {
-        name: "CPU",
-        onChainResource: onChainPeer.resourcesByType.cpu,
-        configuredResource: resourcesByType.cpu,
-      },
-      {
-        name: "RAM",
+        resourceType: "ram",
         onChainResource: onChainPeer.resourcesByType.ram,
         configuredResource: resourcesByType.ram,
+      },
+      {
+        resourceType: "cpu",
+        onChainResource: onChainPeer.resourcesByType.cpu,
+        configuredResource: resourcesByType.cpu,
       },
       ...resourcesByType.storage.map((configuredStorage) => {
         const onChainStorage = onChainPeer.resourcesByType.storage.find((s) => {
@@ -694,10 +719,10 @@ async function populatePeerResourcesTxs({
         });
 
         return {
-          name: "storage",
+          resourceType: "storage",
           onChainResource: onChainStorage,
           configuredResource: configuredStorage,
-        };
+        } as const;
       }),
       ...onChainPeer.resourcesByType.storage.map((onChainStorage) => {
         const configuredStorage = resourcesByType.storage.find((s) => {
@@ -705,22 +730,22 @@ async function populatePeerResourcesTxs({
         });
 
         return {
-          name: "storage",
+          resourceType: "storage",
           onChainResource: onChainStorage,
           configuredResource: configuredStorage,
-        };
+        } as const;
       }),
       {
-        name: "IP",
+        resourceType: "ip",
         onChainResource: onChainPeer.resourcesByType.ip,
         configuredResource: resourcesByType.ip,
       },
       {
-        name: "bandwidth",
+        resourceType: "bandwidth",
         onChainResource: onChainPeer.resourcesByType.bandwidth,
         configuredResource: resourcesByType.bandwidth,
       },
-    ];
+    ] as const;
 
     const [firstTx, ...restTxs] = (
       await Promise.all(

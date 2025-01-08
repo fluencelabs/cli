@@ -17,6 +17,7 @@
 
 import type { ResourceType } from "../configs/project/provider/provider4.js";
 import { VCPU_PER_CU } from "../const.js";
+import { getContracts } from "../dealClient.js";
 import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
 import { bufferToBase64, numToStr } from "../helpers/typesafeStringify.js";
 
@@ -97,17 +98,17 @@ export async function resourceSupplyFromConfigToChain(
       return { supply: supply * VCPU_PER_CU, supplyString: numToStr(supply) };
     case "ram":
       return {
-        supply: Math.round(supply / (await getRamToBytesFromChain())),
+        supply: Math.round(supply / (await getBytesPerRam())),
         supplyString: xbytes(supply),
       };
     case "storage":
       return {
-        supply: Math.round(supply / STORAGE_TO_BYTES),
+        supply: Math.round(supply / (await getBytesPerStorage())),
         supplyString: xbytes(supply),
       };
     case "bandwidth":
       return {
-        supply: Math.round(supply / BANDWIDTH_TO_BYTES),
+        supply: Math.round(supply / BYTES_PER_BANDWIDTH),
         supplyString: `${xbytes(supply, { bits: true })}ps`,
       };
     case "ip":
@@ -131,13 +132,13 @@ export async function resourceSupplyFromChainToConfig(
       const cpuSupply = supply / VCPU_PER_CU;
       return { supply: cpuSupply, supplyString: numToStr(cpuSupply) };
     case "ram":
-      const ramSupply = supply * (await getRamToBytesFromChain());
+      const ramSupply = supply * (await getBytesPerRam());
       return { supply: ramSupply, supplyString: xbytes(ramSupply) };
     case "storage":
-      const storageSupply = supply * STORAGE_TO_BYTES;
+      const storageSupply = supply * (await getBytesPerStorage());
       return { supply: storageSupply, supplyString: xbytes(storageSupply) };
     case "bandwidth":
-      const bandwidthSupply = supply * BANDWIDTH_TO_BYTES;
+      const bandwidthSupply = supply * BYTES_PER_BANDWIDTH;
       return {
         supply: bandwidthSupply,
         supplyString: `${xbytes(bandwidthSupply, { bits: true })}ps`,
@@ -152,9 +153,30 @@ export async function resourceSupplyFromChainToConfig(
   }
 }
 
-const STORAGE_TO_BYTES = 1_000_000; // to megabytes
-const BANDWIDTH_TO_BYTES = 125_000; // to megabits
+const BYTES_PER_BANDWIDTH = 125_000; // to megabits
 
-async function getRamToBytesFromChain() {
-  return Promise.resolve(1_000_000);
+let bytesPerRam: Promise<number> | undefined;
+
+async function getBytesPerRam() {
+  if (bytesPerRam === undefined) {
+    bytesPerRam = (async () => {
+      const { contracts } = await getContracts();
+      return Number(await contracts.diamond.bytesPerRam());
+    })();
+  }
+
+  return bytesPerRam;
+}
+
+let bytesPerStorage: Promise<number> | undefined;
+
+async function getBytesPerStorage() {
+  if (bytesPerStorage === undefined) {
+    bytesPerStorage = (async () => {
+      const { contracts } = await getContracts();
+      return Number(await contracts.diamond.bytesPerStorage());
+    })();
+  }
+
+  return bytesPerStorage;
 }
