@@ -629,7 +629,7 @@ async function formatOfferInfo(
     {
       "Provider ID": offerIndexerInfo.providerId,
       "Offer ID": offerIndexerInfo.id,
-      "Data Center ID": offerIndexerInfo.dataCenter.id,
+      "Data Center": offerIndexerInfo.dataCenter,
       "Created At": offerIndexerInfo.createdAt,
       "Last Updated At": offerIndexerInfo.updatedAt,
       "Resource Prices": offerIndexerInfo.resources?.map(
