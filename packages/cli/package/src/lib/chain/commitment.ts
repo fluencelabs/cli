@@ -1096,20 +1096,18 @@ async function getDetailedCommitmentInfo({
     providerRewardsAvailable: await fltFormatWithSymbol(
       unlockedRewardsSplit.provider,
     ),
-    providerRewardsTotalClaimed:
-      withdrawnRewardsSplit === undefined
-        ? "Didn't get claimed rewards from indexer"
-        : await fltFormatWithSymbol(withdrawnRewardsSplit.provider),
+    providerRewardsTotalClaimed: await fltFormatWithSymbol(
+      withdrawnRewardsSplit === undefined ? 0n : withdrawnRewardsSplit.provider,
+    ),
     stakerRewardsInVesting: await fltFormatWithSymbol(
       totalRewardsSplit.staker - unlockedRewardsSplit.staker,
     ),
     stakerRewardsAvailable: await fltFormatWithSymbol(
       unlockedRewardsSplit.staker,
     ),
-    stakerRewardsTotalClaimed:
-      withdrawnRewardsSplit === undefined
-        ? "Didn't get claimed rewards from indexer"
-        : await fltFormatWithSymbol(withdrawnRewardsSplit.staker),
+    stakerRewardsTotalClaimed: await fltFormatWithSymbol(
+      withdrawnRewardsSplit === undefined ? 0n : withdrawnRewardsSplit.staker,
+    ),
   } satisfies Record<string, string>;
 }
 
