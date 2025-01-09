@@ -956,8 +956,9 @@ async function ensureOfferConfigs() {
           resourcePrices,
         },
       ]) => {
-        const computePeerConfigs =
-          await ensureComputerPeerConfigs(computePeers);
+        const computePeerConfigs = await ensureComputerPeerConfigs({
+          computePeerNames: computePeers,
+        });
 
         const computePeersFromProviderConfig = await Promise.all(
           computePeerConfigs.map(

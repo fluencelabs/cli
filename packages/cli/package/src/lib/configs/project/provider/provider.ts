@@ -183,7 +183,15 @@ export type EnsureComputerPeerConfig = Awaited<
   ReturnType<typeof ensureComputerPeerConfigs>
 >[number];
 
-export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
+type EnsureComputerPeerConfigsArgs = {
+  computePeerNames?: string[];
+  writeManifestFiles?: boolean;
+};
+
+export async function ensureComputerPeerConfigs({
+  computePeerNames,
+  writeManifestFiles = false,
+}: EnsureComputerPeerConfigsArgs = {}) {
   const { Wallet } = await import("ethers");
   const providerConfig = await ensureReadonlyProviderConfig();
 
@@ -260,13 +268,9 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
       const capacityCommitment =
         providerConfig.capacityCommitments[c.computePeerName];
 
-      if (capacityCommitment === undefined) {
-        return {
-          error: c.computePeerName,
-        };
-      }
-
-      return { result: { ...c, capacityCommitment } };
+      return capacityCommitment === undefined
+        ? { error: c.computePeerName }
+        : { result: { ...c, capacityCommitment } };
     },
   );
 
@@ -304,20 +308,22 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         );
 
         const peerId = await getPeerIdFromSecretKey(secretKey);
-
-        const manifest = genManifest({
-          chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
-          ipSupplies: computePeer.resources.ip.supply,
-          httpEndpoint,
-          wsEndpoint,
-          ipfsGatewayEndpoint,
-          peerIdHex: await peerIdBase58ToHexString(peerId),
-          networkId,
-          diamondContract,
-        });
-
         const manifestPath = join(k8sManifestsDir, `${computePeerName}.yaml`);
-        await writeFile(manifestPath, manifest, "utf8");
+
+        if (writeManifestFiles) {
+          const manifest = genManifest({
+            chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
+            ipSupplies: computePeer.resources.ip.supply,
+            httpEndpoint,
+            wsEndpoint,
+            ipfsGatewayEndpoint,
+            peerIdHex: await peerIdBase58ToHexString(peerId),
+            networkId,
+            diamondContract,
+          });
+
+          await writeFile(manifestPath, manifest, "utf8");
+        }
 
         const cpu =
           providerConfig.resources.cpu[computePeer.resources.cpu.name];
