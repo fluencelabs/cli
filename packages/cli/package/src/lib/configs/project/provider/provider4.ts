@@ -1092,7 +1092,7 @@ type IpRange =
     }
   | {
       start: IPv4;
-      end?: IPv4;
+      stop?: IPv4;
     };
 
 // TODO: export this from deal-ts-clients
@@ -1248,19 +1248,19 @@ export function ipSupplyToIndividualIPs(
         };
       }
 
-      if (!("end" in s)) {
+      if (!("stop" in s)) {
         return { result: { start: startRes.result } };
       }
 
-      const endRes = stringToIp(s.end);
+      const endRes = stringToIp(s.stop);
 
       if ("error" in endRes) {
         return {
-          error: `Invalid IP range end: ${s.end}. ${endRes.error}`,
+          error: `Invalid IP range stop: ${s.stop}. ${endRes.error}`,
         };
       }
 
-      return { result: { start: startRes.result, end: endRes.result } };
+      return { result: { start: startRes.result, stop: endRes.result } };
     },
   );
 
@@ -1289,9 +1289,9 @@ export function ipSupplyToIndividualIPs(
         addIp(ipNumToIpStr(ipNum));
         ipNum++;
       }
-    } else if ("end" in range) {
-      const { end, start } = range;
-      const endNum = ipToIpNum(end);
+    } else if ("stop" in range) {
+      const { stop, start } = range;
+      const endNum = ipToIpNum(stop);
       let startNum = ipToIpNum(start);
 
       while (startNum <= endNum) {

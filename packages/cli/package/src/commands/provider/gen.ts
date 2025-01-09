@@ -110,7 +110,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
       );
     }
 
-    await ensureComputerPeerConfigs();
+    await ensureComputerPeerConfigs({ writeManifestFiles: true });
 
     commandObj.logToStderr(
       `Secrets are generated at:\n${getFluenceSecretsDir()}\n\nManifest files are generated at:\n${await ensureK8sManifestsDir()}`,
