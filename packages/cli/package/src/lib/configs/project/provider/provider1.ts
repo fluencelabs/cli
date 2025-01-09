@@ -645,7 +645,7 @@ export const ccpConfigYAMLSchema = {
 type IPSupply =
   | {
       start: string;
-      end?: string;
+      stop?: string;
     }
   | {
       cidr: string;
@@ -654,7 +654,7 @@ type IPSupply =
 const supplySchema = {
   type: "object",
   description:
-    "Either specify only a `start` property (if you want a single IP) or `start` and `end` properties (if you want a range) or `cidr` property (if you want a CIDR notation)",
+    "Either specify only a `start` property (if you want a single IP) or `start` and `stop` properties (if you want a range) or `cidr` property (if you want a CIDR notation)",
   oneOf: [
     {
       additionalProperties: false,
@@ -664,7 +664,7 @@ const supplySchema = {
           format: "ipv4",
           description: "Start of the IP range or individual IP",
         },
-        end: {
+        stop: {
           nullable: true,
           type: "string",
           format: "ipv4",
