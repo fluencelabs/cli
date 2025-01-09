@@ -36,6 +36,14 @@ query OfferDetails($where: Offer_filter) {
         }
       }
     }
+    datacenter {
+      id
+      countryCode
+      cityCode
+      index
+      tier
+      certifications
+    }
   }
 }
 

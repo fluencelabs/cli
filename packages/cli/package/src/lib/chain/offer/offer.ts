@@ -138,6 +138,7 @@ export async function createOffers(flags: OffersArgs) {
       computePeersFromProviderConfig: allCPs,
       offerName,
       resourcePricesWithIds,
+      dataCenter,
     } = offer;
 
     const resourcePricesArray = Object.values({
@@ -168,6 +169,7 @@ export async function createOffers(flags: OffersArgs) {
             contracts.deployment.usdc,
             resourcePricesArray,
             setCPUSupplyForCP(computePeersToRegister),
+            dataCenter.id,
           ];
         },
         getTitle() {
@@ -361,6 +363,7 @@ async function confirmOffer(offer: EnsureOfferConfig) {
       "",
       {},
       {
+        "Data Center": offer.dataCenter,
         "Resource Prices": {
           CPU: await formatOfferResourcePrice("cpu", offer),
           RAM: await formatOfferResourcePrice("ram", offer),
@@ -456,6 +459,7 @@ export async function addRemainingCPs({
 }) {
   const { contracts } = await getContracts();
   let totalAddedCPs = addedCPs.length;
+  const addedCPsNames = [];
 
   while (totalAddedCPs < allCPs.length) {
     const remainingCPs = allCPs.slice(totalAddedCPs);
@@ -487,8 +491,16 @@ export async function addRemainingCPs({
       offerName,
     });
 
+    addedCPsNames.push(
+      ...addedCPs.map(({ name }) => {
+        return name;
+      }),
+    );
+
     totalAddedCPs = totalAddedCPs + addedCPs.length;
   }
+
+  return { addedCPsNames };
 }
 
 async function addRemainingCUs({
@@ -617,6 +629,7 @@ async function formatOfferInfo(
     {
       "Provider ID": offerIndexerInfo.providerId,
       "Offer ID": offerIndexerInfo.id,
+      "Data Center ID": offerIndexerInfo.dataCenter.id,
       "Created At": offerIndexerInfo.createdAt,
       "Last Updated At": offerIndexerInfo.updatedAt,
       "Resource Prices": offerIndexerInfo.resources?.map(
@@ -828,10 +841,14 @@ export async function resolveOffersFromProviderConfig(
           ),
         );
 
+        const { id: dataCenterId } = offerIndexerInfo.dataCenter;
+        assertIsHex(dataCenterId, "Data center ID must be a hex string");
+
         return {
           offerName: `Offer ${offerId}`,
           computePeersFromProviderConfig,
           offerId,
+          dataCenter: { id: dataCenterId, name: dataCenterId },
           minProtocolVersion: Number(
             protocolVersionsFromChain.minProtocolVersion,
           ),
@@ -954,6 +971,7 @@ async function ensureOfferConfigs() {
           minProtocolVersion,
           maxProtocolVersion,
           resourcePrices,
+          dataCenterName,
         },
       ]) => {
         const computePeerConfigs = await ensureComputerPeerConfigs({
@@ -1073,6 +1091,13 @@ async function ensureOfferConfigs() {
           bandwidth: await getResourcePricesWithIds("bandwidth"),
         };
 
+        const dataCenterId = providerConfig.dataCenters[dataCenterName];
+
+        assert(
+          dataCenterId !== undefined,
+          `Unreachable. Data center ${dataCenterName} is not found in provider config. This must be validated during config validation`,
+        );
+
         return {
           offerName,
           computePeersFromProviderConfig,
@@ -1080,7 +1105,8 @@ async function ensureOfferConfigs() {
           minProtocolVersion,
           maxProtocolVersion,
           resourcePricesWithIds,
-        };
+          dataCenter: { name: dataCenterName, id: `0x${dataCenterId}` },
+        } as const;
       },
     ),
   );
@@ -1362,6 +1388,7 @@ function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
 
   return {
     id: offerIndexerInfo.id,
+    dataCenter: offerIndexerInfo.datacenter,
     createdAt: new Date(
       Number(offerIndexerInfo.createdAt) * 1000,
     ).toISOString(),

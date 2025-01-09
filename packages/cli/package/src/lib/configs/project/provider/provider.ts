@@ -75,6 +75,8 @@ import configOptions4, {
   mergeStorageResources,
   mergeIPResources,
   mergeBandwidthResources,
+  getDefaultDataCenters,
+  DATA_CENTER_NAME,
 } from "./provider4.js";
 
 export const options: InitConfigOptions<
@@ -138,10 +140,12 @@ function getDefault(args: ProviderConfigArgs) {
 
     return {
       providerName: "defaultProvider",
+      dataCenters: await getDefaultDataCenters(),
       resources: await getDefaultResources(),
       computePeers,
       offers: {
         [DEFAULT_OFFER_NAME]: {
+          dataCenterName: DATA_CENTER_NAME,
           computePeers: Object.keys(computePeers),
           resourcePrices: getDefaultOfferResources(),
         },

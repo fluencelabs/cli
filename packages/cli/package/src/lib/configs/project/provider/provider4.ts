@@ -58,6 +58,20 @@ import {
 const OPTIONAL_RESOURCE_DETAILS_STRING = "<optional>";
 const OPTIONAL_RESOURCE_DETAILS_NUMBER = 1;
 const OPTIONAL_RESOURCE_DETAILS_BOOLEAN = false;
+export const DATA_CENTER_NAME = "<dataCenterName>";
+
+type DataCenters = Record<string, string>;
+
+const dataCentersSchema = {
+  type: "object",
+  description:
+    "A map with data center names as keys and data center IDs as values",
+  additionalProperties: { type: "string" },
+  properties: {
+    [DATA_CENTER_NAME]: { type: "string" },
+  },
+  required: [],
+} as const satisfies JSONSchemaType<DataCenters>;
 
 const idSchema = {
   description: "On-chain ID of the resource",
@@ -517,6 +531,7 @@ const offerResourcesSchema = {
 } as const satisfies JSONSchemaType<ResourcePrices>;
 
 type Offer = {
+  dataCenterName: string;
   computePeers: Array<string>;
   resourcePrices: ResourcePrices;
   minProtocolVersion?: number;
@@ -528,6 +543,10 @@ const offerSchema = {
   description: "Defines a provider offer",
   additionalProperties: false,
   properties: {
+    dataCenterName: {
+      type: "string",
+      description: "Data center name from top-level dataCenters property",
+    },
     computePeers: {
       description: "Compute peers participating in this offer",
       type: "array",
@@ -554,7 +573,7 @@ const offerSchema = {
       minimum: 1,
     },
   },
-  required: ["computePeers"],
+  required: ["computePeers", "dataCenterName", "resourcePrices"],
 } as const satisfies JSONSchemaType<Offer>;
 
 type Offers = Record<string, Offer>;
@@ -568,6 +587,7 @@ const offersSchema = {
 } as const satisfies JSONSchemaType<Offers>;
 
 export type Config = {
+  dataCenters: DataCenters;
   resources: ResourcePerResourceType;
   providerName: string;
   capacityCommitments: CapacityCommitments;
@@ -586,13 +606,20 @@ export default {
     type: "object",
     additionalProperties: false,
     properties: {
+      dataCenters: dataCentersSchema,
       resources: resourcesPerResourceTypeSchema,
       providerName: providerNameSchema,
       computePeers: computePeersSchema,
       capacityCommitments: capacityCommitmentsSchema,
       offers: offersSchema,
     },
-    required: ["computePeers", "offers", "providerName", "capacityCommitments"],
+    required: [
+      "dataCenters",
+      "computePeers",
+      "offers",
+      "providerName",
+      "capacityCommitments",
+    ],
   },
   async migrate({ computePeers, capacityCommitments, offers, providerName }) {
     const newComputePeers = Object.fromEntries(
@@ -632,13 +659,18 @@ export default {
       Object.entries(offers).map(([name, { computePeers }]) => {
         return [
           name,
-          { computePeers, resourcePrices: getDefaultOfferResources() },
+          {
+            dataCenterName: DATA_CENTER_NAME,
+            computePeers,
+            resourcePrices: getDefaultOfferResources(),
+          },
         ];
       }),
     );
 
     return {
       providerName,
+      dataCenters: await getDefaultDataCenters(),
       resources: await getDefaultResources(),
       computePeers: newComputePeers,
       offers: newOffers,
@@ -647,6 +679,7 @@ export default {
   },
   validate(config) {
     return validateBatchAsync(
+      validateNoUnknownDataCenterNames(config),
       validateEnoughRAMPerCPUCore(config),
       validateCC(config),
       validateNoDuplicatePeerNamesInOffers(config),
@@ -657,6 +690,19 @@ export default {
     );
   },
   async refineSchema(schema) {
+    const dataCentersFromChain = await getDataCentersFromChain();
+
+    const dataCentersOneOf = {
+      oneOf: dataCentersFromChain.map(({ idWithoutPrefix, ...rest }) => {
+        return { const: idWithoutPrefix, description: stringify(rest) };
+      }),
+    };
+
+    const dataCenters = {
+      additionalProperties: dataCentersOneOf,
+      properties: { [DATA_CENTER_NAME]: dataCentersOneOf },
+    };
+
     const resourcesFromChain = await getResourcesFromChain();
 
     const cpuOneOf = getOneOfForSchema("cpu", resourcesFromChain);
@@ -665,7 +711,7 @@ export default {
     const bandwidthOneOf = getOneOfForSchema("bandwidth", resourcesFromChain);
     const ipOneOf = getOneOfForSchema("ip", resourcesFromChain);
 
-    const properties = {
+    const resourcesProperties = {
       cpu: {
         additionalProperties: cpuOneOf,
         properties: { [CPU_RESOURCE_NAME_EXAMPLE]: cpuOneOf },
@@ -694,7 +740,12 @@ export default {
       }
     >;
 
-    return merge(schema, { properties: { resources: { properties } } });
+    return merge(schema, {
+      properties: {
+        dataCenters,
+        resources: { properties: resourcesProperties },
+      },
+    });
   },
 } satisfies ConfigOptions<PrevConfig, Config>;
 
@@ -710,7 +761,7 @@ function getOneOfForSchema(
 
   if (oneOf.length === 0) {
     return commandObj.error(
-      `No ${resourceType} resources found on chain. At least on is required to define a valid offer in ${PROVIDER_CONFIG_FULL_FILE_NAME}`,
+      `No ${resourceType} resources found on chain. At least one is required to define a valid offer in ${PROVIDER_CONFIG_FULL_FILE_NAME}`,
     );
   }
 
@@ -745,6 +796,19 @@ const DEFAULT_STORAGE_DETAILS: PeerStorageDetails = {
   model: OPTIONAL_RESOURCE_DETAILS_STRING,
   sequentialWriteSpeed: OPTIONAL_RESOURCE_DETAILS_NUMBER,
 };
+
+export async function getDefaultDataCenters() {
+  const [firstDataCenter] = await getDataCentersFromChain();
+
+  assert(
+    firstDataCenter !== undefined,
+    "There must be at least one data center specified on chain",
+  );
+
+  return {
+    [DATA_CENTER_NAME]: firstDataCenter.id,
+  } as const satisfies DataCenters;
+}
 
 export async function getDefaultResources(): Promise<ResourcePerResourceType> {
   const resources = await getDefaultChainResources();
@@ -829,6 +893,32 @@ export function defaultComputePeerConfig({
       },
     },
   };
+}
+
+function validateNoUnknownDataCenterNames({
+  dataCenters,
+  offers,
+}: {
+  dataCenters: DataCenters;
+  offers: Offers;
+}): ValidationResult {
+  const dataCenterNames = Object.keys(dataCenters);
+
+  const unknownDataCenterNames = Object.entries(offers).filter(
+    ([, { dataCenterName }]) => {
+      return !dataCenterNames.includes(dataCenterName);
+    },
+  );
+
+  return unknownDataCenterNames.length === 0
+    ? true
+    : `Unknown data center names in the following offers: ${unknownDataCenterNames
+        .map(([offerName, { dataCenterName }]) => {
+          return `${offerName}: ${dataCenterName}`;
+        })
+        .join(
+          "\n",
+        )}\nAvailable data center names specified in ${PROVIDER_CONFIG_FULL_FILE_NAME} dataCenters property:\n${dataCenterNames.join("\n")}`;
 }
 
 function validateNoUnknownResourceNamesInComputePeers({
@@ -1594,6 +1684,41 @@ const resourcesMetadataPerResourceTypeSchema = {
   bandwidth: ajv.compile(bandwidthMetadataSchema),
   ip: ajv.compile(ipMetadataSchema),
 };
+
+type DataCenter = {
+  id: string;
+  idWithoutPrefix: string;
+  countryCode: string;
+  cityCode: string;
+  index: number;
+  tier: number;
+  certifications: string[];
+};
+
+let dataCentersPromise: undefined | Promise<Array<DataCenter>> = undefined;
+
+async function getDataCentersFromChain(): Promise<Array<DataCenter>> {
+  if (dataCentersPromise === undefined) {
+    dataCentersPromise = (async () => {
+      const { readonlyContracts } = await getReadonlyContracts();
+      return (await readonlyContracts.diamond.getDatacenters()).map(
+        ({ id, countryCode, cityCode, index, tier, certifications }) => {
+          return {
+            id,
+            idWithoutPrefix: id.slice(2),
+            countryCode,
+            cityCode,
+            index: Number(index),
+            tier: Number(tier),
+            certifications,
+          };
+        },
+      );
+    })();
+  }
+
+  return dataCentersPromise;
+}
 
 type ChainResources = {
   cpu: Record<string, CPUMetadata>;
