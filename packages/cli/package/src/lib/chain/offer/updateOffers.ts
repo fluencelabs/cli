@@ -382,12 +382,12 @@ async function populateDataCenterTx({
   dataCenter,
 }: OnChainOffer) {
   const { contracts } = await getContracts();
-  return offerIndexerInfo.dataCenter.id === dataCenter.id
+  return offerIndexerInfo.dataCenter?.id === dataCenter.id
     ? []
     : [
         {
           description: `\nchanging data center from ${color.yellow(
-            offerIndexerInfo.dataCenter.id,
+            offerIndexerInfo.dataCenter?.id,
           )} to ${color.yellow(dataCenter.id)}`,
           tx: populateTx(
             contracts.diamond.setOfferDatacenter,

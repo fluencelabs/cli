@@ -841,7 +841,14 @@ export async function resolveOffersFromProviderConfig(
           ),
         );
 
-        const { id: dataCenterId } = offerIndexerInfo.dataCenter;
+        const { dataCenter } = offerIndexerInfo;
+
+        assert(
+          dataCenter !== null && dataCenter !== undefined,
+          "Data center is always saved for offer on-chain when offer is created. Try waiting for indexer to index the data center",
+        );
+
+        const { id: dataCenterId } = dataCenter;
         assertIsHex(dataCenterId, "Data center ID must be a hex string");
 
         return {
