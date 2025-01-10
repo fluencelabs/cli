@@ -806,7 +806,7 @@ export async function getDefaultDataCenters() {
   );
 
   return {
-    [DATA_CENTER_NAME]: firstDataCenter.id,
+    [DATA_CENTER_NAME]: firstDataCenter.id.slice(2),
   } as const satisfies DataCenters;
 }
 
