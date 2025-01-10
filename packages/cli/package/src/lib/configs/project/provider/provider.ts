@@ -19,6 +19,7 @@ import assert from "assert";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
+import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
 
 import {
@@ -45,7 +46,7 @@ import { type ProviderConfigArgs } from "../../../generateUserProviderConfig.js"
 import { genManifest } from "../../../genManifest.js";
 import { getPeerIdFromSecretKey } from "../../../helpers/getPeerIdFromSecretKey.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
-import { splitErrorsAndResults } from "../../../helpers/utils.js";
+import { pathExists, splitErrorsAndResults } from "../../../helpers/utils.js";
 import { genSecretKeyOrReturnExisting } from "../../../keyPairs.js";
 import {
   getProviderConfigPath,
@@ -229,7 +230,7 @@ export async function ensureComputerPeerConfigs({
 
   if (computePeersWithoutKeys.length > 0) {
     commandObj.warn(
-      `Missing keys for the following compute peers in noxes property at ${providerSecretsConfig.$getPath()}:\n${computePeersWithoutKeys
+      `Missing keys for the following compute peers at ${providerSecretsConfig.$getPath()}:\n${computePeersWithoutKeys
         .map(({ computePeerName }) => {
           return computePeerName;
         })
@@ -314,7 +315,13 @@ export async function ensureComputerPeerConfigs({
         const peerId = await getPeerIdFromSecretKey(secretKey);
         const manifestPath = join(k8sManifestsDir, `${computePeerName}.yaml`);
 
-        if (writeManifestFiles) {
+        if (writeManifestFiles || !(await pathExists(manifestPath))) {
+          if (!writeManifestFiles) {
+            commandObj.warn(
+              `Missing a manifest file for the compute peer ${color.yellow(computePeerName)}. Generating a new one at ${manifestPath}`,
+            );
+          }
+
           const manifest = genManifest({
             chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
             ipSupplies: computePeer.resources.ip.supply,
