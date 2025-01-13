@@ -1,6 +1,6 @@
 {
   "protocolVersion": 1,
-  "chain-rpc": "docker.fluence.dev/chain-rpc:add-dc-to-subgraph-e81a019-7470-1",
-  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:add-dc-to-subgraph-e81a019-7470-1",
-  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:add-dc-to-subgraph-e81a019-7470-1"
+  "chain-rpc": "docker.fluence.dev/chain-rpc:add-dc-to-subgraph-afdd94a-7473-1",
+  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:add-dc-to-subgraph-afdd94a-7473-1",
+  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:add-dc-to-subgraph-afdd94a-7473-1"
 }
