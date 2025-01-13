@@ -30,7 +30,7 @@ import {
 import { getContracts, signBatch, populateTx } from "../../dealClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
-import { deployManifests } from "../../manifests.js";
+import { deployManifests } from "../../manifestsDeploy.js";
 import { confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import { uint8ArrayToPeerIdHexString } from "../conversions.js";

@@ -46,7 +46,7 @@ import { getPeerIdFromSecretKey } from "../../../helpers/getPeerIdFromSecretKey.
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import { pathExists, splitErrorsAndResults } from "../../../helpers/utils.js";
 import { genSecretKeyOrReturnExisting } from "../../../keyPairs.js";
-import { genManifest } from "../../../manifests.js";
+import { genManifest } from "../../../manifestsGen.js";
 import {
   getProviderConfigPath,
   getFluenceDir,

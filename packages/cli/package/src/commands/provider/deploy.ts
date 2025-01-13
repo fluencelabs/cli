@@ -18,7 +18,7 @@
 import { BaseCommand } from "../../baseCommand.js";
 import { CHAIN_FLAGS, PEER_AND_OFFER_NAMES_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { deployManifests } from "../../lib/manifests.js";
+import { deployManifests } from "../../lib/manifestsDeploy.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = "Deploy manifests";
