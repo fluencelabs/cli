@@ -8,6 +8,7 @@ Defines provider configuration
 |-----------------------|--------------------------------|----------|----------------------------------------------------------------------------|
 | `capacityCommitments` | [object](#capacitycommitments) | **Yes**  | A map with computePeer names as keys and capacity commitments as values    |
 | `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peer configs as values   |
+| `dataCenters`         | [object](#datacenters)         | **Yes**  | A map with data center names as keys and data center IDs as values         |
 | `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offer configs as values                 |
 | `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                           |
 | `version`             | integer                        | **Yes**  | Config version                                                             |
@@ -170,6 +171,16 @@ Override or extend Storage details not related to matching but visible to the us
 | `model`                | string  | No       |             |
 | `sequentialWriteSpeed` | integer | No       |             |
 
+## dataCenters
+
+A map with data center names as keys and data center IDs as values
+
+### Properties
+
+| Property           | Type   | Required | Description |
+|--------------------|--------|----------|-------------|
+| `<dataCenterName>` | string | No       |             |
+
 ## offers
 
 A map with offer names as keys and offer configs as values
@@ -189,9 +200,10 @@ Defines a provider offer
 | Property             | Type                      | Required | Description                                                                        |
 |----------------------|---------------------------|----------|------------------------------------------------------------------------------------|
 | `computePeers`       | string[]                  | **Yes**  | Compute peers participating in this offer                                          |
+| `dataCenterName`     | string                    | **Yes**  | Data center name from top-level dataCenters property                               |
+| `resourcePrices`     | [object](#resourceprices) | **Yes**  | Resource prices for the offer                                                      |
 | `maxProtocolVersion` | integer                   | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 1 |
 | `minProtocolVersion` | integer                   | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 1 |
-| `resourcePrices`     | [object](#resourceprices) | No       | Resource prices for the offer                                                      |
 
 #### resourcePrices
 

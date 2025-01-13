@@ -1027,9 +1027,10 @@ async function getDetailedCommitmentInfo({
     "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/utils.js"
   );
 
+  const isCCNotStarted = ccFromChain.startEpoch === 0n;
+
   function getStartOrExpirationDate(epoch: bigint) {
-    // if startEpoch is 0, then it's not yet started - no need to show anything
-    return ccFromChain.startEpoch === 0n
+    return isCCNotStarted
       ? "-"
       : secondsToDate(
           calculateTimestamp(
@@ -1077,8 +1078,9 @@ async function getDetailedCommitmentInfo({
       ccFromChain.rewardDelegatorRate,
       precision,
     ),
-    startEpoch: bigintToStr(ccFromChain.startEpoch),
-    endEpoch: bigintToStr(ccFromChain.endEpoch),
+    durationEpochs: bigintToStr(ccFromChain.endEpoch - ccFromChain.startEpoch),
+    startEpoch: isCCNotStarted ? "-" : bigintToStr(ccFromChain.startEpoch),
+    endEpoch: isCCNotStarted ? "-" : bigintToStr(ccFromChain.endEpoch),
     currentEpoch: bigintToStr(currentEpoch),
     startDate: getStartOrExpirationDate(ccFromChain.startEpoch),
     expirationDate: getStartOrExpirationDate(ccFromChain.endEpoch),
@@ -1125,6 +1127,7 @@ function getDetailedCommitmentInfoString(
       Status: detailedCommitmentInfo.status,
       Staker: detailedCommitmentInfo.staker,
       "Staker reward": detailedCommitmentInfo.stakerReward,
+      "Duration (epochs)": detailedCommitmentInfo.durationEpochs,
       "Start / End / Current epoch": [
         detailedCommitmentInfo.startEpoch,
         detailedCommitmentInfo.endEpoch,

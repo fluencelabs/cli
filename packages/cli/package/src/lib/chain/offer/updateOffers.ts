@@ -17,6 +17,7 @@
 
 import { color } from "@oclif/color";
 import omit from "lodash-es/omit.js";
+import { stringify } from "yaml";
 
 import { commandObj } from "../../commandObj.js";
 import type { ResourceType } from "../../configs/project/provider/provider4.js";
@@ -31,6 +32,7 @@ import { numToStr } from "../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
+import type { Required } from "../../typeHelpers.js";
 import { uint8ArrayToPeerIdHexString } from "../conversions.js";
 import {
   peerIdHexStringToBase58String,
@@ -58,7 +60,9 @@ type PeersOnChain = {
   hexPeerId: string;
 }[];
 
-type Txs = { description?: string; tx: ReturnType<typeof populateTx> }[];
+type Tx = { description?: string; tx: ReturnType<typeof populateTx> };
+type Txs = Tx[];
+type TxsWithDescription = Required<Tx>[];
 
 export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
@@ -79,7 +83,25 @@ export async function updateOffers(flags: OffersArgs) {
   ].flat();
 
   if (firstUpdateOffersTx === undefined) {
-    commandObj.logToStderr("No changes found for selected offers");
+    const addedCPs = populatedTxs.reduce<Record<string, string[]>>(
+      (acc, { addedCPsNames, offerName }) => {
+        if (addedCPsNames.length > 0) {
+          acc[offerName] = addedCPsNames;
+        }
+
+        return acc;
+      },
+      {},
+    );
+
+    if (Object.values(addedCPs).length === 0) {
+      commandObj.logToStderr("No changes found for selected offers");
+    } else {
+      commandObj.logToStderr(
+        `Added the compute peers to the following offers:\n${stringify(addedCPs)}`,
+      );
+    }
+
     return;
   }
 
@@ -229,10 +251,14 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         peersOnChain,
       )) satisfies Txs;
 
-      await addMissingComputePeers(offer, peersOnChain);
+      const { addedCPsNames } = await addMissingComputePeers(
+        offer,
+        peersOnChain,
+      );
 
       const txs = (
         await Promise.all([
+          populateDataCenterTx(offer),
           populateChangeResourceSupplyAndDetailsTx(offer),
           populateCUToRemoveTxs(offer, peersOnChain),
           populateCUToAddTxs(offer, peersOnChain),
@@ -244,7 +270,13 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         ])
       ).flat() satisfies Txs;
 
-      return { offerName, offerId, removePeersFromOffersTxs, txs };
+      return {
+        offerName,
+        offerId,
+        removePeersFromOffersTxs,
+        txs,
+        addedCPsNames,
+      };
     }),
   );
 }
@@ -339,6 +371,28 @@ async function populatePaymentTokenTx({
             contracts.diamond.changePaymentToken,
             offerId,
             usdcAddress,
+          ),
+        },
+      ];
+}
+
+async function populateDataCenterTx({
+  offerIndexerInfo,
+  offerId,
+  dataCenter,
+}: OnChainOffer) {
+  const { contracts } = await getContracts();
+  return offerIndexerInfo.dataCenter?.id === dataCenter.id
+    ? []
+    : [
+        {
+          description: `\nchanging data center from ${color.yellow(
+            offerIndexerInfo.dataCenter?.id,
+          )} to ${color.yellow(dataCenter.id)}`,
+          tx: populateTx(
+            contracts.diamond.setOfferDatacenter,
+            offerId,
+            dataCenter.id,
           ),
         },
       ];
@@ -492,7 +546,7 @@ async function createResourceSupplyAndDetailsUpdateTx(
   peerId: string,
   { resourceType, onChainResource, configuredResource }: ResourceSupplyUpdate,
 ) {
-  const txs: { description: string; tx: ReturnType<typeof populateTx> }[] = [];
+  const txs: TxsWithDescription = [];
 
   if (onChainResource.resourceId !== configuredResource.resourceId) {
     return txs;
@@ -548,7 +602,7 @@ async function populateChangeResourceSupplyAndDetailsTx({
   computePeersFromProviderConfig,
   offerIndexerInfo,
 }: OnChainOffer) {
-  const txs: { description?: string; tx: ReturnType<typeof populateTx> }[] = [];
+  const txs: Txs = [];
 
   for (const peer of offerIndexerInfo.peers) {
     const peerIdBase58 = await peerIdHexStringToBase58String(peer.id);
@@ -638,7 +692,7 @@ async function createResourceUpdateTx(
   peerId: string,
   { resourceType, onChainResource, configuredResource }: ResourceUpdate,
 ) {
-  const txs: { description: string; tx: ReturnType<typeof populateTx> }[] = [];
+  const txs: TxsWithDescription = [];
   const { contracts } = await getContracts();
 
   function removeResource() {

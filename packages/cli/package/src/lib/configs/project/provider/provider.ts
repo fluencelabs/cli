@@ -19,6 +19,7 @@ import assert from "assert";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
+import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
 
 import {
@@ -27,7 +28,6 @@ import {
   getRpcUrl,
 } from "../../../chain/chainConfig.js";
 import { hexStringToUTF8ToBase64String } from "../../../chain/conversions.js";
-import { peerIdBase58ToHexString } from "../../../chain/conversions.js";
 import { commandObj, isInteractive } from "../../../commandObj.js";
 import {
   DEFAULT_OFFER_NAME,
@@ -45,7 +45,7 @@ import { type ProviderConfigArgs } from "../../../generateUserProviderConfig.js"
 import { genManifest } from "../../../genManifest.js";
 import { getPeerIdFromSecretKey } from "../../../helpers/getPeerIdFromSecretKey.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
-import { splitErrorsAndResults } from "../../../helpers/utils.js";
+import { pathExists, splitErrorsAndResults } from "../../../helpers/utils.js";
 import { genSecretKeyOrReturnExisting } from "../../../keyPairs.js";
 import {
   getProviderConfigPath,
@@ -75,6 +75,8 @@ import configOptions4, {
   mergeStorageResources,
   mergeIPResources,
   mergeBandwidthResources,
+  getDefaultDataCenters,
+  DATA_CENTER_NAME,
 } from "./provider4.js";
 
 export const options: InitConfigOptions<
@@ -138,10 +140,12 @@ function getDefault(args: ProviderConfigArgs) {
 
     return {
       providerName: "defaultProvider",
+      dataCenters: await getDefaultDataCenters(),
       resources: await getDefaultResources(),
       computePeers,
       offers: {
         [DEFAULT_OFFER_NAME]: {
+          dataCenterName: DATA_CENTER_NAME,
           computePeers: Object.keys(computePeers),
           resourcePrices: getDefaultOfferResources(),
         },
@@ -225,7 +229,7 @@ export async function ensureComputerPeerConfigs({
 
   if (computePeersWithoutKeys.length > 0) {
     commandObj.warn(
-      `Missing keys for the following compute peers in noxes property at ${providerSecretsConfig.$getPath()}:\n${computePeersWithoutKeys
+      `Missing keys for the following compute peers at ${providerSecretsConfig.$getPath()}:\n${computePeersWithoutKeys
         .map(({ computePeerName }) => {
           return computePeerName;
         })
@@ -310,14 +314,20 @@ export async function ensureComputerPeerConfigs({
         const peerId = await getPeerIdFromSecretKey(secretKey);
         const manifestPath = join(k8sManifestsDir, `${computePeerName}.yaml`);
 
-        if (writeManifestFiles) {
+        if (writeManifestFiles || !(await pathExists(manifestPath))) {
+          if (!writeManifestFiles) {
+            commandObj.warn(
+              `Missing a manifest file for the compute peer ${color.yellow(computePeerName)}. Generating a new one at ${manifestPath}`,
+            );
+          }
+
           const manifest = genManifest({
             chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
             ipSupplies: computePeer.resources.ip.supply,
             httpEndpoint,
             wsEndpoint,
             ipfsGatewayEndpoint,
-            peerIdHex: await peerIdBase58ToHexString(peerId),
+            peerId,
             networkId,
             diamondContract,
           });
