@@ -329,6 +329,7 @@ export async function ensureComputerPeerConfigs({
             wsEndpoint,
             ipfsGatewayEndpoint,
             peerIdHex: await peerIdBase58ToHexString(peerId),
+            peerId,
             networkId,
             diamondContract,
           });
