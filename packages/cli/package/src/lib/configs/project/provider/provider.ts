@@ -28,7 +28,6 @@ import {
   getRpcUrl,
 } from "../../../chain/chainConfig.js";
 import { hexStringToUTF8ToBase64String } from "../../../chain/conversions.js";
-import { peerIdBase58ToHexString } from "../../../chain/conversions.js";
 import { commandObj, isInteractive } from "../../../commandObj.js";
 import {
   DEFAULT_OFFER_NAME,
@@ -328,7 +327,6 @@ export async function ensureComputerPeerConfigs({
             httpEndpoint,
             wsEndpoint,
             ipfsGatewayEndpoint,
-            peerIdHex: await peerIdBase58ToHexString(peerId),
             peerId,
             networkId,
             diamondContract,

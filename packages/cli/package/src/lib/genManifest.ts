@@ -27,7 +27,6 @@ type GenManifestsArgs = {
   httpEndpoint: string;
   wsEndpoint: string;
   ipfsGatewayEndpoint: string;
-  peerIdHex: string;
   peerId: string;
   networkId: string;
   diamondContract: string;
@@ -39,7 +38,6 @@ export function genManifest({
   httpEndpoint,
   wsEndpoint,
   ipfsGatewayEndpoint,
-  peerIdHex,
   peerId,
   networkId,
   diamondContract,
@@ -101,7 +99,7 @@ kind: Namespace
 metadata:
   name: lightmare
 ---
-# lightmare config (peerId: ${peerId})
+# lightmare config
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -116,7 +114,7 @@ ${stringify({
             httpEndpoint,
             wsEndpoint,
             ipfsGatewayEndpoint,
-            peerId: peerIdHex,
+            peerId,
             networkId,
             diamondContract,
             privateKeySecretRef: PRIVATE_KEY_SECRET_REF,
