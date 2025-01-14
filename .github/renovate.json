@@ -5,14 +5,6 @@
     {
       "fileMatch": ["^packages/cli/package/src/versions\\.json$"],
       "matchStrings": [
-        "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
-      ],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "nox"
-    },
-    {
-      "fileMatch": ["^packages/cli/package/src/versions\\.json$"],
-      "matchStrings": [
         "\"chain-rpc\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n",
         "\"chain-deploy-script\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n",
         "\"subgraph-deploy-script\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
@@ -27,14 +19,6 @@
       ],
       "matchStringsStrategy": "any",
       "datasourceTemplate": "npm"
-    },
-    {
-      "fileMatch": ["^packages/cli/package/src/versions\\.json$"],
-      "matchStrings": [
-        "\"(?<depName>[marine|mrepl|marine\\-rs\\-sdk|marine\\-rs\\-sdk\\-test]+)\": \"(?<currentValue>[^\"\n]+)\""
-      ],
-      "matchStringsStrategy": "any",
-      "datasourceTemplate": "crate"
     }
   ],
   "packageRules": [
