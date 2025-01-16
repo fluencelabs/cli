@@ -800,18 +800,18 @@ export function ipResourceToHumanReadableString({ version }: IPMetadata) {
   return `v${version}`;
 }
 
-export async function resourceNameToId(
+export async function resourceNameToResource(
   resourceType: ResourceType,
   name: string,
 ) {
-  const { id } = (await getResourcesFromChain())[resourceType][name] ?? {};
+  const chainResource = (await getResourcesFromChain())[resourceType][name];
 
   assert(
-    id !== undefined,
+    chainResource !== undefined,
     `Unreachable. It's validated in ${PROVIDER_CONFIG_FULL_FILE_NAME} schema that resource names are correct`,
   );
 
-  return id;
+  return chainResource;
 }
 
 const START_IP = 16843009; // 1.1.1.1
@@ -1756,11 +1756,11 @@ export async function getDataCentersFromChain(): Promise<
 }
 
 type ChainResources = {
-  cpu: Record<string, CPUMetadata & { id: string }>;
-  ram: Record<string, RAMMetadata & { id: string }>;
-  storage: Record<string, StorageMetadata & { id: string }>;
-  bandwidth: Record<string, BandwidthMetadata & { id: string }>;
-  ip: Record<string, IPMetadata & { id: string }>;
+  cpu: Record<string, { metadata: string; id: string }>;
+  ram: Record<string, { metadata: string; id: string }>;
+  storage: Record<string, { metadata: string; id: string }>;
+  bandwidth: Record<string, { metadata: string; id: string }>;
+  ip: Record<string, { metadata: string; id: string }>;
 };
 
 let resourcesPromise: undefined | Promise<ChainResources> = undefined;
@@ -1810,7 +1810,7 @@ async function getResourcesFromChainImpl(): Promise<ChainResources> {
         // @ts-expect-error it's validated above that resource metadata corresponds to the resource type
       }[resourceType](parsedMetadata);
 
-      chainResources[resourceType][name] = { ...parsedMetadata, id };
+      chainResources[resourceType][name] = { metadata, id };
     } catch (err) {
       commandObj.warn(
         `Failed to parse metadata for resource with id: ${id}. Error: ${stringifyUnknown(err)} Please report this issue.`,

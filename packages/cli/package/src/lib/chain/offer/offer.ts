@@ -322,6 +322,7 @@ function setCPUSupplyForCP(
         readonly details: string;
         readonly name: string;
         readonly supply: number;
+        readonly metadata: string;
       };
     };
     owner: string;
@@ -353,6 +354,7 @@ function setCPUSupply(
     readonly details: string;
     readonly name: string;
     readonly supply: number;
+    readonly metadata: string;
   },
   unitIds: Uint8Array[],
 ): OnChainResource {

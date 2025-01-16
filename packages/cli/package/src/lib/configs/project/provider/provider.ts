@@ -62,7 +62,7 @@ import configOptions1, { type Config as Config1 } from "./provider1.js";
 import configOptions2, { type Config as Config2 } from "./provider2.js";
 import configOptions3, { type Config as Config3 } from "./provider3.js";
 import configOptions4, {
-  resourceNameToId,
+  resourceNameToResource,
   type Config as Config4,
   type ComputePeer,
   getDefaultComputePeerConfig,
@@ -343,7 +343,7 @@ export async function ensureComputerPeerConfigs({
 
             return {
               ...s,
-              id: await resourceNameToId("storage", s.name),
+              ...(await resourceNameToResource("storage", s.name)),
               details: mergeStorageResourceDetails(storage, s),
             };
           }),
@@ -352,30 +352,39 @@ export async function ensureComputerPeerConfigs({
         const resourcesWithIds = {
           cpu: {
             ...computePeer.resources.cpu,
-            id: await resourceNameToId("cpu", computePeer.resources.cpu.name),
+            ...(await resourceNameToResource(
+              "cpu",
+              computePeer.resources.cpu.name,
+            )),
             details: mergeCPUResourceDetails(cpu, computePeer.resources.cpu),
           },
           ram: {
             ...computePeer.resources.ram,
-            id: await resourceNameToId("ram", computePeer.resources.ram.name),
+            ...(await resourceNameToResource(
+              "ram",
+              computePeer.resources.ram.name,
+            )),
             details: mergeRAMResourceDetails(ram, computePeer.resources.ram),
           },
           storage: storages,
           bandwidth: {
             ...computePeer.resources.bandwidth,
-            id: await resourceNameToId(
+            ...(await resourceNameToResource(
               "bandwidth",
               computePeer.resources.bandwidth.name,
-            ),
+            )),
           },
           ip: {
             ...computePeer.resources.ip,
-            id: await resourceNameToId("ip", computePeer.resources.ip.name),
+            ...(await resourceNameToResource(
+              "ip",
+              computePeer.resources.ip.name,
+            )),
           },
         } as const satisfies Record<
           ResourceType,
-          | { id: string; details?: unknown }
-          | Array<{ id: string; details: unknown }>
+          | { id: string; metadata: string; details?: unknown }
+          | Array<{ id: string; metadata: string; details: unknown }>
         >;
 
         return {
