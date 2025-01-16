@@ -33,6 +33,10 @@ export let commandObj: CommandObj =
     error(msg: string): never {
       throw new CLIError(msg);
     },
+    warn(msg: string) {
+      // eslint-disable-next-line no-console
+      console.warn(msg);
+    },
     config: {},
   } as CommandObj;
 export let isInteractive: boolean;
