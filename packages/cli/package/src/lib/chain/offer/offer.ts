@@ -32,7 +32,6 @@ import {
   type ResourcePrices,
   resourceTypeToOnChainResourceType,
   OnChainResourceType,
-  isOnChainResourceType,
   onChainResourceTypeToResourceType,
   getDataCentersFromChain,
   resourcePriceToBigInt,
@@ -60,7 +59,7 @@ import {
 import { getOffers } from "../../gql/gql.js";
 import { setTryTimeout } from "../../helpers/setTryTimeout.js";
 import { stringifyUnknown } from "../../helpers/stringifyUnknown.js";
-import { bigintToStr, numToStr } from "../../helpers/typesafeStringify.js";
+import { numToStr } from "../../helpers/typesafeStringify.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
@@ -635,13 +634,26 @@ async function formatOfferInfo(
       "Data Center": offerIndexerInfo.dataCenter,
       "Created At": offerIndexerInfo.createdAt,
       "Last Updated At": offerIndexerInfo.updatedAt,
-      "Resource Prices": offerIndexerInfo.resources?.map(
-        ({ resourceId, resourcePrice }) => {
-          return {
-            "Resource ID": resourceId,
-            Price: bigintToStr(resourcePrice),
-          };
-        },
+      "Resource Prices": await Promise.all(
+        (offerIndexerInfo.resources ?? []).map(
+          async ({
+            resourceId,
+            resourcePrice,
+            resource: { type, metadata },
+          }) => {
+            const resourceType = onChainResourceTypeToResourceType(type);
+            return {
+              "Resource Type": resourceType,
+              "Resource ID": resourceId,
+              Metadata: metadata,
+              Price: await ptFormatWithSymbol(
+                resourceType === "cpu"
+                  ? resourcePrice * BigInt(VCPU_PER_CU)
+                  : resourcePrice,
+              ),
+            };
+          },
+        ),
       ),
       "Total compute units": offerIndexerInfo.totalComputeUnits,
       "Free compute units": offerIndexerInfo.freeComputeUnits,
@@ -654,57 +666,60 @@ async function formatOfferInfo(
               Resources: {
                 CPU: {
                   "Resource ID": resourcesByType.cpu.resourceId,
+                  Metadata: resourcesByType.cpu.metadata,
+                  Details: resourcesByType.cpu.details,
                   Supply: (
                     await resourceSupplyFromChainToConfig(
                       "cpu",
                       resourcesByType.cpu.supply,
                     )
                   ).supplyString,
-                  Details: resourcesByType.cpu.details,
                 },
                 RAM: {
                   "Resource ID": resourcesByType.ram.resourceId,
+                  Metadata: resourcesByType.ram.metadata,
+                  Details: resourcesByType.ram.details,
                   Supply: (
                     await resourceSupplyFromChainToConfig(
                       "ram",
                       resourcesByType.ram.supply,
                     )
                   ).supplyString,
-                  Details: resourcesByType.ram.details,
                 },
                 Storage: await Promise.all(
                   resourcesByType.storage.map(async (storage) => {
                     return {
                       "Resource ID": storage.resourceId,
+                      Metadata: storage.metadata,
+                      Details: storage.details,
                       Supply: (
                         await resourceSupplyFromChainToConfig(
                           "storage",
                           storage.supply,
                         )
                       ).supplyString,
-                      Details: storage.details,
                     };
                   }),
                 ),
                 IP: {
                   "Resource ID": resourcesByType.ip.resourceId,
+                  Metadata: resourcesByType.ip.metadata,
                   Supply: (
                     await resourceSupplyFromChainToConfig(
                       "ip",
                       resourcesByType.ip.supply,
                     )
                   ).supplyString,
-                  Details: resourcesByType.ip.details,
                 },
                 Bandwidth: {
                   "Resource ID": resourcesByType.bandwidth.resourceId,
+                  Metadata: resourcesByType.bandwidth.metadata,
                   Supply: (
                     await resourceSupplyFromChainToConfig(
                       "bandwidth",
                       resourcesByType.bandwidth.supply,
                     )
                   ).supplyString,
-                  Details: resourcesByType.bandwidth.details,
                 },
               },
             };
@@ -775,14 +790,7 @@ export async function resolveOffersFromProviderConfig(
           offerIndexerInfo.resources ?? []
         ).reduce<ResourcePricesWithIds>(
           (acc, { resourceId, resourcePrice, resource: { type } }) => {
-            if (
-              !isOnChainResourceType(type) ||
-              type === OnChainResourceType.GPU
-            ) {
-              return acc;
-            }
-
-            const resourceType = onChainResourceTypeToResourceType[type];
+            const resourceType = onChainResourceTypeToResourceType(type);
 
             acc[resourceType].push({
               ty: type,
@@ -952,6 +960,7 @@ export type OnChainResource = {
   resourceId: string;
   supply: number;
   details: string;
+  metadata: string;
 };
 
 type ResourcePricesWithIds = Record<
@@ -1318,15 +1327,13 @@ function indexerResourcesToOnchainResources(
   >,
   offerId: string,
 ): [OnChainResource, ...OnChainResource[]] {
-  const onChainResourceType = resourceTypeToOnChainResourceType[resourceType];
-
   const [firstResource, ...restResources] = resources
     .filter(({ resource: { type } }) => {
-      return isOnChainResourceType(type) && type === onChainResourceType;
+      return onChainResourceTypeToResourceType(type) === resourceType;
     })
-    .map(({ details, resource: { id: resourceId }, maxSupply }) => {
+    .map(({ details, resource: { id: resourceId, metadata }, maxSupply }) => {
       assertIsHex(resourceId, `Invalid Resource ID for offer ${offerId}`);
-      return { resourceId, supply: Number(maxSupply), details };
+      return { resourceId, supply: Number(maxSupply), details, metadata };
     });
 
   if (firstResource === undefined) {

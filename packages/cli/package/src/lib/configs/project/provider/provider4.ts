@@ -797,7 +797,7 @@ export function bandwidthResourceToHumanReadableString({
 }
 
 export function ipResourceToHumanReadableString({ version }: IPMetadata) {
-  return version;
+  return `v${version}`;
 }
 
 export async function resourceNameToId(
@@ -1224,13 +1224,22 @@ export enum OnChainResourceType {
   STORAGE,
   PUBLIC_IP,
   NETWORK_BANDWIDTH,
-  GPU,
 }
 
-export function isOnChainResourceType(
-  value: unknown,
-): value is OnChainResourceType {
-  return typeof value === "number" && value in OnChainResourceType;
+export function onChainResourceTypeToResourceType(value: number | bigint) {
+  const numberValue = Number(value);
+  assertOnChainResourceType(numberValue);
+  return onChainResourceTypeToResourceTypeMap[numberValue];
+}
+
+function assertOnChainResourceType(
+  value: number,
+): asserts value is OnChainResourceType {
+  if (!(value in OnChainResourceType)) {
+    commandObj.error(
+      `Unknown resource type: ${color.yellow(value)}. You may need to update ${CLI_NAME_FULL}`,
+    );
+  }
 }
 
 export const resourceTypeToOnChainResourceType: Record<
@@ -1244,8 +1253,8 @@ export const resourceTypeToOnChainResourceType: Record<
   ip: OnChainResourceType.PUBLIC_IP,
 };
 
-export const onChainResourceTypeToResourceType: Record<
-  Exclude<OnChainResourceType, OnChainResourceType.GPU>,
+const onChainResourceTypeToResourceTypeMap: Record<
+  OnChainResourceType,
   ResourceType
 > = {
   [OnChainResourceType.VCPU]: "cpu",
@@ -1777,19 +1786,7 @@ async function getResourcesFromChainImpl(): Promise<ChainResources> {
   };
 
   for (const { metadata, id, ty } of resources) {
-    const onChainResourceType = Number(ty);
-
-    if (!isOnChainResourceType(onChainResourceType)) {
-      commandObj.error(
-        `Unknown resource type: ${color.yellow(onChainResourceType)}. You may need to update ${CLI_NAME_FULL}`,
-      );
-    }
-
-    if (onChainResourceType === OnChainResourceType.GPU) {
-      continue;
-    }
-
-    const resourceType = onChainResourceTypeToResourceType[onChainResourceType];
+    const resourceType = onChainResourceTypeToResourceType(ty);
 
     try {
       const parsedMetadata = JSON.parse(metadata);

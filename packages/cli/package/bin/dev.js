@@ -1,4 +1,4 @@
-#!/usr/bin/env -S node --no-warnings --import tsx
+#!/usr/bin/env -S node --no-warnings --no-deprecation --import tsx
 
 /**
  * Fluence CLI
