@@ -191,8 +191,8 @@ Defines a provider offer
 | `computePeers`       | string[]                  | **Yes**  | Compute peers participating in this offer                                          |
 | `dataCenterName`     | string                    | **Yes**  | Data center name from top-level dataCenters property                               |
 | `resourcePrices`     | [object](#resourceprices) | **Yes**  | Resource prices for the offer                                                      |
-| `maxProtocolVersion` | integer                   | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 1 |
-| `minProtocolVersion` | integer                   | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 1 |
+| `maxProtocolVersion` | integer                   | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 2 |
+| `minProtocolVersion` | integer                   | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 2 |
 
 #### resourcePrices
 
