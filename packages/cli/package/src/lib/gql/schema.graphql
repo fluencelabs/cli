@@ -17,6 +17,7 @@ query OfferDetails($where: Offer_filter) {
       resource {
         id
         type
+        metadata
       }
     }
     peers(where: { deleted: false }) {
@@ -33,6 +34,7 @@ query OfferDetails($where: Offer_filter) {
         resource {
           id
           type
+          metadata
         }
       }
     }
@@ -40,7 +42,7 @@ query OfferDetails($where: Offer_filter) {
       id
       countryCode
       cityCode
-      # cityIndex
+      cityIndex
       tier
       certifications
     }

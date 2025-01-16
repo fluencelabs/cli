@@ -512,7 +512,7 @@ async function populateChangeResourcePriceTx({
         }
 
         return {
-          description: `Change ${resourceType} resource price for ${resourceName} from ${await ptFormatWithSymbol(resourcePrice * BigInt(VCPU_PER_CU))} to ${await ptFormatWithSymbol(price)}`,
+          description: `Change ${resourceType} resource price for ${resourceName} from ${await ptFormatWithSymbol(resourceType === "cpu" ? resourcePrice * BigInt(VCPU_PER_CU) : resourcePrice)} to ${await ptFormatWithSymbol(price)}`,
           tx: populateTx(
             contracts.diamond.changeResourcePriceV2,
             offerId,

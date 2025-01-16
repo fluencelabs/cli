@@ -17,7 +17,7 @@
 
 import { color } from "@oclif/color";
 
-import { CHAIN_ENV, DEFAULT_PUBLIC_FLUENCE_ENV } from "../common.js";
+import { CHAIN_ENV } from "../common.js";
 
 import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
@@ -66,7 +66,7 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
 
 async function fluenceEnvPrompt(
   message = "Select Fluence Environment to use",
-  defaultVal: FluenceEnv = DEFAULT_PUBLIC_FLUENCE_ENV,
+  defaultVal: FluenceEnv = process.env.FLUENCE_ENV,
 ): Promise<FluenceEnv> {
   return list({
     message,
