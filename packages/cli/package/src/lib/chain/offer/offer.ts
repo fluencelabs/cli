@@ -1059,7 +1059,7 @@ async function ensureOfferConfigs() {
                   supply: (
                     await resourceSupplyFromConfigToChain(
                       "ip",
-                      ip.supply.length,
+                      ipSupplyRes.result.length,
                     )
                   ).supply,
                   resourceId: ipId,
