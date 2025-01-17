@@ -18,16 +18,27 @@
 import assert from "node:assert";
 import { join } from "node:path";
 
-import { describe } from "vitest";
+import { describe, expect } from "vitest";
 
-import { LOCAL_NET_DEFAULT_ACCOUNTS } from "../../src/common.js";
+import {
+  LOCAL_NET_DEFAULT_ACCOUNTS,
+  LOCAL_NET_DEFAULT_WALLET_KEY,
+} from "../../src/common.js";
 import { getConfigInitFunction } from "../../src/lib/configs/initConfigNew.js";
-import { options as providerConfigOptions } from "../../src/lib/configs/project/provider/provider.js";
+import {
+  initProviderConfig,
+  options as providerConfigOptions,
+} from "../../src/lib/configs/project/provider/provider.js";
+import { dataCenterToHumanReadableString } from "../../src/lib/configs/project/provider/provider4.js";
 import {
   OFFER_FLAG_NAME,
   PRIV_KEY_FLAG_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../src/lib/const.js";
+import {
+  getContractsByPrivKey,
+  getEventValue,
+} from "../../src/lib/dealClient.js";
 import { stringifyUnknown } from "../../src/lib/helpers/stringifyUnknown.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
@@ -39,13 +50,22 @@ const PRIV_KEY_1 = {
   [PRIV_KEY_FLAG_NAME]: LOCAL_NET_DEFAULT_ACCOUNTS[1].privateKey,
 };
 
-async function initProviderConfigWithPath(path: string) {
-  return getConfigInitFunction({
+async function initProviderConfigWithPath(
+  path: string,
+): Promise<NonNullable<Awaited<ReturnType<typeof initProviderConfig>>>> {
+  const providerConfig = await getConfigInitFunction({
     ...providerConfigOptions,
     getConfigPath() {
       return join(path, PROVIDER_CONFIG_FULL_FILE_NAME);
     },
   })();
+
+  assert(
+    providerConfig !== null,
+    "Provider config must already exists in a quickstart template",
+  );
+
+  return providerConfig;
 }
 
 describe("provider tests", () => {
@@ -54,13 +74,7 @@ describe("provider tests", () => {
     async () => {
       const cwd = join("test", "tmp", "fullLifeCycle");
       await initializeTemplate(cwd);
-
       const providerConfig = await initProviderConfigWithPath(cwd);
-
-      assert(
-        providerConfig !== null,
-        "Provider config must already exists in a quickstart template",
-      );
 
       // add extra capacity commitments and compute peers not used in any offer
       providerConfig.capacityCommitments = Object.fromEntries(
@@ -163,6 +177,127 @@ describe("provider tests", () => {
         args: ["provider", "offer-remove"],
         ...TEST_DEFAULT,
       });
+    },
+  );
+
+  wrappedTest(
+    "create offer with newly added datacenter, update datacenter",
+    async () => {
+      const cwd = join("test", "tmp", "addDatacenter");
+      await initializeTemplate(cwd);
+
+      const { contracts } = await getContractsByPrivKey(
+        LOCAL_NET_DEFAULT_WALLET_KEY,
+      );
+
+      const countryCode = "BY";
+      const cityCode = "MNSK";
+      const cityIndex = "0";
+      const tier = 3;
+      const NO_CERTIFICATIONS = "NO_CERTIFICATIONS";
+      const certifications = [NO_CERTIFICATIONS];
+
+      const createDatacenterTxReceipt = await (
+        await contracts.diamond.createDatacenter({
+          countryCode,
+          cityCode,
+          index: cityIndex,
+          tier,
+          certifications,
+        })
+      ).wait();
+
+      assert(createDatacenterTxReceipt !== null, "Tx receipt must exist");
+
+      const createdDatacenterId = await getEventValue({
+        txReceipt: createDatacenterTxReceipt,
+        contract: contracts.diamond,
+        eventName: "DatacenterCreated",
+        value: "id",
+      });
+
+      assert(
+        typeof createdDatacenterId === "string",
+        "Datacenter id must be a string",
+      );
+
+      const providerConfig = await initProviderConfigWithPath(cwd);
+      const [defaultOffer] = Object.keys(providerConfig.offers);
+
+      assert(
+        defaultOffer !== undefined &&
+          providerConfig.offers[defaultOffer] !== undefined,
+        "Default offer must exist in the provider config",
+      );
+
+      providerConfig.offers[defaultOffer].dataCenterName =
+        dataCenterToHumanReadableString({
+          countryCode,
+          cityCode,
+          cityIndex,
+        });
+
+      await providerConfig.$commit();
+
+      await fluence({
+        args: ["provider", "offer-create"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: defaultOffer,
+        },
+        cwd,
+      });
+
+      const offerInfoWithNewDatacenter = await fluence({
+        args: ["provider", "offer-info"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: defaultOffer,
+        },
+        cwd,
+      });
+
+      expect(offerInfoWithNewDatacenter).toEqual(
+        expect.stringContaining(`countryCode: ${countryCode}`),
+      );
+
+      expect(offerInfoWithNewDatacenter).toEqual(
+        expect.stringContaining(`tier: "${numToStr(tier)}"`),
+      );
+
+      expect(offerInfoWithNewDatacenter).toEqual(
+        expect.stringContaining(NO_CERTIFICATIONS),
+      );
+
+      const NEW_CERTIFICATIONS = "ALL_CERTIFICATIONS";
+      const newTier = 4;
+
+      await (
+        await contracts.diamond.updateDatacenter(createdDatacenterId, newTier, [
+          NEW_CERTIFICATIONS,
+        ])
+      ).wait();
+
+      const offerInfoWithUpdatedDatacenter = await fluence({
+        args: ["provider", "offer-info"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: defaultOffer,
+        },
+        cwd,
+      });
+
+      expect(offerInfoWithUpdatedDatacenter).toEqual(
+        expect.stringContaining(`countryCode: ${countryCode}`),
+      );
+
+      expect(offerInfoWithUpdatedDatacenter).toEqual(
+        expect.stringContaining(`tier: "${numToStr(newTier)}"`),
+      );
+
+      expect(offerInfoWithUpdatedDatacenter).toEqual(
+        expect.stringContaining(NEW_CERTIFICATIONS),
+      );
     },
   );
 });

@@ -91,6 +91,15 @@ export async function getContracts() {
   return { contracts, providerOrWallet };
 }
 
+export async function getContractsByPrivKey(privKey: string) {
+  const providerOrWallet = await getWallet(privKey);
+
+  return {
+    providerOrWallet,
+    contracts: await createContracts(providerOrWallet),
+  };
+}
+
 export async function getSignerAddress() {
   const { providerOrWallet } = await getContracts();
 
