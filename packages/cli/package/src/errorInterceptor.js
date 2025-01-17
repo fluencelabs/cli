@@ -206,6 +206,7 @@ interceptor.on("response", ({ request: { url } }) => {
 const WARN_MSGS_TO_IGNORE = [
   "ExperimentalWarning: Import assertions are not a stable feature of the JavaScript language",
   "ExperimentalWarning: Importing JSON modules is an experimental feature",
+  "DeprecationWarning",
 ];
 
 /**
