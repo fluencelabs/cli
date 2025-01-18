@@ -56,6 +56,7 @@ async function initProviderConfigWithPath(
 ): Promise<NonNullable<Awaited<ReturnType<typeof initProviderConfig>>>> {
   const providerConfig = await getConfigInitFunction({
     ...providerConfigOptions,
+    reset: true,
     getConfigPath() {
       return join(path, PROVIDER_CONFIG_FULL_FILE_NAME);
     },

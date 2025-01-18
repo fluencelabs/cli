@@ -696,6 +696,10 @@ export default {
 
     return mergedSchema;
   },
+  onReset() {
+    dataCentersPromise = undefined;
+    resourcesPromise = undefined;
+  },
 } satisfies ConfigOptions<PrevConfig, Config>;
 
 type DefaultComputePeerConfigArgs = {

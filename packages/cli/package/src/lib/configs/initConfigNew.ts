@@ -107,6 +107,7 @@ export function getConfigInitFunction<
     getSchemaDirPath,
     getConfigPath,
     description,
+    reset = false,
   }: InitConfigOptions<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>,
   getDefaultConfig?: GetDefaultConfig<
     GetLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>
@@ -118,6 +119,10 @@ export function getConfigInitFunction<
 
   return async () => {
     const expectedConfigPath = await getConfigPath();
+
+    if (reset) {
+      initializedConfigs.delete(expectedConfigPath);
+    }
 
     const previouslyInitializedConfig =
       await initializedConfigs.get(expectedConfigPath);
@@ -159,6 +164,7 @@ export function getConfigInitFunction<
         getDefaultConfig,
         getSchemaDirPath,
         description,
+        reset,
       });
 
       if (getLatestConfigRes === null) {
@@ -278,6 +284,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
   getDefaultConfig,
   getSchemaDirPath,
   description,
+  reset,
 }: {
   options: OptionsTuple<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>;
   expectedConfigPath: string;
@@ -286,6 +293,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     | undefined;
   getSchemaDirPath: GetPath | undefined;
   description: string;
+  reset: boolean;
 }): Promise<{
   latestConfig: GetLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>;
   latestConfigString: string;
@@ -426,6 +434,10 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
       }
 
       currentConfig = { version: initialVersion + index, ...migrated };
+    }
+
+    if (reset && configOptions.onReset !== undefined) {
+      await configOptions.onReset();
     }
 
     if (configOptions.refineSchema !== undefined) {
