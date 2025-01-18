@@ -286,6 +286,7 @@ async function doSign<
     method,
     args: originalArgs,
     validateAddress,
+    providerOrWallet,
   } = await getTransaction();
 
   const overrides = originalArgs[originalArgs.length - 1];
@@ -315,12 +316,13 @@ async function doSign<
       : `calling contract method: ${debugInfo}`,
   );
 
-  const { providerOrWallet } = await getContracts();
-
   let txHash: string;
   let txReceipt: TransactionReceipt | null;
 
-  if (providerOrWallet.sendTransaction !== undefined) {
+  if (
+    providerOrWallet?.sendTransaction !== undefined ||
+    (await getContracts()).providerOrWallet.sendTransaction !== undefined
+  ) {
     const { tx, res } = await setTryTimeout(
       `execute ${color.yellow(title)} contract function`,
       async function executingContractMethod() {
@@ -417,6 +419,7 @@ type SignArgs<
   method: TypedContractMethod<A, R, S>;
   args: Parameters<TypedContractMethod<A, R, S>>;
   validateAddress?: ValidateAddress;
+  providerOrWallet?: Provider | Wallet;
 };
 
 export async function sign<

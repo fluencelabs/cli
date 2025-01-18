@@ -38,6 +38,7 @@ import {
 import {
   getContractsByPrivKey,
   getEventValue,
+  sign,
 } from "../../src/lib/dealClient.js";
 import { stringifyUnknown } from "../../src/lib/helpers/stringifyUnknown.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
@@ -186,7 +187,7 @@ describe("provider tests", () => {
       const cwd = join("test", "tmp", "addDatacenter");
       await initializeTemplate(cwd);
 
-      const { contracts } = await getContractsByPrivKey(
+      const { contracts, providerOrWallet } = await getContractsByPrivKey(
         LOCAL_NET_DEFAULT_WALLET_KEY,
       );
 
@@ -197,17 +198,14 @@ describe("provider tests", () => {
       const NO_CERTIFICATIONS = "NO_CERTIFICATIONS";
       const certifications = [NO_CERTIFICATIONS];
 
-      const createDatacenterTxReceipt = await (
-        await contracts.diamond.createDatacenter({
-          countryCode,
-          cityCode,
-          index: cityIndex,
-          tier,
-          certifications,
-        })
-      ).wait();
-
-      assert(createDatacenterTxReceipt !== null, "Tx receipt must exist");
+      const createDatacenterTxReceipt = await sign({
+        title: 'Create datacenter with "NO_CERTIFICATIONS" certifications',
+        method: contracts.diamond.createDatacenter,
+        args: [
+          { countryCode, cityCode, index: cityIndex, tier, certifications },
+        ],
+        providerOrWallet,
+      });
 
       const createdDatacenterId = await getEventValue({
         txReceipt: createDatacenterTxReceipt,
@@ -272,11 +270,12 @@ describe("provider tests", () => {
       const NEW_CERTIFICATIONS = "ALL_CERTIFICATIONS";
       const newTier = 4;
 
-      await (
-        await contracts.diamond.updateDatacenter(createdDatacenterId, newTier, [
-          NEW_CERTIFICATIONS,
-        ])
-      ).wait();
+      await sign({
+        title: `Update datacenter with new certifications: ${NEW_CERTIFICATIONS} and new tier: ${numToStr(newTier)}`,
+        method: contracts.diamond.updateDatacenter,
+        args: [createdDatacenterId, newTier, [NEW_CERTIFICATIONS]],
+        providerOrWallet,
+      });
 
       const offerInfoWithUpdatedDatacenter = await fluence({
         args: ["provider", "offer-info"],
