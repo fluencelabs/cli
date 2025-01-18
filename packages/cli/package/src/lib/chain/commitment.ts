@@ -336,14 +336,14 @@ export async function createCommitments(flags: PeerAndOfferNameFlags) {
   let createCommitmentsTxReceipts;
 
   try {
-    createCommitmentsTxReceipts = await signBatch(
-      `Create commitments for the following peers:\n\n${computePeers
+    createCommitmentsTxReceipts = await signBatch({
+      title: `Create commitments for the following peers:\n\n${computePeers
         .map(({ name, peerId }) => {
           return `Peer: ${name}\nPeerId: ${peerId}`;
         })
         .join("\n\n")}`,
-      [firstCommitmentTx, ...restCommitmentTxs],
-    );
+      populatedTxs: [firstCommitmentTx, ...restCommitmentTxs],
+    });
   } catch (e) {
     const errorString = stringifyUnknown(e);
 
@@ -440,9 +440,9 @@ export async function removeCommitments(flags: CCFlags) {
     },
   ).join("\n\n");
 
-  await signBatch(
-    `Remove the following commitments:\n\n${CCsWithWaitDelegationStatusString}`,
-    [
+  await signBatch({
+    title: `Remove the following commitments:\n\n${CCsWithWaitDelegationStatusString}`,
+    populatedTxs: [
       populateTx(
         contracts.diamond.removeCommitment,
         firstCCWithWaitDelegationStatus.ccId,
@@ -451,7 +451,7 @@ export async function removeCommitments(flags: CCFlags) {
         return populateTx(contracts.diamond.removeCommitment, ccId);
       }),
     ],
-  );
+  });
 
   commandObj.logToStderr(
     `Removed commitments:\n\n${CCsWithWaitDelegationStatusString}`,
@@ -573,10 +573,13 @@ export async function collateralWithdraw(
 
     if (firstMoveResourcesFromDealTx !== undefined) {
       try {
-        await signBatch(
-          `Moving resources from the following deals:\n${dealsString}`,
-          [firstMoveResourcesFromDealTx, ...restMoveResourcesFromDealTxs],
-        );
+        await signBatch({
+          title: `Moving resources from the following deals:\n${dealsString}`,
+          populatedTxs: [
+            firstMoveResourcesFromDealTx,
+            ...restMoveResourcesFromDealTxs,
+          ],
+        });
       } catch (e) {
         commandObj.warn(
           `Wasn't able to move resources from deals for ${stringifyBasicCommitmentInfo(commitment)}. Most likely the reason is you must wait until the provider exits from all the following deals:\n${dealsString}`,
@@ -609,22 +612,23 @@ export async function collateralWithdraw(
       },
     );
 
-    await signBatch(
-      `${firstNotExitedUnit === undefined ? "Finish" : "Remove compute units from capacity commitments and finish"} commitment ${peerName === undefined ? ccId : `for ${peerName} (${ccId})`} ${ccId}`,
-      firstNotExitedUnit === undefined
-        ? [populateTx(contracts.diamond.finishCommitment, ccId)]
-        : [
-            populateTx(contracts.diamond.removeCUFromCC, ccId, [
-              firstNotExitedUnit.unitId,
-            ]),
-            ...restNotExitedUnits.map(({ unitId }) => {
-              return populateTx(contracts.diamond.removeCUFromCC, ccId, [
-                unitId,
-              ]);
-            }),
-            populateTx(contracts.diamond.finishCommitment, ccId),
-          ],
-    );
+    await signBatch({
+      title: `${firstNotExitedUnit === undefined ? "Finish" : "Remove compute units from capacity commitments and finish"} commitment ${peerName === undefined ? ccId : `for ${peerName} (${ccId})`} ${ccId}`,
+      populatedTxs:
+        firstNotExitedUnit === undefined
+          ? [populateTx(contracts.diamond.finishCommitment, ccId)]
+          : [
+              populateTx(contracts.diamond.removeCUFromCC, ccId, [
+                firstNotExitedUnit.unitId,
+              ]),
+              ...restNotExitedUnits.map(({ unitId }) => {
+                return populateTx(contracts.diamond.removeCUFromCC, ccId, [
+                  unitId,
+                ]);
+              }),
+              populateTx(contracts.diamond.finishCommitment, ccId),
+            ],
+    });
   }
 }
 
@@ -633,19 +637,19 @@ export async function collateralRewardWithdraw(flags: CCFlags) {
   const [firstCommitment, ...restCommitments] = commitments;
   const { contracts } = await getContracts();
 
-  await signBatch(
-    `Withdraw rewards for commitments:\n\n${commitments
+  await signBatch({
+    title: `Withdraw rewards for commitments:\n\n${commitments
       .map(({ ccId }) => {
         return ccId;
       })
       .join("\n")}`,
-    [
+    populatedTxs: [
       populateTx(contracts.diamond.withdrawReward, firstCommitment.ccId),
       ...restCommitments.map(({ ccId }) => {
         return populateTx(contracts.diamond.withdrawReward, ccId);
       }),
     ],
-  );
+  });
 }
 
 export function stringifyBasicCommitmentInfo({

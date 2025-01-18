@@ -16,9 +16,11 @@
  */
 
 import assert from "node:assert";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { describe, expect } from "vitest";
+import { stringify } from "yaml";
 
 import {
   LOCAL_NET_DEFAULT_ACCOUNTS,
@@ -57,10 +59,14 @@ import {
   getContractsByPrivKey,
   getEventValue,
   getEventValues,
+  populateTx,
   sign,
+  signBatch,
 } from "../../src/lib/dealClient.js";
+import { setTryTimeout } from "../../src/lib/helpers/setTryTimeout.js";
 import { stringifyUnknown } from "../../src/lib/helpers/stringifyUnknown.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
+import { removeProperties } from "../../src/lib/helpers/utils.js";
 import { fluence } from "../helpers/commonWithSetupTests.js";
 import { CC_DURATION_SECONDS } from "../helpers/constants.js";
 import { initializeTemplate } from "../helpers/sharedSteps.js";
@@ -324,173 +330,345 @@ describe("provider tests", () => {
     },
   );
 
-  wrappedTest("create offer with newly added resources", async () => {
-    const cwd = join("test", "tmp", "addResources");
-    await initializeTemplate(cwd);
+  wrappedTest(
+    "create offer with newly added resources, update resources",
+    async () => {
+      const cwd = join("test", "tmp", "addResources");
+      await initializeTemplate(cwd);
 
-    const { contracts, providerOrWallet } = await getContractsByPrivKey(
-      LOCAL_NET_DEFAULT_WALLET_KEY,
-    );
+      const { contracts, providerOrWallet } = await getContractsByPrivKey(
+        LOCAL_NET_DEFAULT_WALLET_KEY,
+      );
 
-    const CPU_RESOURCE_METADATA: CPUMetadata = {
-      manufacturer: "Fluence",
-      brand: "F1",
-      architecture: "RISC-V",
-      generation: "1",
-    };
+      const CPU_RESOURCE_METADATA: CPUMetadata = {
+        manufacturer: "Fluence",
+        brand: "F1",
+        architecture: "RISC-V",
+        generation: "1",
+      };
 
-    const CPU_RESOURCE_NAME = cpuResourceToHumanReadableString(
-      CPU_RESOURCE_METADATA,
-    );
+      const CPU_RESOURCE_NAME = cpuResourceToHumanReadableString(
+        CPU_RESOURCE_METADATA,
+      );
 
-    const RAM_RESOURCE_METADATA: RAMMetadata = {
-      type: "DDR",
-      generation: "6",
-    };
+      const RAM_RESOURCE_METADATA: RAMMetadata = {
+        type: "DDR",
+        generation: "6",
+      };
 
-    const RAM_RESOURCE_NAME = ramResourceToHumanReadableString(
-      RAM_RESOURCE_METADATA,
-    );
+      const RAM_RESOURCE_NAME = ramResourceToHumanReadableString(
+        RAM_RESOURCE_METADATA,
+      );
 
-    const STORAGE_RESOURCE_METADATA: StorageMetadata = {
-      type: "HDD",
-    };
+      const STORAGE_RESOURCE_METADATA: StorageMetadata = {
+        type: "HDD",
+      };
 
-    const STORAGE_RESOURCE_NAME = storageResourceToHumanReadableString(
-      STORAGE_RESOURCE_METADATA,
-    );
+      const STORAGE_RESOURCE_NAME = storageResourceToHumanReadableString(
+        STORAGE_RESOURCE_METADATA,
+      );
 
-    const BANDWIDTH_RESOURCE_METADATA: BandwidthMetadata = {
-      type: "semi-dedicated",
-    };
+      const BANDWIDTH_RESOURCE_METADATA: BandwidthMetadata = {
+        type: "semi-dedicated",
+      };
 
-    const BANDWIDTH_RESOURCE_NAME = bandwidthResourceToHumanReadableString(
-      BANDWIDTH_RESOURCE_METADATA,
-    );
+      const BANDWIDTH_RESOURCE_NAME = bandwidthResourceToHumanReadableString(
+        BANDWIDTH_RESOURCE_METADATA,
+      );
 
-    const IP_RESOURCE_METADATA: IPMetadata = {
-      version: "8",
-    };
+      const IP_RESOURCE_METADATA: IPMetadata = {
+        version: "8",
+      };
 
-    const IP_RESOURCE_NAME =
-      ipResourceToHumanReadableString(IP_RESOURCE_METADATA);
+      const IP_RESOURCE_NAME =
+        ipResourceToHumanReadableString(IP_RESOURCE_METADATA);
 
-    const createResourcesTxReceipt = await sign({
-      title: "Create resources",
-      method: contracts.diamond.registerResources,
-      args: [
-        [
-          {
-            ty: OnChainResourceType.VCPU,
-            metadata: JSON.stringify(CPU_RESOURCE_METADATA),
-          },
-          {
-            ty: OnChainResourceType.RAM,
-            metadata: JSON.stringify(RAM_RESOURCE_METADATA),
-          },
-          {
-            ty: OnChainResourceType.STORAGE,
-            metadata: JSON.stringify(STORAGE_RESOURCE_METADATA),
-          },
-          {
-            ty: OnChainResourceType.NETWORK_BANDWIDTH,
-            metadata: JSON.stringify(BANDWIDTH_RESOURCE_METADATA),
-          },
-          {
-            ty: OnChainResourceType.PUBLIC_IP,
-            metadata: JSON.stringify(IP_RESOURCE_METADATA),
-          },
+      const createResourcesTxReceipt = await sign({
+        title: "Create resources",
+        method: contracts.diamond.registerResources,
+        args: [
+          [
+            {
+              ty: OnChainResourceType.VCPU,
+              metadata: JSON.stringify(CPU_RESOURCE_METADATA),
+            },
+            {
+              ty: OnChainResourceType.RAM,
+              metadata: JSON.stringify(RAM_RESOURCE_METADATA),
+            },
+            {
+              ty: OnChainResourceType.STORAGE,
+              metadata: JSON.stringify(STORAGE_RESOURCE_METADATA),
+            },
+            {
+              ty: OnChainResourceType.NETWORK_BANDWIDTH,
+              metadata: JSON.stringify(BANDWIDTH_RESOURCE_METADATA),
+            },
+            {
+              ty: OnChainResourceType.PUBLIC_IP,
+              metadata: JSON.stringify(IP_RESOURCE_METADATA),
+            },
+          ],
         ],
-      ],
-      providerOrWallet,
-    });
-
-    const resources = getEventValues({
-      txReceipt: createResourcesTxReceipt,
-      contract: contracts.diamond,
-      eventName: "ResourceCreated",
-      value: "resources",
-    });
-
-    assert(
-      resources.every((resource) => {
-        return (
-          typeof resource === "object" &&
-          resource !== null &&
-          "resourceId" in resource
-        );
-      }),
-      "All ResourceCreated events must have resourceId and ty",
-    );
-
-    const providerConfig = await initProviderConfigWithPath(cwd);
-
-    Object.values(providerConfig.computePeers).forEach((computePeer) => {
-      computePeer.resources.cpu.name = CPU_RESOURCE_NAME;
-      computePeer.resources.ram.name = RAM_RESOURCE_NAME;
-
-      computePeer.resources.storage.forEach((s) => {
-        s.name = STORAGE_RESOURCE_NAME;
+        providerOrWallet,
       });
 
-      computePeer.resources.bandwidth.name = BANDWIDTH_RESOURCE_NAME;
-      computePeer.resources.ip.name = IP_RESOURCE_NAME;
-    });
+      const [
+        cpuResourceId,
+        ramResourceId,
+        storageResourceId,
+        bandwidthResourceId,
+        ipResourceId,
+      ] = getEventValues({
+        txReceipt: createResourcesTxReceipt,
+        contract: contracts.diamond,
+        eventName: "ResourceCreated",
+        value: "resourceId",
+      });
 
-    const [defaultOfferName] = Object.keys(providerConfig.offers);
-
-    assert(
-      defaultOfferName !== undefined &&
-        providerConfig.offers[defaultOfferName] !== undefined,
-      "Default offer must exist in the provider config",
-    );
-
-    const resourcePrices =
-      providerConfig.offers[defaultOfferName].resourcePrices;
-
-    resourcePrices.cpu = { [CPU_RESOURCE_NAME]: `1 ${CPU_PRICE_UNITS}` };
-    resourcePrices.ram = { [RAM_RESOURCE_NAME]: `1 ${RAM_PRICE_UNITS}` };
-
-    resourcePrices.storage = {
-      [STORAGE_RESOURCE_NAME]: `1 ${STORAGE_PRICE_UNITS}`,
-    };
-
-    resourcePrices.bandwidth = {
-      [BANDWIDTH_RESOURCE_NAME]: `1 ${BANDWIDTH_PRICE_UNITS}`,
-    };
-
-    resourcePrices.ip = { [IP_RESOURCE_NAME]: `1 ${IP_PRICE_UNITS}` };
-
-    await providerConfig.$commit();
-
-    await fluence({ args: ["provider", "register"], flags: PRIV_KEY_1, cwd });
-
-    await fluence({
-      args: ["provider", "offer-create"],
-      flags: {
-        ...PRIV_KEY_1,
-        [OFFER_FLAG_NAME]: defaultOfferName,
-      },
-      cwd,
-    });
-
-    const offerInfoWithNewResources = await fluence({
-      args: ["provider", "offer-info"],
-      flags: {
-        ...PRIV_KEY_1,
-        [OFFER_FLAG_NAME]: defaultOfferName,
-      },
-      cwd,
-    });
-
-    resources.forEach(({ resourceId }) => {
-      assert(typeof resourceId === "string", "Resource id must be a string");
-
-      expect(offerInfoWithNewResources).toEqual(
-        expect.stringContaining(resourceId),
+      assert(
+        typeof cpuResourceId === "string" &&
+          typeof ramResourceId === "string" &&
+          typeof storageResourceId === "string" &&
+          typeof bandwidthResourceId === "string" &&
+          typeof ipResourceId === "string",
+        "All ResourceCreated events must have string resourceId",
       );
-    });
-  });
+
+      const providerConfig = await initProviderConfigWithPath(cwd);
+
+      function setResourceNamesInConfig({
+        cpuName,
+        ramName,
+        storageName,
+        bandwidthName,
+        ipName,
+      }: {
+        cpuName: string;
+        ramName: string;
+        storageName: string;
+        bandwidthName: string;
+        ipName: string;
+      }) {
+        Object.values(providerConfig.computePeers).forEach((computePeer) => {
+          computePeer.resources.cpu.name = cpuName;
+          computePeer.resources.ram.name = ramName;
+
+          computePeer.resources.storage.forEach((s) => {
+            s.name = storageName;
+          });
+
+          computePeer.resources.bandwidth.name = bandwidthName;
+          computePeer.resources.ip.name = ipName;
+        });
+
+        const [defaultOfferName] = Object.keys(providerConfig.offers);
+
+        assert(
+          defaultOfferName !== undefined &&
+            providerConfig.offers[defaultOfferName] !== undefined,
+          "Default offer must exist in the provider config",
+        );
+
+        const resourcePrices =
+          providerConfig.offers[defaultOfferName].resourcePrices;
+
+        resourcePrices.cpu = { [cpuName]: `1 ${CPU_PRICE_UNITS}` };
+        resourcePrices.ram = { [ramName]: `1 ${RAM_PRICE_UNITS}` };
+
+        resourcePrices.storage = {
+          [storageName]: `1 ${STORAGE_PRICE_UNITS}`,
+        };
+
+        resourcePrices.bandwidth = {
+          [bandwidthName]: `1 ${BANDWIDTH_PRICE_UNITS}`,
+        };
+
+        resourcePrices.ip = { [ipName]: `1 ${IP_PRICE_UNITS}` };
+
+        return defaultOfferName;
+      }
+
+      const defaultOfferName = setResourceNamesInConfig({
+        cpuName: CPU_RESOURCE_NAME,
+        ramName: RAM_RESOURCE_NAME,
+        storageName: STORAGE_RESOURCE_NAME,
+        bandwidthName: BANDWIDTH_RESOURCE_NAME,
+        ipName: IP_RESOURCE_NAME,
+      });
+
+      await providerConfig.$commit();
+
+      await fluence({ args: ["provider", "register"], flags: PRIV_KEY_1, cwd });
+
+      await fluence({
+        args: ["provider", "offer-create"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: defaultOfferName,
+        },
+        cwd,
+      });
+
+      const offerInfoWithNewResources = await fluence({
+        args: ["provider", "offer-info"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: defaultOfferName,
+        },
+        cwd,
+      });
+
+      [
+        cpuResourceId,
+        ramResourceId,
+        storageResourceId,
+        bandwidthResourceId,
+        ipResourceId,
+      ].forEach((resourceId) => {
+        expect(offerInfoWithNewResources).toEqual(
+          expect.stringContaining(resourceId),
+        );
+      });
+
+      const CPU_RESOURCE_METADATA_UPDATED: CPUMetadata = {
+        ...CPU_RESOURCE_METADATA,
+        generation: "2",
+      };
+
+      const CPU_RESOURCE_NAME_UPDATED = cpuResourceToHumanReadableString(
+        CPU_RESOURCE_METADATA_UPDATED,
+      );
+
+      const RAM_RESOURCE_METADATA_UPDATED: RAMMetadata = {
+        ...RAM_RESOURCE_METADATA,
+        generation: "7",
+      };
+
+      const RAM_RESOURCE_NAME_UPDATED = ramResourceToHumanReadableString(
+        RAM_RESOURCE_METADATA_UPDATED,
+      );
+
+      const STORAGE_RESOURCE_METADATA_UPDATED: StorageMetadata = {
+        ...STORAGE_RESOURCE_METADATA,
+        type: "ODD",
+      };
+
+      const STORAGE_RESOURCE_NAME_UPDATED =
+        storageResourceToHumanReadableString(STORAGE_RESOURCE_METADATA_UPDATED);
+
+      const BANDWIDTH_RESOURCE_METADATA_UPDATED: BandwidthMetadata = {
+        ...BANDWIDTH_RESOURCE_METADATA,
+        type: "semi-shared",
+      };
+
+      const BANDWIDTH_RESOURCE_NAME_UPDATED =
+        bandwidthResourceToHumanReadableString(
+          BANDWIDTH_RESOURCE_METADATA_UPDATED,
+        );
+
+      const IP_RESOURCE_METADATA_UPDATED: IPMetadata = {
+        ...IP_RESOURCE_METADATA,
+        version: "10",
+      };
+
+      const IP_RESOURCE_NAME_UPDATED = ipResourceToHumanReadableString(
+        IP_RESOURCE_METADATA_UPDATED,
+      );
+
+      await signBatch({
+        title: "Update resources metadata",
+        populatedTxs: [
+          populateTx(
+            contracts.diamond.updateResourceMetadata,
+            cpuResourceId,
+            JSON.stringify(CPU_RESOURCE_METADATA_UPDATED),
+          ),
+          populateTx(
+            contracts.diamond.updateResourceMetadata,
+            ramResourceId,
+            JSON.stringify(RAM_RESOURCE_METADATA_UPDATED),
+          ),
+          populateTx(
+            contracts.diamond.updateResourceMetadata,
+            storageResourceId,
+            JSON.stringify(STORAGE_RESOURCE_METADATA_UPDATED),
+          ),
+          populateTx(
+            contracts.diamond.updateResourceMetadata,
+            bandwidthResourceId,
+            JSON.stringify(BANDWIDTH_RESOURCE_METADATA_UPDATED),
+          ),
+          populateTx(
+            contracts.diamond.updateResourceMetadata,
+            ipResourceId,
+            JSON.stringify(IP_RESOURCE_METADATA_UPDATED),
+          ),
+        ],
+        providerOrWallet,
+      });
+
+      await expect(async () => {
+        await fluence({
+          args: ["provider", "gen"],
+          flags: {
+            ...PRIV_KEY_1,
+            [OFFER_FLAG_NAME]: defaultOfferName,
+          },
+          cwd,
+        });
+      }).rejects.toThrow();
+
+      setResourceNamesInConfig({
+        cpuName: CPU_RESOURCE_NAME_UPDATED,
+        ramName: RAM_RESOURCE_NAME_UPDATED,
+        storageName: STORAGE_RESOURCE_NAME_UPDATED,
+        bandwidthName: BANDWIDTH_RESOURCE_NAME_UPDATED,
+        ipName: IP_RESOURCE_NAME_UPDATED,
+      });
+
+      await writeFile(
+        stringify(
+          removeProperties(providerConfig, ([, v]) => {
+            return typeof v === "function";
+          }),
+        ),
+        "utf8",
+      );
+
+      await fluence({
+        args: ["provider", "gen"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: defaultOfferName,
+        },
+        cwd,
+      });
+
+      await setTryTimeout(
+        "get updated resources from subgraph",
+        async () => {
+          const offerInfoWithUpdatedResources = await fluence({
+            args: ["provider", "offer-info"],
+            flags: {
+              ...PRIV_KEY_1,
+              [OFFER_FLAG_NAME]: defaultOfferName,
+            },
+            cwd,
+          });
+
+          expect(offerInfoWithUpdatedResources).toEqual(
+            expect.stringContaining(BANDWIDTH_RESOURCE_METADATA_UPDATED.type),
+          );
+        },
+        (err) => {
+          throw err;
+        },
+        10_000,
+        1_000,
+      );
+    },
+  );
 });
 
 async function checkProviderNameIsCorrect(cwd: string, providerName: string) {

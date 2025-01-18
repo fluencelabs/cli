@@ -122,15 +122,15 @@ export async function updateOffers(flags: OffersArgs) {
     return;
   }
 
-  await signBatch(
-    `Updating offers:\n\n${populatedTxs
+  await signBatch({
+    title: `Updating offers:\n\n${populatedTxs
       .map(({ offerName, offerId }) => {
         return `${offerName} (${offerId})`;
       })
       .join("\n")}`,
-    [firstUpdateOffersTx, ...restUpdateOffersTxs],
-    assertProviderIsRegistered,
-  );
+    populatedTxs: [firstUpdateOffersTx, ...restUpdateOffersTxs],
+    validateAddress: assertProviderIsRegistered,
+  });
 
   const peersToDeploy = populatedTxs.flatMap(({ txs }) => {
     return txs.flatMap(({ peersToDeploy }) => {
@@ -190,15 +190,15 @@ export async function removeOffers(flags: OffersArgs) {
     return;
   }
 
-  await signBatch(
-    `Removing offers:\n\n${populatedTxs
+  await signBatch({
+    title: `Removing offers:\n\n${populatedTxs
       .map(({ offerName, offerId }) => {
         return `${offerName} (${offerId})`;
       })
       .join("\n")}`,
-    [firstRemoveOffersTx, ...restRemoveOffersTxs],
-    assertProviderIsRegistered,
-  );
+    populatedTxs: [firstRemoveOffersTx, ...restRemoveOffersTxs],
+    validateAddress: assertProviderIsRegistered,
+  });
 
   const providerArtifactsConfig = await initNewProviderArtifactsConfig();
 

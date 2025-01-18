@@ -419,7 +419,7 @@ type SignArgs<
   method: TypedContractMethod<A, R, S>;
   args: Parameters<TypedContractMethod<A, R, S>>;
   validateAddress?: ValidateAddress;
-  providerOrWallet?: Provider | Wallet;
+  providerOrWallet?: Provider | Wallet | undefined;
 };
 
 export async function sign<
@@ -452,18 +452,24 @@ export function populateTx<T extends unknown[]>(
 
 let batchTxMessage: string | undefined;
 
-export async function signBatch(
-  title: string,
-  populatedTxsWithDebugInfo: [
+export async function signBatch({
+  title,
+  populatedTxs,
+  validateAddress,
+  providerOrWallet,
+}: {
+  title: string;
+  populatedTxs: [
     ReturnType<typeof populateTx>,
     ...ReturnType<typeof populateTx>[],
-  ],
-  validateAddress?: ValidateAddress,
-) {
+  ];
+  validateAddress?: ValidateAddress;
+  providerOrWallet?: Provider | Wallet | undefined;
+}) {
   const [
     { populate: firstPopulate, debugInfo: firstDebugInfo },
     ...restPopulatedTxsWithDebugInfo
-  ] = populatedTxsWithDebugInfo;
+  ] = populatedTxs;
 
   const [
     {
@@ -492,15 +498,15 @@ export async function signBatch(
   const receipts = [];
   let sliceIndexStart = 0;
 
-  while (sliceIndexStart < populatedTxsWithDebugInfo.length) {
+  while (sliceIndexStart < populatedTxs.length) {
     const res = await guessTxSizeAndSign({
       sliceValuesToRegister(sliceIndex) {
-        return populatedTxsWithDebugInfo.slice(
+        return populatedTxs.slice(
           sliceIndexStart,
           sliceIndexStart + sliceIndex,
         );
       },
-      sliceIndex: populatedTxsWithDebugInfo.length - sliceIndexStart,
+      sliceIndex: populatedTxs.length - sliceIndexStart,
       method: multicall,
       validateAddress,
       async getArgs(valuesToRegister) {
@@ -521,6 +527,7 @@ export async function signBatch(
 
         return title;
       },
+      providerOrWallet,
     });
 
     receipts.push(res.txReceipt);
