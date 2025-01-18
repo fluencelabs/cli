@@ -29,7 +29,25 @@ import {
   initProviderConfig,
   options as providerConfigOptions,
 } from "../../src/lib/configs/project/provider/provider.js";
-import { dataCenterToHumanReadableString } from "../../src/lib/configs/project/provider/provider4.js";
+import {
+  dataCenterToHumanReadableString,
+  OnChainResourceType,
+  type CPUMetadata,
+  type RAMMetadata,
+  type StorageMetadata,
+  type BandwidthMetadata,
+  type IPMetadata,
+  cpuResourceToHumanReadableString,
+  ramResourceToHumanReadableString,
+  storageResourceToHumanReadableString,
+  bandwidthResourceToHumanReadableString,
+  ipResourceToHumanReadableString,
+  CPU_PRICE_UNITS,
+  RAM_PRICE_UNITS,
+  STORAGE_PRICE_UNITS,
+  BANDWIDTH_PRICE_UNITS,
+  IP_PRICE_UNITS,
+} from "../../src/lib/configs/project/provider/provider4.js";
 import {
   OFFER_FLAG_NAME,
   PRIV_KEY_FLAG_NAME,
@@ -38,6 +56,7 @@ import {
 import {
   getContractsByPrivKey,
   getEventValue,
+  getEventValues,
   sign,
 } from "../../src/lib/dealClient.js";
 import { stringifyUnknown } from "../../src/lib/helpers/stringifyUnknown.js";
@@ -54,6 +73,7 @@ const PRIV_KEY_1 = {
 async function initProviderConfigWithPath(
   path: string,
 ): Promise<NonNullable<Awaited<ReturnType<typeof initProviderConfig>>>> {
+  // @ts-expect-error Don't know how to solve this error but it's valid
   const providerConfig = await getConfigInitFunction({
     ...providerConfigOptions,
     reset: true,
@@ -67,6 +87,7 @@ async function initProviderConfigWithPath(
     "Provider config must already exists in a quickstart template",
   );
 
+  // @ts-expect-error Don't know how to solve this error but it's valid
   return providerConfig;
 }
 
@@ -208,7 +229,7 @@ describe("provider tests", () => {
         providerOrWallet,
       });
 
-      const createdDatacenterId = await getEventValue({
+      const createdDatacenterId = getEventValue({
         txReceipt: createDatacenterTxReceipt,
         contract: contracts.diamond,
         eventName: "DatacenterCreated",
@@ -237,6 +258,8 @@ describe("provider tests", () => {
         });
 
       await providerConfig.$commit();
+
+      await fluence({ args: ["provider", "register"], flags: PRIV_KEY_1, cwd });
 
       await fluence({
         args: ["provider", "offer-create"],
@@ -300,6 +323,174 @@ describe("provider tests", () => {
       );
     },
   );
+
+  wrappedTest("create offer with newly added resources", async () => {
+    const cwd = join("test", "tmp", "addResources");
+    await initializeTemplate(cwd);
+
+    const { contracts, providerOrWallet } = await getContractsByPrivKey(
+      LOCAL_NET_DEFAULT_WALLET_KEY,
+    );
+
+    const CPU_RESOURCE_METADATA: CPUMetadata = {
+      manufacturer: "Fluence",
+      brand: "F1",
+      architecture: "RISC-V",
+      generation: "1",
+    };
+
+    const CPU_RESOURCE_NAME = cpuResourceToHumanReadableString(
+      CPU_RESOURCE_METADATA,
+    );
+
+    const RAM_RESOURCE_METADATA: RAMMetadata = {
+      type: "DDR",
+      generation: "6",
+    };
+
+    const RAM_RESOURCE_NAME = ramResourceToHumanReadableString(
+      RAM_RESOURCE_METADATA,
+    );
+
+    const STORAGE_RESOURCE_METADATA: StorageMetadata = {
+      type: "HDD",
+    };
+
+    const STORAGE_RESOURCE_NAME = storageResourceToHumanReadableString(
+      STORAGE_RESOURCE_METADATA,
+    );
+
+    const BANDWIDTH_RESOURCE_METADATA: BandwidthMetadata = {
+      type: "semi-dedicated",
+    };
+
+    const BANDWIDTH_RESOURCE_NAME = bandwidthResourceToHumanReadableString(
+      BANDWIDTH_RESOURCE_METADATA,
+    );
+
+    const IP_RESOURCE_METADATA: IPMetadata = {
+      version: "8",
+    };
+
+    const IP_RESOURCE_NAME =
+      ipResourceToHumanReadableString(IP_RESOURCE_METADATA);
+
+    const createResourcesTxReceipt = await sign({
+      title: "Create resources",
+      method: contracts.diamond.registerResources,
+      args: [
+        [
+          {
+            ty: OnChainResourceType.VCPU,
+            metadata: JSON.stringify(CPU_RESOURCE_METADATA),
+          },
+          {
+            ty: OnChainResourceType.RAM,
+            metadata: JSON.stringify(RAM_RESOURCE_METADATA),
+          },
+          {
+            ty: OnChainResourceType.STORAGE,
+            metadata: JSON.stringify(STORAGE_RESOURCE_METADATA),
+          },
+          {
+            ty: OnChainResourceType.NETWORK_BANDWIDTH,
+            metadata: JSON.stringify(BANDWIDTH_RESOURCE_METADATA),
+          },
+          {
+            ty: OnChainResourceType.PUBLIC_IP,
+            metadata: JSON.stringify(IP_RESOURCE_METADATA),
+          },
+        ],
+      ],
+      providerOrWallet,
+    });
+
+    const resources = getEventValues({
+      txReceipt: createResourcesTxReceipt,
+      contract: contracts.diamond,
+      eventName: "ResourceCreated",
+      value: "resources",
+    });
+
+    assert(
+      resources.every((resource) => {
+        return (
+          typeof resource === "object" &&
+          resource !== null &&
+          "resourceId" in resource
+        );
+      }),
+      "All ResourceCreated events must have resourceId and ty",
+    );
+
+    const providerConfig = await initProviderConfigWithPath(cwd);
+
+    Object.values(providerConfig.computePeers).forEach((computePeer) => {
+      computePeer.resources.cpu.name = CPU_RESOURCE_NAME;
+      computePeer.resources.ram.name = RAM_RESOURCE_NAME;
+
+      computePeer.resources.storage.forEach((s) => {
+        s.name = STORAGE_RESOURCE_NAME;
+      });
+
+      computePeer.resources.bandwidth.name = BANDWIDTH_RESOURCE_NAME;
+      computePeer.resources.ip.name = IP_RESOURCE_NAME;
+    });
+
+    const [defaultOfferName] = Object.keys(providerConfig.offers);
+
+    assert(
+      defaultOfferName !== undefined &&
+        providerConfig.offers[defaultOfferName] !== undefined,
+      "Default offer must exist in the provider config",
+    );
+
+    const resourcePrices =
+      providerConfig.offers[defaultOfferName].resourcePrices;
+
+    resourcePrices.cpu = { [CPU_RESOURCE_NAME]: `1 ${CPU_PRICE_UNITS}` };
+    resourcePrices.ram = { [RAM_RESOURCE_NAME]: `1 ${RAM_PRICE_UNITS}` };
+
+    resourcePrices.storage = {
+      [STORAGE_RESOURCE_NAME]: `1 ${STORAGE_PRICE_UNITS}`,
+    };
+
+    resourcePrices.bandwidth = {
+      [BANDWIDTH_RESOURCE_NAME]: `1 ${BANDWIDTH_PRICE_UNITS}`,
+    };
+
+    resourcePrices.ip = { [IP_RESOURCE_NAME]: `1 ${IP_PRICE_UNITS}` };
+
+    await providerConfig.$commit();
+
+    await fluence({ args: ["provider", "register"], flags: PRIV_KEY_1, cwd });
+
+    await fluence({
+      args: ["provider", "offer-create"],
+      flags: {
+        ...PRIV_KEY_1,
+        [OFFER_FLAG_NAME]: defaultOfferName,
+      },
+      cwd,
+    });
+
+    const offerInfoWithNewResources = await fluence({
+      args: ["provider", "offer-info"],
+      flags: {
+        ...PRIV_KEY_1,
+        [OFFER_FLAG_NAME]: defaultOfferName,
+      },
+      cwd,
+    });
+
+    resources.forEach(({ resourceId }) => {
+      assert(typeof resourceId === "string", "Resource id must be a string");
+
+      expect(offerInfoWithNewResources).toEqual(
+        expect.stringContaining(resourceId),
+      );
+    });
+  });
 });
 
 async function checkProviderNameIsCorrect(cwd: string, providerName: string) {
