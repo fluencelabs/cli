@@ -131,6 +131,11 @@ export async function resolveDeployment() {
       return {
         ...DEPLOYMENTS[await ensureChainEnv()],
         ...envConfig?.deployment,
+        // TODO: REMOVE THIS!
+        diamond: "0x162A433068F51e18b7d13932F27e66a3f99E6890",
+        multicall3: "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
+        usdc: "0x1291Be112d480055DaFd8a610b7d1e203891C274",
+        balanceKeeper: "0x04C89607413713Ec9775E14b954286519d836FEf",
       };
     })();
   }
