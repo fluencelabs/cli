@@ -611,10 +611,7 @@ describe("provider tests", () => {
       await expect(async () => {
         await fluence({
           args: ["provider", "gen"],
-          flags: {
-            ...PRIV_KEY_1,
-            [OFFER_FLAG_NAME]: defaultOfferName,
-          },
+          flags: PRIV_KEY_1,
           cwd,
         });
       }).rejects.toThrow();
@@ -628,6 +625,7 @@ describe("provider tests", () => {
       });
 
       await writeFile(
+        providerConfig.$getPath(),
         stringify(
           removeProperties(providerConfig, ([, v]) => {
             return typeof v === "function";
@@ -638,10 +636,7 @@ describe("provider tests", () => {
 
       await fluence({
         args: ["provider", "gen"],
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: defaultOfferName,
-        },
+        flags: PRIV_KEY_1,
         cwd,
       });
 
