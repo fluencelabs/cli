@@ -494,9 +494,9 @@ async function populateChangeResourcePriceTx({
   );
 
   const prevResourcePriceChanges = await Promise.all(
-    (offerIndexerInfo.resources ?? []).map(
-      async ({ resourceId, resourcePrice }) => {
-        const newResource = allResourcePrices[resourceId];
+    (offerIndexerInfo.offerResources ?? []).map(
+      async ({ resourceDescription: { id }, resourcePrice }) => {
+        const newResource = allResourcePrices[id];
 
         if (newResource === undefined) {
           return null;
@@ -516,7 +516,7 @@ async function populateChangeResourcePriceTx({
           tx: populateTx(
             contracts.diamond.changeResourcePriceV2,
             offerId,
-            resourceId,
+            id,
             newPrice,
           ),
         };
@@ -527,8 +527,8 @@ async function populateChangeResourcePriceTx({
   const newResources = await Promise.all(
     resourcePricesWithIdsArr.map(
       async ({ price, resourceId, resourceName, resourceType }) => {
-        const onChainResource = offerIndexerInfo.resources?.find((r) => {
-          return r.resourceId === resourceId;
+        const onChainResource = offerIndexerInfo.offerResources?.find((r) => {
+          return r.resourceDescription.id === resourceId;
         });
 
         if (onChainResource !== undefined) {

@@ -1,6 +1,6 @@
 {
   "protocolVersion": 2,
-  "chain-rpc": "docker.fluence.dev/chain-rpc:feat-marketplace-v2-resources-535b24c-7525-1",
-  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:feat-marketplace-v2-resources-535b24c-7525-1",
-  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:feat-marketplace-v2-resources-535b24c-7525-1"
+  "chain-rpc": "docker.fluence.dev/chain-rpc:feat-marketplace-v2-resources-1ae68b7-7538-1",
+  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:feat-marketplace-v2-resources-1ae68b7-7538-1",
+  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:feat-marketplace-v2-resources-1ae68b7-7538-1"
 }
