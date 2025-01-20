@@ -346,6 +346,10 @@ describe("provider tests", () => {
         generation: "1",
       };
 
+      const CPU_RESOURCE_METADATA_STRING = JSON.stringify(
+        CPU_RESOURCE_METADATA,
+      );
+
       const CPU_RESOURCE_NAME = cpuResourceToHumanReadableString(
         CPU_RESOURCE_METADATA,
       );
@@ -355,6 +359,10 @@ describe("provider tests", () => {
         generation: "6",
       };
 
+      const RAM_RESOURCE_METADATA_STRING = JSON.stringify(
+        RAM_RESOURCE_METADATA,
+      );
+
       const RAM_RESOURCE_NAME = ramResourceToHumanReadableString(
         RAM_RESOURCE_METADATA,
       );
@@ -362,6 +370,10 @@ describe("provider tests", () => {
       const STORAGE_RESOURCE_METADATA: StorageMetadata = {
         type: "HDD",
       };
+
+      const STORAGE_RESOURCE_METADATA_STRING = JSON.stringify(
+        STORAGE_RESOURCE_METADATA,
+      );
 
       const STORAGE_RESOURCE_NAME = storageResourceToHumanReadableString(
         STORAGE_RESOURCE_METADATA,
@@ -371,6 +383,10 @@ describe("provider tests", () => {
         type: "semi-dedicated",
       };
 
+      const BANDWIDTH_RESOURCE_METADATA_STRING = JSON.stringify(
+        BANDWIDTH_RESOURCE_METADATA,
+      );
+
       const BANDWIDTH_RESOURCE_NAME = bandwidthResourceToHumanReadableString(
         BANDWIDTH_RESOURCE_METADATA,
       );
@@ -378,6 +394,8 @@ describe("provider tests", () => {
       const IP_RESOURCE_METADATA: IPMetadata = {
         version: "8",
       };
+
+      const IP_RESOURCE_METADATA_STRING = JSON.stringify(IP_RESOURCE_METADATA);
 
       const IP_RESOURCE_NAME =
         ipResourceToHumanReadableString(IP_RESOURCE_METADATA);
@@ -530,10 +548,26 @@ describe("provider tests", () => {
         );
       });
 
+      [
+        CPU_RESOURCE_METADATA_STRING,
+        RAM_RESOURCE_METADATA_STRING,
+        STORAGE_RESOURCE_METADATA_STRING,
+        BANDWIDTH_RESOURCE_METADATA_STRING,
+        IP_RESOURCE_METADATA_STRING,
+      ].forEach((resourceMetadata) => {
+        expect(offerInfoWithNewResources).toEqual(
+          expect.stringContaining(resourceMetadata),
+        );
+      });
+
       const CPU_RESOURCE_METADATA_UPDATED: CPUMetadata = {
         ...CPU_RESOURCE_METADATA,
         generation: "2",
       };
+
+      const CPU_RESOURCE_METADATA_UPDATED_STRING = JSON.stringify(
+        CPU_RESOURCE_METADATA_UPDATED,
+      );
 
       const CPU_RESOURCE_NAME_UPDATED = cpuResourceToHumanReadableString(
         CPU_RESOURCE_METADATA_UPDATED,
@@ -544,6 +578,10 @@ describe("provider tests", () => {
         generation: "7",
       };
 
+      const RAM_RESOURCE_METADATA_UPDATED_STRING = JSON.stringify(
+        RAM_RESOURCE_METADATA_UPDATED,
+      );
+
       const RAM_RESOURCE_NAME_UPDATED = ramResourceToHumanReadableString(
         RAM_RESOURCE_METADATA_UPDATED,
       );
@@ -553,6 +591,10 @@ describe("provider tests", () => {
         type: "ODD",
       };
 
+      const STORAGE_RESOURCE_METADATA_UPDATED_STRING = JSON.stringify(
+        STORAGE_RESOURCE_METADATA_UPDATED,
+      );
+
       const STORAGE_RESOURCE_NAME_UPDATED =
         storageResourceToHumanReadableString(STORAGE_RESOURCE_METADATA_UPDATED);
 
@@ -560,6 +602,10 @@ describe("provider tests", () => {
         ...BANDWIDTH_RESOURCE_METADATA,
         type: "semi-shared",
       };
+
+      const BANDWIDTH_RESOURCE_METADATA_UPDATED_STRING = JSON.stringify(
+        BANDWIDTH_RESOURCE_METADATA_UPDATED,
+      );
 
       const BANDWIDTH_RESOURCE_NAME_UPDATED =
         bandwidthResourceToHumanReadableString(
@@ -571,6 +617,10 @@ describe("provider tests", () => {
         version: "10",
       };
 
+      const IP_RESOURCE_METADATA_UPDATED_STRING = JSON.stringify(
+        IP_RESOURCE_METADATA_UPDATED,
+      );
+
       const IP_RESOURCE_NAME_UPDATED = ipResourceToHumanReadableString(
         IP_RESOURCE_METADATA_UPDATED,
       );
@@ -581,27 +631,27 @@ describe("provider tests", () => {
           populateTx(
             contracts.diamond.updateResourceMetadata,
             cpuResourceId,
-            JSON.stringify(CPU_RESOURCE_METADATA_UPDATED),
+            CPU_RESOURCE_METADATA_UPDATED_STRING,
           ),
           populateTx(
             contracts.diamond.updateResourceMetadata,
             ramResourceId,
-            JSON.stringify(RAM_RESOURCE_METADATA_UPDATED),
+            RAM_RESOURCE_METADATA_UPDATED_STRING,
           ),
           populateTx(
             contracts.diamond.updateResourceMetadata,
             storageResourceId,
-            JSON.stringify(STORAGE_RESOURCE_METADATA_UPDATED),
+            STORAGE_RESOURCE_METADATA_UPDATED_STRING,
           ),
           populateTx(
             contracts.diamond.updateResourceMetadata,
             bandwidthResourceId,
-            JSON.stringify(BANDWIDTH_RESOURCE_METADATA_UPDATED),
+            BANDWIDTH_RESOURCE_METADATA_UPDATED_STRING,
           ),
           populateTx(
             contracts.diamond.updateResourceMetadata,
             ipResourceId,
-            JSON.stringify(IP_RESOURCE_METADATA_UPDATED),
+            IP_RESOURCE_METADATA_UPDATED_STRING,
           ),
         ],
         providerOrWallet,
@@ -648,9 +698,17 @@ describe("provider tests", () => {
         cwd,
       });
 
-      expect(offerInfoWithUpdatedResources).toEqual(
-        expect.stringContaining(BANDWIDTH_RESOURCE_METADATA_UPDATED.type),
-      );
+      [
+        CPU_RESOURCE_METADATA_UPDATED_STRING,
+        RAM_RESOURCE_METADATA_UPDATED_STRING,
+        STORAGE_RESOURCE_METADATA_UPDATED_STRING,
+        BANDWIDTH_RESOURCE_METADATA_UPDATED_STRING,
+        IP_RESOURCE_METADATA_UPDATED_STRING,
+      ].forEach((resourceMetadata) => {
+        expect(offerInfoWithUpdatedResources).toEqual(
+          expect.stringContaining(resourceMetadata),
+        );
+      });
     },
   );
 });
