@@ -63,7 +63,6 @@ import {
   sign,
   signBatch,
 } from "../../src/lib/dealClient.js";
-import { setTryTimeout } from "../../src/lib/helpers/setTryTimeout.js";
 import { stringifyUnknown } from "../../src/lib/helpers/stringifyUnknown.js";
 import { numToStr } from "../../src/lib/helpers/typesafeStringify.js";
 import { removeProperties } from "../../src/lib/helpers/utils.js";
@@ -640,27 +639,17 @@ describe("provider tests", () => {
         cwd,
       });
 
-      await setTryTimeout(
-        "get updated resources from subgraph",
-        async () => {
-          const offerInfoWithUpdatedResources = await fluence({
-            args: ["provider", "offer-info"],
-            flags: {
-              ...PRIV_KEY_1,
-              [OFFER_FLAG_NAME]: defaultOfferName,
-            },
-            cwd,
-          });
+      const offerInfoWithUpdatedResources = await fluence({
+        args: ["provider", "offer-info"],
+        flags: {
+          ...PRIV_KEY_1,
+          [OFFER_FLAG_NAME]: defaultOfferName,
+        },
+        cwd,
+      });
 
-          expect(offerInfoWithUpdatedResources).toEqual(
-            expect.stringContaining(BANDWIDTH_RESOURCE_METADATA_UPDATED.type),
-          );
-        },
-        (err) => {
-          throw err;
-        },
-        10_000,
-        1_000,
+      expect(offerInfoWithUpdatedResources).toEqual(
+        expect.stringContaining(BANDWIDTH_RESOURCE_METADATA_UPDATED.type),
       );
     },
   );
