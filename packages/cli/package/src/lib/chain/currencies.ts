@@ -54,9 +54,11 @@ async function getPtDecimals() {
   if (ptDecimalsPromise === undefined) {
     ptDecimalsPromise = (async () => {
       const { id } = await import("ethers");
-      const { readonlyContracts, provider } = await getReadonlyContracts();
 
-      const decimalsRaw = await provider.call({
+      const { readonlyContracts, jsonRpcProvider } =
+        await getReadonlyContracts();
+
+      const decimalsRaw = await jsonRpcProvider.call({
         to: readonlyContracts.deployment.usdc,
         data: id("decimals()").substring(0, 10),
       });

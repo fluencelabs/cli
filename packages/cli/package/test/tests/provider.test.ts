@@ -139,7 +139,7 @@ describe("provider tests", () => {
         args: ["provider", "tokens-distribute"],
         flags: {
           ...TEST_DEFAULT.flags,
-          amount: "10",
+          amount: "2.5",
         },
         cwd,
       });
