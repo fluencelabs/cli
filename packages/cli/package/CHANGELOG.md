@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.25.0](https://github.com/fluencelabs/cli/compare/cli-v0.24.0...cli-v0.25.0) (2025-01-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* add datacenter and resource tests, print offer-info to stdout ([#1096](https://github.com/fluencelabs/cli/issues/1096))
+
+### Features
+
+* add datacenter and resource tests, print offer-info to stdout ([#1096](https://github.com/fluencelabs/cli/issues/1096)) ([ad7b5e7](https://github.com/fluencelabs/cli/commit/ad7b5e77aea6c3ca582bbfbdba26b373b9ce1a8f))
+* suggest to deploy manifests when ip changed ([#1092](https://github.com/fluencelabs/cli/issues/1092)) ([efbe845](https://github.com/fluencelabs/cli/commit/efbe845c861d966cf33b1178b3d69db8d9f2c47f))
+* suggest to distribute tokens on cc-create if not enough ([#1097](https://github.com/fluencelabs/cli/issues/1097)) ([dfb59a5](https://github.com/fluencelabs/cli/commit/dfb59a5224de78ee8c43517b5184525e2262ed61))
+* support data centers ([#1091](https://github.com/fluencelabs/cli/issues/1091)) ([651f830](https://github.com/fluencelabs/cli/commit/651f8309780649782a1446d66ad3a5076c84b95d))
+* write manifest files on gen command only, rename end to stop ([#1089](https://github.com/fluencelabs/cli/issues/1089)) ([26dd8b7](https://github.com/fluencelabs/cli/commit/26dd8b7e1136d7e39d78016a265211551b884f72))
+
+
+### Bug Fixes
+
+* remove deprecation warning, fix ip supply ([#1095](https://github.com/fluencelabs/cli/issues/1095)) ([33720de](https://github.com/fluencelabs/cli/commit/33720de100dd92c0a79c5391c800b574ab19dfd5))
+
 ## [0.24.0](https://github.com/fluencelabs/cli/compare/cli-v0.23.0...cli-v0.24.0) (2025-01-08)
 
 
