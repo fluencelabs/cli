@@ -122,15 +122,15 @@ export async function updateOffers(flags: OffersArgs) {
     return;
   }
 
-  await signBatch(
-    `Updating offers:\n\n${populatedTxs
+  await signBatch({
+    title: `Updating offers:\n\n${populatedTxs
       .map(({ offerName, offerId }) => {
         return `${offerName} (${offerId})`;
       })
       .join("\n")}`,
-    [firstUpdateOffersTx, ...restUpdateOffersTxs],
-    assertProviderIsRegistered,
-  );
+    populatedTxs: [firstUpdateOffersTx, ...restUpdateOffersTxs],
+    validateAddress: assertProviderIsRegistered,
+  });
 
   const peersToDeploy = populatedTxs.flatMap(({ txs }) => {
     return txs.flatMap(({ peersToDeploy }) => {
@@ -190,15 +190,15 @@ export async function removeOffers(flags: OffersArgs) {
     return;
   }
 
-  await signBatch(
-    `Removing offers:\n\n${populatedTxs
+  await signBatch({
+    title: `Removing offers:\n\n${populatedTxs
       .map(({ offerName, offerId }) => {
         return `${offerName} (${offerId})`;
       })
       .join("\n")}`,
-    [firstRemoveOffersTx, ...restRemoveOffersTxs],
-    assertProviderIsRegistered,
-  );
+    populatedTxs: [firstRemoveOffersTx, ...restRemoveOffersTxs],
+    validateAddress: assertProviderIsRegistered,
+  });
 
   const providerArtifactsConfig = await initNewProviderArtifactsConfig();
 
@@ -494,9 +494,9 @@ async function populateChangeResourcePriceTx({
   );
 
   const prevResourcePriceChanges = await Promise.all(
-    (offerIndexerInfo.resources ?? []).map(
-      async ({ resourceId, resourcePrice }) => {
-        const newResource = allResourcePrices[resourceId];
+    (offerIndexerInfo.offerResources ?? []).map(
+      async ({ resourceDescription: { id }, resourcePrice }) => {
+        const newResource = allResourcePrices[id];
 
         if (newResource === undefined) {
           return null;
@@ -516,7 +516,7 @@ async function populateChangeResourcePriceTx({
           tx: populateTx(
             contracts.diamond.changeResourcePriceV2,
             offerId,
-            resourceId,
+            id,
             newPrice,
           ),
         };
@@ -527,8 +527,8 @@ async function populateChangeResourcePriceTx({
   const newResources = await Promise.all(
     resourcePricesWithIdsArr.map(
       async ({ price, resourceId, resourceName, resourceType }) => {
-        const onChainResource = offerIndexerInfo.resources?.find((r) => {
-          return r.resourceId === resourceId;
+        const onChainResource = offerIndexerInfo.offerResources?.find((r) => {
+          return r.resourceDescription.id === resourceId;
         });
 
         if (onChainResource !== undefined) {

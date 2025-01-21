@@ -637,16 +637,15 @@ async function formatOfferInfo(
       "Created At": offerIndexerInfo.createdAt,
       "Last Updated At": offerIndexerInfo.updatedAt,
       "Resource Prices": await Promise.all(
-        (offerIndexerInfo.resources ?? []).map(
+        (offerIndexerInfo.offerResources ?? []).map(
           async ({
-            resourceId,
             resourcePrice,
-            resource: { type, metadata },
+            resourceDescription: { type, metadata, id },
           }) => {
             const resourceType = onChainResourceTypeToResourceType(type);
             return {
               "Resource Type": resourceType,
-              "Resource ID": resourceId,
+              "Resource ID": id,
               Metadata: metadata,
               Price: await ptFormatWithSymbol(
                 resourceType === "cpu"
@@ -789,16 +788,16 @@ export async function resolveOffersFromProviderConfig(
     const offersNotDefinedLocally = await Promise.all(
       offerInfos.map(async ({ offerId, offerIndexerInfo }) => {
         const resourcePricesWithIds = (
-          offerIndexerInfo.resources ?? []
+          offerIndexerInfo.offerResources ?? []
         ).reduce<ResourcePricesWithIds>(
-          (acc, { resourceId, resourcePrice, resource: { type } }) => {
+          (acc, { resourcePrice, resourceDescription: { type, id } }) => {
             const resourceType = onChainResourceTypeToResourceType(type);
 
             acc[resourceType].push({
               ty: type,
               resourceType,
-              resourceId,
-              resourceName: resourceId,
+              resourceId: id,
+              resourceName: id,
               price: resourcePrice,
             });
 
@@ -1325,18 +1324,24 @@ type OfferIndexerInfo = Awaited<ReturnType<typeof getOffers>>["offers"][number];
 function indexerResourcesToOnchainResources(
   resourceType: ResourceType,
   resources: NonNullable<
-    NonNullable<OfferIndexerInfo["peers"]>[number]["resources"]
+    NonNullable<OfferIndexerInfo["peers"]>[number]["peerResources"]
   >,
   offerId: string,
 ): [OnChainResource, ...OnChainResource[]] {
   const [firstResource, ...restResources] = resources
-    .filter(({ resource: { type } }) => {
+    .filter(({ resourceDescription: { type } }) => {
       return onChainResourceTypeToResourceType(type) === resourceType;
     })
-    .map(({ details, resource: { id: resourceId, metadata }, maxSupply }) => {
-      assertIsHex(resourceId, `Invalid Resource ID for offer ${offerId}`);
-      return { resourceId, supply: Number(maxSupply), details, metadata };
-    });
+    .map(
+      ({
+        details,
+        resourceDescription: { id: resourceId, metadata },
+        maxSupply,
+      }) => {
+        assertIsHex(resourceId, `Invalid Resource ID for offer ${offerId}`);
+        return { resourceId, supply: Number(maxSupply), details, metadata };
+      },
+    );
 
   if (firstResource === undefined) {
     throw new Error(
@@ -1349,8 +1354,8 @@ function indexerResourcesToOnchainResources(
 
 function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
   const serializedPeers =
-    offerIndexerInfo.peers?.map(({ id, computeUnits, resources }) => {
-      if (resources === null || resources === undefined) {
+    offerIndexerInfo.peers?.map(({ id, computeUnits, peerResources }) => {
+      if (peerResources === null || peerResources === undefined) {
         throw new Error(
           `Resources for peer ${id} are not found in indexer for offer ${offerIndexerInfo.id}`,
         );
@@ -1359,27 +1364,27 @@ function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
       const resourcesByType = {
         cpu: indexerResourcesToOnchainResources(
           "cpu",
-          resources,
+          peerResources,
           offerIndexerInfo.id,
         )[0],
         ram: indexerResourcesToOnchainResources(
           "ram",
-          resources,
+          peerResources,
           offerIndexerInfo.id,
         )[0],
         storage: indexerResourcesToOnchainResources(
           "storage",
-          resources,
+          peerResources,
           offerIndexerInfo.id,
         ),
         ip: indexerResourcesToOnchainResources(
           "ip",
-          resources,
+          peerResources,
           offerIndexerInfo.id,
         )[0],
         bandwidth: indexerResourcesToOnchainResources(
           "bandwidth",
-          resources,
+          peerResources,
           offerIndexerInfo.id,
         )[0],
       } as const satisfies Record<
@@ -1416,15 +1421,10 @@ function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
     freeComputeUnits: offerIndexerInfo.computeUnitsAvailable,
     providerId: offerIndexerInfo.provider.id,
     peers: serializedPeers,
-    resources: offerIndexerInfo.resources?.map(({ price, resource }) => {
-      const resourceId = resource.id;
-
-      assertIsHex(
-        resourceId,
-        `Invalid Resource ID for offer ${offerIndexerInfo.id}`,
-      );
-
-      return { resourceId, resourcePrice: BigInt(price), resource };
-    }),
+    offerResources: offerIndexerInfo.offerResources?.map(
+      ({ price, resourceDescription }) => {
+        return { resourcePrice: BigInt(price), resourceDescription };
+      },
+    ),
   };
 }

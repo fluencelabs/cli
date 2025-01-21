@@ -121,13 +121,13 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
         continue;
       }
 
-      await signBatch(
-        `Remove the following workers from deal ${dealId}:\n\n${workers
+      await signBatch({
+        title: `Remove the following workers from deal ${dealId}:\n\n${workers
           .map(({ worker: { onchainId } }) => {
             return onchainId;
           })
           .join("\n")}`,
-        [
+        populatedTxs: [
           populateTx(
             firstWorker.deal.removeWorker,
             firstWorker.worker.onchainId,
@@ -136,7 +136,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
             return populateTx(deal.removeWorker, onchainId);
           }),
         ],
-      );
+      });
     }
   }
 }

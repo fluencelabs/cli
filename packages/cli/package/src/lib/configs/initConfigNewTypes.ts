@@ -44,6 +44,7 @@ export type ConfigOptionsWithoutMigrate<Config> = {
   refineSchema?: (
     schema: Schema<Config>,
   ) => Promise<Schema<Config>> | Schema<Config>;
+  onReset?: () => void | Promise<void>;
 };
 
 export type ConfigOptions<PrevConfig, Config> = PrevConfig extends undefined
@@ -104,4 +105,5 @@ export type InitConfigOptions<
   options: OptionsTuple<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>;
   getConfigPath: GetPath;
   getSchemaDirPath?: GetPath;
+  reset?: boolean;
 };

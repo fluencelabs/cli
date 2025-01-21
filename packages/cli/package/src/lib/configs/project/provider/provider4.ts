@@ -337,13 +337,13 @@ type OfferResource = Record<string, string>;
 
 export type ResourcePrices = Record<ResourceType, OfferResource>;
 
-const CPU_PRICE_UNITS = "USDC/PhysicalCore";
-const RAM_PRICE_UNITS = "USDC/MiB";
-const STORAGE_PRICE_UNITS = "USDC/MiB";
-const BANDWIDTH_PRICE_UNITS = "USDC/Mb";
-const IP_PRICE_UNITS = "USDC/IP";
+export const CPU_PRICE_UNITS = "USDC/PhysicalCore";
+export const RAM_PRICE_UNITS = "USDC/MiB";
+export const STORAGE_PRICE_UNITS = "USDC/MiB";
+export const BANDWIDTH_PRICE_UNITS = "USDC/Mb";
+export const IP_PRICE_UNITS = "USDC/IP";
 
-const offerResourcesSchema = {
+const offerResourcePricesSchema = {
   type: "object",
   description: "Resource prices for the offer",
   additionalProperties: false,
@@ -420,7 +420,7 @@ const offerSchema = {
       items: { type: "string" },
       uniqueItems: true,
     },
-    resourcePrices: offerResourcesSchema,
+    resourcePrices: offerResourcePricesSchema,
     minProtocolVersion: {
       type: "integer",
       description: `Min protocol version. Must be less then or equal to maxProtocolVersion. Default: ${numToStr(
@@ -550,8 +550,9 @@ export default {
   },
   async refineSchema(schema) {
     const dataCentersFromChain = await getDataCentersFromChain();
+    const resourcesFromChain = await getResourcesFromChain();
 
-    const dataCenters = {
+    const offer = {
       properties: {
         dataCenterName: {
           type: "string",
@@ -564,72 +565,43 @@ export default {
             },
           ),
         },
+        resourcePrices: {
+          properties: {
+            cpu: { properties: {} },
+            ram: { properties: {} },
+            storage: { properties: {} },
+            bandwidth: { properties: {} },
+            ip: { properties: {} },
+          },
+        },
       },
     };
 
-    const resourcesFromChain = await getResourcesFromChain();
+    function oneOfResources(resourceType: ResourceType) {
+      return {
+        properties: {
+          name: {
+            oneOf: Object.entries(resourcesFromChain[resourceType]).map(
+              ([name, { id }]) => {
+                return { const: name, description: `id: ${id}` };
+              },
+            ),
+          },
+        },
+      };
+    }
 
     const resourceNames = {
       properties: {
         resources: {
           properties: {
-            cpu: {
-              properties: {
-                name: {
-                  oneOf: Object.entries(resourcesFromChain.cpu).map(
-                    ([name, { id }]) => {
-                      return { const: name, description: `id: ${id}` };
-                    },
-                  ),
-                },
-              },
-            },
-            ram: {
-              properties: {
-                name: {
-                  oneOf: Object.entries(resourcesFromChain.ram).map(
-                    ([name, { id }]) => {
-                      return { const: name, description: `id: ${id}` };
-                    },
-                  ),
-                },
-              },
-            },
+            cpu: oneOfResources("cpu"),
+            ram: oneOfResources("ram"),
             storage: {
-              items: {
-                properties: {
-                  name: {
-                    oneOf: Object.entries(resourcesFromChain.storage).map(
-                      ([name, { id }]) => {
-                        return { const: name, description: `id: ${id}` };
-                      },
-                    ),
-                  },
-                },
-              },
+              items: oneOfResources("storage"),
             },
-            bandwidth: {
-              properties: {
-                name: {
-                  oneOf: Object.entries(resourcesFromChain.bandwidth).map(
-                    ([name, { id }]) => {
-                      return { const: name, description: `id: ${id}` };
-                    },
-                  ),
-                },
-              },
-            },
-            ip: {
-              properties: {
-                name: {
-                  oneOf: Object.entries(resourcesFromChain.ip).map(
-                    ([name, { id }]) => {
-                      return { const: name, description: `id: ${id}` };
-                    },
-                  ),
-                },
-              },
-            },
+            bandwidth: oneOfResources("bandwidth"),
+            ip: oneOfResources("ip"),
           },
         },
       },
@@ -645,8 +617,8 @@ export default {
           },
         },
         offers: {
-          additionalProperties: dataCenters,
-          properties: { [OFFER_NAME_EXAMPLE]: dataCenters },
+          additionalProperties: offer,
+          properties: { [OFFER_NAME_EXAMPLE]: offer },
         },
         computePeers: {
           additionalProperties: resourceNames,
@@ -655,46 +627,73 @@ export default {
       },
     });
 
-    mergedSchema.properties.resources.properties.cpu.properties =
-      Object.fromEntries(
-        Object.entries(resourcesFromChain.cpu).map(([name, { id }]) => {
-          return [
-            name,
-            {
-              ...peerCPUDetailsSchema,
-              description: `id: ${id}. ${peerCPUDetailsSchema.description}`,
+    function refineResources(
+      resourceType: "cpu" | "ram" | "storage",
+      originalSchema: { description: string },
+    ) {
+      mergedSchema.properties.resources.properties[resourceType] = {
+        type: "object",
+        additionalProperties: false,
+        required: [],
+        description:
+          resourcesPerResourceTypeSchema.properties[resourceType].description,
+        properties: Object.fromEntries(
+          Object.entries(resourcesFromChain[resourceType]).map(
+            ([name, { id }]) => {
+              return [
+                name,
+                {
+                  ...originalSchema,
+                  description: `id: ${id}. ${originalSchema.description}`,
+                },
+              ];
             },
-          ];
-        }),
-      );
+          ),
+        ),
+      };
+    }
 
-    mergedSchema.properties.resources.properties.ram.properties =
-      Object.fromEntries(
-        Object.entries(resourcesFromChain.ram).map(([name, { id }]) => {
-          return [
-            name,
-            {
-              ...peerRamDetailsSchema,
-              description: `id: ${id}. ${peerRamDetailsSchema.description}`,
-            },
-          ];
-        }),
-      );
+    refineResources("cpu", peerCPUDetailsSchema);
+    refineResources("ram", peerRamDetailsSchema);
+    refineResources("storage", peerStorageDetailsSchema);
 
-    mergedSchema.properties.resources.properties.storage.properties =
-      Object.fromEntries(
-        Object.entries(resourcesFromChain.storage).map(([name, { id }]) => {
-          return [
-            name,
-            {
-              ...peerStorageDetailsSchema,
-              description: `id: ${id}. ${peerStorageDetailsSchema.description}`,
+    function refineResourcePrices(resourceType: ResourceType) {
+      mergedSchema.properties.offers.additionalProperties.properties.resourcePrices.properties[
+        resourceType
+      ] = {
+        type: "object",
+        additionalProperties: false,
+        required: [],
+        description:
+          offerResourcePricesSchema.properties[resourceType].description,
+        properties: Object.fromEntries(
+          Object.entries(resourcesFromChain[resourceType]).map(
+            ([name, { id }]) => {
+              return [
+                name,
+                {
+                  ...offerResourcePricesSchema.properties[resourceType]
+                    .additionalProperties,
+                  description: `${offerResourcePricesSchema.properties[resourceType].additionalProperties.description} for resource with id: ${id}`,
+                },
+              ];
             },
-          ];
-        }),
-      );
+          ),
+        ),
+      };
+    }
+
+    refineResourcePrices("cpu");
+    refineResourcePrices("ram");
+    refineResourcePrices("storage");
+    refineResourcePrices("bandwidth");
+    refineResourcePrices("ip");
 
     return mergedSchema;
+  },
+  onReset() {
+    dataCentersPromise = undefined;
+    resourcesPromise = undefined;
   },
 } satisfies ConfigOptions<PrevConfig, Config>;
 
@@ -1631,7 +1630,7 @@ function removeOptionalStorageDetails(
   return res;
 }
 
-type CPUMetadata = {
+export type CPUMetadata = {
   manufacturer: string;
   brand: string;
   architecture: string;
@@ -1650,7 +1649,7 @@ const cpuMetadataSchema = {
   required: ["manufacturer", "brand", "architecture", "generation"],
 } as const satisfies JSONSchemaType<CPUMetadata>;
 
-type RAMMetadata = {
+export type RAMMetadata = {
   type: string;
   generation: string;
 };
@@ -1665,7 +1664,7 @@ const ramMetadataSchema = {
   required: ["type", "generation"],
 } as const satisfies JSONSchemaType<RAMMetadata>;
 
-type StorageMetadata = {
+export type StorageMetadata = {
   type: string;
 };
 
@@ -1678,7 +1677,7 @@ const storageMetadataSchema = {
   required: ["type"],
 } as const satisfies JSONSchemaType<StorageMetadata>;
 
-type BandwidthMetadata = {
+export type BandwidthMetadata = {
   type: string;
 };
 
@@ -1691,7 +1690,7 @@ const bandwidthMetadataSchema = {
   required: ["type"],
 } as const satisfies JSONSchemaType<BandwidthMetadata>;
 
-type IPMetadata = {
+export type IPMetadata = {
   version: string;
 };
 

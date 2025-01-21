@@ -12,9 +12,9 @@ query OfferDetails($where: Offer_filter) {
     provider {
       id
     }
-    resources {
+    offerResources {
       price
-      resource {
+      resourceDescription {
         id
         type
         metadata
@@ -28,10 +28,10 @@ query OfferDetails($where: Offer_filter) {
           id
         }
       }
-      resources {
+      peerResources {
         maxSupply
         details
-        resource {
+        resourceDescription {
           id
           type
           metadata
