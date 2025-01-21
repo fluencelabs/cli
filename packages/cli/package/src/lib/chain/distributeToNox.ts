@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import assert from "assert";
-
 import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
@@ -29,6 +27,7 @@ import {
   getWallet,
   sendRawTransaction,
   getSignerAddress,
+  ensureJsonRpcProvider,
 } from "../dealClient.js";
 import { input } from "../prompt.js";
 import { resolveComputePeersByNames } from "../resolveComputePeersByNames.js";
@@ -47,19 +46,16 @@ export async function distributeToPeer(
     }));
 
   const parsedAmount = await fltParse(amount);
-  const formattedAmount = color.yellow(await fltFormatWithSymbol(parsedAmount));
+  const formattedAmount = await fltFormatWithSymbol(parsedAmount);
 
   for (const computePeer of computePeers) {
     const txReceipt = await sendRawTransaction(
-      `Distribute ${await fltFormatWithSymbol(parsedAmount)} to ${computePeer.name} (${computePeer.walletAddress})`,
-      {
-        to: computePeer.walletAddress,
-        value: parsedAmount,
-      },
+      `Distribute ${formattedAmount} to ${computePeer.name} (${computePeer.walletAddress})`,
+      { to: computePeer.walletAddress, value: parsedAmount },
     );
 
     commandObj.logToStderr(
-      `Successfully distributed ${formattedAmount} to ${color.yellow(
+      `Successfully distributed ${color.yellow(formattedAmount)} to ${color.yellow(
         computePeer.name,
       )} with tx hash: ${color.yellow(txReceipt.hash)}`,
     );
@@ -136,17 +132,17 @@ async function withdrawMaxAmount({
   peerWalletKey,
   peerName,
 }: WithdrawMaxAmountArgs) {
+  const providerAddress = await getSignerAddress();
   const peerWallet = await getWallet(peerWalletKey);
-  const peerAddress = await getSignerAddress();
+  const peerAddress = peerWallet.address;
 
   const gasLimit = await peerWallet.estimateGas({
-    to: peerAddress,
+    to: providerAddress,
     value: 0n,
   });
 
-  const peerProvider = peerWallet.provider;
-  assert(peerProvider !== null, "Unreachable. We ensure provider is not null");
-  const gasPrice = await peerProvider.getFeeData();
+  const jsonRpcProvider = await ensureJsonRpcProvider();
+  const gasPrice = await jsonRpcProvider.getFeeData();
 
   if (
     gasPrice.maxFeePerGas === null ||
@@ -160,7 +156,7 @@ async function withdrawMaxAmount({
   const feeAmount =
     (gasPrice.maxFeePerGas + gasPrice.maxPriorityFeePerGas) * gasLimit;
 
-  const totalBalance = await peerProvider.getBalance(peerAddress);
+  const totalBalance = await jsonRpcProvider.getBalance(peerAddress);
   const amountBigInt = totalBalance - feeAmount;
 
   if (amountBigInt <= 0n) {
@@ -174,8 +170,6 @@ async function withdrawMaxAmount({
       peerAddress: undefined,
     };
   }
-
-  const providerAddress = await getSignerAddress();
 
   const result = {
     txReceipt: await sendRawTransaction(

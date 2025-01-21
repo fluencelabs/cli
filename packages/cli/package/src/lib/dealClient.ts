@@ -53,19 +53,19 @@ import { setTryTimeout } from "./helpers/setTryTimeout.js";
 import { stringifyUnknown } from "./helpers/stringifyUnknown.js";
 import { createTransaction, getAddressFromConnector } from "./server.js";
 
-let provider: Provider | undefined = undefined;
+let jsonRpcProvider: Provider | undefined = undefined;
 let readonlyContracts: Contracts | undefined = undefined;
 
 export async function getReadonlyContracts() {
-  if (provider === undefined) {
-    provider = await ensureProvider();
+  if (jsonRpcProvider === undefined) {
+    jsonRpcProvider = await ensureJsonRpcProvider();
   }
 
   if (readonlyContracts === undefined) {
-    readonlyContracts = await createContracts(provider);
+    readonlyContracts = await createContracts(jsonRpcProvider);
   }
 
-  return { readonlyContracts, provider };
+  return { readonlyContracts, jsonRpcProvider };
 }
 
 let providerOrWallet: Provider | Wallet | undefined = undefined;
@@ -82,7 +82,7 @@ export async function getContracts() {
 
   if (providerOrWallet === undefined || contracts === undefined) {
     providerOrWallet = await (privKey === undefined
-      ? ensureProvider()
+      ? ensureJsonRpcProvider()
       : getWallet(privKey));
 
     contracts = await createContracts(providerOrWallet);
@@ -159,22 +159,22 @@ async function createContracts(signerOrProvider: Provider | Signer) {
   return contracts;
 }
 
-async function ensureProvider(): Promise<Provider> {
-  if (provider === undefined) {
+export async function ensureJsonRpcProvider(): Promise<Provider> {
+  if (jsonRpcProvider === undefined) {
     const { JsonRpcProvider } = await import("ethers");
 
-    provider = new JsonRpcProvider(await getRpcUrl(), {
+    jsonRpcProvider = new JsonRpcProvider(await getRpcUrl(), {
       chainId: await getChainId(),
       name: await getNetworkName(),
     });
   }
 
-  return provider;
+  return jsonRpcProvider;
 }
 
 export async function getWallet(privKey: string): Promise<Wallet> {
   const { Wallet } = await import("ethers");
-  return new Wallet(privKey, await ensureProvider());
+  return new Wallet(privKey, await ensureJsonRpcProvider());
 }
 
 const DEFAULT_OVERRIDES: TransactionRequest = {

@@ -30,6 +30,7 @@ import {
   type PeerAndOfferNameFlags,
   CC_IDS_FLAG_NAME,
   FINISH_COMMITMENT_FLAG_NAME,
+  FLT_SYMBOL,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
@@ -40,6 +41,8 @@ import {
   sign,
   multicallRead,
   type MulticallReadItem,
+  ensureJsonRpcProvider,
+  sendRawTransaction,
 } from "../dealClient.js";
 import { getCCDetails, getCCIdsByHexPeerIds } from "../gql/gql.js";
 import type {
@@ -50,7 +53,7 @@ import { secondsToDate } from "../helpers/bigintOps.js";
 import { stringifyUnknown } from "../helpers/stringifyUnknown.js";
 import { bigintToStr, numToStr } from "../helpers/typesafeStringify.js";
 import { splitErrorsAndResults, commaSepStrToArr } from "../helpers/utils.js";
-import { input } from "../prompt.js";
+import { confirm, input } from "../prompt.js";
 import {
   resolveComputePeersByNames,
   type ResolvedComputePeer,
@@ -61,7 +64,7 @@ import {
   peerIdBase58ToHexString,
   peerIdHexStringToBase58String,
 } from "./conversions.js";
-import { fltFormatWithSymbol } from "./currencies.js";
+import { fltFormatWithSymbol, fltParse } from "./currencies.js";
 
 const HUNDRED_PERCENT = 100;
 
@@ -246,8 +249,83 @@ async function getCommitmentsIds(
   return getComputePeersWithCCIds(await resolveComputePeersByNames({ flags }));
 }
 
+const MIN_PEER_TOKENS_FLT_STR = "10";
+
+async function ensurePeersHaveEnoughTokens(
+  computePeers: ResolvedComputePeer[],
+) {
+  const MIN_PEER_TOKENS = await fltParse(MIN_PEER_TOKENS_FLT_STR);
+  const jsonRpcProvider = await ensureJsonRpcProvider();
+
+  const peersWithoutEnoughTokens = (
+    await Promise.all(
+      computePeers.map(async (cp) => {
+        const balance = await jsonRpcProvider.getBalance(cp.walletAddress);
+        return { ...cp, balance };
+      }),
+    )
+  ).filter(({ balance }) => {
+    return balance < MIN_PEER_TOKENS;
+  });
+
+  if (
+    peersWithoutEnoughTokens.length > 0 &&
+    (await confirm({
+      message: `The following peers don't have enough tokens (${await fltFormatWithSymbol(MIN_PEER_TOKENS)}) in their wallets to work properly:\n${(
+        await Promise.all(
+          peersWithoutEnoughTokens.map(async ({ name, balance }) => {
+            return `${name}: ${await fltFormatWithSymbol(balance)}`;
+          }),
+        )
+      ).join("\n")}\nDo you want to ensure they do?`,
+      default: true,
+    }))
+  ) {
+    const targetTokens = await fltParse(
+      await input({
+        message: `Enter the amount of ${FLT_SYMBOL} tokens (min: ${await fltFormatWithSymbol(
+          MIN_PEER_TOKENS,
+        )}) that you want to have on the wallets of peers: ${peersWithoutEnoughTokens
+          .map(({ name }) => {
+            return name;
+          })
+          .join(", ")}`,
+        default: MIN_PEER_TOKENS_FLT_STR,
+        async validate(val: string) {
+          let parsedVal: bigint;
+
+          try {
+            parsedVal = await fltParse(val);
+          } catch {
+            return "Amount must be a positive number";
+          }
+
+          return parsedVal > 0 || "Amount must be a positive number";
+        },
+      }),
+    );
+
+    for (const { balance, walletAddress, name } of peersWithoutEnoughTokens) {
+      const tokensToDistribute = targetTokens - balance;
+      const formattedAmount = await fltFormatWithSymbol(tokensToDistribute);
+
+      const txReceipt = await sendRawTransaction(
+        `Distribute ${formattedAmount} to ${name} (${walletAddress})`,
+        { to: walletAddress, value: tokensToDistribute },
+      );
+
+      commandObj.logToStderr(
+        `Successfully distributed ${color.yellow(formattedAmount)} to ${color.yellow(
+          name,
+        )} with tx hash: ${color.yellow(txReceipt.hash)}`,
+      );
+    }
+  }
+}
+
 export async function createCommitments(flags: PeerAndOfferNameFlags) {
   const computePeers = await resolveComputePeersByNames({ flags });
+  await ensurePeersHaveEnoughTokens(computePeers);
   const { contracts } = await getContracts();
   const precision = await contracts.diamond.precision();
   const { ZeroAddress } = await import("ethers");
