@@ -249,7 +249,7 @@ async function getCommitmentsIds(
   return getComputePeersWithCCIds(await resolveComputePeersByNames({ flags }));
 }
 
-const MIN_PEER_TOKENS_FLT_STR = "5";
+const MIN_PEER_TOKENS_FLT_STR = "10";
 
 async function ensurePeersHaveEnoughTokens(
   computePeers: ResolvedComputePeer[],

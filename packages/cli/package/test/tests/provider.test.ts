@@ -128,19 +128,13 @@ describe("provider tests", () => {
       await providerConfig.$commit();
 
       const TEST_DEFAULT = {
-        flags: {
-          ...PRIV_KEY_1,
-          [OFFER_FLAG_NAME]: NEW_OFFER_NAME,
-        },
+        flags: { ...PRIV_KEY_1, [OFFER_FLAG_NAME]: NEW_OFFER_NAME },
         cwd,
       } as const;
 
       await fluence({
         args: ["provider", "tokens-distribute"],
-        flags: {
-          ...TEST_DEFAULT.flags,
-          amount: "2.5",
-        },
+        flags: { ...TEST_DEFAULT.flags, amount: "5" },
         cwd,
       });
 
@@ -151,60 +145,18 @@ describe("provider tests", () => {
       await providerConfig.$commit();
       await fluence({ args: ["provider", "update"], flags: PRIV_KEY_1, cwd });
       await checkProviderNameIsCorrect(cwd, NEW_PROVIDER_NAME);
-
-      await fluence({
-        args: ["provider", "offer-create"],
-        ...TEST_DEFAULT,
-      });
-
-      await fluence({
-        args: ["provider", "cc-create"],
-        ...TEST_DEFAULT,
-      });
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        ...TEST_DEFAULT,
-      });
-
-      await fluence({
-        args: ["provider", "cc-activate"],
-        ...TEST_DEFAULT,
-      });
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        ...TEST_DEFAULT,
-      });
-
+      await fluence({ args: ["provider", "offer-create"], ...TEST_DEFAULT });
+      await fluence({ args: ["provider", "cc-create"], ...TEST_DEFAULT });
+      await fluence({ args: ["provider", "cc-info"], ...TEST_DEFAULT });
+      await fluence({ args: ["provider", "cc-activate"], ...TEST_DEFAULT });
+      await fluence({ args: ["provider", "cc-info"], ...TEST_DEFAULT });
       await sleepSeconds(5);
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        ...TEST_DEFAULT,
-      });
-
+      await fluence({ args: ["provider", "cc-info"], ...TEST_DEFAULT });
       await sleepSeconds(CC_DURATION_SECONDS);
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        ...TEST_DEFAULT,
-      });
-
-      await fluence({
-        args: ["provider", "cc-finish"],
-        ...TEST_DEFAULT,
-      });
-
-      await fluence({
-        args: ["provider", "cc-info"],
-        ...TEST_DEFAULT,
-      });
-
-      await fluence({
-        args: ["provider", "offer-remove"],
-        ...TEST_DEFAULT,
-      });
+      await fluence({ args: ["provider", "cc-info"], ...TEST_DEFAULT });
+      await fluence({ args: ["provider", "cc-finish"], ...TEST_DEFAULT });
+      await fluence({ args: ["provider", "cc-info"], ...TEST_DEFAULT });
+      await fluence({ args: ["provider", "offer-remove"], ...TEST_DEFAULT });
     },
   );
 
