@@ -37,7 +37,7 @@ import {
   type Config as PrevConfig,
 } from "./provider1.js";
 
-export const versions = { protocolVersion: 1 } as const;
+export const PROTOCOL_VERSION_1 = 1;
 
 type Offer = {
   minPricePerCuPerEpoch: string;
@@ -66,19 +66,19 @@ const offerSchema = {
     minProtocolVersion: {
       type: "integer",
       description: `Min protocol version. Must be less then or equal to maxProtocolVersion. Default: ${numToStr(
-        versions.protocolVersion,
+        PROTOCOL_VERSION_1,
       )}`,
       nullable: true,
-      default: versions.protocolVersion,
+      default: PROTOCOL_VERSION_1,
       minimum: 1,
     },
     maxProtocolVersion: {
       type: "integer",
       description: `Max protocol version. Must be more then or equal to minProtocolVersion. Default: ${numToStr(
-        versions.protocolVersion,
+        PROTOCOL_VERSION_1,
       )}`,
       nullable: true,
-      default: versions.protocolVersion,
+      default: PROTOCOL_VERSION_1,
       minimum: 1,
     },
   },

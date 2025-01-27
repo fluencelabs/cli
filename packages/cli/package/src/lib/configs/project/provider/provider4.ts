@@ -23,7 +23,6 @@ import isEmpty from "lodash-es/isEmpty.js";
 import merge from "lodash-es/merge.js";
 import { stringify } from "yaml";
 
-import { versions } from "../../../../versions.js";
 import { ajv, validationErrorToString } from "../../../ajvInstance.js";
 import { ptParse } from "../../../chain/currencies.js";
 import { commandObj } from "../../../commandObj.js";
@@ -51,13 +50,14 @@ import {
   validateNoDuplicatePeerNamesInOffers,
   type CapacityCommitments,
   validateCC,
-  validateProtocolVersions,
+  getValidateProtocolVersions,
 } from "./provider3.js";
 
 const OPTIONAL_RESOURCE_DETAILS_STRING = "<optional>";
 const OPTIONAL_RESOURCE_DETAILS_NUMBER = 1;
 const OPTIONAL_RESOURCE_DETAILS_BOOLEAN = false;
 const BYTES_PER_CORE = 4_000_000_000;
+const PROTOCOL_VERSION_2 = 2;
 
 type PeerCPUDetails = {
   model?: string;
@@ -425,19 +425,19 @@ const offerSchema = {
     minProtocolVersion: {
       type: "integer",
       description: `Min protocol version. Must be less then or equal to maxProtocolVersion. Default: ${numToStr(
-        versions.protocolVersion,
+        PROTOCOL_VERSION_2,
       )}`,
       nullable: true,
-      default: versions.protocolVersion,
+      default: PROTOCOL_VERSION_2,
       minimum: 1,
     },
     maxProtocolVersion: {
       type: "integer",
       description: `Max protocol version. Must be more then or equal to minProtocolVersion. Default: ${numToStr(
-        versions.protocolVersion,
+        PROTOCOL_VERSION_2,
       )}`,
       nullable: true,
-      default: versions.protocolVersion,
+      default: PROTOCOL_VERSION_2,
       minimum: 1,
     },
   },
@@ -515,7 +515,6 @@ export default {
     const dataCenterName = await getDefaultDataCenterName();
 
     const newOffers = Object.fromEntries(
-      // TODO: protocol versions
       await Promise.all(
         Object.entries(offers).map(async ([name, { computePeers }]) => {
           return [
@@ -543,7 +542,7 @@ export default {
       validateEnoughRAMPerCPUCore(config),
       validateCC(config),
       validateNoDuplicatePeerNamesInOffers(config),
-      validateProtocolVersions(config),
+      getValidateProtocolVersions(PROTOCOL_VERSION_2)(config),
       validateOfferHasComputePeerResources(config),
       validateComputePeerIPs(config),
       validateOfferPrices(config),
