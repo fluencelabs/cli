@@ -20,7 +20,6 @@ import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
 import mapValues from "lodash-es/mapValues.js";
 
-import { versions } from "../../../../versions.js";
 import {
   ccDurationValidator,
   validateAddress,
@@ -50,6 +49,7 @@ import {
 } from "./provider1.js";
 import {
   offersSchema,
+  versions,
   type Offers,
   type Config as PrevConfig,
 } from "./provider2.js";

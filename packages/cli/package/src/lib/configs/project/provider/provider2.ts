@@ -18,7 +18,6 @@
 import type { JSONSchemaType } from "ajv";
 import mapValues from "lodash-es/mapValues.js";
 
-import { versions } from "../../../../versions.js";
 import { PT_SYMBOL } from "../../../const.js";
 import { numToStr } from "../../../helpers/typesafeStringify.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
@@ -37,6 +36,8 @@ import {
   type NoxConfigYAML,
   type Config as PrevConfig,
 } from "./provider1.js";
+
+export const versions = { protocolVersion: 1 } as const;
 
 type Offer = {
   minPricePerCuPerEpoch: string;

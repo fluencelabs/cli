@@ -57,6 +57,7 @@ import {
 const OPTIONAL_RESOURCE_DETAILS_STRING = "<optional>";
 const OPTIONAL_RESOURCE_DETAILS_NUMBER = 1;
 const OPTIONAL_RESOURCE_DETAILS_BOOLEAN = false;
+const BYTES_PER_CORE = 4_000_000_000;
 
 type PeerCPUDetails = {
   model?: string;
@@ -822,6 +823,7 @@ export async function getDefaultComputePeerConfig({
   ip,
   index,
 }: DefaultComputePeerConfigArgs): Promise<ComputePeer> {
+  const xbytes = (await import("xbytes")).default;
   const resources = await getDefaultChainResources();
 
   return {
@@ -833,7 +835,8 @@ export async function getDefaultComputePeerConfig({
       },
       ram: {
         name: resources.ram,
-        supply: "11 GiB",
+        supply:
+          computeUnits <= 1 ? "11 GiB" : xbytes(computeUnits * BYTES_PER_CORE),
       },
       storage: [
         {
@@ -1262,8 +1265,6 @@ const onChainResourceTypeToResourceTypeMap: Record<
   [OnChainResourceType.NETWORK_BANDWIDTH]: "bandwidth",
   [OnChainResourceType.PUBLIC_IP]: "ip",
 };
-
-const BYTES_PER_CORE = 4_000_000_000;
 
 async function validateEnoughRAMPerCPUCore({
   computePeers,
