@@ -50,6 +50,7 @@ import {
 } from "./provider1.js";
 import {
   offersSchema,
+  PROTOCOL_VERSION_1,
   type Offers,
   type Config as PrevConfig,
 } from "./provider2.js";
@@ -172,69 +173,75 @@ export default {
       validateCC(config),
       validateMissingComputePeers(config),
       validateNoDuplicatePeerNamesInOffers(config),
-      validateProtocolVersions(config),
+      getValidateProtocolVersions(PROTOCOL_VERSION_1)(config),
     );
   },
 } satisfies ConfigOptions<PrevConfig, Config>;
 
-export async function validateProtocolVersions(providerConfig: {
-  offers: Record<
-    string,
-    { maxProtocolVersion?: number; minProtocolVersion?: number }
-  >;
-}): Promise<ValidationResult> {
-  const errors = (
-    await Promise.all(
-      Object.entries(providerConfig.offers).flatMap(
-        ([
-          offer,
-          {
-            maxProtocolVersion = versions.protocolVersion,
-            minProtocolVersion = versions.protocolVersion,
-          },
-        ]) => {
-          return [
-            Promise.resolve({
-              offer,
-              property: "minProtocolVersion or maxProtocolVersion",
-              validity:
-                minProtocolVersion > maxProtocolVersion
-                  ? `minProtocolVersion must be less than or equal to maxProtocolVersion. Got: minProtocolVersion=${color.yellow(
-                      minProtocolVersion,
-                    )} maxProtocolVersion=${color.yellow(maxProtocolVersion)}`
-                  : true,
-            }),
-            ...(
-              [
-                ["minProtocolVersion", minProtocolVersion],
-                ["maxProtocolVersion", maxProtocolVersion],
-              ] as const
-            ).map(async ([property, v]) => {
-              return {
+export function getValidateProtocolVersions(protocolVersion: number) {
+  return async function validateProtocolVersions(providerConfig: {
+    offers: Record<
+      string,
+      { maxProtocolVersion?: number; minProtocolVersion?: number }
+    >;
+  }): Promise<ValidationResult> {
+    const shouldValidateOnChain = protocolVersion === versions.protocolVersion;
+
+    const errors = (
+      await Promise.all(
+        Object.entries(providerConfig.offers).flatMap(
+          ([
+            offer,
+            {
+              maxProtocolVersion = protocolVersion,
+              minProtocolVersion = protocolVersion,
+            },
+          ]) => {
+            return [
+              Promise.resolve({
                 offer,
-                property,
-                validity: await validateProtocolVersion(v),
-              };
-            }),
-          ];
-        },
-      ),
-    )
-  ).filter((a): a is typeof a & { validity: string } => {
-    return a.validity !== true;
-  });
+                property: "minProtocolVersion or maxProtocolVersion",
+                validity:
+                  minProtocolVersion > maxProtocolVersion
+                    ? `minProtocolVersion must be less than or equal to maxProtocolVersion. Got: minProtocolVersion=${color.yellow(
+                        minProtocolVersion,
+                      )} maxProtocolVersion=${color.yellow(maxProtocolVersion)}`
+                    : true,
+              }),
+              ...(shouldValidateOnChain
+                ? (
+                    [
+                      ["minProtocolVersion", minProtocolVersion],
+                      ["maxProtocolVersion", maxProtocolVersion],
+                    ] as const
+                  ).map(async ([property, v]) => {
+                    return {
+                      offer,
+                      property,
+                      validity: await validateProtocolVersion(v),
+                    };
+                  })
+                : []),
+            ];
+          },
+        ),
+      )
+    ).filter((a): a is typeof a & { validity: string } => {
+      return a.validity !== true;
+    });
 
-  if (errors.length > 0) {
-    return errors
-      .map(({ offer, property, validity }) => {
-        return `Offer ${color.yellow(offer)} has invalid ${color.yellow(
-          property,
-        )} property: ${validity}`;
-      })
-      .join("\n");
-  }
+    if (errors.length > 0) {
+      return errors
+        .map(({ offer, property, validity }) => {
+          return `Offer ${color.yellow(offer)} has invalid ${color.yellow(
+            property,
+          )} property: ${validity}`;
+        })
+        .join("\n");
+    }
 
-  return true;
+    return true;
+  };
 }
 
 export function validateNoDuplicatePeerNamesInOffers(config: {
