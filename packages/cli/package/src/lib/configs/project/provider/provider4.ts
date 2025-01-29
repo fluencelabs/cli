@@ -21,7 +21,6 @@ import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
 import merge from "lodash-es/merge.js";
-import { stringify } from "yaml";
 
 import { ajv, validationErrorToString } from "../../../ajvInstance.js";
 import { ptParse } from "../../../chain/currencies.js";
@@ -553,6 +552,7 @@ export default {
   async refineSchema(schema) {
     const dataCentersFromChain = await getDataCentersFromChain();
     const resourcesFromChain = await getResourcesFromChain();
+    const { stringify } = await import("yaml");
 
     const offer = {
       properties: {

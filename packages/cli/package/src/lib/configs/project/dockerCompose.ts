@@ -17,8 +17,6 @@
 
 import { writeFile } from "fs/promises";
 
-import { yamlDiffPatch } from "yaml-diff-patch";
-
 import { pathExists } from "../../helpers/utils.js";
 import { ensureDockerComposeConfigPath } from "../../paths.js";
 
@@ -28,7 +26,8 @@ export async function ensureDockerComposeConfig() {
   const configPath = await ensureDockerComposeConfigPath();
 
   if (!(await pathExists(configPath))) {
-    await writeFile(configPath, yamlDiffPatch("", {}, chainContainers));
+    const { stringify } = await import("yaml");
+    await writeFile(configPath, stringify(chainContainers));
   }
 
   return configPath;

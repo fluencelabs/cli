@@ -181,6 +181,7 @@ export function getConfigInitFunction<
       } = getLatestConfigRes;
 
       let prevConfigString = latestConfigString;
+      let prevConfig = latestConfig;
 
       const initializedConfig: InitializedConfig<LatestConfig> = {
         ...latestConfig,
@@ -188,17 +189,19 @@ export function getConfigInitFunction<
           return actualConfigPath;
         },
         async $commit(): Promise<void> {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const config = removeProperties(this, ([, v]) => {
             return typeof v === "function";
-          });
+          }) as LatestConfig;
 
           prevConfigString = await saveConfig(
             actualConfigPath,
-            yamlDiffPatch(prevConfigString, {}, config),
+            yamlDiffPatch(prevConfigString, prevConfig, config),
             prevConfigString,
           );
 
           await validateLatestConfig(config);
+          prevConfig = config;
         },
       };
 
@@ -451,7 +454,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
 
     currentConfigString = await saveConfig(
       actualConfigPath,
-      yamlDiffPatch(currentConfigString, {}, currentConfig),
+      yamlDiffPatch(currentConfigString, prevConfig, currentConfig),
       index === 0 ? configString : currentConfigString,
     );
 

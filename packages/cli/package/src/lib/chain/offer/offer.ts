@@ -19,7 +19,6 @@ import assert from "node:assert";
 
 import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
-import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../../commandObj.js";
 import {
@@ -362,10 +361,9 @@ function setCPUSupply(
 }
 
 async function confirmOffer(offer: EnsureOfferConfig) {
+  const { stringify } = await import("yaml");
   return confirm({
-    message: `The following offer will be created: ${color.yellow(offer.offerName)}\n${yamlDiffPatch(
-      "",
-      {},
+    message: `The following offer will be created: ${color.yellow(offer.offerName)}\n${stringify(
       {
         "Data Center": offer.dataCenter,
         "Resource Prices": {
@@ -627,108 +625,106 @@ async function formatOfferInfo(
     ReturnType<typeof getOffersInfo>
   >[1][number]["offerIndexerInfo"],
 ) {
-  return yamlDiffPatch(
-    "",
-    {},
-    {
-      "Provider ID": offerIndexerInfo.providerId,
-      "Offer ID": offerIndexerInfo.id,
-      "Data Center": offerIndexerInfo.dataCenter,
-      "Created At": offerIndexerInfo.createdAt,
-      "Last Updated At": offerIndexerInfo.updatedAt,
-      "Resource Prices": await Promise.all(
-        (offerIndexerInfo.offerResources ?? []).map(
-          async ({
-            resourcePrice,
-            resourceDescription: { type, metadata, id },
-          }) => {
-            const resourceType = onChainResourceTypeToResourceType(type);
-            return {
-              "Resource Type": resourceType,
-              "Resource ID": id,
-              Metadata: metadata,
-              Price: await ptFormatWithSymbol(
-                resourceType === "cpu"
-                  ? resourcePrice * BigInt(VCPU_PER_CU)
-                  : resourcePrice,
-              ),
-            };
-          },
-        ),
+  const { stringify } = await import("yaml");
+
+  return stringify({
+    "Provider ID": offerIndexerInfo.providerId,
+    "Offer ID": offerIndexerInfo.id,
+    "Data Center": offerIndexerInfo.dataCenter,
+    "Created At": offerIndexerInfo.createdAt,
+    "Last Updated At": offerIndexerInfo.updatedAt,
+    "Resource Prices": await Promise.all(
+      (offerIndexerInfo.offerResources ?? []).map(
+        async ({
+          resourcePrice,
+          resourceDescription: { type, metadata, id },
+        }) => {
+          const resourceType = onChainResourceTypeToResourceType(type);
+          return {
+            "Resource Type": resourceType,
+            "Resource ID": id,
+            Metadata: metadata,
+            Price: await ptFormatWithSymbol(
+              resourceType === "cpu"
+                ? resourcePrice * BigInt(VCPU_PER_CU)
+                : resourcePrice,
+            ),
+          };
+        },
       ),
-      "Total compute units": offerIndexerInfo.totalComputeUnits,
-      "Free compute units": offerIndexerInfo.freeComputeUnits,
-      Peers: await Promise.all(
-        offerIndexerInfo.peers.map(
-          async ({ id, computeUnits, resourcesByType }) => {
-            return {
-              "Peer ID": await peerIdHexStringToBase58String(id),
-              "CU Count": computeUnits.length,
-              Resources: {
-                CPU: {
-                  "Resource ID": resourcesByType.cpu.resourceId,
-                  Metadata: resourcesByType.cpu.metadata,
-                  Details: resourcesByType.cpu.details,
-                  Supply: (
-                    await resourceSupplyFromChainToConfig(
-                      "cpu",
-                      resourcesByType.cpu.supply,
-                    )
-                  ).supplyString,
-                },
-                RAM: {
-                  "Resource ID": resourcesByType.ram.resourceId,
-                  Metadata: resourcesByType.ram.metadata,
-                  Details: resourcesByType.ram.details,
-                  Supply: (
-                    await resourceSupplyFromChainToConfig(
-                      "ram",
-                      resourcesByType.ram.supply,
-                    )
-                  ).supplyString,
-                },
-                Storage: await Promise.all(
-                  resourcesByType.storage.map(async (storage) => {
-                    return {
-                      "Resource ID": storage.resourceId,
-                      Metadata: storage.metadata,
-                      Details: storage.details,
-                      Supply: (
-                        await resourceSupplyFromChainToConfig(
-                          "storage",
-                          storage.supply,
-                        )
-                      ).supplyString,
-                    };
-                  }),
-                ),
-                IP: {
-                  "Resource ID": resourcesByType.ip.resourceId,
-                  Metadata: resourcesByType.ip.metadata,
-                  Supply: (
-                    await resourceSupplyFromChainToConfig(
-                      "ip",
-                      resourcesByType.ip.supply,
-                    )
-                  ).supplyString,
-                },
-                Bandwidth: {
-                  "Resource ID": resourcesByType.bandwidth.resourceId,
-                  Metadata: resourcesByType.bandwidth.metadata,
-                  Supply: (
-                    await resourceSupplyFromChainToConfig(
-                      "bandwidth",
-                      resourcesByType.bandwidth.supply,
-                    )
-                  ).supplyString,
-                },
+    ),
+    "Total compute units": offerIndexerInfo.totalComputeUnits,
+    "Free compute units": offerIndexerInfo.freeComputeUnits,
+    Peers: await Promise.all(
+      offerIndexerInfo.peers.map(
+        async ({ id, computeUnits, resourcesByType }) => {
+          return {
+            "Peer ID": await peerIdHexStringToBase58String(id),
+            "CU Count": computeUnits.length,
+            Resources: {
+              CPU: {
+                "Resource ID": resourcesByType.cpu.resourceId,
+                Metadata: resourcesByType.cpu.metadata,
+                Details: resourcesByType.cpu.details,
+                Supply: (
+                  await resourceSupplyFromChainToConfig(
+                    "cpu",
+                    resourcesByType.cpu.supply,
+                  )
+                ).supplyString,
               },
-            };
-          },
-        ),
+              RAM: {
+                "Resource ID": resourcesByType.ram.resourceId,
+                Metadata: resourcesByType.ram.metadata,
+                Details: resourcesByType.ram.details,
+                Supply: (
+                  await resourceSupplyFromChainToConfig(
+                    "ram",
+                    resourcesByType.ram.supply,
+                  )
+                ).supplyString,
+              },
+              Storage: await Promise.all(
+                resourcesByType.storage.map(async (storage) => {
+                  return {
+                    "Resource ID": storage.resourceId,
+                    Metadata: storage.metadata,
+                    Details: storage.details,
+                    Supply: (
+                      await resourceSupplyFromChainToConfig(
+                        "storage",
+                        storage.supply,
+                      )
+                    ).supplyString,
+                  };
+                }),
+              ),
+              IP: {
+                "Resource ID": resourcesByType.ip.resourceId,
+                Metadata: resourcesByType.ip.metadata,
+                Supply: (
+                  await resourceSupplyFromChainToConfig(
+                    "ip",
+                    resourcesByType.ip.supply,
+                  )
+                ).supplyString,
+              },
+              Bandwidth: {
+                "Resource ID": resourcesByType.bandwidth.resourceId,
+                Metadata: resourcesByType.bandwidth.metadata,
+                Supply: (
+                  await resourceSupplyFromChainToConfig(
+                    "bandwidth",
+                    resourcesByType.bandwidth.supply,
+                  )
+                ).supplyString,
+              },
+            },
+          };
+        },
       ),
-    },
-  );
+    ),
+  });
 }
 
 export async function resolveOffersFromProviderConfig(

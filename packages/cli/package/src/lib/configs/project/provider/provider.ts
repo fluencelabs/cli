@@ -317,7 +317,7 @@ export async function ensureComputerPeerConfigs({
             );
           }
 
-          const manifest = genManifest({
+          const manifest = await genManifest({
             chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
             ipSupplies: computePeer.resources.ip.supply,
             httpEndpoint,

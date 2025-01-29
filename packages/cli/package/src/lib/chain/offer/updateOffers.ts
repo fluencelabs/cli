@@ -17,7 +17,6 @@
 
 import { color } from "@oclif/color";
 import omit from "lodash-es/omit.js";
-import { stringify } from "yaml";
 
 import { commandObj } from "../../commandObj.js";
 import type { ResourceType } from "../../configs/project/provider/provider4.js";
@@ -102,6 +101,8 @@ export async function updateOffers(flags: OffersArgs) {
     if (Object.values(addedCPs).length === 0) {
       commandObj.logToStderr("No changes found for selected offers");
     } else {
+      const { stringify } = await import("yaml");
+
       commandObj.logToStderr(
         `Added the compute peers to the following offers:\n${stringify(addedCPs)}`,
       );
@@ -242,7 +243,7 @@ async function filterOffersFoundOnChain(offers: EnsureOfferConfig[]) {
 
   if (offerInfoErrors.length > 0) {
     commandObj.warn(
-      `Some of the offers are not found on chain:\n${offerInfoErrors
+      `Some of the offers are not found on subgraph indexer:\n${offerInfoErrors
         .map(({ offerName, offerId }) => {
           return `${offerName} (${offerId})`;
         })
