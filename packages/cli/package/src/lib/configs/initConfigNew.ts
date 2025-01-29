@@ -21,6 +21,7 @@ import { basename, dirname, join, relative } from "node:path";
 
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
+import cloneDeep from "lodash-es/cloneDeep.js";
 
 import { jsonStringify } from "../../common.js";
 import { validationErrorToString, getAjv } from "../ajvInstance.js";
@@ -181,7 +182,7 @@ export function getConfigInitFunction<
       } = getLatestConfigRes;
 
       let prevConfigString = latestConfigString;
-      let prevConfig = latestConfig;
+      let prevConfig = cloneDeep(latestConfig);
 
       const initializedConfig: InitializedConfig<LatestConfig> = {
         ...latestConfig,
@@ -430,7 +431,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     if (index !== 0) {
       prevConfig = currentConfig;
       await confirmProviderConfigMigration(actualConfigPath, prevConfig);
-      const migrated = await configOptions.migrate(prevConfig);
+      const migrated = await configOptions.migrate(cloneDeep(prevConfig));
 
       if ("version" in migrated) {
         delete migrated.version;
