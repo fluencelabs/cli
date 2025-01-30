@@ -34,6 +34,7 @@ import { stringifyUnknown } from "../../../helpers/stringifyUnknown.js";
 import { bigintToStr, numToStr } from "../../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../../helpers/utils.js";
 import { validateBatchAsync } from "../../../helpers/validations.js";
+import { confirm } from "../../../prompt.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
 
 import { providerNameSchema } from "./provider0.js";
@@ -479,6 +480,19 @@ export default {
     required: ["computePeers", "offers", "providerName", "capacityCommitments"],
   },
   async migrate({ computePeers, capacityCommitments, offers, providerName }) {
+    if (
+      !(await confirm({
+        message: `${color.yellow(
+          PROVIDER_CONFIG_FULL_FILE_NAME,
+        )} will be automatically migrated to version 4. Continue?`,
+        default: true,
+      }))
+    ) {
+      commandObj.error(
+        `Aborting. Reason: ${PROVIDER_CONFIG_FULL_FILE_NAME} migration cancelled. Please use older ${CLI_NAME_FULL} version if you don't want to migrate`,
+      );
+    }
+
     const newComputePeers = Object.fromEntries(
       await Promise.all(
         Object.entries(computePeers).map(
