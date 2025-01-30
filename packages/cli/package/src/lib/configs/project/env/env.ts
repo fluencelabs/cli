@@ -29,9 +29,9 @@ export const options: InitConfigOptions<Config0, Config1> = {
   getConfigPath: getEnvConfigPath,
 };
 
-export function initNewEnvConfig(fluenceEnv: FluenceEnv) {
+export function initNewEnvConfig(fluenceEnv?: FluenceEnv) {
   return getConfigInitFunction(options, () => {
-    return { fluenceEnv };
+    return fluenceEnv === undefined ? {} : { fluenceEnv };
   })();
 }
 
