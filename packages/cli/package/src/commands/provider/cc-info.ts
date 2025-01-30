@@ -47,7 +47,7 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
               return CCs;
             }),
           )
-        : stringifyDetailedCommitmentsInfo(ccInfo),
+        : await stringifyDetailedCommitmentsInfo(ccInfo),
     );
   }
 }

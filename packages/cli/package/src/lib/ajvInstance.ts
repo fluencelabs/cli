@@ -46,13 +46,15 @@ export async function validationErrorToString(errors: AjvErrors) {
     return "";
   }
 
-  const { yamlDiffPatch } = await import("yaml-diff-patch");
+  const { stringify } = await import("yaml");
 
   return (
     "Errors:\n\n" +
     errors
       .map(({ instancePath, params, message }, i) => {
-        const paramsMessage = yamlDiffPatch("", {}, params);
+        const paramsMessage =
+          Object.keys(params).length === 0 ? "" : `\n${stringify(params)}`;
+
         const prevError = errors[i - 1];
 
         const isDuplicateError =
@@ -64,7 +66,7 @@ export async function validationErrorToString(errors: AjvErrors) {
           return "";
         }
 
-        return `${instancePath === "" ? "" : `${color.yellow(instancePath)} `}${message ?? ""}${paramsMessage === "" ? "" : `\n${paramsMessage}`}`;
+        return `${instancePath === "" ? "" : `${color.yellow(instancePath)} `}${message ?? ""}${paramsMessage}`;
       })
       .filter((s) => {
         return s !== "";

@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { yamlDiffPatch } from "yaml-diff-patch";
-
 import { BaseCommand } from "../../baseCommand.js";
 import { jsonStringify } from "../../common.js";
 import { getProviderInfo } from "../../lib/chain/providerInfo.js";
@@ -68,7 +66,8 @@ export default class Info extends BaseCommand<typeof Info> {
       return;
     }
 
-    commandObj.log(yamlDiffPatch("", {}, infoToPrint));
+    const { stringify } = await import("yaml");
+    commandObj.log(stringify(infoToPrint));
   }
 }
 

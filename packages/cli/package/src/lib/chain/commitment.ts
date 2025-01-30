@@ -20,7 +20,6 @@ import assert from "assert";
 import type { Contracts } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import parse from "parse-duration";
-import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
 import { initProviderConfig } from "../configs/project/provider/provider.js";
@@ -471,7 +470,7 @@ export async function createCommitments(flags: PeerAndOfferNameFlags) {
   );
 
   commandObj.logToStderr(
-    stringifyDetailedCommitmentsInfo(
+    await stringifyDetailedCommitmentsInfo(
       await getDetailedCommitmentsInfoGroupedByStatus({
         [PEER_NAMES_FLAG_NAME]: computePeers
           .map(({ name }) => {
@@ -1049,21 +1048,31 @@ export async function getDetailedCommitmentsInfoGroupedByStatus(
   );
 }
 
-export function stringifyDetailedCommitmentsInfo(
+export async function stringifyDetailedCommitmentsInfo(
   detailedCommitmentsInfoGroupedByStatus: Awaited<
     ReturnType<typeof getDetailedCommitmentsInfoGroupedByStatus>
   >,
 ) {
-  return detailedCommitmentsInfoGroupedByStatus
-    .map(({ statusInfo, CCs }) => {
-      return `${getStatusHeading(statusInfo)}${CCs.map((cc) => {
-        const peerNameString =
-          "peerName" in cc ? color.yellow(`Peer: ${cc.peerName}\n`) : "";
+  return (
+    await Promise.all(
+      detailedCommitmentsInfoGroupedByStatus.map(
+        async ({ statusInfo, CCs }) => {
+          return `${getStatusHeading(statusInfo)}${(
+            await Promise.all(
+              CCs.map(async (cc) => {
+                const peerNameString =
+                  "peerName" in cc
+                    ? color.yellow(`Peer: ${cc.peerName}\n`)
+                    : "";
 
-        return `${peerNameString}${getDetailedCommitmentInfoString(cc)}`;
-      }).join("\n\n")}`;
-    })
-    .join("\n\n");
+                return `${peerNameString}${await getDetailedCommitmentInfoString(cc)}`;
+              }),
+            )
+          ).join("\n\n")}`;
+        },
+      ),
+    )
+  ).join("\n\n");
 }
 
 function getStatusHeading(cc: CommitmentGroupedByStatus[number]) {
@@ -1197,47 +1206,43 @@ async function getDetailedCommitmentInfo({
   } satisfies Record<string, string>;
 }
 
-function getDetailedCommitmentInfoString(
+async function getDetailedCommitmentInfoString(
   detailedCommitmentInfo: Awaited<ReturnType<typeof getDetailedCommitmentInfo>>,
 ) {
-  return yamlDiffPatch(
-    "",
-    {},
-    {
-      PeerId: detailedCommitmentInfo.peerId,
-      "Capacity commitment ID": detailedCommitmentInfo.commitmentId,
-      Status: detailedCommitmentInfo.status,
-      Staker: detailedCommitmentInfo.staker,
-      "Staker reward": detailedCommitmentInfo.stakerReward,
-      "Duration (epochs)": detailedCommitmentInfo.durationEpochs,
-      "Start / End / Current epoch": [
-        detailedCommitmentInfo.startEpoch,
-        detailedCommitmentInfo.endEpoch,
-        detailedCommitmentInfo.currentEpoch,
-      ].join(" / "),
-      "Start date": detailedCommitmentInfo.startDate,
-      "Expiration date": detailedCommitmentInfo.expirationDate,
-      "Total CU": detailedCommitmentInfo.totalCU,
-      "Missed proofs / Threshold": [
-        detailedCommitmentInfo.missedProofs,
-        detailedCommitmentInfo.threshold,
-      ].join(" / "),
-      "Collateral per unit": detailedCommitmentInfo.collateralPerUnit,
-      "Exited unit count": detailedCommitmentInfo.exitedUnitCount,
-      "Total CC rewards over time":
-        detailedCommitmentInfo.totalCCRewardsOverTime,
-      "In vesting / Available / Total claimed (Provider)": [
-        detailedCommitmentInfo.providerRewardsInVesting,
-        detailedCommitmentInfo.providerRewardsAvailable,
-        detailedCommitmentInfo.providerRewardsTotalClaimed,
-      ].join(" / "),
-      "In vesting / Available / Total claimed (Staker)": [
-        detailedCommitmentInfo.stakerRewardsInVesting,
-        detailedCommitmentInfo.stakerRewardsAvailable,
-        detailedCommitmentInfo.stakerRewardsTotalClaimed,
-      ].join(" / "),
-    },
-  );
+  const { stringify } = await import("yaml");
+  return stringify({
+    PeerId: detailedCommitmentInfo.peerId,
+    "Capacity commitment ID": detailedCommitmentInfo.commitmentId,
+    Status: detailedCommitmentInfo.status,
+    Staker: detailedCommitmentInfo.staker,
+    "Staker reward": detailedCommitmentInfo.stakerReward,
+    "Duration (epochs)": detailedCommitmentInfo.durationEpochs,
+    "Start / End / Current epoch": [
+      detailedCommitmentInfo.startEpoch,
+      detailedCommitmentInfo.endEpoch,
+      detailedCommitmentInfo.currentEpoch,
+    ].join(" / "),
+    "Start date": detailedCommitmentInfo.startDate,
+    "Expiration date": detailedCommitmentInfo.expirationDate,
+    "Total CU": detailedCommitmentInfo.totalCU,
+    "Missed proofs / Threshold": [
+      detailedCommitmentInfo.missedProofs,
+      detailedCommitmentInfo.threshold,
+    ].join(" / "),
+    "Collateral per unit": detailedCommitmentInfo.collateralPerUnit,
+    "Exited unit count": detailedCommitmentInfo.exitedUnitCount,
+    "Total CC rewards over time": detailedCommitmentInfo.totalCCRewardsOverTime,
+    "In vesting / Available / Total claimed (Provider)": [
+      detailedCommitmentInfo.providerRewardsInVesting,
+      detailedCommitmentInfo.providerRewardsAvailable,
+      detailedCommitmentInfo.providerRewardsTotalClaimed,
+    ].join(" / "),
+    "In vesting / Available / Total claimed (Staker)": [
+      detailedCommitmentInfo.stakerRewardsInVesting,
+      detailedCommitmentInfo.stakerRewardsAvailable,
+      detailedCommitmentInfo.stakerRewardsTotalClaimed,
+    ].join(" / "),
+  });
 }
 
 type Rewards = { ccRewards: bigint; dealStakerRewards: bigint };

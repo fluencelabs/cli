@@ -21,7 +21,6 @@ import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
 import merge from "lodash-es/merge.js";
-import { stringify } from "yaml";
 
 import { ajv, validationErrorToString } from "../../../ajvInstance.js";
 import { ptParse } from "../../../chain/currencies.js";
@@ -35,6 +34,7 @@ import { stringifyUnknown } from "../../../helpers/stringifyUnknown.js";
 import { bigintToStr, numToStr } from "../../../helpers/typesafeStringify.js";
 import { splitErrorsAndResults } from "../../../helpers/utils.js";
 import { validateBatchAsync } from "../../../helpers/validations.js";
+import { confirm } from "../../../prompt.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
 
 import { providerNameSchema } from "./provider0.js";
@@ -56,7 +56,7 @@ import {
 const OPTIONAL_RESOURCE_DETAILS_STRING = "<optional>";
 const OPTIONAL_RESOURCE_DETAILS_NUMBER = 1;
 const OPTIONAL_RESOURCE_DETAILS_BOOLEAN = false;
-const BYTES_PER_CORE = 4_000_000_000;
+const BYTES_PER_CORE = 4_294_967_296;
 const PROTOCOL_VERSION_2 = 2;
 
 type PeerCPUDetails = {
@@ -480,6 +480,19 @@ export default {
     required: ["computePeers", "offers", "providerName", "capacityCommitments"],
   },
   async migrate({ computePeers, capacityCommitments, offers, providerName }) {
+    if (
+      !(await confirm({
+        message: `${color.yellow(
+          PROVIDER_CONFIG_FULL_FILE_NAME,
+        )} will be automatically migrated to version 4. Continue?`,
+        default: true,
+      }))
+    ) {
+      commandObj.error(
+        `Aborting. Reason: ${PROVIDER_CONFIG_FULL_FILE_NAME} migration cancelled. Please use older ${CLI_NAME_FULL} version if you don't want to migrate`,
+      );
+    }
+
     const newComputePeers = Object.fromEntries(
       await Promise.all(
         Object.entries(computePeers).map(
@@ -553,6 +566,7 @@ export default {
   async refineSchema(schema) {
     const dataCentersFromChain = await getDataCentersFromChain();
     const resourcesFromChain = await getResourcesFromChain();
+    const { stringify } = await import("yaml");
 
     const offer = {
       properties: {
@@ -1489,17 +1503,7 @@ function stringToIp(str: string): { result: IPv4 } | { error: string } {
   return { result: [first, second, third, fourth] };
 }
 
-export function mergeCPUResourceDetails(
-  details: PeerCPUDetails | undefined,
-  { details: peerCPUDetails, ...restPeerCPU }: PeerCPU,
-) {
-  return {
-    ...restPeerCPU,
-    details: mergeCPUDetails(details, peerCPUDetails),
-  };
-}
-
-function mergeCPUDetails(
+export function mergeCPUDetails(
   details: PeerCPUDetails | undefined,
   peerDetails: PeerCPUDetails | undefined,
 ): PeerCPUDetails {
@@ -1525,17 +1529,7 @@ function removeOptionalCPUDetails(
   return res;
 }
 
-export function mergeRAMResourceDetails(
-  details: PeerRamDetails | undefined,
-  { details: peerRAMDetails, ...restPeerRAM }: PeerRAM,
-) {
-  return {
-    ...restPeerRAM,
-    details: mergeRAMDetails(details, peerRAMDetails),
-  };
-}
-
-function mergeRAMDetails(
+export function mergeRAMDetails(
   details: PeerRamDetails | undefined,
   peerDetails: PeerRamDetails | undefined,
 ): PeerRamDetails {
@@ -1582,17 +1576,7 @@ function removeOptionalRAMDetails(
   return res;
 }
 
-export function mergeStorageResourceDetails(
-  details: PeerStorageDetails | undefined,
-  { details: peerStorageDetails, ...restPeerStorage }: PeerStorage,
-) {
-  return {
-    ...restPeerStorage,
-    details: mergeStorageDetails(details, peerStorageDetails),
-  };
-}
-
-function mergeStorageDetails(
+export function mergeStorageDetails(
   details: PeerStorageDetails | undefined,
   peerDetails: PeerStorageDetails | undefined,
 ): PeerStorageDetails {

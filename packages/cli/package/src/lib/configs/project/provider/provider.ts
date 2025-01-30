@@ -69,9 +69,9 @@ import configOptions4, {
   getDefaultResources,
   getDefaultOfferResources,
   type ResourceType,
-  mergeCPUResourceDetails,
-  mergeRAMResourceDetails,
-  mergeStorageResourceDetails,
+  mergeCPUDetails,
+  mergeRAMDetails,
+  mergeStorageDetails,
   getDefaultDataCenterName,
 } from "./provider4.js";
 
@@ -317,7 +317,7 @@ export async function ensureComputerPeerConfigs({
             );
           }
 
-          const manifest = genManifest({
+          const manifest = await genManifest({
             chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
             ipSupplies: computePeer.resources.ip.supply,
             httpEndpoint,
@@ -344,7 +344,7 @@ export async function ensureComputerPeerConfigs({
             return {
               ...s,
               ...(await resourceNameToResource("storage", s.name)),
-              details: mergeStorageResourceDetails(storage, s),
+              details: mergeStorageDetails(storage, s.details),
             };
           }),
         );
@@ -356,7 +356,7 @@ export async function ensureComputerPeerConfigs({
               "cpu",
               computePeer.resources.cpu.name,
             )),
-            details: mergeCPUResourceDetails(cpu, computePeer.resources.cpu),
+            details: mergeCPUDetails(cpu, computePeer.resources.cpu.details),
           },
           ram: {
             ...computePeer.resources.ram,
@@ -364,7 +364,7 @@ export async function ensureComputerPeerConfigs({
               "ram",
               computePeer.resources.ram.name,
             )),
-            details: mergeRAMResourceDetails(ram, computePeer.resources.ram),
+            details: mergeRAMDetails(ram, computePeer.resources.ram.details),
           },
           storage: storages,
           bandwidth: {

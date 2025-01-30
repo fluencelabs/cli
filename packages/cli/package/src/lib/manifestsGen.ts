@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { stringify } from "yaml";
-
 import type { IPSupplies } from "./configs/project/provider/provider1.js";
 
 const PRIVATE_KEY_SECRET_REF = "private-key-secret";
@@ -32,7 +30,7 @@ type GenManifestsArgs = {
   diamondContract: string;
 };
 
-export function genManifest({
+export async function genManifest({
   chainPrivateKey,
   ipSupplies,
   httpEndpoint,
@@ -42,6 +40,7 @@ export function genManifest({
   networkId,
   diamondContract,
 }: GenManifestsArgs) {
+  const { stringify } = await import("yaml");
   return `---
 # if VM is enabled
 apiVersion: kustomize.toolkit.fluxcd.io/v1

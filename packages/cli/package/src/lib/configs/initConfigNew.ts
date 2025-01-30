@@ -21,6 +21,7 @@ import { basename, dirname, join, relative } from "node:path";
 
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
+import cloneDeep from "lodash-es/cloneDeep.js";
 
 import { jsonStringify } from "../../common.js";
 import { validationErrorToString, getAjv } from "../ajvInstance.js";
@@ -30,12 +31,10 @@ import {
   YML_EXT,
   CLI_NAME_FULL,
   SCHEMAS_DIR_NAME,
-  PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../const.js";
 import { dbg } from "../dbg.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
 import { removeProperties } from "../helpers/utils.js";
-import { confirm } from "../prompt.js";
 
 import type {
   InitializedConfig,
@@ -181,6 +180,7 @@ export function getConfigInitFunction<
       } = getLatestConfigRes;
 
       let prevConfigString = latestConfigString;
+      let prevConfig = cloneDeep(latestConfig);
 
       const initializedConfig: InitializedConfig<LatestConfig> = {
         ...latestConfig,
@@ -188,17 +188,19 @@ export function getConfigInitFunction<
           return actualConfigPath;
         },
         async $commit(): Promise<void> {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const config = removeProperties(this, ([, v]) => {
             return typeof v === "function";
-          });
+          }) as LatestConfig;
 
           prevConfigString = await saveConfig(
             actualConfigPath,
-            yamlDiffPatch(prevConfigString, {}, config),
+            yamlDiffPatch(prevConfigString, prevConfig, config),
             prevConfigString,
           );
 
           await validateLatestConfig(config);
+          prevConfig = config;
         },
       };
 
@@ -426,8 +428,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     // No need to migrate for the current config version
     if (index !== 0) {
       prevConfig = currentConfig;
-      await confirmProviderConfigMigration(actualConfigPath, prevConfig);
-      const migrated = await configOptions.migrate(prevConfig);
+      const migrated = await configOptions.migrate(cloneDeep(prevConfig));
 
       if ("version" in migrated) {
         delete migrated.version;
@@ -451,7 +452,7 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
 
     currentConfigString = await saveConfig(
       actualConfigPath,
-      yamlDiffPatch(currentConfigString, {}, currentConfig),
+      yamlDiffPatch(currentConfigString, prevConfig, currentConfig),
       index === 0 ? configString : currentConfigString,
     );
 
@@ -474,27 +475,6 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
       typeof getConfigValidator<LatestConfig>
     >,
   };
-}
-
-async function confirmProviderConfigMigration(
-  actualConfigPath: string,
-  prevConfig: object,
-) {
-  if (
-    actualConfigPath.endsWith(PROVIDER_CONFIG_FULL_FILE_NAME) &&
-    "version" in prevConfig &&
-    Number(prevConfig.version) === 3 &&
-    !(await confirm({
-      message: `Config at ${color.yellow(
-        actualConfigPath,
-      )} will be automatically migrated to version 4. Continue?`,
-      default: true,
-    }))
-  ) {
-    commandObj.error(
-      `Aborting. Reason: ${actualConfigPath} migration cancelled. Please use older ${CLI_NAME_FULL} version if you don't want to migrate`,
-    );
-  }
 }
 
 const objWithVersionSchema: JSONSchemaType<{ version: number }> = {

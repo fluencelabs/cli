@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import assert from "node:assert";
+
 import { color } from "@oclif/color";
 import omit from "lodash-es/omit.js";
-import { stringify } from "yaml";
 
 import { commandObj } from "../../commandObj.js";
 import type { ResourceType } from "../../configs/project/provider/provider4.js";
@@ -55,7 +56,13 @@ type PeersOnChain = {
     id: string;
     workerId: string | undefined;
   }[];
-  resourcesByType: { cpu: OnChainResource };
+  resourcesByType: {
+    cpu: OnChainResource;
+    ram: OnChainResource;
+    storage: [OnChainResource, ...OnChainResource[]];
+    ip: OnChainResource;
+    bandwidth: OnChainResource;
+  };
   peerIdBase58: string;
   hexPeerId: string;
 }[];
@@ -72,45 +79,37 @@ type TxsWithDescription = (Tx & { description: string })[];
 export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
   const offersFoundOnChain = await filterOffersFoundOnChain(offers);
-  const populatedTxs = await populateUpdateOffersTxs(offersFoundOnChain);
+  const populatedOffersTxs = await populateUpdateOffersTxs(offersFoundOnChain);
 
   const [firstUpdateOffersTx, ...restUpdateOffersTxs] = [
-    populatedTxs.flatMap(({ removePeersFromOffersTxs }) => {
+    populatedOffersTxs.flatMap(({ removePeersFromOffersTxs }) => {
       return removePeersFromOffersTxs.map(({ tx }) => {
         return tx;
       });
     }),
-    populatedTxs.flatMap(({ txs }) => {
+    populatedOffersTxs.flatMap(({ txs }) => {
       return txs.map(({ tx }) => {
         return tx;
       });
     }),
   ].flat();
 
-  if (firstUpdateOffersTx === undefined) {
-    const addedCPs = populatedTxs.reduce<Record<string, string[]>>(
-      (acc, { addedCPsNames, offerName }) => {
-        if (addedCPsNames.length > 0) {
-          acc[offerName] = addedCPsNames;
-        }
+  const offersToAddCPsTo = populatedOffersTxs.filter(
+    (
+      offer,
+    ): offer is (typeof populatedOffersTxs)[number] & {
+      addMissingComputePeers: NonNullable<AddMissingComputePeers>;
+    } => {
+      return offer.addMissingComputePeers !== null;
+    },
+  );
 
-        return acc;
-      },
-      {},
-    );
-
-    if (Object.values(addedCPs).length === 0) {
-      commandObj.logToStderr("No changes found for selected offers");
-    } else {
-      commandObj.logToStderr(
-        `Added the compute peers to the following offers:\n${stringify(addedCPs)}`,
-      );
-    }
-
+  if (firstUpdateOffersTx === undefined && offersToAddCPsTo.length === 0) {
+    commandObj.logToStderr("No changes found for selected offers");
     return;
   }
 
-  printOffersToUpdateInfo(populatedTxs);
+  printOffersToUpdateInfo(populatedOffersTxs);
 
   if (
     !(await confirm({
@@ -122,17 +121,23 @@ export async function updateOffers(flags: OffersArgs) {
     return;
   }
 
-  await signBatch({
-    title: `Updating offers:\n\n${populatedTxs
-      .map(({ offerName, offerId }) => {
-        return `${offerName} (${offerId})`;
-      })
-      .join("\n")}`,
-    populatedTxs: [firstUpdateOffersTx, ...restUpdateOffersTxs],
-    validateAddress: assertProviderIsRegistered,
-  });
+  for (const { addMissingComputePeers } of offersToAddCPsTo) {
+    await addMissingComputePeers.execute();
+  }
 
-  const peersToDeploy = populatedTxs.flatMap(({ txs }) => {
+  if (firstUpdateOffersTx !== undefined) {
+    await signBatch({
+      title: `Updating offers:\n\n${populatedOffersTxs
+        .map(({ offerName, offerId }) => {
+          return `${offerName} (${offerId})`;
+        })
+        .join("\n")}`,
+      populatedTxs: [firstUpdateOffersTx, ...restUpdateOffersTxs],
+      validateAddress: assertProviderIsRegistered,
+    });
+  }
+
+  const peersToDeploy = populatedOffersTxs.flatMap(({ txs }) => {
     return txs.flatMap(({ peersToDeploy }) => {
       return peersToDeploy ?? [];
     });
@@ -242,7 +247,7 @@ async function filterOffersFoundOnChain(offers: EnsureOfferConfig[]) {
 
   if (offerInfoErrors.length > 0) {
     commandObj.warn(
-      `Some of the offers are not found on chain:\n${offerInfoErrors
+      `Some of the offers are not found on subgraph indexer:\n${offerInfoErrors
         .map(({ offerName, offerId }) => {
           return `${offerName} (${offerId})`;
         })
@@ -275,7 +280,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         peersOnChain,
       )) satisfies Txs;
 
-      const { addedCPsNames } = await addMissingComputePeers(
+      const addMissingComputePeers = getAddMissingComputePeers(
         offer,
         peersOnChain,
       );
@@ -299,7 +304,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         offerId,
         removePeersFromOffersTxs,
         txs,
-        addedCPsNames,
+        addMissingComputePeers,
       };
     }),
   );
@@ -356,22 +361,33 @@ async function populatePeersToRemoveTxs(
   });
 
   return computePeersToRemove.flatMap(
-    ({ peerIdBase58, hexPeerId, computeUnits, resourcesByType: { cpu } }) => {
+    ({ peerIdBase58, hexPeerId, computeUnits, resourcesByType }) => {
       return [
         ...computeUnits.map((computeUnit, index) => {
           return {
             ...(index === 0
               ? {
-                  description: `\nRemoving peer ${peerIdBase58} with ${numToStr(computeUnits.length)} compute units`,
+                  description: `\nRemoving peer ${peerIdBase58} with ${numToStr(computeUnits.length)} compute units and resources`,
                 }
               : {}),
             tx: populateTx(
               contracts.diamond.removeComputeUnitV2,
               computeUnit.id,
-              cpu.resourceId,
+              resourcesByType.cpu.resourceId,
             ),
           };
         }),
+        ...Object.values(resourcesByType)
+          .flat()
+          .map((resource) => {
+            return {
+              tx: populateTx(
+                contracts.diamond.removePeerResource,
+                hexPeerId,
+                resource.resourceId,
+              ),
+            };
+          }),
         { tx: populateTx(contracts.diamond.removeComputePeerV2, hexPeerId) },
       ];
     },
@@ -711,28 +727,61 @@ type ResourceUpdate =
       resourceType: ResourceType;
       onChainResource: ResourceInfo | undefined;
       configuredResource: ResourceInfo;
+      unitIds?: string[];
     }
   | {
       resourceType: ResourceType;
       onChainResource: ResourceInfo;
       configuredResource: ResourceInfo | undefined;
+      unitIds?: string[];
     };
 
 async function createResourceUpdateTx(
   peerId: string,
-  { resourceType, onChainResource, configuredResource }: ResourceUpdate,
+  {
+    resourceType,
+    onChainResource,
+    configuredResource,
+    unitIds,
+  }: ResourceUpdate,
 ) {
-  const txs: TxsWithDescription = [];
+  const txs: Txs = [];
   const { contracts } = await getContracts();
 
   function removeResource() {
     if (
-      onChainResource !== undefined &&
-      (configuredResource === undefined ||
-        onChainResource.resourceId !== configuredResource.resourceId)
+      !(
+        onChainResource !== undefined &&
+        (configuredResource === undefined ||
+          onChainResource.resourceId !== configuredResource.resourceId)
+      )
     ) {
+      return;
+    }
+
+    const description = `Removing ${resourceType} resource with id ${onChainResource.resourceId}`;
+
+    if (resourceType === "cpu") {
+      assert(
+        unitIds !== undefined,
+        "Unit ids must be included for CPU resource",
+      );
+
+      txs.push(
+        ...unitIds.map((computeUnit, i) => {
+          return {
+            ...(i === 0 ? { description } : {}),
+            tx: populateTx(
+              contracts.diamond.removeComputeUnitV2,
+              computeUnit,
+              onChainResource.resourceId,
+            ),
+          };
+        }),
+      );
+    } else {
       txs.push({
-        description: `Removing ${resourceType} resource with id ${onChainResource.resourceId}`,
+        description,
         tx: populateTx(
           contracts.diamond.removePeerResource,
           peerId,
@@ -744,12 +793,38 @@ async function createResourceUpdateTx(
 
   function addResource() {
     if (
-      configuredResource !== undefined &&
-      (onChainResource === undefined ||
-        onChainResource.resourceId !== configuredResource.resourceId)
+      !(
+        configuredResource !== undefined &&
+        (onChainResource === undefined ||
+          onChainResource.resourceId !== configuredResource.resourceId)
+      )
     ) {
+      return;
+    }
+
+    const description = `Adding ${resourceType} resource with id ${configuredResource.resourceId}`;
+
+    if (resourceType === "cpu") {
+      assert(
+        unitIds !== undefined,
+        "Unit ids must be included for CPU resource",
+      );
+
+      txs.push(
+        ...unitIds.map((computeUnit, i) => {
+          const CUIds = [computeUnit];
+          return {
+            ...(i === 0 ? { description } : {}),
+            tx: populateTx(contracts.diamond.addComputeUnitsV2, peerId, CUIds, {
+              ...configuredResource,
+              supply: CUIds.length * VCPU_PER_CU,
+            }),
+          };
+        }),
+      );
+    } else {
       txs.push({
-        description: `Adding ${resourceType} resource with id ${configuredResource.resourceId}`,
+        description,
         tx: populateTx(
           contracts.diamond.registerPeerResource,
           peerId,
@@ -802,6 +877,9 @@ async function populatePeerResourcesTxs({
       resourceType: "cpu",
       onChainResource: onChainPeer.resourcesByType.cpu,
       configuredResource: resourcesByType.cpu,
+      unitIds: onChainPeer.computeUnits.map(({ id }) => {
+        return id;
+      }),
     } as const;
 
     const resourceUpdates = [
@@ -854,6 +932,11 @@ async function populatePeerResourcesTxs({
     if (firstTx === undefined) {
       continue;
     }
+
+    assert(
+      firstTx.description !== undefined,
+      "createResourceUpdateTx ensures that description is set for first tx",
+    );
 
     firstTx.description = `\nFor ${peerName}:\n${firstTx.description}`;
     txs.push(firstTx, ...restTxs);
@@ -925,7 +1008,7 @@ async function populateCUToAddTxs(
   );
 }
 
-async function addMissingComputePeers(
+function getAddMissingComputePeers(
   { computePeersFromProviderConfig, offerId, offerName }: OnChainOffer,
   peersOnChain: PeersOnChain,
 ) {
@@ -935,34 +1018,65 @@ async function addMissingComputePeers(
     });
   });
 
-  return addRemainingCPs({ allCPs, offerId, offerName });
+  return allCPs.length === 0
+    ? null
+    : {
+        async execute() {
+          await addRemainingCPs({ allCPs, offerId, offerName });
+        },
+        computePeerNames: allCPs.map(({ name }) => {
+          return name;
+        }),
+      };
 }
+
+type AddMissingComputePeers = ReturnType<typeof getAddMissingComputePeers>;
 
 function printOffersToUpdateInfo(
   populatedTxs: Awaited<ReturnType<typeof populateUpdateOffersTxs>>,
 ) {
   commandObj.logToStderr(
     `Offers to update:\n\n${populatedTxs
-      .flatMap(({ offerId, offerName, removePeersFromOffersTxs, txs }) => {
-        const allTxs = [...removePeersFromOffersTxs, ...txs];
+      .flatMap(
+        ({
+          offerId,
+          offerName,
+          removePeersFromOffersTxs,
+          txs,
+          addMissingComputePeers,
+        }) => {
+          const allTxs = [...removePeersFromOffersTxs, ...txs];
 
-        if (allTxs.length === 0) {
-          return [];
-        }
+          if (allTxs.length === 0 && addMissingComputePeers === null) {
+            return [];
+          }
 
-        return [
-          `Offer ${color.green(offerName)} with id ${color.yellow(
-            offerId,
-          )}:\n${allTxs
-            .filter((tx): tx is typeof tx & { description: string } => {
-              return "description" in tx;
-            })
-            .map(({ description }) => {
-              return description;
-            })
-            .join("\n")}\n`,
-        ];
-      })
+          const addMissingComputePeersMessage =
+            addMissingComputePeers === null
+              ? null
+              : `Add missing compute peers:\n${addMissingComputePeers.computePeerNames.join(
+                  "\n",
+                )}`;
+
+          const allTxsMessage =
+            allTxs.length === 0
+              ? null
+              : allTxs
+                  .filter((tx): tx is typeof tx & { description: string } => {
+                    return "description" in tx;
+                  })
+                  .map(({ description }) => {
+                    return description;
+                  })
+                  .join("\n");
+
+          return [
+            `Offer ${color.green(offerName)} with id ${color.yellow(
+              offerId,
+            )}:\n\n${[addMissingComputePeersMessage, allTxsMessage].filter(Boolean).join("\n")}\n`,
+          ];
+        },
+      )
       .join("\n\n")}`,
   );
 }
