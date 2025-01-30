@@ -1331,8 +1331,11 @@ function indexerResourcesToOnchainResources(
   offerId: string,
 ): [OnChainResource, ...OnChainResource[]] {
   const [firstResource, ...restResources] = resources
-    .filter(({ resourceDescription: { type } }) => {
-      return onChainResourceTypeToResourceType(type) === resourceType;
+    .filter(({ resourceDescription: { type }, maxSupply }) => {
+      return (
+        onChainResourceTypeToResourceType(type) === resourceType &&
+        Number(maxSupply) > 0
+      );
     })
     .map(
       ({

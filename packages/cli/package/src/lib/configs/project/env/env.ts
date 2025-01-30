@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DEFAULT_PUBLIC_FLUENCE_ENV } from "../../../../common.js";
 import { type FluenceEnv } from "../../../const.js";
 import { getEnvConfigPath } from "../../../paths.js";
 import { getConfigInitFunction } from "../../initConfigNew.js";
@@ -30,9 +29,7 @@ export const options: InitConfigOptions<Config0, Config1> = {
   getConfigPath: getEnvConfigPath,
 };
 
-export function initNewEnvConfig(
-  fluenceEnv: FluenceEnv = DEFAULT_PUBLIC_FLUENCE_ENV,
-) {
+export function initNewEnvConfig(fluenceEnv: FluenceEnv) {
   return getConfigInitFunction(options, () => {
     return { fluenceEnv };
   })();

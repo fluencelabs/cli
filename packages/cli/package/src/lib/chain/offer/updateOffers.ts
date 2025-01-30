@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import assert from "node:assert";
+
 import { color } from "@oclif/color";
 import omit from "lodash-es/omit.js";
 
@@ -708,28 +710,61 @@ type ResourceUpdate =
       resourceType: ResourceType;
       onChainResource: ResourceInfo | undefined;
       configuredResource: ResourceInfo;
+      unitIds?: string[];
     }
   | {
       resourceType: ResourceType;
       onChainResource: ResourceInfo;
       configuredResource: ResourceInfo | undefined;
+      unitIds?: string[];
     };
 
 async function createResourceUpdateTx(
   peerId: string,
-  { resourceType, onChainResource, configuredResource }: ResourceUpdate,
+  {
+    resourceType,
+    onChainResource,
+    configuredResource,
+    unitIds,
+  }: ResourceUpdate,
 ) {
-  const txs: TxsWithDescription = [];
+  const txs: Txs = [];
   const { contracts } = await getContracts();
 
   function removeResource() {
     if (
-      onChainResource !== undefined &&
-      (configuredResource === undefined ||
-        onChainResource.resourceId !== configuredResource.resourceId)
+      !(
+        onChainResource !== undefined &&
+        (configuredResource === undefined ||
+          onChainResource.resourceId !== configuredResource.resourceId)
+      )
     ) {
+      return;
+    }
+
+    const description = `Removing ${resourceType} resource with id ${onChainResource.resourceId}`;
+
+    if (resourceType === "cpu") {
+      assert(
+        unitIds !== undefined,
+        "Unit ids must be included for CPU resource",
+      );
+
+      txs.push(
+        ...unitIds.map((computeUnit, i) => {
+          return {
+            ...(i === 0 ? { description } : {}),
+            tx: populateTx(
+              contracts.diamond.removeComputeUnitV2,
+              computeUnit,
+              onChainResource.resourceId,
+            ),
+          };
+        }),
+      );
+    } else {
       txs.push({
-        description: `Removing ${resourceType} resource with id ${onChainResource.resourceId}`,
+        description,
         tx: populateTx(
           contracts.diamond.removePeerResource,
           peerId,
@@ -741,12 +776,38 @@ async function createResourceUpdateTx(
 
   function addResource() {
     if (
-      configuredResource !== undefined &&
-      (onChainResource === undefined ||
-        onChainResource.resourceId !== configuredResource.resourceId)
+      !(
+        configuredResource !== undefined &&
+        (onChainResource === undefined ||
+          onChainResource.resourceId !== configuredResource.resourceId)
+      )
     ) {
+      return;
+    }
+
+    const description = `Adding ${resourceType} resource with id ${configuredResource.resourceId}`;
+
+    if (resourceType === "cpu") {
+      assert(
+        unitIds !== undefined,
+        "Unit ids must be included for CPU resource",
+      );
+
+      txs.push(
+        ...unitIds.map((computeUnit, i) => {
+          const CUIds = [computeUnit];
+          return {
+            ...(i === 0 ? { description } : {}),
+            tx: populateTx(contracts.diamond.addComputeUnitsV2, peerId, CUIds, {
+              ...configuredResource,
+              supply: CUIds.length * VCPU_PER_CU,
+            }),
+          };
+        }),
+      );
+    } else {
       txs.push({
-        description: `Adding ${resourceType} resource with id ${configuredResource.resourceId}`,
+        description,
         tx: populateTx(
           contracts.diamond.registerPeerResource,
           peerId,
@@ -799,6 +860,9 @@ async function populatePeerResourcesTxs({
       resourceType: "cpu",
       onChainResource: onChainPeer.resourcesByType.cpu,
       configuredResource: resourcesByType.cpu,
+      unitIds: onChainPeer.computeUnits.map(({ id }) => {
+        return id;
+      }),
     } as const;
 
     const resourceUpdates = [
@@ -851,6 +915,11 @@ async function populatePeerResourcesTxs({
     if (firstTx === undefined) {
       continue;
     }
+
+    assert(
+      firstTx.description !== undefined,
+      "createResourceUpdateTx ensures that description is set for first tx",
+    );
 
     firstTx.description = `\nFor ${peerName}:\n${firstTx.description}`;
     txs.push(firstTx, ...restTxs);
