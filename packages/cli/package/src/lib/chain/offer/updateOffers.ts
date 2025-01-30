@@ -56,7 +56,13 @@ type PeersOnChain = {
     id: string;
     workerId: string | undefined;
   }[];
-  resourcesByType: { cpu: OnChainResource };
+  resourcesByType: {
+    cpu: OnChainResource;
+    ram: OnChainResource;
+    storage: [OnChainResource, ...OnChainResource[]];
+    ip: OnChainResource;
+    bandwidth: OnChainResource;
+  };
   peerIdBase58: string;
   hexPeerId: string;
 }[];
@@ -355,22 +361,33 @@ async function populatePeersToRemoveTxs(
   });
 
   return computePeersToRemove.flatMap(
-    ({ peerIdBase58, hexPeerId, computeUnits, resourcesByType: { cpu } }) => {
+    ({ peerIdBase58, hexPeerId, computeUnits, resourcesByType }) => {
       return [
         ...computeUnits.map((computeUnit, index) => {
           return {
             ...(index === 0
               ? {
-                  description: `\nRemoving peer ${peerIdBase58} with ${numToStr(computeUnits.length)} compute units`,
+                  description: `\nRemoving peer ${peerIdBase58} with ${numToStr(computeUnits.length)} compute units and resources`,
                 }
               : {}),
             tx: populateTx(
               contracts.diamond.removeComputeUnitV2,
               computeUnit.id,
-              cpu.resourceId,
+              resourcesByType.cpu.resourceId,
             ),
           };
         }),
+        ...Object.values(resourcesByType)
+          .flat()
+          .map((resource) => {
+            return {
+              tx: populateTx(
+                contracts.diamond.removePeerResource,
+                hexPeerId,
+                resource.resourceId,
+              ),
+            };
+          }),
         { tx: populateTx(contracts.diamond.removeComputePeerV2, hexPeerId) },
       ];
     },
