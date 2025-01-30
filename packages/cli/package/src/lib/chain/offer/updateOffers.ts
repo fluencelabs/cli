@@ -71,47 +71,37 @@ type TxsWithDescription = (Tx & { description: string })[];
 export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
   const offersFoundOnChain = await filterOffersFoundOnChain(offers);
-  const populatedTxs = await populateUpdateOffersTxs(offersFoundOnChain);
+  const populatedOffersTxs = await populateUpdateOffersTxs(offersFoundOnChain);
 
   const [firstUpdateOffersTx, ...restUpdateOffersTxs] = [
-    populatedTxs.flatMap(({ removePeersFromOffersTxs }) => {
+    populatedOffersTxs.flatMap(({ removePeersFromOffersTxs }) => {
       return removePeersFromOffersTxs.map(({ tx }) => {
         return tx;
       });
     }),
-    populatedTxs.flatMap(({ txs }) => {
+    populatedOffersTxs.flatMap(({ txs }) => {
       return txs.map(({ tx }) => {
         return tx;
       });
     }),
   ].flat();
 
-  if (firstUpdateOffersTx === undefined) {
-    const addedCPs = populatedTxs.reduce<Record<string, string[]>>(
-      (acc, { addedCPsNames, offerName }) => {
-        if (addedCPsNames.length > 0) {
-          acc[offerName] = addedCPsNames;
-        }
+  const offersToAddCPsTo = populatedOffersTxs.filter(
+    (
+      offer,
+    ): offer is (typeof populatedOffersTxs)[number] & {
+      addMissingComputePeers: NonNullable<AddMissingComputePeers>;
+    } => {
+      return offer.addMissingComputePeers !== null;
+    },
+  );
 
-        return acc;
-      },
-      {},
-    );
-
-    if (Object.values(addedCPs).length === 0) {
-      commandObj.logToStderr("No changes found for selected offers");
-    } else {
-      const { stringify } = await import("yaml");
-
-      commandObj.logToStderr(
-        `Added the compute peers to the following offers:\n${stringify(addedCPs)}`,
-      );
-    }
-
+  if (firstUpdateOffersTx === undefined && offersToAddCPsTo.length === 0) {
+    commandObj.logToStderr("No changes found for selected offers");
     return;
   }
 
-  printOffersToUpdateInfo(populatedTxs);
+  printOffersToUpdateInfo(populatedOffersTxs);
 
   if (
     !(await confirm({
@@ -123,17 +113,23 @@ export async function updateOffers(flags: OffersArgs) {
     return;
   }
 
-  await signBatch({
-    title: `Updating offers:\n\n${populatedTxs
-      .map(({ offerName, offerId }) => {
-        return `${offerName} (${offerId})`;
-      })
-      .join("\n")}`,
-    populatedTxs: [firstUpdateOffersTx, ...restUpdateOffersTxs],
-    validateAddress: assertProviderIsRegistered,
-  });
+  for (const { addMissingComputePeers } of offersToAddCPsTo) {
+    await addMissingComputePeers.execute();
+  }
 
-  const peersToDeploy = populatedTxs.flatMap(({ txs }) => {
+  if (firstUpdateOffersTx !== undefined) {
+    await signBatch({
+      title: `Updating offers:\n\n${populatedOffersTxs
+        .map(({ offerName, offerId }) => {
+          return `${offerName} (${offerId})`;
+        })
+        .join("\n")}`,
+      populatedTxs: [firstUpdateOffersTx, ...restUpdateOffersTxs],
+      validateAddress: assertProviderIsRegistered,
+    });
+  }
+
+  const peersToDeploy = populatedOffersTxs.flatMap(({ txs }) => {
     return txs.flatMap(({ peersToDeploy }) => {
       return peersToDeploy ?? [];
     });
@@ -276,7 +272,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         peersOnChain,
       )) satisfies Txs;
 
-      const { addedCPsNames } = await addMissingComputePeers(
+      const addMissingComputePeers = getAddMissingComputePeers(
         offer,
         peersOnChain,
       );
@@ -300,7 +296,7 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
         offerId,
         removePeersFromOffersTxs,
         txs,
-        addedCPsNames,
+        addMissingComputePeers,
       };
     }),
   );
@@ -926,7 +922,7 @@ async function populateCUToAddTxs(
   );
 }
 
-async function addMissingComputePeers(
+function getAddMissingComputePeers(
   { computePeersFromProviderConfig, offerId, offerName }: OnChainOffer,
   peersOnChain: PeersOnChain,
 ) {
@@ -936,34 +932,65 @@ async function addMissingComputePeers(
     });
   });
 
-  return addRemainingCPs({ allCPs, offerId, offerName });
+  return allCPs.length === 0
+    ? null
+    : {
+        async execute() {
+          await addRemainingCPs({ allCPs, offerId, offerName });
+        },
+        computePeerNames: allCPs.map(({ name }) => {
+          return name;
+        }),
+      };
 }
+
+type AddMissingComputePeers = ReturnType<typeof getAddMissingComputePeers>;
 
 function printOffersToUpdateInfo(
   populatedTxs: Awaited<ReturnType<typeof populateUpdateOffersTxs>>,
 ) {
   commandObj.logToStderr(
     `Offers to update:\n\n${populatedTxs
-      .flatMap(({ offerId, offerName, removePeersFromOffersTxs, txs }) => {
-        const allTxs = [...removePeersFromOffersTxs, ...txs];
+      .flatMap(
+        ({
+          offerId,
+          offerName,
+          removePeersFromOffersTxs,
+          txs,
+          addMissingComputePeers,
+        }) => {
+          const allTxs = [...removePeersFromOffersTxs, ...txs];
 
-        if (allTxs.length === 0) {
-          return [];
-        }
+          if (allTxs.length === 0 && addMissingComputePeers === null) {
+            return [];
+          }
 
-        return [
-          `Offer ${color.green(offerName)} with id ${color.yellow(
-            offerId,
-          )}:\n${allTxs
-            .filter((tx): tx is typeof tx & { description: string } => {
-              return "description" in tx;
-            })
-            .map(({ description }) => {
-              return description;
-            })
-            .join("\n")}\n`,
-        ];
-      })
+          const addMissingComputePeersMessage =
+            addMissingComputePeers === null
+              ? null
+              : `Add missing compute peers:\n${addMissingComputePeers.computePeerNames.join(
+                  "\n",
+                )}`;
+
+          const allTxsMessage =
+            allTxs.length === 0
+              ? null
+              : allTxs
+                  .filter((tx): tx is typeof tx & { description: string } => {
+                    return "description" in tx;
+                  })
+                  .map(({ description }) => {
+                    return description;
+                  })
+                  .join("\n");
+
+          return [
+            `Offer ${color.green(offerName)} with id ${color.yellow(
+              offerId,
+            )}:\n\n${[addMissingComputePeersMessage, allTxsMessage].filter(Boolean).join("\n")}\n`,
+          ];
+        },
+      )
       .join("\n\n")}`,
   );
 }

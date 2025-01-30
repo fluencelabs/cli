@@ -665,7 +665,9 @@ async function formatOfferInfo(
               CPU: {
                 "Resource ID": resourcesByType.cpu.resourceId,
                 Metadata: resourcesByType.cpu.metadata,
-                Details: resourcesByType.cpu.details,
+                ...(resourcesByType.cpu.details === "{}"
+                  ? {}
+                  : { Details: resourcesByType.cpu.details }),
                 Supply: (
                   await resourceSupplyFromChainToConfig(
                     "cpu",
@@ -676,7 +678,9 @@ async function formatOfferInfo(
               RAM: {
                 "Resource ID": resourcesByType.ram.resourceId,
                 Metadata: resourcesByType.ram.metadata,
-                Details: resourcesByType.ram.details,
+                ...(resourcesByType.ram.details === "{}"
+                  ? {}
+                  : { Details: resourcesByType.ram.details }),
                 Supply: (
                   await resourceSupplyFromChainToConfig(
                     "ram",
@@ -689,7 +693,9 @@ async function formatOfferInfo(
                   return {
                     "Resource ID": storage.resourceId,
                     Metadata: storage.metadata,
-                    Details: storage.details,
+                    ...(storage.details === "{}"
+                      ? {}
+                      : { Details: storage.details }),
                     Supply: (
                       await resourceSupplyFromChainToConfig(
                         "storage",

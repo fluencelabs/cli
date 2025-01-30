@@ -56,7 +56,7 @@ import {
 const OPTIONAL_RESOURCE_DETAILS_STRING = "<optional>";
 const OPTIONAL_RESOURCE_DETAILS_NUMBER = 1;
 const OPTIONAL_RESOURCE_DETAILS_BOOLEAN = false;
-const BYTES_PER_CORE = 4_000_000_000;
+const BYTES_PER_CORE = 4_294_967_296;
 const PROTOCOL_VERSION_2 = 2;
 
 type PeerCPUDetails = {
@@ -1503,17 +1503,7 @@ function stringToIp(str: string): { result: IPv4 } | { error: string } {
   return { result: [first, second, third, fourth] };
 }
 
-export function mergeCPUResourceDetails(
-  details: PeerCPUDetails | undefined,
-  { details: peerCPUDetails, ...restPeerCPU }: PeerCPU,
-) {
-  return {
-    ...restPeerCPU,
-    details: mergeCPUDetails(details, peerCPUDetails),
-  };
-}
-
-function mergeCPUDetails(
+export function mergeCPUDetails(
   details: PeerCPUDetails | undefined,
   peerDetails: PeerCPUDetails | undefined,
 ): PeerCPUDetails {
@@ -1539,17 +1529,7 @@ function removeOptionalCPUDetails(
   return res;
 }
 
-export function mergeRAMResourceDetails(
-  details: PeerRamDetails | undefined,
-  { details: peerRAMDetails, ...restPeerRAM }: PeerRAM,
-) {
-  return {
-    ...restPeerRAM,
-    details: mergeRAMDetails(details, peerRAMDetails),
-  };
-}
-
-function mergeRAMDetails(
+export function mergeRAMDetails(
   details: PeerRamDetails | undefined,
   peerDetails: PeerRamDetails | undefined,
 ): PeerRamDetails {
@@ -1596,17 +1576,7 @@ function removeOptionalRAMDetails(
   return res;
 }
 
-export function mergeStorageResourceDetails(
-  details: PeerStorageDetails | undefined,
-  { details: peerStorageDetails, ...restPeerStorage }: PeerStorage,
-) {
-  return {
-    ...restPeerStorage,
-    details: mergeStorageDetails(details, peerStorageDetails),
-  };
-}
-
-function mergeStorageDetails(
+export function mergeStorageDetails(
   details: PeerStorageDetails | undefined,
   peerDetails: PeerStorageDetails | undefined,
 ): PeerStorageDetails {
