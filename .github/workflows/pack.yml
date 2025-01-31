@@ -68,7 +68,16 @@ jobs:
           secrets: |
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN;
             kv/ci/fcli-binaries id | AWS_ACCESS_KEY_ID ;
-            kv/ci/fcli-binaries secret | AWS_SECRET_ACCESS_KEY
+            kv/ci/fcli-binaries secret | AWS_SECRET_ACCESS_KEY ;
+            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
+            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD ;
+
+      - name: Login to private docker registry
+        uses: docker/login-action@v3
+        with:
+          registry: docker.fluence.dev
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
