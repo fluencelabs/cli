@@ -46,6 +46,7 @@ jobs:
 
   promote:
     name: "Promote fcli"
+    needs: pack
     runs-on: ubuntu-latest
 
     permissions:
