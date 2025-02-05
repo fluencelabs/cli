@@ -99,8 +99,17 @@ const peerRamDetailsSchema = {
   properties: {
     manufacturer: { type: "string", nullable: true },
     model: { type: "string", nullable: true },
-    speed: { type: "integer", nullable: true, minimum: 1 },
-    ecc: { type: "boolean", nullable: true },
+    speed: {
+      description: "in MHz",
+      type: "integer",
+      nullable: true,
+      minimum: 1,
+    },
+    ecc: {
+      description: "Error-Correcting Code (ECC) availability",
+      type: "boolean",
+      nullable: true,
+    },
   },
   required: [],
 } as const satisfies JSONSchemaType<PeerRamDetails>;
@@ -129,7 +138,12 @@ const peerStorageDetailsSchema = {
   properties: {
     manufacturer: { type: "string", nullable: true },
     model: { type: "string", nullable: true },
-    sequentialWriteSpeed: { type: "integer", nullable: true, minimum: 1 },
+    sequentialWriteSpeed: {
+      description: "in Mb/s",
+      type: "integer",
+      nullable: true,
+      minimum: 1,
+    },
   },
   required: [],
 } as const satisfies JSONSchemaType<PeerStorageDetails>;
