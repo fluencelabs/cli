@@ -20,11 +20,9 @@ import type { JSONSchemaType } from "ajv";
 import isEmpty from "lodash-es/isEmpty.js";
 import mapValues from "lodash-es/mapValues.js";
 
-import { versions } from "../../../../versions.js";
 import {
   ccDurationValidator,
   validateAddress,
-  validateProtocolVersion,
 } from "../../../chain/chainValidators.js";
 import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
@@ -172,65 +170,9 @@ export default {
       validateCC(config),
       validateMissingComputePeers(config),
       validateNoDuplicateNoxNamesInOffers(config),
-      validateProtocolVersions(config),
     );
   },
 } satisfies ConfigOptions<PrevConfig, Config>;
-
-async function validateProtocolVersions(providerConfig: Config) {
-  const errors = (
-    await Promise.all(
-      Object.entries(providerConfig.offers).flatMap(
-        ([
-          offer,
-          {
-            maxProtocolVersion = versions.protocolVersion,
-            minProtocolVersion = versions.protocolVersion,
-          },
-        ]) => {
-          return [
-            Promise.resolve({
-              offer,
-              property: "minProtocolVersion or maxProtocolVersion",
-              validity:
-                minProtocolVersion > maxProtocolVersion
-                  ? `minProtocolVersion must be less than or equal to maxProtocolVersion. Got: minProtocolVersion=${color.yellow(
-                      minProtocolVersion,
-                    )} maxProtocolVersion=${color.yellow(maxProtocolVersion)}`
-                  : true,
-            }),
-            ...(
-              [
-                ["minProtocolVersion", minProtocolVersion],
-                ["maxProtocolVersion", maxProtocolVersion],
-              ] as const
-            ).map(async ([property, v]) => {
-              return {
-                offer,
-                property,
-                validity: await validateProtocolVersion(v),
-              };
-            }),
-          ];
-        },
-      ),
-    )
-  ).filter((a): a is typeof a & { validity: string } => {
-    return a.validity !== true;
-  });
-
-  if (errors.length > 0) {
-    return errors
-      .map(({ offer, property, validity }) => {
-        return `Offer ${color.yellow(offer)} has invalid ${color.yellow(
-          property,
-        )} property: ${validity}`;
-      })
-      .join("\n");
-  }
-
-  return true;
-}
 
 function validateNoDuplicateNoxNamesInOffers(config: Config): ValidationResult {
   const noxNamesInOffers: Record<string, string[]> = {};
