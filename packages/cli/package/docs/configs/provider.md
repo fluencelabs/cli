@@ -139,12 +139,12 @@ Override or extend RAM details not related to matching but visible to the user f
 
 **Properties**
 
-| Property       | Type    | Required | Description |
-|----------------|---------|----------|-------------|
-| `ecc`          | boolean | No       |             |
-| `manufacturer` | string  | No       |             |
-| `model`        | string  | No       |             |
-| `speed`        | integer | No       |             |
+| Property       | Type    | Required | Description                              |
+|----------------|---------|----------|------------------------------------------|
+| `ecc`          | boolean | No       | Error-Correcting Code (ECC) availability |
+| `manufacturer` | string  | No       |                                          |
+| `model`        | string  | No       |                                          |
+| `speed`        | integer | No       | in MHz                                   |
 
 ##### storage
 
@@ -168,7 +168,7 @@ Override or extend Storage details not related to matching but visible to the us
 |------------------------|---------|----------|-------------|
 | `manufacturer`         | string  | No       |             |
 | `model`                | string  | No       |             |
-| `sequentialWriteSpeed` | integer | No       |             |
+| `sequentialWriteSpeed` | integer | No       | in Mb/s     |
 
 ## offers
 
@@ -301,12 +301,12 @@ RAM details not related to matching but visible to the user for information purp
 
 ##### Properties
 
-| Property       | Type    | Required | Description |
-|----------------|---------|----------|-------------|
-| `ecc`          | boolean | No       |             |
-| `manufacturer` | string  | No       |             |
-| `model`        | string  | No       |             |
-| `speed`        | integer | No       |             |
+| Property       | Type    | Required | Description                              |
+|----------------|---------|----------|------------------------------------------|
+| `ecc`          | boolean | No       | Error-Correcting Code (ECC) availability |
+| `manufacturer` | string  | No       |                                          |
+| `model`        | string  | No       |                                          |
+| `speed`        | integer | No       | in MHz                                   |
 
 ### storage
 
@@ -328,5 +328,5 @@ Storage details not related to matching but visible to the user for information 
 |------------------------|---------|----------|-------------|
 | `manufacturer`         | string  | No       |             |
 | `model`                | string  | No       |             |
-| `sequentialWriteSpeed` | integer | No       |             |
+| `sequentialWriteSpeed` | integer | No       | in Mb/s     |
 
