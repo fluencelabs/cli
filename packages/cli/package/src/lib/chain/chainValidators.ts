@@ -93,31 +93,3 @@ export async function getProtocolVersions() {
 
   return protocolVersions;
 }
-
-export async function validateProtocolVersion(
-  protocolVersion: number,
-): Promise<ValidationResult> {
-  const { minProtocolVersion, maxProtocolVersion } =
-    await getProtocolVersions();
-
-  if (
-    protocolVersion < minProtocolVersion ||
-    protocolVersion > maxProtocolVersion
-  ) {
-    const minProtocolVersionStr = bigintToStr(minProtocolVersion);
-
-    if (minProtocolVersion === maxProtocolVersion) {
-      return `Protocol version must be equal to ${color.yellow(
-        minProtocolVersionStr,
-      )}. Got: ${color.yellow(protocolVersion)}`;
-    }
-
-    return `Protocol version must be ${color.yellow(
-      `>=${minProtocolVersionStr}`,
-    )} and ${color.yellow(`<=${minProtocolVersionStr}`)}. Got: ${color.yellow(
-      protocolVersion,
-    )}`;
-  }
-
-  return true;
-}
