@@ -121,10 +121,6 @@ export async function updateOffers(flags: OffersArgs) {
     return;
   }
 
-  for (const { addMissingComputePeers } of offersToAddCPsTo) {
-    await addMissingComputePeers.execute();
-  }
-
   if (firstUpdateOffersTx !== undefined) {
     await signBatch({
       title: `Updating offers:\n\n${populatedOffersTxs
@@ -135,6 +131,10 @@ export async function updateOffers(flags: OffersArgs) {
       populatedTxs: [firstUpdateOffersTx, ...restUpdateOffersTxs],
       validateAddress: assertProviderIsRegistered,
     });
+  }
+
+  for (const { addMissingComputePeers } of offersToAddCPsTo) {
+    await addMissingComputePeers.execute();
   }
 
   const peersToDeploy = populatedOffersTxs.flatMap(({ txs }) => {
@@ -1073,7 +1073,7 @@ function printOffersToUpdateInfo(
           return [
             `Offer ${color.green(offerName)} with id ${color.yellow(
               offerId,
-            )}:\n\n${[addMissingComputePeersMessage, allTxsMessage].filter(Boolean).join("\n")}\n`,
+            )}:\n\n${[allTxsMessage, addMissingComputePeersMessage].filter(Boolean).join("\n")}\n`,
           ];
         },
       )
