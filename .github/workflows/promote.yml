@@ -12,6 +12,8 @@ on:
           - testnet # version compatible with current testnet env
           - stable # latest stable version (same as mainnet)
           - mainnet # version compatible with current mainnet env
+          - v1 # version compatible with mainnet marketplace v1 (old CLI)
+          - v2 # version compatible with mainnet marketplace v2 (current)
           - unstable # version used by all CI jobs; TODO: publish automatically on every release
         required: true
       ref:
