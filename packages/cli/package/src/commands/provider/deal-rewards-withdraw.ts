@@ -68,7 +68,7 @@ export default class DealRewardsWithdraw extends BaseCommand<
     const { contracts } = await getContracts();
 
     for (const dealId of dealIds) {
-      const deal = contracts.getDeal(dealId);
+      const deal = contracts.getDealV2(dealId);
       const workersIds = await deal.getWorkerIds();
 
       let providerRewards = 0n;

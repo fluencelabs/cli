@@ -78,7 +78,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const workerIdsFromRPC = (await multicallRead(
       dealIds.map((id): MulticallReadItem => {
-        const deal = contracts.getDeal(id);
+        const deal = contracts.getDealV2(id);
         return {
           target: id,
           callData: deal.interface.encodeFunctionData("getWorkerIds"),
@@ -91,11 +91,11 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
         };
       }),
     )) as Awaited<
-      ReturnType<ReturnType<Contracts["getDeal"]>["getWorkerIds"]>
+      ReturnType<ReturnType<Contracts["getDealV2"]>["getWorkerIds"]>
     >[];
 
     const dealWorkerIds = dealIds.map((dealId, i) => {
-      const deal = contracts.getDeal(dealId);
+      const deal = contracts.getDealV2(dealId);
       const workerIds = workerIdsFromRPC[i] ?? [];
       return { dealId, deal, workerIds };
     });
