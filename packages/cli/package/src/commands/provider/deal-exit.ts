@@ -95,12 +95,12 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     >[];
 
     const dealWorkerIds = dealIds.map((dealId, i) => {
-      const deal = contracts.getDealV2(dealId);
       const workerIds = workerIdsFromRPC[i] ?? [];
-      return { dealId, deal, workerIds };
+      return { dealId, workerIds };
     });
 
-    for (const { dealId, deal, workerIds } of dealWorkerIds) {
+    for (const { dealId, workerIds } of dealWorkerIds) {
+      const deal = contracts.getDealV2(dealId);
       const [firstWorkerId, ...restWorkerIds] = workerIds;
 
       if (firstWorkerId === undefined) {
