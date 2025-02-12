@@ -26,7 +26,6 @@ import {
 } from "../../lib/const.js";
 import {
   getContracts,
-  getSignerAddress,
   multicallRead,
   populateTx,
   signBatch,
@@ -54,7 +53,6 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(DealExit));
     const { contracts } = await getContracts();
-    const signerAddress = await getSignerAddress();
 
     const dealIds =
       // flags.all
@@ -78,7 +76,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     }
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const workersFromRPC = (await multicallRead(
+    const workerIdsFromRPC = (await multicallRead(
       dealIds.map((id): MulticallReadItem => {
         const deal = contracts.getDeal(id);
         return {
@@ -96,37 +94,28 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
       ReturnType<ReturnType<Contracts["getDeal"]>["getWorkerIds"]>
     >[];
 
-    const dealWorkers = dealIds.map((id, i) => {
-      const deal = contracts.getDeal(id);
-      const workers = workersFromRPC[i];
-
-      return {
-        dealId: id,
-        workers: (workers ?? []).map((worker) => {
-          return { worker, deal };
-        }),
-      };
+    const dealWorkerIds = dealIds.map((dealId, i) => {
+      const deal = contracts.getDeal(dealId);
+      const workerIds = workerIdsFromRPC[i] ?? [];
+      return { dealId, deal, workerIds };
     });
 
-    for (const { dealId, workers } of dealWorkers) {
-      const [firstWorker, ...restWorkers] = workers;
+    for (const { dealId, deal, workerIds } of dealWorkerIds) {
+      const [firstWorkerId, ...restWorkerIds] = workerIds;
 
-      if (firstWorker === undefined) {
-        commandObj.warn(
-          `No workers found for address ${signerAddress} and deal id: ${dealId}`,
-        );
-
+      if (firstWorkerId === undefined) {
+        commandObj.warn(`No workers found for deal id: ${dealId}`);
         continue;
       }
 
       await signBatch({
-        title: `Remove the following workers from deal ${dealId}:\n\n${workers.join(
+        title: `Remove the following workers from deal ${dealId}:\n\n${workerIds.join(
           "\n",
         )}`,
         populatedTxs: [
-          populateTx(firstWorker.deal.removeWorker, firstWorker.worker),
-          ...restWorkers.map(({ deal, worker }) => {
-            return populateTx(deal.removeWorker, worker);
+          populateTx(deal.removeWorker, firstWorkerId),
+          ...restWorkerIds.map((workerId) => {
+            return populateTx(deal.removeWorker, workerId);
           }),
         ],
       });
