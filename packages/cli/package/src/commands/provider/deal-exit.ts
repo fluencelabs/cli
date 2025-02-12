@@ -83,16 +83,18 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
         const deal = contracts.getDeal(id);
         return {
           target: id,
-          callData: deal.interface.encodeFunctionData("getWorkers"),
+          callData: deal.interface.encodeFunctionData("getWorkerIds"),
           decode(returnData) {
             return deal.interface.decodeFunctionResult(
-              "getWorkers",
+              "getWorkerIds",
               returnData,
             );
           },
         };
       }),
-    )) as Awaited<ReturnType<ReturnType<Contracts["getDeal"]>["getWorkers"]>>[];
+    )) as Awaited<
+      ReturnType<ReturnType<Contracts["getDeal"]>["getWorkerIds"]>
+    >[];
 
     const dealWorkers = dealIds.map((id, i) => {
       const deal = contracts.getDeal(id);
@@ -100,13 +102,9 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
 
       return {
         dealId: id,
-        workers: (workers ?? [])
-          .filter((worker) => {
-            return worker.provider.toLowerCase() === signerAddress;
-          })
-          .map((worker) => {
-            return { worker, deal };
-          }),
+        workers: (workers ?? []).map((worker) => {
+          return { worker, deal };
+        }),
       };
     });
 
@@ -122,18 +120,13 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
       }
 
       await signBatch({
-        title: `Remove the following workers from deal ${dealId}:\n\n${workers
-          .map(({ worker: { onchainId } }) => {
-            return onchainId;
-          })
-          .join("\n")}`,
+        title: `Remove the following workers from deal ${dealId}:\n\n${workers.join(
+          "\n",
+        )}`,
         populatedTxs: [
-          populateTx(
-            firstWorker.deal.removeWorker,
-            firstWorker.worker.onchainId,
-          ),
-          ...restWorkers.map(({ deal, worker: { onchainId } }) => {
-            return populateTx(deal.removeWorker, onchainId);
+          populateTx(firstWorker.deal.removeWorker, firstWorker.worker),
+          ...restWorkers.map(({ deal, worker }) => {
+            return populateTx(deal.removeWorker, worker);
           }),
         ],
       });
