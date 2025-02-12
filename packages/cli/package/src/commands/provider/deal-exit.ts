@@ -26,7 +26,6 @@ import {
 } from "../../lib/const.js";
 import {
   getContracts,
-  getSignerAddress,
   multicallRead,
   populateTx,
   signBatch,
@@ -54,7 +53,6 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(DealExit));
     const { contracts } = await getContracts();
-    const signerAddress = await getSignerAddress();
 
     const dealIds =
       // flags.all
@@ -78,62 +76,45 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
     }
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const workersFromRPC = (await multicallRead(
+    const workerIdsFromRPC = (await multicallRead(
       dealIds.map((id): MulticallReadItem => {
-        const deal = contracts.getDeal(id);
+        const deal = contracts.getDealV2(id);
         return {
           target: id,
-          callData: deal.interface.encodeFunctionData("getWorkers"),
+          callData: deal.interface.encodeFunctionData("getWorkerIds"),
           decode(returnData) {
             return deal.interface.decodeFunctionResult(
-              "getWorkers",
+              "getWorkerIds",
               returnData,
             );
           },
         };
       }),
-    )) as Awaited<ReturnType<ReturnType<Contracts["getDeal"]>["getWorkers"]>>[];
+    )) as Awaited<
+      ReturnType<ReturnType<Contracts["getDealV2"]>["getWorkerIds"]>
+    >[];
 
-    const dealWorkers = dealIds.map((id, i) => {
-      const deal = contracts.getDeal(id);
-      const workers = workersFromRPC[i];
-
-      return {
-        dealId: id,
-        workers: (workers ?? [])
-          .filter((worker) => {
-            return worker.provider.toLowerCase() === signerAddress;
-          })
-          .map((worker) => {
-            return { worker, deal };
-          }),
-      };
+    const dealWorkerIds = dealIds.map((dealId, i) => {
+      return { dealId, workerIds: workerIdsFromRPC[i] ?? [] };
     });
 
-    for (const { dealId, workers } of dealWorkers) {
-      const [firstWorker, ...restWorkers] = workers;
+    for (const { dealId, workerIds } of dealWorkerIds) {
+      const deal = contracts.getDealV2(dealId);
+      const [firstWorkerId, ...restWorkerIds] = workerIds;
 
-      if (firstWorker === undefined) {
-        commandObj.warn(
-          `No workers found for address ${signerAddress} and deal id: ${dealId}`,
-        );
-
+      if (firstWorkerId === undefined) {
+        commandObj.warn(`No workers found for deal id: ${dealId}`);
         continue;
       }
 
       await signBatch({
-        title: `Remove the following workers from deal ${dealId}:\n\n${workers
-          .map(({ worker: { onchainId } }) => {
-            return onchainId;
-          })
-          .join("\n")}`,
+        title: `Remove the following workers from deal ${dealId}:\n\n${workerIds.join(
+          "\n",
+        )}`,
         populatedTxs: [
-          populateTx(
-            firstWorker.deal.removeWorker,
-            firstWorker.worker.onchainId,
-          ),
-          ...restWorkers.map(({ deal, worker: { onchainId } }) => {
-            return populateTx(deal.removeWorker, onchainId);
+          populateTx(deal.removeWorker, firstWorkerId),
+          ...restWorkerIds.map((workerId) => {
+            return populateTx(deal.removeWorker, workerId);
           }),
         ],
       });

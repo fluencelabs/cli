@@ -56,7 +56,7 @@ export default class DealRewardsInfo extends BaseCommand<
       (await input({ message: "Enter on-chain worker id" }));
 
     const { readonlyContracts } = await getReadonlyContracts();
-    const deal = readonlyContracts.getDeal(dealAddress);
+    const deal = readonlyContracts.getDealV2(dealAddress);
     const rewardAmount = await deal.getRewardAmount(onChainWorkerId);
 
     commandObj.log(

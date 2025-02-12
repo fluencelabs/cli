@@ -16,7 +16,6 @@
  */
 
 import { BaseCommand } from "../../baseCommand.js";
-import { peerIdHexStringToBase58String } from "../../lib/chain/conversions.js";
 import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
@@ -69,30 +68,30 @@ export default class DealRewardsWithdraw extends BaseCommand<
     const { contracts } = await getContracts();
 
     for (const dealId of dealIds) {
-      const deal = contracts.getDeal(dealId);
-      const workers = await deal.getWorkers();
+      const deal = contracts.getDealV2(dealId);
+      const workersIds = await deal.getWorkerIds();
 
       let providerRewards = 0n;
       let stakerRewards = 0n;
 
-      for (const { onchainId, peerId } of workers) {
-        const rewardAmount = await deal.getRewardAmount(onchainId);
+      for (const workerId of workersIds) {
+        const rewardAmount = await deal.getRewardAmount(workerId);
 
         if (
           rewardAmount.providerReward === 0n &&
           rewardAmount.stakerReward === 0n
         ) {
           commandObj.logToStderr(
-            `No rewards to withdraw for worker ${onchainId} (${await peerIdHexStringToBase58String(peerId)})`,
+            `No rewards to withdraw for worker ${workerId}`,
           );
 
           continue;
         }
 
         const txReceipt = await sign({
-          title: `Withdraw rewards for worker ${onchainId}`,
+          title: `Withdraw rewards for worker ${workerId}`,
           method: deal.withdrawRewards,
-          args: [onchainId],
+          args: [workerId],
         });
 
         const providerReward = getEventValue({
