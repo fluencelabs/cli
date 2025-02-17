@@ -354,7 +354,7 @@ export type ResourcePrices = Record<ResourceType, OfferResource>;
 
 export const CPU_PRICE_UNITS = "USDC/PhysicalCore";
 export const RAM_PRICE_UNITS = "USDC/MiB";
-export const STORAGE_PRICE_UNITS = "USDC/MiB";
+export const STORAGE_PRICE_UNITS = "USDC/GB";
 export const BANDWIDTH_PRICE_UNITS = "USDC/Mb";
 export const IP_PRICE_UNITS = "USDC/IP";
 

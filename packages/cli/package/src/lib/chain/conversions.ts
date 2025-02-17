@@ -98,17 +98,17 @@ export async function resourceSupplyFromConfigToChain(
       return { supply: supply * VCPU_PER_CU, supplyString: numToStr(supply) };
     case "ram":
       return {
-        supply: Math.round(supply / (await getBytesPerRam())),
+        supply: Math.floor(supply / (await getBytesPerRam())),
         supplyString: xbytes(supply, { iec: true }),
       };
     case "storage":
       return {
-        supply: Math.round(supply / (await getBytesPerStorage())),
-        supplyString: xbytes(supply, { iec: true }),
+        supply: Math.floor(supply / (await getBytesPerStorage())),
+        supplyString: xbytes(supply),
       };
     case "bandwidth":
       return {
-        supply: Math.round(supply / BYTES_PER_BANDWIDTH),
+        supply: Math.floor(supply / BYTES_PER_BANDWIDTH),
         supplyString: `${xbytes(supply, { bits: true })}ps`,
       };
     case "ip":
@@ -141,7 +141,7 @@ export async function resourceSupplyFromChainToConfig(
       const storageSupply = supply * (await getBytesPerStorage());
       return {
         supply: storageSupply,
-        supplyString: xbytes(storageSupply, { iec: true }),
+        supplyString: xbytes(storageSupply),
       };
     case "bandwidth":
       const bandwidthSupply = supply * BYTES_PER_BANDWIDTH;
