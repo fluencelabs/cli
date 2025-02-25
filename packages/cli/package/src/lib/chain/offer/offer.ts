@@ -1334,7 +1334,8 @@ function indexerResourcesToOnchainResources(
     .filter(({ resourceDescription: { type }, maxSupply }) => {
       return (
         onChainResourceTypeToResourceType(type) === resourceType &&
-        Number(maxSupply) > 0
+        // TODO: temporary solution to allow non-cpu resources to have maxSupply 0
+        (resourceType !== "cpu" || Number(maxSupply) > 0)
       );
     })
     .map(
