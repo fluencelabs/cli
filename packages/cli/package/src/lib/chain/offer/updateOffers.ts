@@ -288,8 +288,8 @@ function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {
       const txs: Txs = (
         await Promise.all([
           populateDataCenterTx(offer),
-          populateChangeResourceSupplyAndDetailsTx(offer),
           populateCUToRemoveTxs(offer, peersOnChain),
+          populateChangeResourceSupplyAndDetailsTx(offer),
           populateCUToAddTxs(offer, peersOnChain),
 
           populatePaymentTokenTx(offer),
