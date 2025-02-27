@@ -48,15 +48,17 @@ export async function setTryTimeout<T, U>(
     try {
       dbg(`Trying to ${yellowMessage}`);
       const res = await callbackToTry();
-      clearTimeout(timeout);
-      isTrying = false;
 
       if (attemptCounter > 1) {
         commandObj.logToStderr(
           `Succeeded to ${yellowMessage} after ${numToStr(attemptCounter)} attempts`,
         );
+      } else {
+        dbg(`Succeeded to ${yellowMessage}`);
       }
 
+      clearTimeout(timeout);
+      isTrying = false;
       return res;
     } catch (e) {
       if (failCondition !== undefined && failCondition(e)) {
