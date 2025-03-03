@@ -142,23 +142,36 @@ export async function resolveDeployment() {
 
 async function createContracts(signerOrProvider: Provider | Signer) {
   const { Contracts } = await import("@fluencelabs/deal-ts-clients");
-  const contracts = new Contracts(signerOrProvider, await resolveDeployment());
+
+  const newContracts = new Contracts(
+    signerOrProvider,
+    await resolveDeployment(),
+  );
+
+  if (contracts !== undefined || readonlyContracts !== undefined) {
+    return newContracts;
+  }
 
   await setTryTimeout(
     "check if blockchain client is connected",
     async () => {
+      dbg(
+        "Going to run contracts.diamond.bytesPerRam() to check if blockchain client is connected",
+      );
+
       // By calling this method we ensure that the blockchain client is connected
-      await contracts.diamond.minDealDepositedEpochs();
+      await newContracts.diamond.bytesPerRam();
+      dbg("Blockchain client is connected");
     },
     (err) => {
       commandObj.error(
-        `Check if blockchain client is connected by running contracts.diamond.minDealDepositedEpochs() failed: ${stringifyUnknown(err)}`,
+        `Check if blockchain client is connected by running contracts.diamond.bytesPerRam() failed: ${stringifyUnknown(err)}`,
       );
     },
     1000 * 5, // 5 seconds
   );
 
-  return contracts;
+  return newContracts;
 }
 
 export async function ensureJsonRpcProvider(): Promise<Provider> {
