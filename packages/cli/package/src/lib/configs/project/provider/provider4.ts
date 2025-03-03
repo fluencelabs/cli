@@ -175,6 +175,7 @@ const resourcesPerResourceTypeSchema = {
     storage: storageResourcesSchema,
   },
   required: [],
+  nullable: true,
 } as const satisfies JSONSchemaType<ResourcePerResourceType>;
 
 type PeerResource = {
@@ -473,11 +474,11 @@ const offersSchema = {
 } as const satisfies JSONSchemaType<Offers>;
 
 export type Config = {
-  resources: ResourcePerResourceType;
   providerName: string;
   capacityCommitments: CapacityCommitments;
   computePeers: ComputePeers;
   offers: Offers;
+  resources?: ResourcePerResourceType;
 };
 
 export default {

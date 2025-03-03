@@ -25,6 +25,7 @@ import {
   getChainId,
   getIpfsGateway,
   getRpcUrl,
+  getWsUrl,
 } from "../../../chain/chainConfig.js";
 import { hexStringToUTF8ToBase64String } from "../../../chain/conversions.js";
 import { commandObj, isInteractive } from "../../../commandObj.js";
@@ -35,7 +36,6 @@ import {
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_PEER,
   CLI_NAME,
   DEFAULT_NUMBER_OF_LOCAL_NET_PEERS,
-  WS_CHAIN_URLS,
 } from "../../../const.js";
 import { resolveDeployment } from "../../../dealClient.js";
 import { ensureChainEnv } from "../../../ensureChainNetwork.js";
@@ -284,13 +284,12 @@ export async function ensureComputerPeerConfigs({
     );
   }
 
-  const env = await ensureChainEnv();
   const k8sManifestsDir = await ensureK8sManifestsDir();
   const { diamond: diamondContract } = await resolveDeployment();
   const networkId = numToStr(await getChainId());
   const ipfsGatewayEndpoint = await getIpfsGateway();
-  const wsEndpoint = WS_CHAIN_URLS[env];
   const httpEndpoint = await getRpcUrl();
+  const wsEndpoint = await getWsUrl();
 
   return Promise.all(
     computePeersWithCC.map(
@@ -332,14 +331,14 @@ export async function ensureComputerPeerConfigs({
         }
 
         const cpu =
-          providerConfig.resources.cpu[computePeer.resources.cpu.name];
+          providerConfig.resources?.cpu[computePeer.resources.cpu.name];
 
         const ram =
-          providerConfig.resources.ram[computePeer.resources.ram.name];
+          providerConfig.resources?.ram[computePeer.resources.ram.name];
 
         const storages = await Promise.all(
           computePeer.resources.storage.map(async (s) => {
-            const storage = providerConfig.resources.storage[s.name];
+            const storage = providerConfig.resources?.storage[s.name];
 
             return {
               ...s,

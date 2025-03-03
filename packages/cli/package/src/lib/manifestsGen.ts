@@ -18,6 +18,7 @@
 import type { IPSupplies } from "./configs/project/provider/provider1.js";
 
 const PRIVATE_KEY_SECRET_REF = "private-key-secret";
+const PRIVATE_RPC_TOKEN_SECRET_REF = "private-rpc-token-secret";
 
 type GenManifestsArgs = {
   chainPrivateKey: string;
@@ -110,13 +111,12 @@ ${stringify({
       operator: {
         config: {
           chainAdapter: {
-            httpEndpoint,
-            wsEndpoint,
             ipfsGatewayEndpoint,
             peerId,
             networkId,
             diamondContract,
             privateKeySecretRef: PRIVATE_KEY_SECRET_REF,
+            privateRPCTokenSecretRef: PRIVATE_RPC_TOKEN_SECRET_REF,
           },
         },
       },
@@ -134,6 +134,20 @@ type: Opaque
 ${stringify({
   data: {
     "chain-private-key": chainPrivateKey,
+  },
+})}
+---
+# chain rpc token
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ${PRIVATE_RPC_TOKEN_SECRET_REF}
+  namespace: lightmare
+type: Opaque
+${stringify({
+  data: {
+    CHAIN_HTTP_ENDPOINT: httpEndpoint,
+    CHAIN_WS_ENDPOINT: wsEndpoint,
   },
 })}
 ---

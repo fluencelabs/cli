@@ -116,21 +116,23 @@ export async function resolveDeployment() {
   if (deployment === undefined) {
     deployment = (async () => {
       const envConfig = await initEnvConfig();
+      const chainEnv = await ensureChainEnv();
       const { DEPLOYMENTS } = await import("@fluencelabs/deal-ts-clients");
 
       if (
-        envConfig !== null &&
-        envConfig.deployment !== undefined &&
-        Object.keys(envConfig.deployment).length > 0
+        envConfig?.perEnvConfig?.[chainEnv]?.deployment !== undefined &&
+        Object.keys(envConfig.perEnvConfig[chainEnv].deployment).length > 0
       ) {
+        const customDeployment = envConfig.perEnvConfig[chainEnv].deployment;
+
         commandObj.logToStderr(
-          `Using custom contract addresses ${JSON.stringify(envConfig.deployment)} from ${envConfig.$getPath()}`,
+          `Using custom contract addresses ${JSON.stringify(customDeployment)} from ${envConfig.$getPath()}`,
         );
       }
 
       return {
-        ...DEPLOYMENTS[await ensureChainEnv()],
-        ...envConfig?.deployment,
+        ...DEPLOYMENTS[chainEnv],
+        ...envConfig?.perEnvConfig?.[chainEnv]?.deployment,
       };
     })();
   }
