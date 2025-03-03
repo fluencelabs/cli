@@ -27,7 +27,6 @@ import {
   getRpcUrl,
   getWsUrl,
 } from "../../../chain/chainConfig.js";
-import { hexStringToUTF8ToBase64String } from "../../../chain/conversions.js";
 import { commandObj, isInteractive } from "../../../commandObj.js";
 import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
@@ -317,7 +316,7 @@ export async function ensureComputerPeerConfigs({
           }
 
           const manifest = await genManifest({
-            chainPrivateKey: hexStringToUTF8ToBase64String(signingWallet),
+            signingWallet,
             ipSupplies: computePeer.resources.ip.supply,
             httpEndpoint,
             wsEndpoint,

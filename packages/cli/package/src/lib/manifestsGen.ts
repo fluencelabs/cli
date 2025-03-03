@@ -15,13 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {
+  hexStringToUTF8ToBase64String,
+  utf8ToBase64String,
+} from "./chain/conversions.js";
 import type { IPSupplies } from "./configs/project/provider/provider1.js";
 
 const PRIVATE_KEY_SECRET_REF = "private-key-secret";
 const PRIVATE_RPC_TOKEN_SECRET_REF = "private-rpc-token-secret";
 
 type GenManifestsArgs = {
-  chainPrivateKey: string;
+  signingWallet: string;
   ipSupplies: IPSupplies;
   httpEndpoint: string;
   wsEndpoint: string;
@@ -32,7 +36,7 @@ type GenManifestsArgs = {
 };
 
 export async function genManifest({
-  chainPrivateKey,
+  signingWallet,
   ipSupplies,
   httpEndpoint,
   wsEndpoint,
@@ -133,7 +137,7 @@ metadata:
 type: Opaque
 ${stringify({
   data: {
-    "chain-private-key": chainPrivateKey,
+    "chain-private-key": hexStringToUTF8ToBase64String(signingWallet),
   },
 })}
 ---
@@ -146,8 +150,8 @@ metadata:
 type: Opaque
 ${stringify({
   data: {
-    CHAIN_HTTP_ENDPOINT: httpEndpoint,
-    CHAIN_WS_ENDPOINT: wsEndpoint,
+    CHAIN_HTTP_ENDPOINT: utf8ToBase64String(httpEndpoint),
+    CHAIN_WS_ENDPOINT: utf8ToBase64String(wsEndpoint),
   },
 })}
 ---
