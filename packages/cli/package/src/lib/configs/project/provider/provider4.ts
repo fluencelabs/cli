@@ -576,6 +576,7 @@ export default {
       validateOfferHasComputePeerResources(config),
       validateComputePeerIPs(config),
       validateOfferPrices(config),
+      validateNoDuplicateStorageResources(config),
     );
   },
   async refineSchema(schema) {
@@ -1868,4 +1869,40 @@ async function getDefaultChainResources(): Promise<ChainResourcesDefault> {
   );
 
   return { cpu, ram, storage, bandwidth, ip };
+}
+
+function validateNoDuplicateStorageResources(config: Config): string | true {
+  const computePeersWithDuplicateStorageResources = Object.entries(
+    config.computePeers,
+  )
+    .map(([computePeerName, computePeer]) => {
+      const storageResourceSet = new Set<string>();
+      const duplicateStorageResourcesSet = new Set<string>();
+
+      computePeer.resources.storage.forEach(({ name }) => {
+        if (storageResourceSet.has(name)) {
+          duplicateStorageResourcesSet.add(name);
+        } else {
+          storageResourceSet.add(name);
+        }
+      });
+
+      return {
+        computePeerName,
+        duplicateStorageResources: Array.from(duplicateStorageResourcesSet),
+      };
+    })
+    .filter(({ duplicateStorageResources }) => {
+      return duplicateStorageResources.length > 0;
+    });
+
+  if (computePeersWithDuplicateStorageResources.length > 0) {
+    return `Some compute peers have duplicate storage resources:\n${computePeersWithDuplicateStorageResources
+      .map(({ computePeerName, duplicateStorageResources }) => {
+        return `${color.yellow(computePeerName)}: ${duplicateStorageResources.join(", ")}`;
+      })
+      .join("\n")}`;
+  }
+
+  return true;
 }
