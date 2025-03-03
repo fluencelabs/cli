@@ -17,8 +17,6 @@
 
 import { color } from "@oclif/color";
 
-import { CHAIN_ENV } from "../common.js";
-
 import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
 import { initEnvConfig } from "./configs/project/env/env.js";
@@ -29,6 +27,7 @@ import {
   type FluenceEnv,
   type FluenceEnvOld,
 } from "./const.js";
+import { fluenceEnvPrompt } from "./fluenceEnvPrompt.js";
 import { list } from "./prompt.js";
 
 let env: FluenceEnv | undefined = undefined;
@@ -62,24 +61,6 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
   }
 
   return env;
-}
-
-export async function fluenceEnvPrompt(
-  message = "Select Fluence Environment to use",
-  defaultVal: FluenceEnv = process.env.FLUENCE_ENV,
-): Promise<FluenceEnv> {
-  return list({
-    message,
-    options: [...CHAIN_ENV],
-    oneChoiceMessage() {
-      throw new Error("Unreachable. There are multiple envs");
-    },
-    onNoChoices() {
-      throw new Error("Unreachable. There are multiple envs");
-    },
-    default: defaultVal,
-    flagName: ENV_FLAG_NAME,
-  });
 }
 
 export async function fluenceEnvOldPrompt(

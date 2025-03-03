@@ -21,7 +21,7 @@ import isEmpty from "lodash-es/isEmpty.js";
 
 import { CHAIN_ENV } from "../../../../common.js";
 import { ENV_CONFIG_FULL_FILE_NAME, type FluenceEnv } from "../../../const.js";
-import { fluenceEnvPrompt } from "../../../resolveFluenceEnv.js";
+import { fluenceEnvPrompt } from "../../../fluenceEnvPrompt.js";
 import type { ConfigOptions } from "../../initConfigNewTypes.js";
 
 import { type Config as PrevConfig } from "./env1.js";
