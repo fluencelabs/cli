@@ -45,7 +45,7 @@ import {
 import { getChainId, getNetworkName, getRpcUrl } from "./chain/chainConfig.js";
 import { chainFlags } from "./chainFlags.js";
 import { commandObj, isInteractive } from "./commandObj.js";
-import { initEnvConfig } from "./configs/project/env/env.js";
+import { initEnvConfig, initNewEnvConfig } from "./configs/project/env/env.js";
 import { CLI_NAME_FULL, PRIV_KEY_FLAG_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
@@ -116,21 +116,23 @@ export async function resolveDeployment() {
   if (deployment === undefined) {
     deployment = (async () => {
       const envConfig = await initEnvConfig();
+      const chainEnv = await ensureChainEnv();
       const { DEPLOYMENTS } = await import("@fluencelabs/deal-ts-clients");
 
       if (
-        envConfig !== null &&
-        envConfig.deployment !== undefined &&
-        Object.keys(envConfig.deployment).length > 0
+        envConfig?.perEnvConfig?.[chainEnv]?.deployment !== undefined &&
+        Object.keys(envConfig.perEnvConfig[chainEnv].deployment).length > 0
       ) {
+        const customDeployment = envConfig.perEnvConfig[chainEnv].deployment;
+
         commandObj.logToStderr(
-          `Using custom contract addresses ${JSON.stringify(envConfig.deployment)} from ${envConfig.$getPath()}`,
+          `Using custom contract addresses ${JSON.stringify(customDeployment)} from ${envConfig.$getPath()}`,
         );
       }
 
       return {
-        ...DEPLOYMENTS[await ensureChainEnv()],
-        ...envConfig?.deployment,
+        ...DEPLOYMENTS[chainEnv],
+        ...envConfig?.perEnvConfig?.[chainEnv]?.deployment,
       };
     })();
   }
@@ -161,9 +163,9 @@ async function createContracts(signerOrProvider: Provider | Signer) {
       await newContracts.diamond.bytesPerRam();
       dbg("Blockchain client is connected");
     },
-    (err) => {
+    async (err) => {
       commandObj.error(
-        `Check if blockchain client is connected by running contracts.diamond.bytesPerRam() failed: ${stringifyUnknown(err)}`,
+        `Check if blockchain client is connected by running contracts.diamond.bytesPerRam() failed: ${stringifyUnknown(err)}. Please check HTTP URL you provided at ${color.yellow((await initNewEnvConfig()).$getPath())}`,
       );
     },
     1000 * 5, // 5 seconds

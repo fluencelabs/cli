@@ -20,14 +20,8 @@ import { Args, Flags } from "@oclif/core";
 import {
   getIsUnion,
   CHAIN_ENV,
-  type ChainENV,
   LOCAL_NET_DEFAULT_WALLET_KEY,
 } from "../common.js";
-
-import {
-  CHAIN_RPC_CONTAINER_NAME,
-  CHAIN_RPC_PORT,
-} from "./configs/project/chainContainers.js";
 
 export const CLI_NAME = "fluence";
 export const CLI_NAME_FULL = "Fluence CLI";
@@ -62,13 +56,6 @@ export const WEB_SOCKET_PORT_START = 999;
 export const HTTP_PORT_START = 918;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
 export const DEFAULT_NUMBER_OF_LOCAL_NET_PEERS = 3;
-
-export const WS_CHAIN_URLS: Record<ChainENV, string> = {
-  mainnet: "wss://ws.mainnet.fluence.dev",
-  testnet: "wss://ws.testnet.fluence.dev",
-  stage: "wss://ws.stage.fluence.dev",
-  local: `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
-};
 
 export const JSON_EXT = "json";
 export const YAML_EXT = "yaml";

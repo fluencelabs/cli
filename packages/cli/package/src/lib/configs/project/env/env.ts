@@ -22,10 +22,11 @@ import { type InitConfigOptions } from "../../initConfigNewTypes.js";
 
 import configOptions0, { type Config as Config0 } from "./env0.js";
 import configOptions1, { type Config as Config1 } from "./env1.js";
+import configOptions2, { type Config as Config2 } from "./env2.js";
 
-export const options: InitConfigOptions<Config0, Config1> = {
+export const options: InitConfigOptions<Config0, Config1, Config2> = {
   description: "Defines project user's preferences",
-  options: [configOptions0, configOptions1],
+  options: [configOptions0, configOptions1, configOptions2],
   getConfigPath: getEnvConfigPath,
 };
 

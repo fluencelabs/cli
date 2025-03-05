@@ -19,10 +19,16 @@ import capitalize from "lodash-es/capitalize.js";
 
 import type { ChainENV } from "../../common.js";
 import { commandObj } from "../commandObj.js";
-import { initEnvConfig } from "../configs/project/env/env.js";
+import {
+  CHAIN_RPC_CONTAINER_NAME,
+  CHAIN_RPC_PORT,
+} from "../configs/project/chainContainers.js";
+import { initEnvConfig, initNewEnvConfig } from "../configs/project/env/env.js";
 import { dbg } from "../dbg.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
+import { urlValidator } from "../helpers/validations.js";
+import { password } from "../prompt.js";
 
 let chainIdPromise: Promise<number> | undefined;
 
@@ -34,12 +40,14 @@ export async function getChainId() {
       let chainId: number = CHAIN_IDS[chainEnv];
       const envConfig = await initEnvConfig();
 
-      if (envConfig?.chainId !== undefined) {
+      if (envConfig?.perEnvConfig?.[chainEnv]?.chainId !== undefined) {
+        const customChainId = envConfig.perEnvConfig[chainEnv].chainId;
+
         commandObj.logToStderr(
-          `Using custom chain ID: ${numToStr(envConfig.chainId)} from ${envConfig.$getPath()}`,
+          `Using custom chain ID: ${numToStr(customChainId)} from ${envConfig.$getPath()}`,
         );
 
-        chainId = envConfig.chainId;
+        chainId = customChainId;
       }
 
       dbg(`chainId: ${numToStr(chainId)}`);
@@ -56,16 +64,28 @@ export async function getRpcUrl() {
   if (rpcUrlPromise === undefined) {
     rpcUrlPromise = (async () => {
       const chainEnv = await ensureChainEnv();
-      const { RPC_URLS } = await import("@fluencelabs/deal-ts-clients");
-      let rpcUrl: string = RPC_URLS[chainEnv];
-      const envConfig = await initEnvConfig();
+      let rpcUrl: string | undefined;
+      let envConfig = await initEnvConfig();
 
-      if (envConfig?.rpcUrl !== undefined) {
-        commandObj.logToStderr(
-          `Using custom RPC URL: ${envConfig.rpcUrl} from ${envConfig.$getPath()}`,
-        );
+      if (envConfig?.perEnvConfig?.[chainEnv]?.rpcHttpUrl !== undefined) {
+        const customRpcUrl = envConfig.perEnvConfig[chainEnv].rpcHttpUrl;
+        rpcUrl = customRpcUrl;
+      } else if (chainEnv === "local") {
+        rpcUrl = "http://localhost:8545";
+      } else {
+        rpcUrl = await password({
+          message: `Enter private HTTP RPC URL to use with ${chainEnv} env`,
+          validate(rpcUrl: string) {
+            return urlValidator(rpcUrl);
+          },
+        });
 
-        rpcUrl = envConfig.rpcUrl;
+        envConfig = await initNewEnvConfig();
+        const perEnvConfig = envConfig.perEnvConfig ?? {};
+        perEnvConfig[chainEnv] = perEnvConfig[chainEnv] ?? {};
+        perEnvConfig[chainEnv].rpcHttpUrl = rpcUrl;
+        envConfig.perEnvConfig = perEnvConfig;
+        await envConfig.$commit();
       }
 
       dbg(`rpcUrl: ${rpcUrl}`);
@@ -74,6 +94,44 @@ export async function getRpcUrl() {
   }
 
   return rpcUrlPromise;
+}
+
+let wsUrlPromise: Promise<string> | undefined;
+
+export async function getWsUrl() {
+  if (wsUrlPromise === undefined) {
+    wsUrlPromise = (async () => {
+      const chainEnv = await ensureChainEnv();
+      let rpcUrl: string | undefined;
+      let envConfig = await initEnvConfig();
+
+      if (envConfig?.perEnvConfig?.[chainEnv]?.rpcWsUrl !== undefined) {
+        const customRpcUrl = envConfig.perEnvConfig[chainEnv].rpcWsUrl;
+        rpcUrl = customRpcUrl;
+      } else if (chainEnv === "local") {
+        rpcUrl = `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`;
+      } else {
+        rpcUrl = await password({
+          message: `Enter private Websocket RPC URL to use with ${chainEnv} env`,
+          validate(rpcUrl: string) {
+            return urlValidator(rpcUrl);
+          },
+        });
+
+        envConfig = await initNewEnvConfig();
+        const perEnvConfig = envConfig.perEnvConfig ?? {};
+        perEnvConfig[chainEnv] = perEnvConfig[chainEnv] ?? {};
+        perEnvConfig[chainEnv].rpcWsUrl = rpcUrl;
+        envConfig.perEnvConfig = perEnvConfig;
+        await envConfig.$commit();
+      }
+
+      dbg(`wsUrl: ${rpcUrl}`);
+      return rpcUrl;
+    })();
+  }
+
+  return wsUrlPromise;
 }
 
 let ipfsGatewayPromise: Promise<string> | undefined;
@@ -92,12 +150,14 @@ export async function getIpfsGateway() {
       let ipfsGateway = IPFS_GATEWAYS[chainEnv];
       const envConfig = await initEnvConfig();
 
-      if (envConfig?.ipfsGateway !== undefined) {
+      if (envConfig?.perEnvConfig?.[chainEnv]?.ipfsGateway !== undefined) {
+        const customIpfsGateway = envConfig.perEnvConfig[chainEnv].ipfsGateway;
+
         commandObj.logToStderr(
-          `Using custom IPFS Gateway: ${envConfig.ipfsGateway} from ${envConfig.$getPath()}`,
+          `Using custom IPFS Gateway: ${customIpfsGateway} from ${envConfig.$getPath()}`,
         );
 
-        ipfsGateway = envConfig.ipfsGateway;
+        ipfsGateway = customIpfsGateway;
       }
 
       dbg(`ipfsGateway: ${ipfsGateway}`);
@@ -136,12 +196,15 @@ export async function getBlockScoutUrl() {
       let blockScoutUrl: string = BLOCK_SCOUT_URLS[chainEnv];
       const envConfig = await initEnvConfig();
 
-      if (envConfig?.blockScoutUrl !== undefined) {
+      if (envConfig?.perEnvConfig?.[chainEnv]?.blockScoutUrl !== undefined) {
+        const customBlockScoutUrl =
+          envConfig.perEnvConfig[chainEnv].blockScoutUrl;
+
         commandObj.logToStderr(
-          `Using custom BlockScout URL: ${envConfig.blockScoutUrl} from ${envConfig.$getPath()}`,
+          `Using custom BlockScout URL: ${customBlockScoutUrl} from ${envConfig.$getPath()}`,
         );
 
-        blockScoutUrl = envConfig.blockScoutUrl;
+        blockScoutUrl = customBlockScoutUrl;
       }
 
       dbg(`blockScoutUrl: ${blockScoutUrl}`);
@@ -170,12 +233,14 @@ export async function getSubgraphUrl() {
       let subgraphUrl: string = SUBGRAPH_URLS[chainEnv];
       const envConfig = await initEnvConfig();
 
-      if (envConfig?.subgraphUrl !== undefined) {
+      if (envConfig?.perEnvConfig?.[chainEnv]?.subgraphUrl !== undefined) {
+        const customSubgraphUrl = envConfig.perEnvConfig[chainEnv].subgraphUrl;
+
         commandObj.logToStderr(
-          `Using custom Subgraph URL: ${envConfig.subgraphUrl} from ${envConfig.$getPath()}`,
+          `Using custom Subgraph URL: ${customSubgraphUrl} from ${envConfig.$getPath()}`,
         );
 
-        subgraphUrl = envConfig.subgraphUrl;
+        subgraphUrl = customSubgraphUrl;
       }
 
       dbg(`subgraphUrl: ${subgraphUrl}`);
