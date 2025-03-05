@@ -200,7 +200,7 @@ export function getConfigInitFunction<
           );
 
           await validateLatestConfig(config);
-          prevConfig = config;
+          prevConfig = cloneDeep(config);
         },
       };
 
