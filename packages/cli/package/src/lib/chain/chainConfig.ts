@@ -27,6 +27,7 @@ import { initEnvConfig, initNewEnvConfig } from "../configs/project/env/env.js";
 import { dbg } from "../dbg.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
+import { urlValidator } from "../helpers/validations.js";
 import { password } from "../prompt.js";
 
 let chainIdPromise: Promise<number> | undefined;
@@ -74,6 +75,9 @@ export async function getRpcUrl() {
       } else {
         rpcUrl = await password({
           message: `Enter private HTTP RPC URL to use with ${chainEnv} env`,
+          validate(rpcUrl: string) {
+            return urlValidator(rpcUrl);
+          },
         });
 
         envConfig = await initNewEnvConfig();
@@ -109,6 +113,9 @@ export async function getWsUrl() {
       } else {
         rpcUrl = await password({
           message: `Enter private Websocket RPC URL to use with ${chainEnv} env`,
+          validate(rpcUrl: string) {
+            return urlValidator(rpcUrl);
+          },
         });
 
         envConfig = await initNewEnvConfig();

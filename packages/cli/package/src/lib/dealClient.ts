@@ -45,7 +45,7 @@ import {
 import { getChainId, getNetworkName, getRpcUrl } from "./chain/chainConfig.js";
 import { chainFlags } from "./chainFlags.js";
 import { commandObj, isInteractive } from "./commandObj.js";
-import { initEnvConfig } from "./configs/project/env/env.js";
+import { initEnvConfig, initNewEnvConfig } from "./configs/project/env/env.js";
 import { CLI_NAME_FULL, PRIV_KEY_FLAG_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
@@ -163,9 +163,9 @@ async function createContracts(signerOrProvider: Provider | Signer) {
       await newContracts.diamond.bytesPerRam();
       dbg("Blockchain client is connected");
     },
-    (err) => {
+    async (err) => {
       commandObj.error(
-        `Check if blockchain client is connected by running contracts.diamond.bytesPerRam() failed: ${stringifyUnknown(err)}`,
+        `Check if blockchain client is connected by running contracts.diamond.bytesPerRam() failed: ${stringifyUnknown(err)}. Please check HTTP URL you provided at ${color.yellow((await initNewEnvConfig()).$getPath())}`,
       );
     },
     1000 * 5, // 5 seconds
