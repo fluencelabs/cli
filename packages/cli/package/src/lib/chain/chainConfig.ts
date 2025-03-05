@@ -73,7 +73,7 @@ export async function getRpcUrl() {
         rpcUrl = "http://localhost:8545";
       } else {
         rpcUrl = await password({
-          message: `Enter private RPC URL to use with ${chainEnv} env`,
+          message: `Enter private HTTP RPC URL to use with ${chainEnv} env`,
         });
 
         envConfig = await initNewEnvConfig();
