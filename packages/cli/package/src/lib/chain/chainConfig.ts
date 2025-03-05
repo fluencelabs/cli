@@ -27,7 +27,7 @@ import { initEnvConfig, initNewEnvConfig } from "../configs/project/env/env.js";
 import { dbg } from "../dbg.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
 import { numToStr } from "../helpers/typesafeStringify.js";
-import { input } from "../prompt.js";
+import { password } from "../prompt.js";
 
 let chainIdPromise: Promise<number> | undefined;
 
@@ -72,7 +72,7 @@ export async function getRpcUrl() {
       } else if (chainEnv === "local") {
         rpcUrl = "http://localhost:8545";
       } else {
-        rpcUrl = await input({
+        rpcUrl = await password({
           message: `Enter private RPC URL to use with ${chainEnv} env`,
         });
 
@@ -107,7 +107,7 @@ export async function getWsUrl() {
       } else if (chainEnv === "local") {
         rpcUrl = `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`;
       } else {
-        rpcUrl = await input({
+        rpcUrl = await password({
           message: `Enter private Websocket RPC URL to use with ${chainEnv} env`,
         });
 
