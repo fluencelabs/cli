@@ -540,8 +540,6 @@ export async function collateralWithdraw(
     [FINISH_COMMITMENT_FLAG_NAME]?: boolean;
   },
 ) {
-  const { ZeroAddress } = await import("ethers");
-
   const [invalidCommitments, commitments] = splitErrorsAndResults(
     await getCommitmentsGroupedByStatus(flags),
     (c) => {
@@ -617,55 +615,6 @@ export async function collateralWithdraw(
           })(),
       };
     });
-
-    const unitsWithDeals = units.filter((unit) => {
-      return unit.unitInfo.deal !== ZeroAddress;
-    });
-
-    const onChainWorkerIds = new Set<string>();
-
-    for (const { unitInfo } of unitsWithDeals) {
-      onChainWorkerIds.add(unitInfo.onchainWorkerId);
-    }
-
-    const moveResourcesFromDealTxs = Array.from(onChainWorkerIds).map(
-      (onchainWorkerId) => {
-        return populateTx(
-          contracts.diamond.moveResourcesFromDealV2,
-          onchainWorkerId,
-        );
-      },
-    );
-
-    const [firstMoveResourcesFromDealTx, ...restMoveResourcesFromDealTxs] =
-      moveResourcesFromDealTxs;
-
-    const dealsString = Array.from(
-      new Set(
-        unitsWithDeals.map(({ unitInfo }) => {
-          return unitInfo.deal;
-        }),
-      ),
-    ).join("\n");
-
-    if (firstMoveResourcesFromDealTx !== undefined) {
-      try {
-        await signBatch({
-          title: `Moving resources from the following deals:\n${dealsString}`,
-          populatedTxs: [
-            firstMoveResourcesFromDealTx,
-            ...restMoveResourcesFromDealTxs,
-          ],
-        });
-      } catch (e) {
-        commandObj.warn(
-          `Wasn't able to move resources from deals for ${stringifyBasicCommitmentInfo(commitment)}. Most likely the reason is you must wait until the provider exits from all the following deals:\n${dealsString}`,
-        );
-
-        dbg(stringifyUnknown(e));
-        continue;
-      }
-    }
 
     await sign({
       title: `withdraw collateral from: ${ccId}`,
