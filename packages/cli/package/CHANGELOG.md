@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.1](https://github.com/fluencelabs/cli/compare/cli-v0.25.0...cli-v0.25.1) (2025-03-13)
+
+
+### Bug Fixes
+
+* resources should be nullable ([#1113](https://github.com/fluencelabs/cli/issues/1113)) ([6ff601f](https://github.com/fluencelabs/cli/commit/6ff601f75e2738683f70781f8763009458d44eeb))
+
 ## [0.25.0](https://github.com/fluencelabs/cli/compare/cli-v0.24.0...cli-v0.25.0) (2025-03-13)
 
 
