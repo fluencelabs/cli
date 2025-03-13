@@ -19,8 +19,10 @@ import { readFile } from "fs/promises";
 import { isAbsolute, resolve } from "path/posix";
 
 import k8s from "@kubernetes/client-node";
+import { stringify } from "yaml";
 
 import { commandObj } from "./commandObj.js";
+import { dbg } from "./dbg.js";
 import { projectRootDir } from "./paths.js";
 import { resolveComputePeersByNames } from "./resolveComputePeersByNames.js";
 
@@ -55,18 +57,22 @@ async function kubectlApply(
     ? kubeconfigPath
     : resolve(projectRootDir, kubeconfigPath);
 
-  commandObj.log(
+  commandObj.logToStderr(
     `Applying manifest for computePeer ${peerName}\nKubeconfig: ${kubeconfigAbsolutePath}\nManifest: ${specPath}`,
   );
 
   const k8s = await import("@kubernetes/client-node");
+  dbg(`creating new cube config obj: ${kubeconfigAbsolutePath}`);
   const kc = new k8s.KubeConfig(kubeconfigAbsolutePath);
+  dbg(`loading kubeconfig from file: ${kubeconfigAbsolutePath}`);
   kc.loadFromFile(kubeconfigAbsolutePath);
 
   /* eslint-disable */
   const client = k8s.KubernetesObjectApi.makeApiClient(kc);
 
+  dbg(`reading spec file: ${specPath}`);
   const specString = await readFile(specPath, "utf8");
+  dbg(`loaded spec file: ${specString}`);
   const specs: k8s.KubernetesObject[] = k8s.loadAllYaml(specString);
 
   const validSpecs = specs.filter((s) => {
@@ -89,13 +95,17 @@ async function kubectlApply(
       "kubectl.kubernetes.io/last-applied-configuration"
     ] = JSON.stringify(spec);
 
+    dbg(`applying spec:\n${stringify(spec)}\n`);
+
     try {
+      dbg(`trying to read resource: ${spec.metadata.name}`);
       // try to get the resource, if it does not exist an error will be thrown and we will end up in the catch
       // block.
       // @ts-expect-error
       await client.read(spec);
       // we got the resource, so it exists, so patch it
       //
+      dbg(`patching resource: ${spec.metadata.name}`);
       // Note that this could fail if the spec refers to a custom resource. For custom resources you may need
       // to specify a different patch merge strategy in the content-type header.
       //
@@ -105,7 +115,9 @@ async function kubectlApply(
     } catch (err) {
       // if the resource doesnt exist then create it
       if (err instanceof k8s.HttpError && err.statusCode === 404) {
+        dbg(`creating resource: ${spec.metadata.name}`);
         const response = await client.create(spec);
+        dbg(`created resource: ${spec.metadata.name}`);
         created.push(response.body);
       } else {
         throw err;
