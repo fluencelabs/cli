@@ -168,3 +168,12 @@ export function assertIsHex(
     );
   }
 }
+
+export function urlValidator(input: string): ValidationResult {
+  try {
+    new URL(input);
+    return true;
+  } catch {
+    return "Please enter a valid URL";
+  }
+}

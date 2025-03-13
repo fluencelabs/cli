@@ -200,7 +200,7 @@ export function getConfigInitFunction<
           );
 
           await validateLatestConfig(config);
-          prevConfig = config;
+          prevConfig = cloneDeep(config);
         },
       };
 
@@ -428,12 +428,13 @@ async function getLatestConfig<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>({
     // No need to migrate for the current config version
     if (index !== 0) {
       prevConfig = currentConfig;
-      const migrated = await configOptions.migrate(cloneDeep(prevConfig));
+      const configToMigrate = cloneDeep(prevConfig);
 
-      if ("version" in migrated) {
-        delete migrated.version;
+      if ("version" in configToMigrate) {
+        delete configToMigrate.version;
       }
 
+      const migrated = await configOptions.migrate(configToMigrate);
       currentConfig = { version: initialVersion + index, ...migrated };
     }
 
