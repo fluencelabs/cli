@@ -82,6 +82,7 @@ const cpuResourcesSchema = {
     "A map with CPU resource names as keys and CPU resource details objects as values",
   properties: { cpuResourceName: peerCPUDetailsSchema },
   required: [],
+  nullable: true,
 } as const satisfies JSONSchemaType<CPUResources>;
 
 type PeerRamDetails = {
@@ -122,6 +123,7 @@ const ramResourcesSchema = {
     "A map with RAM resource names as keys and RAM resource details objects as values",
   properties: { ramResourceName: peerRamDetailsSchema },
   required: [],
+  nullable: true,
 } as const satisfies JSONSchemaType<RamResources>;
 
 type PeerStorageDetails = {
@@ -156,12 +158,13 @@ const storageResourcesSchema = {
     "A map with storage resource names as keys and storage resource details objects as values",
   properties: { storageResourceName: peerStorageDetailsSchema },
   required: [],
+  nullable: true,
 } as const satisfies JSONSchemaType<StorageResources>;
 
 export type ResourcePerResourceType = {
-  cpu: CPUResources;
-  ram: RamResources;
-  storage: StorageResources;
+  cpu?: CPUResources;
+  ram?: RamResources;
+  storage?: StorageResources;
 };
 
 const resourcesPerResourceTypeSchema = {

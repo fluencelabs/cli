@@ -330,14 +330,14 @@ export async function ensureComputerPeerConfigs({
         }
 
         const cpu =
-          providerConfig.resources?.cpu[computePeer.resources.cpu.name];
+          providerConfig.resources?.cpu?.[computePeer.resources.cpu.name];
 
         const ram =
-          providerConfig.resources?.ram[computePeer.resources.ram.name];
+          providerConfig.resources?.ram?.[computePeer.resources.ram.name];
 
         const storages = await Promise.all(
           computePeer.resources.storage.map(async (s) => {
-            const storage = providerConfig.resources?.storage[s.name];
+            const storage = providerConfig.resources?.storage?.[s.name];
 
             return {
               ...s,
