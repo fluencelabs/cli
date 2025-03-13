@@ -110,7 +110,18 @@ async function kubectlApply(
       // to specify a different patch merge strategy in the content-type header.
       //
       // See: https://github.com/kubernetes/kubernetes/issues/97423
-      const response = await client.patch(spec);
+      const response = await client.patch(
+        spec,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          headers: {
+            "content-type": "application/merge-patch+json",
+          },
+        },
+      );
       created.push(response.body);
     } catch (err) {
       // if the resource doesnt exist then create it
