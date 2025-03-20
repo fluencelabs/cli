@@ -82,6 +82,7 @@ const cpuResourcesSchema = {
     "A map with CPU resource names as keys and CPU resource details objects as values",
   properties: { cpuResourceName: peerCPUDetailsSchema },
   required: [],
+  nullable: true,
 } as const satisfies JSONSchemaType<CPUResources>;
 
 type PeerRamDetails = {
@@ -122,6 +123,7 @@ const ramResourcesSchema = {
     "A map with RAM resource names as keys and RAM resource details objects as values",
   properties: { ramResourceName: peerRamDetailsSchema },
   required: [],
+  nullable: true,
 } as const satisfies JSONSchemaType<RamResources>;
 
 type PeerStorageDetails = {
@@ -156,12 +158,13 @@ const storageResourcesSchema = {
     "A map with storage resource names as keys and storage resource details objects as values",
   properties: { storageResourceName: peerStorageDetailsSchema },
   required: [],
+  nullable: true,
 } as const satisfies JSONSchemaType<StorageResources>;
 
 export type ResourcePerResourceType = {
-  cpu: CPUResources;
-  ram: RamResources;
-  storage: StorageResources;
+  cpu?: CPUResources;
+  ram?: RamResources;
+  storage?: StorageResources;
 };
 
 const resourcesPerResourceTypeSchema = {
@@ -175,6 +178,7 @@ const resourcesPerResourceTypeSchema = {
     storage: storageResourcesSchema,
   },
   required: [],
+  nullable: true,
 } as const satisfies JSONSchemaType<ResourcePerResourceType>;
 
 type PeerResource = {
@@ -473,11 +477,11 @@ const offersSchema = {
 } as const satisfies JSONSchemaType<Offers>;
 
 export type Config = {
-  resources: ResourcePerResourceType;
   providerName: string;
   capacityCommitments: CapacityCommitments;
   computePeers: ComputePeers;
   offers: Offers;
+  resources?: ResourcePerResourceType;
 };
 
 export default {
@@ -575,6 +579,7 @@ export default {
       validateOfferHasComputePeerResources(config),
       validateComputePeerIPs(config),
       validateOfferPrices(config),
+      validateNoDuplicateStorageResources(config),
     );
   },
   async refineSchema(schema) {
@@ -1867,4 +1872,40 @@ async function getDefaultChainResources(): Promise<ChainResourcesDefault> {
   );
 
   return { cpu, ram, storage, bandwidth, ip };
+}
+
+function validateNoDuplicateStorageResources(config: Config): string | true {
+  const computePeersWithDuplicateStorageResources = Object.entries(
+    config.computePeers,
+  )
+    .map(([computePeerName, computePeer]) => {
+      const storageResourceSet = new Set<string>();
+      const duplicateStorageResourcesSet = new Set<string>();
+
+      computePeer.resources.storage.forEach(({ name }) => {
+        if (storageResourceSet.has(name)) {
+          duplicateStorageResourcesSet.add(name);
+        } else {
+          storageResourceSet.add(name);
+        }
+      });
+
+      return {
+        computePeerName,
+        duplicateStorageResources: Array.from(duplicateStorageResourcesSet),
+      };
+    })
+    .filter(({ duplicateStorageResources }) => {
+      return duplicateStorageResources.length > 0;
+    });
+
+  if (computePeersWithDuplicateStorageResources.length > 0) {
+    return `Some compute peers have duplicate storage resources:\n${computePeersWithDuplicateStorageResources
+      .map(({ computePeerName, duplicateStorageResources }) => {
+        return `${color.yellow(computePeerName)}: ${duplicateStorageResources.join(", ")}`;
+      })
+      .join("\n")}`;
+  }
+
+  return true;
 }

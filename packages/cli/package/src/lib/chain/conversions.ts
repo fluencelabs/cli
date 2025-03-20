@@ -79,12 +79,16 @@ export async function cidHexStringToBase32(cidHex: string): Promise<string> {
   return base32.encode(new Uint8Array(Buffer.from(cidHex, "hex")));
 }
 
+export function utf8ToBase64String(utf8String: string): string {
+  return bufferToBase64(Buffer.from(utf8String, "utf-8"));
+}
+
 export function hexStringToUTF8ToBase64String(hexString: string): string {
   const cleanHexString = hexString.startsWith("0x")
     ? hexString.slice(2)
     : hexString;
 
-  return bufferToBase64(Buffer.from(cleanHexString, "utf-8"));
+  return utf8ToBase64String(cleanHexString);
 }
 
 export async function resourceSupplyFromConfigToChain(
