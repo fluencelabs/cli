@@ -17,7 +17,8 @@
 
 import { BaseCommand } from "../../baseCommand.js";
 import {
-  filterOffersFoundOnChain, resolveSingleOfferFromProviderConfig
+  filterOffersFoundOnChain,
+  resolveSingleOfferFromProviderConfig,
 } from "../../lib/chain/offer/offer.js";
 import { assertProviderIsRegistered } from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -25,7 +26,8 @@ import {
   CHAIN_FLAGS,
   CLUSTER_ADDRESS_FLAG,
   SINGLE_OFFER_FLAG,
-  ADDRESS_FLAG_NAME, SINGLE_OFFER_FLAG_NAME
+  ADDRESS_FLAG_NAME,
+  SINGLE_OFFER_FLAG_NAME,
 } from "../../lib/const.js";
 import { getContracts, sign } from "../../lib/dealClient.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
@@ -45,7 +47,9 @@ export default class OfferAccessAddress extends BaseCommand<
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(OfferAccessAddress));
-    const configOffer = await resolveSingleOfferFromProviderConfig(flags[SINGLE_OFFER_FLAG_NAME]);
+    const configOffer = await resolveSingleOfferFromProviderConfig(
+      flags[SINGLE_OFFER_FLAG_NAME],
+    );
     const offersFoundOnChain = await filterOffersFoundOnChain([configOffer]);
     const chainOffer = offersFoundOnChain[0];
 
@@ -66,8 +70,8 @@ export default class OfferAccessAddress extends BaseCommand<
       }));
 
     commandObj.logToStderr(
-      `Setting cluster address ${address} for offer ${chainOffer.offerName} (${chainOffer.offerId})`
-    )
+      `Setting cluster address ${address} for offer ${chainOffer.offerName} (${chainOffer.offerId})`,
+    );
 
     if (
       !(await confirm({

@@ -137,7 +137,6 @@ export const OFFER_IDS_FLAG_NAME = "offer-ids";
 export const SINGLE_OFFER_FLAG_NAME = "offer";
 export const SINGLE_OFFER_ID_FLAG_NAME = "offer-id";
 
-
 const OFFER_FLAG_OBJECT = {
   description: `Comma-separated list of offer names. To use all of your offers: --${OFFER_FLAG_NAME} ${ALL_FLAG_VALUE}`,
   helpValue: "<offer-1,offer-2>",

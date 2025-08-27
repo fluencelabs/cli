@@ -1004,7 +1004,6 @@ export async function resolveSingleOfferFromProviderConfig(
   return offer;
 }
 
-
 export type EnsureOfferConfig = Awaited<
   ReturnType<typeof ensureOfferConfigs>
 >[number];
