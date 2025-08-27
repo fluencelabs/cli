@@ -19,6 +19,7 @@ import { BaseCommand } from "../../baseCommand.js";
 import {
   resolveOffersFromProviderConfig, filterOffersFoundOnChain
 } from "../../lib/chain/offer/offer.js";
+import { assertProviderIsRegistered } from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
@@ -26,11 +27,10 @@ import {
   OFFER_FLAG,
   ADDRESS_FLAG_NAME
 } from "../../lib/const.js";
+import { getContracts, sign } from "../../lib/dealClient.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm, input } from "../../lib/prompt.js";
-import { getContracts, sign } from "../../lib/dealClient.js";
-import { assertProviderIsRegistered } from "../../lib/chain/providerInfo.js";
 
 export default class OfferAccessAddress extends BaseCommand<typeof OfferAccessAddress> {
   static override hiddenAliases = ["provider:sck"];
