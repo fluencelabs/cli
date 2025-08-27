@@ -17,16 +17,15 @@
 
 import { BaseCommand } from "../../baseCommand.js";
 import {
-  resolveOffersFromProviderConfig,
-  filterOffersFoundOnChain,
+  filterOffersFoundOnChain, resolveSingleOfferFromProviderConfig
 } from "../../lib/chain/offer/offer.js";
 import { assertProviderIsRegistered } from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
   CLUSTER_ADDRESS_FLAG,
-  OFFER_FLAG,
-  ADDRESS_FLAG_NAME,
+  SINGLE_OFFER_FLAG,
+  ADDRESS_FLAG_NAME, SINGLE_OFFER_FLAG_NAME
 } from "../../lib/const.js";
 import { getContracts, sign } from "../../lib/dealClient.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
@@ -39,26 +38,19 @@ export default class OfferAccessAddress extends BaseCommand<
   static override hiddenAliases = ["provider:sck"];
   static override description = `Set access address for offer for use in cluster software.${aliasesText.apply(this)}`;
   static override flags = {
-    ...OFFER_FLAG,
+    ...SINGLE_OFFER_FLAG,
     ...CHAIN_FLAGS,
     ...CLUSTER_ADDRESS_FLAG,
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(OfferAccessAddress));
-    const offers = await resolveOffersFromProviderConfig(flags);
-    const offersFoundOnChain = await filterOffersFoundOnChain(offers);
+    const configOffer = await resolveSingleOfferFromProviderConfig(flags[SINGLE_OFFER_FLAG_NAME]);
+    const offersFoundOnChain = await filterOffersFoundOnChain([configOffer]);
+    const chainOffer = offersFoundOnChain[0];
 
-    if (offersFoundOnChain.length !== 1) {
-      commandObj.logToStderr("Exactly one offer should be selected");
-      return;
-    }
-
-    const offer = offersFoundOnChain[0];
-
-    if (offer === undefined) {
-      commandObj.logToStderr("Offer required");
-      return;
+    if (chainOffer === undefined) {
+      commandObj.error(`Offer ${configOffer.offerName} is not found on chain`);
     }
 
     const address =
@@ -74,8 +66,8 @@ export default class OfferAccessAddress extends BaseCommand<
       }));
 
     commandObj.logToStderr(
-      `Setting cluster address ${address} for offer ${offer.offerName} (${offer.offerId})`,
-    );
+      `Setting cluster address ${address} for offer ${chainOffer.offerName} (${chainOffer.offerId})`
+    )
 
     if (
       !(await confirm({
@@ -91,9 +83,9 @@ export default class OfferAccessAddress extends BaseCommand<
 
     await sign({
       validateAddress: assertProviderIsRegistered,
-      title: `Setting cluster address ${address} for offer ${offer.offerName} (${offer.offerId})`,
+      title: `Setting cluster address ${address} for offer ${chainOffer.offerName} (${chainOffer.offerId})`,
       method: contracts.diamond.setClusterKey,
-      args: [offer.offerId, address],
+      args: [chainOffer.offerId, address],
     });
   }
 }

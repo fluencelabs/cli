@@ -64,7 +64,7 @@ import {
   splitErrorsAndResults,
 } from "../../helpers/utils.js";
 import { assertIsHex } from "../../helpers/validations.js";
-import { checkboxes, confirm } from "../../prompt.js";
+import { checkboxes, confirm, list } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import { getProtocolVersions } from "../chainValidators.js";
 import {
@@ -954,6 +954,56 @@ export async function resolveOffersFromProviderConfig(
 
   return offers;
 }
+
+export async function resolveSingleOfferFromProviderConfig(
+  offerName: string | undefined,
+): Promise<EnsureOfferConfig> {
+  const allOffers = await ensureOfferConfigs();
+  const providerConfig = await ensureReadonlyProviderConfig();
+
+  if (offerName === undefined) {
+    return list<EnsureOfferConfig, never>({
+      message: `Select one offer name from ${providerConfig.$getPath()}`,
+      options: allOffers.map((offer) => {
+        return {
+          name: offer.offerName,
+          value: offer,
+        };
+      }),
+      validate: (choices: string[]) => {
+        if (choices.length === 0) {
+          return "Please select at least one offer name";
+        }
+
+        return true;
+      },
+      oneChoiceMessage(choice) {
+        return `One offer found at ${providerConfig.$getPath()}: ${color.yellow(
+          choice,
+        )}. Do you want to select it`;
+      },
+      onNoChoices() {
+        commandObj.error(
+          `You must have at least one offer specified in ${providerConfig.$getPath()}`,
+        );
+      },
+      flagName: OFFER_FLAG_NAME,
+    });
+  }
+
+  const offer = allOffers.find((o) => {
+    return o.offerName === offerName;
+  });
+
+  if (offer === undefined) {
+    commandObj.error(
+      `Offer: ${color.yellow(offerName)} is not found in the 'offers' section of ${providerConfig.$getPath()}`,
+    );
+  }
+
+  return offer;
+}
+
 
 export type EnsureOfferConfig = Awaited<
   ReturnType<typeof ensureOfferConfigs>

@@ -134,9 +134,22 @@ export const PEERS_FLAG = {
 export const OFFER_FLAG_NAME = "offers";
 export const OFFER_IDS_FLAG_NAME = "offer-ids";
 
+export const SINGLE_OFFER_FLAG_NAME = "offer";
+export const SINGLE_OFFER_ID_FLAG_NAME = "offer-id";
+
+
 const OFFER_FLAG_OBJECT = {
   description: `Comma-separated list of offer names. To use all of your offers: --${OFFER_FLAG_NAME} ${ALL_FLAG_VALUE}`,
   helpValue: "<offer-1,offer-2>",
+};
+
+const SINGLE_OFFER_FLAG_OBJECT = {
+  description: `Offer name`,
+  helpValue: "<offer>",
+};
+
+export const SINGLE_OFFER_FLAG = {
+  [SINGLE_OFFER_FLAG_NAME]: Flags.string(SINGLE_OFFER_FLAG_OBJECT),
 };
 
 export const OFFER_FLAG = {
@@ -152,6 +165,18 @@ export const OFFER_FLAGS = {
     description: `Comma-separated list of offer ids. Can't be used together with --${OFFER_FLAG_NAME} flag`,
     helpValue: "<id-1,id-2>",
     exclusive: [OFFER_FLAG_NAME],
+  }),
+};
+
+export const SINGLE_OFFER_FLAGS = {
+  [SINGLE_OFFER_FLAG_NAME]: Flags.string({
+    ...SINGLE_OFFER_FLAG_OBJECT,
+    exclusive: [SINGLE_OFFER_ID_FLAG_NAME],
+  }),
+  [SINGLE_OFFER_ID_FLAG_NAME]: Flags.string({
+    description: `Offer id. Can't be used together with --${SINGLE_OFFER_FLAG_NAME} flag`,
+    helpValue: "<id>",
+    exclusive: [SINGLE_OFFER_FLAG_NAME],
   }),
 };
 
