@@ -183,6 +183,13 @@ export const ADDRESS_FLAG = {
   }),
 };
 
+export const CLUSTER_ADDRESS_FLAG = {
+  [ADDRESS_FLAG_NAME]: Flags.string({
+    description: "Address derived from Cluster private key",
+    helpValue: "<address>",
+  }),
+};
+
 export const CHAIN_FLAGS = {
   ...ENV_FLAG,
   ...PRIV_KEY_FLAG,

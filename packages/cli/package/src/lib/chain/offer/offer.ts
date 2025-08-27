@@ -1434,3 +1434,44 @@ function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
     ),
   };
 }
+
+export type OnChainOffer = Awaited<
+  ReturnType<typeof filterOffersFoundOnChain>
+>[number];
+
+export async function filterOffersFoundOnChain(offers: EnsureOfferConfig[]) {
+  const [offersWithoutIds, offersWithIds] = splitErrorsAndResults(
+    offers,
+    (offer) => {
+      return offer.offerId === undefined
+        ? { error: offer }
+        : { result: { ...offer, offerId: offer.offerId } };
+    },
+  );
+
+  if (offersWithoutIds.length > 0) {
+    commandObj.warn(
+      `Some of the offers don't have ids stored in ${PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME} so this offers might not have been created on chain:\n${offersWithoutIds
+        .map(({ offerName }) => {
+          return offerName;
+        })
+        .join("\n")}`,
+    );
+  }
+
+  const [offerInfoErrors, offersInfo] = await getOffersInfo(offersWithIds);
+
+  if (offerInfoErrors.length > 0) {
+    commandObj.warn(
+      `Some of the offers are not found on subgraph indexer:\n${offerInfoErrors
+        .map(({ offerName, offerId }) => {
+          return `${offerName} (${offerId})`;
+        })
+        .join(
+          "\n",
+        )}\n\nPlease make sure the offers exist. If the offers don't exist you can create them using '${CLI_NAME} provider offer-create' command`,
+    );
+  }
+
+  return offersInfo;
+}
