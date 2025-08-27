@@ -47,9 +47,11 @@ export default class OfferAccessAddress extends BaseCommand<
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(OfferAccessAddress));
+
     const configOffer = await resolveSingleOfferFromProviderConfig(
       flags[SINGLE_OFFER_FLAG_NAME],
     );
+
     const offersFoundOnChain = await filterOffersFoundOnChain([configOffer]);
     const chainOffer = offersFoundOnChain[0];
 
