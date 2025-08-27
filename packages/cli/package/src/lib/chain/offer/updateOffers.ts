@@ -23,9 +23,7 @@ import omit from "lodash-es/omit.js";
 import { commandObj } from "../../commandObj.js";
 import type { ResourceType } from "../../configs/project/provider/provider4.js";
 import { initNewProviderArtifactsConfig } from "../../configs/project/providerArtifacts/providerArtifacts.js";
-import {
-  VCPU_PER_CU,
-} from "../../const.js";
+import { VCPU_PER_CU } from "../../const.js";
 import { getContracts, signBatch, populateTx } from "../../dealClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
 import { deployManifests } from "../../manifestsDeploy.js";
@@ -45,7 +43,7 @@ import {
   type OnChainResource,
   addRemainingCPs,
   filterOffersFoundOnChain,
-  type OnChainOffer
+  type OnChainOffer,
 } from "./offer.js";
 
 type PeersOnChain = {
