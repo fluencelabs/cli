@@ -143,7 +143,7 @@ const OFFER_FLAG_OBJECT = {
 };
 
 const SINGLE_OFFER_FLAG_OBJECT = {
-  description: `Offer name`,
+  description: `Offer name. Can't be used together with --offer flag`,
   helpValue: "<offer>",
 };
 
