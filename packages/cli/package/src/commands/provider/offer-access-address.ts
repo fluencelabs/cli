@@ -26,7 +26,7 @@ import {
   CHAIN_FLAGS,
   CLUSTER_ADDRESS_FLAG,
   SINGLE_OFFER_FLAGS,
-  ADDRESS_FLAG_NAME
+  ADDRESS_FLAG_NAME,
 } from "../../lib/const.js";
 import { getContracts, sign } from "../../lib/dealClient.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";

@@ -46,8 +46,10 @@ import {
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
-  PROVIDER_CONFIG_FULL_FILE_NAME, SINGLE_OFFER_FLAG_NAME, SINGLE_OFFER_ID_FLAG_NAME,
-  VCPU_PER_CU
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+  SINGLE_OFFER_FLAG_NAME,
+  SINGLE_OFFER_ID_FLAG_NAME,
+  VCPU_PER_CU,
 } from "../../const.js";
 import {
   getContracts,
@@ -961,7 +963,7 @@ export async function resolveOffersFromProviderConfig(
 }
 
 export async function resolveSingleOfferFromProviderConfig(
-  flags: SingleOffersArgs
+  flags: SingleOffersArgs,
 ): Promise<EnsureOfferConfig> {
   if (
     flags[SINGLE_OFFER_FLAG_NAME] !== undefined &&
@@ -988,38 +990,39 @@ export async function resolveSingleOfferFromProviderConfig(
   const providerConfig = await ensureReadonlyProviderConfig();
 
   return list<EnsureOfferConfig, never>({
-      message: `Select one offer name from ${providerConfig.$getPath()}`,
-      options: allOffers.map((offer) => {
-        return {
-          name: offer.offerName,
-          value: offer,
-        };
-      }),
-      validate: (choices: string[]) => {
-        if (choices.length === 0) {
-          return "Please select at least one offer name";
-        }
+    message: `Select one offer name from ${providerConfig.$getPath()}`,
+    options: allOffers.map((offer) => {
+      return {
+        name: offer.offerName,
+        value: offer,
+      };
+    }),
+    validate: (choices: string[]) => {
+      if (choices.length === 0) {
+        return "Please select at least one offer name";
+      }
 
-        return true;
-      },
-      oneChoiceMessage(choice) {
-        return `One offer found at ${providerConfig.$getPath()}: ${color.yellow(
-          choice,
-        )}. Do you want to select it`;
-      },
-      onNoChoices() {
-        commandObj.error(
-          `You must have at least one offer specified in ${providerConfig.$getPath()}`,
-        );
-      },
-      flagName: OFFER_FLAG_NAME,
+      return true;
+    },
+    oneChoiceMessage(choice) {
+      return `One offer found at ${providerConfig.$getPath()}: ${color.yellow(
+        choice,
+      )}. Do you want to select it`;
+    },
+    onNoChoices() {
+      commandObj.error(
+        `You must have at least one offer specified in ${providerConfig.$getPath()}`,
+      );
+    },
+    flagName: OFFER_FLAG_NAME,
   });
 }
 
-async function resolveOfferByName(offerName: string): Promise<EnsureOfferConfig> {
+async function resolveOfferByName(
+  offerName: string,
+): Promise<EnsureOfferConfig> {
   const allOffers = await ensureOfferConfigs();
   const providerConfig = await ensureReadonlyProviderConfig();
-
 
   const offer = allOffers.find((o) => {
     return o.offerName === offerName;
@@ -1174,7 +1177,7 @@ async function resolveOfferById(offerId: string): Promise<EnsureOfferConfig> {
     });
 
   if (offer === undefined) {
-    commandObj.error(`Offer: ${color.yellow(offerId)} is not found`)
+    commandObj.error(`Offer: ${color.yellow(offerId)} is not found`);
   }
 
   return offer;

@@ -644,14 +644,15 @@ Set access address for offer for use in cluster software.. Alias: fluence provid
 
 ```
 USAGE
-  $ fluence provider offer-access-address [--no-input] [--offer <offer>] [--env <testnet | mainnet | stage | local>] [--priv-key
-    <private-key>] [--address <address>]
+  $ fluence provider offer-access-address [--no-input] [--offer <offer> | --offer-id <id>] [--env <testnet | mainnet | stage |
+    local>] [--priv-key <private-key>] [--address <address>]
 
 FLAGS
   --address=<address>                        Address derived from Cluster private key
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
   --no-input                                 Don't interactively ask for any input from the user
-  --offer=<offer>                            Offer name
+  --offer=<offer>                            Offer name. Can't be used together with --offer flag
+  --offer-id=<id>                            Offer id. Can't be used together with --offer flag
   --priv-key=<private-key>                   !WARNING! for debug purposes only. Passing private keys through flags is
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
