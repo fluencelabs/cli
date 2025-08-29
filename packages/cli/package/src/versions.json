@@ -1,6 +1,6 @@
 {
   "protocolVersion": 2,
-  "chain-rpc": "docker.fluence.dev/chain-rpc:feat-offer-unified-access-23e0cef-8165-1",
-  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:feat-offer-unified-access-23e0cef-8165-1",
-  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:feat-offer-unified-access-23e0cef-8165-1"
+  "chain-rpc": "fluencelabs/chain-rpc:0.24.2",
+  "chain-deploy-script": "fluencelabs/chain-deploy-script:0.24.2",
+  "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.24.2"
 }
