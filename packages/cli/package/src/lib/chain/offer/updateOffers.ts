@@ -23,14 +23,9 @@ import omit from "lodash-es/omit.js";
 import { commandObj } from "../../commandObj.js";
 import type { ResourceType } from "../../configs/project/provider/provider4.js";
 import { initNewProviderArtifactsConfig } from "../../configs/project/providerArtifacts/providerArtifacts.js";
-import {
-  CLI_NAME,
-  PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
-  VCPU_PER_CU,
-} from "../../const.js";
+import { VCPU_PER_CU } from "../../const.js";
 import { getContracts, signBatch, populateTx } from "../../dealClient.js";
 import { numToStr } from "../../helpers/typesafeStringify.js";
-import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { deployManifests } from "../../manifestsDeploy.js";
 import { confirm } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
@@ -45,10 +40,10 @@ import { assertProviderIsRegistered } from "../providerInfo.js";
 import {
   type OffersArgs,
   resolveOffersFromProviderConfig,
-  type EnsureOfferConfig,
-  getOffersInfo,
   type OnChainResource,
   addRemainingCPs,
+  filterOffersFoundOnChain,
+  type OnChainOffer,
 } from "./offer.js";
 
 type PeersOnChain = {
@@ -217,47 +212,6 @@ export async function removeOffers(flags: OffersArgs) {
   );
 
   await providerArtifactsConfig.$commit();
-}
-
-type OnChainOffer = Awaited<
-  ReturnType<typeof filterOffersFoundOnChain>
->[number];
-
-async function filterOffersFoundOnChain(offers: EnsureOfferConfig[]) {
-  const [offersWithoutIds, offersWithIds] = splitErrorsAndResults(
-    offers,
-    (offer) => {
-      return offer.offerId === undefined
-        ? { error: offer }
-        : { result: { ...offer, offerId: offer.offerId } };
-    },
-  );
-
-  if (offersWithoutIds.length > 0) {
-    commandObj.warn(
-      `Some of the offers don't have ids stored in ${PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME} so this offers might not have been created on chain:\n${offersWithoutIds
-        .map(({ offerName }) => {
-          return offerName;
-        })
-        .join("\n")}`,
-    );
-  }
-
-  const [offerInfoErrors, offersInfo] = await getOffersInfo(offersWithIds);
-
-  if (offerInfoErrors.length > 0) {
-    commandObj.warn(
-      `Some of the offers are not found on subgraph indexer:\n${offerInfoErrors
-        .map(({ offerName, offerId }) => {
-          return `${offerName} (${offerId})`;
-        })
-        .join(
-          "\n",
-        )}\n\nPlease make sure the offers exist. If the offers don't exist you can create them using '${CLI_NAME} provider offer-create' command`,
-    );
-  }
-
-  return offersInfo;
 }
 
 function populateUpdateOffersTxs(offersFoundOnChain: OnChainOffer[]) {

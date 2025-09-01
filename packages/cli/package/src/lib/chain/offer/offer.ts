@@ -47,6 +47,8 @@ import {
   OFFER_IDS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
+  SINGLE_OFFER_FLAG_NAME,
+  SINGLE_OFFER_ID_FLAG_NAME,
   VCPU_PER_CU,
 } from "../../const.js";
 import {
@@ -64,7 +66,7 @@ import {
   splitErrorsAndResults,
 } from "../../helpers/utils.js";
 import { assertIsHex } from "../../helpers/validations.js";
-import { checkboxes, confirm } from "../../prompt.js";
+import { checkboxes, confirm, list } from "../../prompt.js";
 import { ensureFluenceEnv } from "../../resolveFluenceEnv.js";
 import { getProtocolVersions } from "../chainValidators.js";
 import {
@@ -83,6 +85,11 @@ export type OffersArgs = {
   [OFFER_FLAG_NAME]?: string | undefined;
   [OFFER_IDS_FLAG_NAME]?: string | undefined;
   force?: boolean | undefined;
+};
+
+export type SingleOffersArgs = {
+  [SINGLE_OFFER_FLAG_NAME]?: string | undefined;
+  [SINGLE_OFFER_ID_FLAG_NAME]?: string | undefined;
 };
 
 export async function createOffers(flags: OffersArgs) {
@@ -955,6 +962,227 @@ export async function resolveOffersFromProviderConfig(
   return offers;
 }
 
+export async function resolveSingleOfferFromProviderConfig(
+  flags: SingleOffersArgs,
+): Promise<EnsureOfferConfig> {
+  if (
+    flags[SINGLE_OFFER_FLAG_NAME] !== undefined &&
+    flags[SINGLE_OFFER_ID_FLAG_NAME] !== undefined
+  ) {
+    commandObj.error(
+      `You can't use both ${color.yellow(
+        `--${SINGLE_OFFER_FLAG_NAME}`,
+      )} and ${color.yellow(
+        `--${SINGLE_OFFER_ID_FLAG_NAME}`,
+      )} flags at the same time. Please pick one of them`,
+    );
+  }
+
+  if (flags[SINGLE_OFFER_ID_FLAG_NAME] !== undefined) {
+    return resolveOfferById(flags[SINGLE_OFFER_ID_FLAG_NAME]);
+  }
+
+  if (flags[SINGLE_OFFER_FLAG_NAME] !== undefined) {
+    return resolveOfferByName(flags[SINGLE_OFFER_FLAG_NAME]);
+  }
+
+  const allOffers = await ensureOfferConfigs();
+  const providerConfig = await ensureReadonlyProviderConfig();
+
+  return list<EnsureOfferConfig, never>({
+    message: `Select one offer name from ${providerConfig.$getPath()}`,
+    options: allOffers.map((offer) => {
+      return {
+        name: offer.offerName,
+        value: offer,
+      };
+    }),
+    validate: (choices: string[]) => {
+      if (choices.length === 0) {
+        return "Please select at least one offer name";
+      }
+
+      return true;
+    },
+    oneChoiceMessage(choice) {
+      return `One offer found at ${providerConfig.$getPath()}: ${color.yellow(
+        choice,
+      )}. Do you want to select it`;
+    },
+    onNoChoices() {
+      commandObj.error(
+        `You must have at least one offer specified in ${providerConfig.$getPath()}`,
+      );
+    },
+    flagName: OFFER_FLAG_NAME,
+  });
+}
+
+async function resolveOfferByName(
+  offerName: string,
+): Promise<EnsureOfferConfig> {
+  const allOffers = await ensureOfferConfigs();
+  const providerConfig = await ensureReadonlyProviderConfig();
+
+  const offer = allOffers.find((o) => {
+    return o.offerName === offerName;
+  });
+
+  if (offer === undefined) {
+    commandObj.error(
+      `Offer: ${color.yellow(offerName)} is not found in the 'offers' section of ${providerConfig.$getPath()}`,
+    );
+  }
+
+  return offer;
+}
+
+async function resolveOfferById(offerId: string): Promise<EnsureOfferConfig> {
+  const allOffers = await ensureOfferConfigs();
+
+  const offerIdsFromFlags = [offerId];
+  const offerIdsFromFlagsSet = new Set(offerIdsFromFlags);
+
+  const offersDefinedLocally = allOffers.filter(({ offerId }) => {
+    return offerId !== undefined && offerIdsFromFlagsSet.has(offerId);
+  });
+
+  const offersDefinedLocallySet = new Set(
+    offersDefinedLocally.map(({ offerId }) => {
+      return offerId;
+    }),
+  );
+
+  const offerIdsNotDefinedLocally = offerIdsFromFlags.filter((offerId) => {
+    return !offersDefinedLocallySet.has(offerId);
+  });
+
+  const [offerInfosErrors, offerInfos] = await getOffersInfo(
+    offerIdsNotDefinedLocally.map((offerId) => {
+      return { offerId };
+    }),
+  );
+
+  if (offerInfosErrors.length > 0) {
+    commandObj.warn(
+      `Wasn't able to get info about the following offers from indexer:\n\n${offerInfosErrors
+        .map(({ offerId }) => {
+          return offerId;
+        })
+        .join("\n")}`,
+    );
+  }
+
+  const protocolVersionsFromChain = await getProtocolVersions();
+
+  const offersNotDefinedLocally = await Promise.all(
+    offerInfos.map(async ({ offerId, offerIndexerInfo }) => {
+      const resourcePricesWithIds = (
+        offerIndexerInfo.offerResources ?? []
+      ).reduce<ResourcePricesWithIds>(
+        (acc, { resourcePrice, resourceDescription: { type, id } }) => {
+          const resourceType = onChainResourceTypeToResourceType(type);
+
+          acc[resourceType].push({
+            ty: type,
+            resourceType,
+            resourceId: id,
+            resourceName: id,
+            price: resourcePrice,
+          });
+
+          return acc;
+        },
+        {
+          cpu: [],
+          ram: [],
+          storage: [],
+          ip: [],
+          bandwidth: [],
+        },
+      );
+
+      const computePeersFromProviderConfig = await Promise.all(
+        offerIndexerInfo.peers.map(
+          async ({ computeUnits, resourcesByType, id }, i) => {
+            const peerIdBase58 = await peerIdHexStringToBase58String(id);
+
+            const resourcesByTypeWithName = {
+              cpu: {
+                ...resourcesByType.cpu,
+                name: resourcesByType.cpu.resourceId,
+              },
+              ram: {
+                ...resourcesByType.ram,
+                name: resourcesByType.ram.resourceId,
+              },
+              storage: resourcesByType.storage.map((res) => {
+                return { ...res, name: res.resourceId };
+              }),
+              ip: {
+                ...resourcesByType.ip,
+                name: resourcesByType.ip.resourceId,
+              },
+              bandwidth: {
+                ...resourcesByType.bandwidth,
+                name: resourcesByType.bandwidth.resourceId,
+              },
+            };
+
+            return {
+              name: `Peer #${numToStr(i)}`,
+              peerIdBase58,
+              peerId: await peerIdBase58ToUint8Array(peerIdBase58),
+              unitIds: computeUnits.map(({ id }) => {
+                return new Uint8Array(Buffer.from(id.slice(2), "hex"));
+              }),
+              owner: offerIndexerInfo.providerId,
+              resourcesByType: resourcesByTypeWithName,
+            };
+          },
+        ),
+      );
+
+      const { dataCenter } = offerIndexerInfo;
+
+      assert(
+        dataCenter !== null && dataCenter !== undefined,
+        "Data center is always saved for offer on-chain when offer is created. Try waiting for indexer to index the data center",
+      );
+
+      assertIsHex(dataCenter.id, "Data center ID must be a hex string");
+
+      return {
+        offerName: `Offer ${offerId}`,
+        computePeersFromProviderConfig,
+        offerId,
+        dataCenter: { name: dataCenter.id, ...dataCenter },
+        minProtocolVersion: Number(
+          protocolVersionsFromChain.minProtocolVersion,
+        ),
+        maxProtocolVersion: Number(
+          protocolVersionsFromChain.maxProtocolVersion,
+        ),
+        resourcePricesWithIds,
+      } satisfies (typeof offersDefinedLocally)[number];
+    }),
+  );
+
+  const offer =
+    offersDefinedLocally.find((o) => {
+      return o.offerId === offerId;
+    }) ??
+    offersNotDefinedLocally.find((o) => {
+      return o.offerId === offerId;
+    });
+
+  if (offer === undefined) {
+    commandObj.error(`Offer: ${color.yellow(offerId)} is not found`);
+  }
+
+  return offer;
+}
+
 export type EnsureOfferConfig = Awaited<
   ReturnType<typeof ensureOfferConfigs>
 >[number];
@@ -1433,4 +1661,45 @@ function serializeOfferInfo(offerIndexerInfo: OfferIndexerInfo) {
       },
     ),
   };
+}
+
+export type OnChainOffer = Awaited<
+  ReturnType<typeof filterOffersFoundOnChain>
+>[number];
+
+export async function filterOffersFoundOnChain(offers: EnsureOfferConfig[]) {
+  const [offersWithoutIds, offersWithIds] = splitErrorsAndResults(
+    offers,
+    (offer) => {
+      return offer.offerId === undefined
+        ? { error: offer }
+        : { result: { ...offer, offerId: offer.offerId } };
+    },
+  );
+
+  if (offersWithoutIds.length > 0) {
+    commandObj.warn(
+      `Some of the offers don't have ids stored in ${PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME} so this offers might not have been created on chain:\n${offersWithoutIds
+        .map(({ offerName }) => {
+          return offerName;
+        })
+        .join("\n")}`,
+    );
+  }
+
+  const [offerInfoErrors, offersInfo] = await getOffersInfo(offersWithIds);
+
+  if (offerInfoErrors.length > 0) {
+    commandObj.warn(
+      `Some of the offers are not found on subgraph indexer:\n${offerInfoErrors
+        .map(({ offerName, offerId }) => {
+          return `${offerName} (${offerId})`;
+        })
+        .join(
+          "\n",
+        )}\n\nPlease make sure the offers exist. If the offers don't exist you can create them using '${CLI_NAME} provider offer-create' command`,
+    );
+  }
+
+  return offersInfo;
 }

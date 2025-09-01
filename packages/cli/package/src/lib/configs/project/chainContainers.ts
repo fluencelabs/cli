@@ -54,7 +54,7 @@ export const chainContainers = {
   },
   services: {
     [IPFS_CONTAINER_NAME]: {
-      image: "ipfs/kubo:v0.27.0",
+      image: "ipfs/kubo:v0.36.0",
       ports: [`${IPFS_PORT}:${IPFS_PORT}`, "4001:4001"],
       environment: {
         IPFS_PROFILE: "server",
