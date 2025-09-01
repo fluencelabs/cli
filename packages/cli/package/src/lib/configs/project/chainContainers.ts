@@ -59,7 +59,7 @@ export const chainContainers = {
       environment: {
         IPFS_PROFILE: "server",
       },
-      volumes: [`./data/ipfs:/data/ipfs`],
+      volumes: [`${IPFS_CONTAINER_NAME}:/data/ipfs`],
       healthcheck: {
         test: "ipfs id || exit 1",
         interval: "8s",
