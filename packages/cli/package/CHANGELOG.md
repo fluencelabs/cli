@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.2](https://github.com/fluencelabs/cli/compare/cli-v0.25.1...cli-v0.25.2) (2025-09-01)
+
+
+### Features
+
+* **offer:** add a command for setting cluster key ([#1116](https://github.com/fluencelabs/cli/issues/1116)) ([d487674](https://github.com/fluencelabs/cli/commit/d487674af3c074d3e7ffb350b04d26472c03c8e1))
+
 ## [0.25.1](https://github.com/fluencelabs/cli/compare/cli-v0.25.0...cli-v0.25.1) (2025-03-20)
 
 
