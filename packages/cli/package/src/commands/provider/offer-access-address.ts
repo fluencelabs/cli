@@ -20,7 +20,10 @@ import {
   filterOffersFoundOnChain,
   resolveSingleOfferFromProviderConfig,
 } from "../../lib/chain/offer/offer.js";
-import { assertProviderIsRegistered } from "../../lib/chain/providerInfo.js";
+import {
+  getOfferOwner,
+  makeProviderAddressValidator
+} from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
@@ -82,8 +85,10 @@ export default class OfferAccessAddress extends BaseCommand<
 
     const { contracts } = await getContracts();
 
+    const providerAddress = await getOfferOwner(chainOffer.offerId);
+
     await sign({
-      validateAddress: assertProviderIsRegistered,
+      validateAddress: makeProviderAddressValidator(providerAddress),
       title: `Setting cluster address ${address} for offer ${chainOffer.offerName} (${chainOffer.offerId})`,
       method: contracts.diamond.setClusterKey,
       args: [chainOffer.offerId, address],

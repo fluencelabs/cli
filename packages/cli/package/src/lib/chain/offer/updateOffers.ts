@@ -35,7 +35,7 @@ import {
   resourceSupplyFromChainToConfig,
 } from "../conversions.js";
 import { ptFormatWithSymbol } from "../currencies.js";
-import { assertProviderIsRegistered } from "../providerInfo.js";
+import { getOfferOwner, makeProviderAddressValidator } from "../providerInfo.js";
 
 import {
   type OffersArgs,
@@ -116,6 +116,12 @@ export async function updateOffers(flags: OffersArgs) {
     return;
   }
 
+  let providerAddress = undefined;
+
+  if (offersFoundOnChain[0] !== undefined) {
+    providerAddress = await getOfferOwner(offersFoundOnChain[0].offerId);
+  }
+
   if (firstUpdateOffersTx !== undefined) {
     await signBatch({
       title: `Updating offers:\n\n${populatedOffersTxs
@@ -124,7 +130,7 @@ export async function updateOffers(flags: OffersArgs) {
         })
         .join("\n")}`,
       populatedTxs: [firstUpdateOffersTx, ...restUpdateOffersTxs],
-      validateAddress: assertProviderIsRegistered,
+      validateAddress: makeProviderAddressValidator(providerAddress),
     });
   }
 
@@ -190,6 +196,12 @@ export async function removeOffers(flags: OffersArgs) {
     return;
   }
 
+  let providerAddress = undefined;
+
+  if (offersFoundOnChain[0] !== undefined) {
+    providerAddress = await getOfferOwner(offersFoundOnChain[0].offerId);
+  }
+
   await signBatch({
     title: `Removing offers:\n\n${populatedTxs
       .map(({ offerName, offerId }) => {
@@ -197,7 +209,7 @@ export async function removeOffers(flags: OffersArgs) {
       })
       .join("\n")}`,
     populatedTxs: [firstRemoveOffersTx, ...restRemoveOffersTxs],
-    validateAddress: assertProviderIsRegistered,
+    validateAddress: makeProviderAddressValidator(providerAddress),
   });
 
   const providerArtifactsConfig = await initNewProviderArtifactsConfig();
