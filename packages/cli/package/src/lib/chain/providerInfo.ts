@@ -110,8 +110,10 @@ Provider address: ${signerAddress}
 async function getProviderInfoByAddress(address: string) {
   const { contracts } = await getContracts();
   const { name } = await contracts.diamond.getProviderInfo(address);
+
   const managementAddress =
     await contracts.diamond.getProviderManagementAddress(address);
+
   return { name: name === "" ? null : name, address, managementAddress };
 }
 
