@@ -22,7 +22,7 @@ import {
 } from "../../lib/chain/offer/offer.js";
 import {
   getOfferOwner,
-  makeProviderAddressValidator
+  makeProviderAddressValidator,
 } from "../../lib/chain/providerInfo.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {

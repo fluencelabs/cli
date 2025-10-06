@@ -671,7 +671,7 @@ Create offers. You have to be registered as a provider to do that. Alias: fluenc
 ```
 USAGE
   $ fluence provider offer-create [--no-input] [--env <testnet | mainnet | stage | local>] [--priv-key <private-key>]
-    [--offers <offer-1,offer-2>]
+    [--offers <offer-1,offer-2>] [--provider <address>]
 
 FLAGS
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
@@ -682,6 +682,7 @@ FLAGS
                                              unsecure. On local env
                                              0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 is used
                                              by default when CLI is used in non-interactive mode
+  --provider=<address>                       Provider address. In case using managmenent address to sign transactions
 
 DESCRIPTION
   Create offers. You have to be registered as a provider to do that. Alias: fluence provider oc

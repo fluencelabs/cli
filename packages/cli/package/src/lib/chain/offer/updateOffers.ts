@@ -35,7 +35,10 @@ import {
   resourceSupplyFromChainToConfig,
 } from "../conversions.js";
 import { ptFormatWithSymbol } from "../currencies.js";
-import { getOfferOwner, makeProviderAddressValidator } from "../providerInfo.js";
+import {
+  getOfferOwner,
+  makeProviderAddressValidator,
+} from "../providerInfo.js";
 
 import {
   type OffersArgs,

@@ -50,7 +50,7 @@ import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
   SINGLE_OFFER_FLAG_NAME,
   SINGLE_OFFER_ID_FLAG_NAME,
-  VCPU_PER_CU
+  VCPU_PER_CU,
 } from "../../const.js";
 import {
   getContracts,
@@ -97,7 +97,10 @@ export type SingleOffersArgs = {
   [SINGLE_OFFER_ID_FLAG_NAME]?: string | undefined;
 };
 
-export async function createOffers(flags: CreateOffersArgs, maybeProviderAddress?: string) {
+export async function createOffers(
+  flags: CreateOffersArgs,
+  maybeProviderAddress?: string,
+) {
   const allOffers = await resolveOffersFromProviderConfig(flags);
   const providerConfig = await ensureReadonlyProviderConfig();
   const providerConfigPath = providerConfig.$getPath();
@@ -171,6 +174,7 @@ export async function createOffers(flags: CreateOffersArgs, maybeProviderAddress
 
     const signerAddress = await getSignerAddress();
     const providerAddress = maybeProviderAddress ?? signerAddress;
+
     try {
       ({
         sliceIndex: registeredCUsCount,
@@ -185,7 +189,7 @@ export async function createOffers(flags: CreateOffersArgs, maybeProviderAddress
             contracts.deployment.usdc,
             resourcePricesArray,
             setCPUSupplyForCP(computePeersToRegister),
-            dataCenter.id
+            dataCenter.id,
           ];
         },
         getTitle() {

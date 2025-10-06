@@ -110,8 +110,9 @@ Provider address: ${signerAddress}
 async function getProviderInfoByAddress(address: string) {
   const { contracts } = await getContracts();
   const { name } = await contracts.diamond.getProviderInfo(address);
-  const managementAddress = await contracts.diamond.getProviderManagementAddress(address);
-  return { name: name === "" ? null : name, address, managementAddress};
+  const managementAddress =
+    await contracts.diamond.getProviderManagementAddress(address);
+  return { name: name === "" ? null : name, address, managementAddress };
 }
 
 export async function getProviderInfo(address?: string) {
@@ -128,14 +129,17 @@ export function makeProviderAddressValidator(providerAddress?: string) {
       commandObj.error(
         `You have to register as a provider first. Use '${CLI_NAME} provider register' command for that`,
       );
-    } else if (address !== providerAddress && address !== providerInfo.managementAddress) {
+    } else if (
+      address !== providerAddress &&
+      address !== providerInfo.managementAddress
+    ) {
       commandObj.error(
         `You have using nor provider address not provider management address to sign the transaction.`,
       );
     }
 
-    return
-  }
+    return;
+  };
 }
 
 export async function getOfferOwner(offerId: string): Promise<string> {

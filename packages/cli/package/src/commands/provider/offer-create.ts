@@ -17,7 +17,11 @@
 
 import { BaseCommand } from "../../baseCommand.js";
 import { createOffers } from "../../lib/chain/offer/offer.js";
-import { OFFER_FLAG, CHAIN_FLAGS, PROVIDER_ADDRESS_FLAG } from "../../lib/const.js";
+import {
+  OFFER_FLAG,
+  CHAIN_FLAGS,
+  PROVIDER_ADDRESS_FLAG,
+} from "../../lib/const.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -27,7 +31,7 @@ export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
   static override flags = {
     ...CHAIN_FLAGS,
     ...OFFER_FLAG,
-    ...PROVIDER_ADDRESS_FLAG
+    ...PROVIDER_ADDRESS_FLAG,
   };
 
   async run(): Promise<void> {
