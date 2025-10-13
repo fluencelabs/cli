@@ -199,6 +199,7 @@ export const PRIV_KEY_FLAG = {
 };
 
 export const ADDRESS_FLAG_NAME = "address";
+export const PROVIDER_ADDRESS_FLAG_NAME = "provider";
 
 export const ADDRESS_FLAG = {
   [ADDRESS_FLAG_NAME]: Flags.string({
@@ -210,6 +211,14 @@ export const ADDRESS_FLAG = {
 export const CLUSTER_ADDRESS_FLAG = {
   [ADDRESS_FLAG_NAME]: Flags.string({
     description: "Address derived from Cluster private key",
+    helpValue: "<address>",
+  }),
+};
+
+export const PROVIDER_ADDRESS_FLAG = {
+  [PROVIDER_ADDRESS_FLAG_NAME]: Flags.string({
+    description:
+      "Provider address. In case using managmenent address to sign transactions",
     helpValue: "<address>",
   }),
 };

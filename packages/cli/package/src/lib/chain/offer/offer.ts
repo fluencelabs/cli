@@ -45,6 +45,7 @@ import {
   CLI_NAME,
   OFFER_FLAG_NAME,
   OFFER_IDS_FLAG_NAME,
+  PROVIDER_ADDRESS_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   SINGLE_OFFER_FLAG_NAME,
@@ -76,7 +77,7 @@ import {
   resourceSupplyFromConfigToChain,
 } from "../conversions.js";
 import { ptFormatWithSymbol } from "../currencies.js";
-import { assertProviderIsRegistered } from "../providerInfo.js";
+import { makeProviderAddressValidator } from "../providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
@@ -87,12 +88,19 @@ export type OffersArgs = {
   force?: boolean | undefined;
 };
 
+export type CreateOffersArgs = OffersArgs & {
+  [PROVIDER_ADDRESS_FLAG_NAME]?: string | undefined;
+};
+
 export type SingleOffersArgs = {
   [SINGLE_OFFER_FLAG_NAME]?: string | undefined;
   [SINGLE_OFFER_ID_FLAG_NAME]?: string | undefined;
 };
 
-export async function createOffers(flags: OffersArgs) {
+export async function createOffers(
+  flags: CreateOffersArgs,
+  maybeProviderAddress?: string,
+) {
   const allOffers = await resolveOffersFromProviderConfig(flags);
   const providerConfig = await ensureReadonlyProviderConfig();
   const providerConfigPath = providerConfig.$getPath();
@@ -164,6 +172,9 @@ export async function createOffers(flags: OffersArgs) {
     let addedCPs;
     let offerRegisterTxReceipt;
 
+    const signerAddress = await getSignerAddress();
+    const providerAddress = maybeProviderAddress ?? signerAddress;
+
     try {
       ({
         sliceIndex: registeredCUsCount,
@@ -174,6 +185,7 @@ export async function createOffers(flags: OffersArgs) {
         sliceIndex: allCUs.length,
         getArgs(computePeersToRegister) {
           return [
+            providerAddress,
             contracts.deployment.usdc,
             resourcePricesArray,
             setCPUSupplyForCP(computePeersToRegister),
@@ -183,8 +195,8 @@ export async function createOffers(flags: OffersArgs) {
         getTitle() {
           return `Register offer: ${offerName}`;
         },
-        method: contracts.diamond.registerMarketOfferV2,
-        validateAddress: assertProviderIsRegistered,
+        method: contracts.diamond.registerMarketOfferV2Delegated,
+        validateAddress: makeProviderAddressValidator(providerAddress),
       }));
     } catch (e) {
       pushOfferRegisterResult({
@@ -221,7 +233,6 @@ export async function createOffers(flags: OffersArgs) {
       continue;
     }
 
-    const providerAddress = await getSignerAddress();
     const offerPerEnv = providerArtifactsConfig.offers[fluenceEnv] ?? {};
     offerPerEnv[offerName] = { id: offerId, providerAddress };
     providerArtifactsConfig.offers[fluenceEnv] = offerPerEnv;
