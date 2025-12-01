@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.26.0](https://github.com/fluencelabs/cli/compare/cli-v0.25.2...cli-v0.26.0) (2025-12-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* support delegated offer creation ([#1118](https://github.com/fluencelabs/cli/issues/1118))
+
+### Features
+
+* support delegated offer creation ([#1118](https://github.com/fluencelabs/cli/issues/1118)) ([69da8d6](https://github.com/fluencelabs/cli/commit/69da8d67ceae8e839eecaee1ac6aa6ff59be0b92))
+
+
+### Bug Fixes
+
+* use kubo ipfs image ([#1122](https://github.com/fluencelabs/cli/issues/1122)) ([f829a47](https://github.com/fluencelabs/cli/commit/f829a475c52d9eeb1545addbf970c87bdb131fef))
+
 ## [0.25.2](https://github.com/fluencelabs/cli/compare/cli-v0.25.1...cli-v0.25.2) (2025-09-01)
 
 
