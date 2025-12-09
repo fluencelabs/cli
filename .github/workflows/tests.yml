@@ -65,6 +65,7 @@ jobs:
         with:
           repository: fluencelabs/cli
           ref: ${{ inputs.ref }}
+          token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
 
       - name: Import secrets
         uses: hashicorp/vault-action@v3.0.0
