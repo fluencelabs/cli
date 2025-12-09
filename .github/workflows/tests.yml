@@ -135,7 +135,10 @@ jobs:
           yarn config set npmRegistryServer "https://npm.fluence.dev"
           yarn config set npmAlwaysAuth true
           yarn config set npmAuthToken $NODE_AUTH_TOKEN
-
+      
+      - name: Accept directory permissions
+        run: sudo chown -R $USER:$USER $HOME
+        
       - run: yarn install
 
       - name: Set deal-ts-clients version
