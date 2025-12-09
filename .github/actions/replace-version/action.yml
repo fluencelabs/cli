@@ -4,7 +4,8 @@ description: |
 
 inputs:
   versions:
-    type: string
+    description: "Versions JSON string"
+    required: true
 
 runs:
   using: "node20"
