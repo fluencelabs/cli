@@ -138,8 +138,8 @@ jobs:
       
       - name: Accept directory permissions
         run: |
-          sudo chown -R $(id -u):$(id -g) $HOME
-          sudo chown -R $(id -u):$(id -g) $GITHUB_WORKSPACE
+          sudo chown -R "$(id -u)":"$(id -g)" $HOME
+          sudo chown -R "$(id -u)":"$(id -g)" $GITHUB_WORKSPACE
 
       - run: yarn install
 
