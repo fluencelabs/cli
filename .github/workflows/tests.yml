@@ -137,10 +137,8 @@ jobs:
           yarn config set npmAuthToken $NODE_AUTH_TOKEN
       
       - name: Accept directory permissions
-        run: |
-          sudo chown -R "$(id -u)":"$(id -g)" $HOME
-          sudo chown -R "$(id -u)":"$(id -g)" $GITHUB_WORKSPACE
-
+        run: sudo chown -R $USER:$USER $HOME
+        
       - run: yarn install
 
       - name: Set deal-ts-clients version
