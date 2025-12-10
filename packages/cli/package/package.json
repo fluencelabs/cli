@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@fluencelabs/deal-ts-clients": "0.24.3-feat-beam-support-f0edb5b-8391-1.0",
-    "@kubernetes/client-node": "github:fluencelabs/kubernetes-client-javascript#e72ee00a52fec4eb4a8327632895d888ee504f4d",
+    "@kubernetes/client-node": "git+https://github.com/fluencelabs/kubernetes-client-javascript.git#e72ee00a52fec4eb4a8327632895d888ee504f4d",
     "@libp2p/crypto": "4.0.1",
     "@libp2p/peer-id-factory": "4.0.5",
     "@mswjs/interceptors": "0.29.1",
@@ -164,5 +164,5 @@
   "engines": {
     "node": "22.10.0"
   },
-  "packageManager": "yarn@4.5.0"
+  "packageManager": "yarn@4.12.0"
 }
