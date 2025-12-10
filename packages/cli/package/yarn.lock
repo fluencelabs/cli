@@ -2017,7 +2017,7 @@ __metadata:
     multiformats: "npm:13.3.0"
     npm-check-updates: "npm:17.1.4"
     oclif: "patch:oclif@patch%3Aoclif@npm%253A4.15.9%23~/.yarn/patches/oclif-npm-4.15.9-f51cd140c1.patch%3A%3Aversion=4.15.9&hash=ce7fb7#~/.yarn/patches/oclif-patch-c5b232dd7e.patch"
-    parse-duration: "npm:1.1.0"
+    parse-duration: "npm:2.1.3"
     platform: "npm:1.3.6"
     proper-lockfile: "npm:4.1.2"
     shx: "npm:0.3.4"
@@ -11125,7 +11125,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse-duration@npm:1.1.0, parse-duration@npm:^1.0.0":
+"parse-duration@npm:2.1.3":
+  version: 2.1.3
+  resolution: "parse-duration@npm:2.1.3"
+  checksum: 10c0/95b39875ee103d89c2db3cd8c5bcf516c8ba6d571096512a835e0cb648c3039db50a7780bd24ddcc425bc18cd6b9e9ef03c029ae080d85325764c098f1010b44
+  languageName: node
+  linkType: hard
+
+"parse-duration@npm:^1.0.0":
   version: 1.1.0
   resolution: "parse-duration@npm:1.1.0"
   checksum: 10c0/26fd83ed8f34b11a6ddb4553c97f4a75decc7a42ffa10c3e998287930cdbd91f27b7958bf5461be3b709bd064245ddccf43566ad8f4daaed2c983f5a7c7f8aed
