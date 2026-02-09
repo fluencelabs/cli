@@ -1,6 +1,6 @@
 {
   "protocolVersion": 2,
-  "chain-rpc": "docker.fluence.dev/chain-rpc:feat-beam-support-f0edb5b-8391-1",
-  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:feat-beam-support-f0edb5b-8391-1",
-  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:feat-beam-support-f0edb5b-8391-1"
+  "chain-rpc": "docker.fluence.dev/chain-rpc:release-candidate-v0-27-2-1d44fe4-9165-1",
+  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:release-candidate-v0-27-2-1d44fe4-9165-1",
+  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:release-candidate-v0-27-2-1d44fe4-9165-1"
 }
