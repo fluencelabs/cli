@@ -260,7 +260,7 @@ export const CC_FLAGS = {
 
 export const CC_FINISH_FORCE_FLAG = {
   force: Flags.boolean({
-    description: "allow finish Active CC",
+    description: "Allow finish Active CC",
   }),
 };
 
