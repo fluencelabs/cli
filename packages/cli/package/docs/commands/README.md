@@ -324,7 +324,7 @@ USAGE
 FLAGS
   --cc-ids=<value>                           Comma separated capacity commitment IDs
   --env=<testnet | mainnet | stage | local>  Fluence Environment to use when running the command
-  --force                                    allow finish Active CC
+  --force                                    Allow finish Active CC
   --no-input                                 Don't interactively ask for any input from the user
   --offers=<offer-1,offer-2>                 Comma-separated list of offer names. To use all of your offers: --offers
                                              all
