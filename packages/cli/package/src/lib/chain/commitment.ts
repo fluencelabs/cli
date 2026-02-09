@@ -541,15 +541,15 @@ export async function collateralWithdraw(
     force?: boolean;
   },
 ) {
-  const allowedStatuses =
+  const isStatusAllowed: (status: CapacityCommitmentStatusString) => boolean =
     flags.force === true
-      ? ["Active", "Completed", "Failed"]
-      : ["Completed", "Failed"];
+      ? (status) => {return status === "Completed" || status === "Failed" || status === "Active" }
+      : (status) => {return status === "Completed" || status === "Failed"};
 
   const [invalidCommitments, commitments] = splitErrorsAndResults(
     await getCommitmentsGroupedByStatus(flags),
     (c) => {
-      return c.status in allowedStatuses ? { result: c } : { error: c };
+      return isStatusAllowed(c.status) ? { result: c } : { error: c };
     },
   );
 
