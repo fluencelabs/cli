@@ -85,7 +85,7 @@ DESCRIPTION
   Show contract addresses for the fluence environment and accounts for the local environment
 ```
 
-_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/chain/info.ts)_
+_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/chain/info.ts)_
 
 ## `fluence default env [ENV]`
 
@@ -108,7 +108,7 @@ EXAMPLES
   $ fluence default env
 ```
 
-_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/default/env.ts)_
+_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/default/env.ts)_
 
 ## `fluence help [COMMAND]`
 
@@ -151,7 +151,7 @@ EXAMPLES
   $ fluence local down
 ```
 
-_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/local/down.ts)_
+_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/local/down.ts)_
 
 ## `fluence local init`
 
@@ -176,7 +176,7 @@ EXAMPLES
   $ fluence local init
 ```
 
-_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/local/init.ts)_
+_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/local/init.ts)_
 
 ## `fluence local logs`
 
@@ -197,7 +197,7 @@ EXAMPLES
   $ fluence local logs
 ```
 
-_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/local/logs.ts)_
+_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/local/logs.ts)_
 
 ## `fluence local ps`
 
@@ -218,7 +218,7 @@ EXAMPLES
   $ fluence local ps
 ```
 
-_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/local/ps.ts)_
+_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/local/ps.ts)_
 
 ## `fluence local up`
 
@@ -255,7 +255,7 @@ EXAMPLES
   $ fluence local up
 ```
 
-_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/local/up.ts)_
+_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/local/up.ts)_
 
 ## `fluence provider cc-activate`
 
@@ -283,7 +283,7 @@ DESCRIPTION
   Add FLT collateral to capacity commitment to activate it. Alias: fluence provider ca
 ```
 
-_See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/cc-activate.ts)_
+_See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/cc-activate.ts)_
 
 ## `fluence provider cc-create`
 
@@ -310,7 +310,7 @@ DESCRIPTION
   Create Capacity commitment. Alias: fluence provider cc
 ```
 
-_See code: [src/commands/provider/cc-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/cc-create.ts)_
+_See code: [src/commands/provider/cc-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/cc-create.ts)_
 
 ## `fluence provider cc-finish`
 
@@ -340,7 +340,7 @@ DESCRIPTION
   commitments and finish capacity commitments. Aliases: fluence provider ccf, fluence provider cc-collateral-withdraw
 ```
 
-_See code: [src/commands/provider/cc-finish.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/cc-finish.ts)_
+_See code: [src/commands/provider/cc-finish.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/cc-finish.ts)_
 
 ## `fluence provider cc-info`
 
@@ -369,7 +369,7 @@ DESCRIPTION
   Get info about capacity commitments. Alias: fluence provider ci
 ```
 
-_See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/cc-info.ts)_
+_See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/cc-info.ts)_
 
 ## `fluence provider cc-remove`
 
@@ -398,7 +398,7 @@ DESCRIPTION
   provider cr
 ```
 
-_See code: [src/commands/provider/cc-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/cc-remove.ts)_
+_See code: [src/commands/provider/cc-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/cc-remove.ts)_
 
 ## `fluence provider cc-rewards-withdraw`
 
@@ -426,7 +426,7 @@ DESCRIPTION
   Withdraw FLT rewards from capacity commitments. Alias: fluence provider crw
 ```
 
-_See code: [src/commands/provider/cc-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/cc-rewards-withdraw.ts)_
+_See code: [src/commands/provider/cc-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/cc-rewards-withdraw.ts)_
 
 ## `fluence provider deal-exit`
 
@@ -450,7 +450,7 @@ DESCRIPTION
   Exit from deal. Alias: fluence provider de
 ```
 
-_See code: [src/commands/provider/deal-exit.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/deal-exit.ts)_
+_See code: [src/commands/provider/deal-exit.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/deal-exit.ts)_
 
 ## `fluence provider deal-list`
 
@@ -472,7 +472,7 @@ DESCRIPTION
   List all deals. Alias: fluence provider dl
 ```
 
-_See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/deal-list.ts)_
+_See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/deal-list.ts)_
 
 ## `fluence provider deal-rewards-info [DEAL-ADDRESS] [ON-CHAIN-WORKER-ID]`
 
@@ -499,7 +499,7 @@ DESCRIPTION
   Deal rewards info. Alias: fluence provider dri
 ```
 
-_See code: [src/commands/provider/deal-rewards-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/deal-rewards-info.ts)_
+_See code: [src/commands/provider/deal-rewards-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/deal-rewards-info.ts)_
 
 ## `fluence provider deal-rewards-withdraw`
 
@@ -523,7 +523,7 @@ DESCRIPTION
   Withdraw USDC rewards from deals. Alias: fluence provider drw
 ```
 
-_See code: [src/commands/provider/deal-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/deal-rewards-withdraw.ts)_
+_See code: [src/commands/provider/deal-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/deal-rewards-withdraw.ts)_
 
 ## `fluence provider deploy`
 
@@ -553,7 +553,7 @@ EXAMPLES
   $ fluence provider deploy
 ```
 
-_See code: [src/commands/provider/deploy.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/deploy.ts)_
+_See code: [src/commands/provider/deploy.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/deploy.ts)_
 
 ## `fluence provider gen`
 
@@ -584,7 +584,7 @@ EXAMPLES
   $ fluence provider gen
 ```
 
-_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/gen.ts)_
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/gen.ts)_
 
 ## `fluence provider info`
 
@@ -613,7 +613,7 @@ DESCRIPTION
   Print peer signing wallets and peer ids. Alias: fluence provider i
 ```
 
-_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/info.ts)_
+_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/info.ts)_
 
 ## `fluence provider init`
 
@@ -637,7 +637,7 @@ DESCRIPTION
   Init provider config. Creates a provider.yaml file
 ```
 
-_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/init.ts)_
+_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/init.ts)_
 
 ## `fluence provider offer-access-address`
 
@@ -663,7 +663,7 @@ DESCRIPTION
   Set access address for offer for use in cluster software.. Alias: fluence provider sck
 ```
 
-_See code: [src/commands/provider/offer-access-address.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/offer-access-address.ts)_
+_See code: [src/commands/provider/offer-access-address.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/offer-access-address.ts)_
 
 ## `fluence provider offer-create`
 
@@ -689,7 +689,7 @@ DESCRIPTION
   Create offers. You have to be registered as a provider to do that. Alias: fluence provider oc
 ```
 
-_See code: [src/commands/provider/offer-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/offer-create.ts)_
+_See code: [src/commands/provider/offer-create.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/offer-create.ts)_
 
 ## `fluence provider offer-info`
 
@@ -716,7 +716,7 @@ DESCRIPTION
   Get info about offers. Alias: fluence provider oi
 ```
 
-_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/offer-info.ts)_
+_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/offer-info.ts)_
 
 ## `fluence provider offer-remove`
 
@@ -743,7 +743,7 @@ DESCRIPTION
   Remove offers. Alias: fluence provider or
 ```
 
-_See code: [src/commands/provider/offer-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/offer-remove.ts)_
+_See code: [src/commands/provider/offer-remove.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/offer-remove.ts)_
 
 ## `fluence provider offer-update`
 
@@ -768,7 +768,7 @@ DESCRIPTION
   Update offers. Alias: fluence provider ou
 ```
 
-_See code: [src/commands/provider/offer-update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/offer-update.ts)_
+_See code: [src/commands/provider/offer-update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/offer-update.ts)_
 
 ## `fluence provider register`
 
@@ -790,7 +790,7 @@ DESCRIPTION
   Register as a provider. Alias: fluence provider r
 ```
 
-_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/register.ts)_
+_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/register.ts)_
 
 ## `fluence provider tokens-distribute`
 
@@ -818,7 +818,7 @@ DESCRIPTION
   Distribute FLT tokens to peers. Alias: fluence provider td
 ```
 
-_See code: [src/commands/provider/tokens-distribute.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/tokens-distribute.ts)_
+_See code: [src/commands/provider/tokens-distribute.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/tokens-distribute.ts)_
 
 ## `fluence provider tokens-withdraw`
 
@@ -847,7 +847,7 @@ DESCRIPTION
   Withdraw FLT tokens from peers. Alias: fluence provider tw
 ```
 
-_See code: [src/commands/provider/tokens-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/tokens-withdraw.ts)_
+_See code: [src/commands/provider/tokens-withdraw.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/tokens-withdraw.ts)_
 
 ## `fluence provider update`
 
@@ -869,7 +869,7 @@ DESCRIPTION
   Update provider info. Alias: fluence provider u
 ```
 
-_See code: [src/commands/provider/update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.25.2/src/commands/provider/update.ts)_
+_See code: [src/commands/provider/update.ts](https://github.com/fluencelabs/cli/blob/fluence-cli-v0.26.0/src/commands/provider/update.ts)_
 
 ## `fluence update [CHANNEL]`
 
