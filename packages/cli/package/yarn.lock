@@ -1964,7 +1964,7 @@ __metadata:
   dependencies:
     "@actions/core": "npm:1.11.1"
     "@aws-sdk/lib-storage": "npm:^3.501.0"
-    "@fluencelabs/deal-ts-clients": "npm:0.27.2-release-candidate-v0-27-2-7faf671-9169-1.0"
+    "@fluencelabs/deal-ts-clients": "npm:0.27.2-release-please-48bcf11-9121-1.0"
     "@graphql-codegen/cli": "npm:^5.0.3"
     "@graphql-codegen/typescript": "npm:^4.1.1"
     "@graphql-codegen/typescript-graphql-request": "npm:^6.2.0"
@@ -2038,9 +2038,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-ts-clients@npm:0.27.2-release-candidate-v0-27-2-7faf671-9169-1.0":
-  version: 0.27.2-release-candidate-v0-27-2-7faf671-9169-1.0
-  resolution: "@fluencelabs/deal-ts-clients@npm:0.27.2-release-candidate-v0-27-2-7faf671-9169-1.0"
+"@fluencelabs/deal-ts-clients@npm:0.27.2-release-please-48bcf11-9121-1.0":
+  version: 0.27.2-release-please-48bcf11-9121-1.0
+  resolution: "@fluencelabs/deal-ts-clients@npm:0.27.2-release-please-48bcf11-9121-1.0"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.2.0"
     debug: "npm:^4.3.4"
@@ -2052,7 +2052,7 @@ __metadata:
     graphql-tag: "npm:^2.12.6"
     ipfs-http-client: "npm:^60.0.1"
     multiformats: "npm:^13.0.1"
-  checksum: 10c0/21a9db2c8f3651a7fd0e89d53aed6fe69755577c3c379317406fd9542006e7cb2f273e4f2786135bf1fbdaba8f8f2370d03cececb0afe95cad2929d6713f1835
+  checksum: 10c0/be39b35f2aa46814f62e0100a5687ac3fa63592b6c85038aa30dca5926c4b62b27b33927da878b34d45e2d2f52c292f85877a4cfdd3f98eb6231c1fa286a4f30
   languageName: node
   linkType: hard
 
