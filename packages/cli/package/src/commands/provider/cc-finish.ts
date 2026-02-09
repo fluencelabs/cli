@@ -17,7 +17,12 @@
 
 import { BaseCommand } from "../../baseCommand.js";
 import { collateralWithdraw } from "../../lib/chain/commitment.js";
-import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS, CC_FINISH_FORCE_FLAG } from "../../lib/const.js";
+import {
+  CHAIN_FLAGS,
+  FLT_SYMBOL,
+  CC_FLAGS,
+  CC_FINISH_FORCE_FLAG,
+} from "../../lib/const.js";
 import { aliasesText } from "../../lib/helpers/aliasesText.js";
 import { initCli } from "../../lib/lifeCycle.js";
 

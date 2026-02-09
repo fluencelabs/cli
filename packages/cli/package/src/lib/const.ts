@@ -262,7 +262,7 @@ export const CC_FINISH_FORCE_FLAG = {
   force: Flags.boolean({
     description: "allow finish Active CC",
   }),
-}
+};
 
 export const FINISH_COMMITMENT_FLAG_NAME = "finish";
 
