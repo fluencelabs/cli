@@ -538,12 +538,16 @@ export async function removeCommitments(flags: CCFlags) {
 export async function collateralWithdraw(
   flags: CCFlags & {
     [FINISH_COMMITMENT_FLAG_NAME]?: boolean;
+    force?: boolean;
   },
 ) {
+
+  const allowedStatuses = (flags.force === true) ? ["Active", "Completed", "Failed"] : ["Completed", "Failed"];
+
   const [invalidCommitments, commitments] = splitErrorsAndResults(
     await getCommitmentsGroupedByStatus(flags),
     (c) => {
-      return c.status === "Completed" || c.status === "Failed"
+      return c.status in allowedStatuses
         ? { result: c }
         : { error: c };
     },
