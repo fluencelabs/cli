@@ -538,14 +538,24 @@ export async function removeCommitments(flags: CCFlags) {
 export async function collateralWithdraw(
   flags: CCFlags & {
     [FINISH_COMMITMENT_FLAG_NAME]?: boolean;
+    force?: boolean;
   },
 ) {
+  const isStatusAllowed: (status: CapacityCommitmentStatusString) => boolean =
+    flags.force === true
+      ? (status) => {
+          return (
+            status === "Completed" || status === "Failed" || status === "Active"
+          );
+        }
+      : (status) => {
+          return status === "Completed" || status === "Failed";
+        };
+
   const [invalidCommitments, commitments] = splitErrorsAndResults(
     await getCommitmentsGroupedByStatus(flags),
     (c) => {
-      return c.status === "Completed" || c.status === "Failed"
-        ? { result: c }
-        : { error: c };
+      return isStatusAllowed(c.status) ? { result: c } : { error: c };
     },
   );
 
@@ -570,52 +580,6 @@ export async function collateralWithdraw(
   })) {
     const { ccId, name: peerName } = commitment;
 
-    // TODO: improve how we get this info
-    const [unitIds, isExitedStatuses] =
-      await contracts.diamond.getUnitExitStatuses(ccId);
-
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const computeUnitInfos = (await multicallRead(
-      unitIds.map((unitId): MulticallReadItem => {
-        return {
-          target: contracts.deployment.diamond,
-          callData: contracts.diamond.interface.encodeFunctionData(
-            "getComputeUnit",
-            [unitId],
-          ),
-          decode(returnData) {
-            return contracts.diamond.interface.decodeFunctionResult(
-              "getComputeUnit",
-              returnData,
-            );
-          },
-        };
-      }),
-    )) as (
-      | Awaited<ReturnType<typeof contracts.diamond.getComputeUnit>>
-      | undefined
-    )[];
-
-    const units = unitIds.map((unitId, i) => {
-      return {
-        unitId,
-        unitInfo:
-          computeUnitInfos[i] ??
-          (() => {
-            throw new Error(
-              `Unreachable. Unit ${unitId} not found after running getComputeUnit`,
-            );
-          })(),
-        isExited:
-          isExitedStatuses[i] ??
-          (() => {
-            throw new Error(
-              `Unreachable. No exit status returned from getUnitExitStatuses for unit ${unitId}`,
-            );
-          })(),
-      };
-    });
-
     await sign({
       title: `withdraw collateral from: ${ccId}`,
       method: contracts.diamond.withdrawCollateral,
@@ -632,28 +596,9 @@ export async function collateralWithdraw(
       continue;
     }
 
-    const [firstNotExitedUnit, ...restNotExitedUnits] = units.filter(
-      ({ isExited }) => {
-        return !isExited;
-      },
-    );
-
     await signBatch({
-      title: `${firstNotExitedUnit === undefined ? "Finish" : "Remove compute units from capacity commitments and finish"} commitment ${peerName === undefined ? ccId : `for ${peerName} (${ccId})`} ${ccId}`,
-      populatedTxs:
-        firstNotExitedUnit === undefined
-          ? [populateTx(contracts.diamond.finishCommitment, ccId)]
-          : [
-              populateTx(contracts.diamond.removeCUFromCC, ccId, [
-                firstNotExitedUnit.unitId,
-              ]),
-              ...restNotExitedUnits.map(({ unitId }) => {
-                return populateTx(contracts.diamond.removeCUFromCC, ccId, [
-                  unitId,
-                ]);
-              }),
-              populateTx(contracts.diamond.finishCommitment, ccId),
-            ],
+      title: `Finish commitment ${peerName === undefined ? ccId : `for ${peerName} (${ccId})`} ${ccId}`,
+      populatedTxs: [populateTx(contracts.diamond.finishCommitment, ccId)],
     });
   }
 }
