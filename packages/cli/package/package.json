@@ -121,7 +121,7 @@
     "oclif": "patch:oclif@patch%3Aoclif@npm%253A4.15.9%23~/.yarn/patches/oclif-npm-4.15.9-f51cd140c1.patch%3A%3Aversion=4.15.9&hash=ce7fb7#~/.yarn/patches/oclif-patch-c5b232dd7e.patch",
     "proper-lockfile": "4.1.2",
     "shx": "0.3.4",
-    "tar": "7.4.3",
+    "tar": "7.5.8",
     "ts-prune": "0.10.3",
     "ts-unused-exports": "10.1.0",
     "tslib": "2.8.0",
